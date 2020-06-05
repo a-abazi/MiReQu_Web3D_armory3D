@@ -10,10 +10,10 @@ project.addAssets("C:/blender/ArmorySDK/lib/haxebullet/ammo/ammo.wasm.js", { not
 project.addAssets("C:/blender/ArmorySDK/lib/haxebullet/ammo/ammo.wasm.wasm", { notinlist: true });
 project.addParameter('arm.UPH2_Base');
 project.addParameter("--macro keep('arm.UPH2_Base')");
-project.addParameter('arm.node.Movement_Central');
-project.addParameter("--macro keep('arm.node.Movement_Central')");
 project.addParameter('armory.trait.physics.bullet.PhysicsWorld');
 project.addParameter("--macro keep('armory.trait.physics.bullet.PhysicsWorld')");
+project.addParameter('arm.node.Movement_Central');
+project.addParameter("--macro keep('arm.node.Movement_Central')");
 project.addParameter('armory.trait.physics.bullet.RigidBody');
 project.addParameter("--macro keep('armory.trait.physics.bullet.RigidBody')");
 project.addShaders("build_PH15_Postholder/compiled/Shaders/*.glsl", { noembed: false});

@@ -1,13 +1,13 @@
 -cp C:\blender\ArmorySDK\Kha\Sources
 -cp C:\blender\ArmorySDK\Kha\Backends\Krom
--cp C:\blender\Thorlabs_Objects\PH15_Postholder\Sources
+-cp C:\MiReQuGitTest\Test\Thorlabs_Objects\PH15_Postholder\Sources
 -cp C:\blender\ArmorySDK\armory\Sources
 -cp C:\blender\ArmorySDK\iron\Sources
--cp C:\blender\Thorlabs_Objects\PH15_Postholder\Libraries\mynodes\Sources
+-cp C:\MiReQuGitTest\Test\Thorlabs_Objects\PH15_Postholder\Libraries\mynodes\Sources
 -cp C:\blender\ArmorySDK\lib\haxebullet\Sources
 -cp C:/blender/ArmorySDK/armory
 -cp C:/blender/ArmorySDK/iron
--cp C:\blender\Thorlabs_Objects\PH15_Postholder\Libraries\mynodes
+-cp C:\MiReQuGitTest\Test\Thorlabs_Objects\PH15_Postholder\Libraries\mynodes
 -cp C:/blender/ArmorySDK/lib/haxebullet
 -D hxcpp_smart_strings
 -D C:/blender/ArmorySDK/armory
@@ -58,10 +58,10 @@
 -js krom\krom.js.temp
 arm.UPH2_Base
 --macro keep('arm.UPH2_Base')
-arm.node.Movement_Central
---macro keep('arm.node.Movement_Central')
 armory.trait.physics.bullet.PhysicsWorld
 --macro keep('armory.trait.physics.bullet.PhysicsWorld')
+arm.node.Movement_Central
+--macro keep('arm.node.Movement_Central')
 armory.trait.physics.bullet.RigidBody
 --macro keep('armory.trait.physics.bullet.RigidBody')
 -main Main

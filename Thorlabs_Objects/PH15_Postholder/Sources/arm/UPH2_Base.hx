@@ -29,14 +29,21 @@ class UPH2_Base extends iron.Trait {
 	@prop 
 	var topName: String = "UPH2_Top";
 
-	var children: Array <Object>;
+	//var children: Array <Object>;
 	var nScale: Vec4  = new Vec4(0.01,0.01,0.01,1);
 
-	var mSTravel: Float = 2.7;
-	var mState: Int = 0;
+	var mSTravel: Float = 2.7; 			// complete travel distance of mScrew
+	var mState: Int = 0; 				// different states of the screw on the base, Controls Base
+						 				// 0 Locked(snaps to holes), 
+						 				// 1 partially locked, rotation of base changeable, and dist between base and screw
+						 				// 2 free, base translatable in loc
 
-	var sTravel: Float = 1.5;
-	var sState: Int = 0;
+
+	var sTravel: Float = 1.5;			// complete travel distance of screw (hexScrew)
+	var sState: Int = 0;	 			// different states of the screw on the Top (HexScrew), Controls Post
+										// 0 Locked,
+										// 1 Post can be rotated and moved up/down 
+
 
 	var postDist: Float = 0.0;
 	var postTrans: Float = 0.01;
@@ -72,28 +79,38 @@ class UPH2_Base extends iron.Trait {
 	};
 
 	// TODO: Movements !!!
+	// bugs: 
+	// 		- inital angle not correct for angles larger than pi (method of Quat(Iron) toAxisAngle)
+	//		- when rotated, base not centered to screw, fixed with an additional update call
 
 
 
 	function onInit() {
-		children = object.getChildren();
+		// TODO: not working for angles larger than PI, error in function from IRON, Method of Quat()
+		baseAngle = object.transform.rot.toAxisAngle(object.transform.up());
+
+		// get base system from the plate object
 		plate = Scene.active.getChild(plateName);
-		
 		zero = plate.getChildren()[2].transform.world.getLoc();
 		baseX = plate.getChildren()[0].transform.world.getLoc().sub(zero);
 		baseY = plate.getChildren()[1].transform.world.getLoc().sub(zero);
 
-		object.transform.translate(0,0,zero.z -  children[0].transform.world.getLoc().z);
+
+		// set the object to correct z stage and to the baseAngle Value(outcommented)
+		object.transform.translate(0,0,zero.z -  object.getChild("C_Platte").transform.world.getLoc().z);
+		//object.transform.rot.fromAxisAngle(object.transform.up().normalize(), baseAngle);
 		object.transform.buildMatrix();
 		rbSync(object);
 
+
+		//spawn the screw and setup location
 		mScrew = spawnObject(mScrewName,false);
 		var mST = object.getChild("C_Screw_Pos").transform.world;
 		mScrew.transform.setMatrix(mST);
 		mScrew.transform.scale = nScale;
 		mScrew.visible = true;
 		rbSync(mScrew);
-
+		//  snap the screw to correct place and base, too
 		var corrVxy: Vec4 = xySnapToBasis(object,mScrew,zero,baseX,baseY);
 		object.transform.translate(corrVxy.x,corrVxy.y,0);
 		object.transform.buildMatrix();
@@ -101,18 +118,18 @@ class UPH2_Base extends iron.Trait {
 		mScrew.transform.translate(corrVxy.x,corrVxy.y,0);
 		rbSync(mScrew);
 
-
+		// spawn "Top" on the base, corrVTop is the correction vector concerning the location
 		top = spawnObject(topName,false);
 		var mT = object.getChild("C_UPH").transform.world;
 		top.transform.setMatrix(mT);
 		top.transform.scale = nScale;
 		rbSync(top);
 		corrVTop = new Vec4().setFrom(top.getChild("C_Bottom").transform.world.getLoc()).sub(top.transform.loc);
-		trace(corrVTop);
 		top.transform.loc.sub(corrVTop);
 		top.visible = true;
 		rbSync(top);
 
+		// spawn the hex screw on the top part, see above  for corrScrew
 		screw = spawnObject(screwName,false);
 		var mS = top.getChild("C_Screw").transform.world;
 		screw.transform.setMatrix(mS);
@@ -123,7 +140,7 @@ class UPH2_Base extends iron.Trait {
 		screw.visible = true;
 		rbSync(screw);
 
-
+		// spawn the post inside the top
 		post = spawnObject(postName,false);
 		var mP = top.getChild("C_Top").transform.world;
 		post.transform.setMatrix(mP);
@@ -132,12 +149,12 @@ class UPH2_Base extends iron.Trait {
 		post.transform.rotate(post.transform.up().normalize(),postAngle);
 		rbSync(post);
 
+		// measure limits from the empty child objects, limits for postTravel and TODO: limit  for base Travel,
+		// (Angles don't need limits)
 		postPosLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Top").transform.world.getLoc()));
 		postNegLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Bottom").transform.world.getLoc()));
 		postTravelDist = Math.abs(postPosLim) + Math.abs(postNegLim);
 
-		baseAngle = object.transform.rot.toAxisAngle(object.transform.up());
-		updatePartsSnap();
 	}
 			
 	function onUpdate(){
@@ -148,6 +165,11 @@ class UPH2_Base extends iron.Trait {
 		var vec = new Vec4(0.01,0,0,1);
 		var vec_B = new Vec4(-0.01,0,0,1);
 
+
+
+
+
+
 		if (keyboard.down("w")){
 			object.transform.loc.add(vec);
 			object.transform.buildMatrix();
@@ -156,6 +178,7 @@ class UPH2_Base extends iron.Trait {
 			if (rigidBody != null) rigidBody.syncTransform();
 			updatePartsMoving();
 		}
+
 		if (keyboard.down("s")){
 			object.transform.loc.add(vec_B);
 			object.transform.buildMatrix();
@@ -203,6 +226,7 @@ class UPH2_Base extends iron.Trait {
 			updatePartsSnap();
 		}
 
+
 		if (mouse.started("left")){
 			var mouse_c = iron.system.Input.getMouse();
 			var coords = new Vec4(mouse_c.x, mouse_c.y,0,1);
@@ -210,40 +234,17 @@ class UPH2_Base extends iron.Trait {
 			
 			var rb = physics.pickClosest(coords.x, coords.y);
 			if (rb != null && rb.object == mScrew){
-				if (mState == 0){
-					mScrew.transform.move(mScrew.transform.up(), mSTravel);
-					mState = 1;
-					rbSync(mScrew);
-				} 
-				else if (mState == 1){
-					mScrew.transform.move(mScrew.transform.up(), mSTravel);
-					mState = 2;
-					rbSync(mScrew);
-				}
-				else {
-					mScrew.transform.move(mScrew.transform.up(), -2*mSTravel);
-					mState = 0;
-					rbSync(mScrew);
-				}
+				switchStateMScrew();
 			}
 			if (rb != null && rb.object == screw){
-				if (sState == 0){
-					screw.transform.move(screw.transform.look(), -1*sTravel);
-					sState = 1;
-					rbSync(screw);
-				}
-				else {
-					screw.transform.move(mScrew.transform.look(), sTravel);
-					sState = 0;
-					rbSync(screw);
-				}
+				switchStateScrew();
 			}
-			var mouse_c = iron.system.Input.getMouse();
-			var coords = new Vec4(mouse_c.x, mouse_c.y,0,1);
-			var physics = armory.trait.physics.PhysicsWorld.active;
-			
-			var rb = physics.pickClosest(coords.x, coords.y);
-			if (rb != null && rb.object == object && mState == 1){
+
+			if (rb != null && rb.object == object && mState == 0){
+				trace("state 0 Locked yo");
+				//updateParts();
+			}
+			else if (rb != null && rb.object == object && mState == 1){
 				trace("state 1 now transl");
 				//updateParts();
 			}
@@ -256,7 +257,12 @@ class UPH2_Base extends iron.Trait {
 
 	}
 
+
+
+
 	function updatePartsMoving() {
+		// moving function to update all rigidbodys and children
+		// does not include the snap, TODO: integrate to one function
 		nScale = new Vec4(0.01,0.01,0.01,1);
 		
 		var mST = object.getChild("C_Screw_Pos").transform.world;
@@ -341,13 +347,45 @@ class UPH2_Base extends iron.Trait {
 		sV.y = sV.y % baseY.y;
 		if (2 * sV.y> baseY.y) sV.y = baseY.y - sV.y;
 		else sV.y = sV.y*-1;
-		//sV.mult(1);
+
 		sV.z = 0;
 
 		return sV;
 	}
 	
+	function switchStateScrew() {
+		if (sState == 0){
+			screw.transform.move(screw.transform.look(), -1*sTravel);
+			sState = 1;
+			rbSync(screw);
+		}
+		else {
+			screw.transform.move(mScrew.transform.look(), sTravel);
+			sState = 0;
+			rbSync(screw);
+		}
+	}
+
+	function switchStateMScrew(){
+		if (mState == 0){
+			mScrew.transform.move(mScrew.transform.up(), mSTravel);
+			mState = 1;
+			rbSync(mScrew);
+		} 
+		else if (mState == 1){
+			mScrew.transform.move(mScrew.transform.up(), mSTravel);
+			mState = 2;
+			rbSync(mScrew);
+		}
+		else {
+			mScrew.transform.move(mScrew.transform.up(), -2*mSTravel);
+			mState = 0;
+			rbSync(mScrew);
+		}
+	}
+
 	function spawnObject(objectName: String, visible: Bool):Object {
+		// helping function to spawn an object
 		var object: Object;
 		var matrix = null;
 		var spawnChildren = true;
@@ -368,7 +406,11 @@ class UPH2_Base extends iron.Trait {
 
 		return object;
 	}
-	function rbSync(object:Object) {
+
+
+	function rbSync(object:Object) { 
+		// helping function for a rigid body object, 
+		// is used to align the child objects of the rigid body to their new parent matrix (location and rotation)
 		var rigidBody = object.getTrait(RigidBody);
 		if (rigidBody != null) rigidBody.syncTransform();
 	}
