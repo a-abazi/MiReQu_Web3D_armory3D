@@ -1,0 +1,85 @@
+-cp C:\blender\ArmorySDK\Kha\Sources
+-cp C:\blender\ArmorySDK\Kha\Backends\Krom
+-cp C:\blender\Merge_Adrian_Jonas\v3\Sources
+-cp C:\blender\ArmorySDK\armory\Sources
+-cp C:\blender\ArmorySDK\iron\Sources
+-cp C:\blender\Merge_Adrian_Jonas\v3\Libraries\mynodes\Sources
+-cp C:\blender\ArmorySDK\lib\haxebullet\Sources
+-cp C:\blender\ArmorySDK\lib\zui\Sources
+-cp C:/blender/ArmorySDK/armory
+-cp C:/blender/ArmorySDK/iron
+-cp C:\blender\Merge_Adrian_Jonas\v3\Libraries\mynodes
+-cp C:/blender/ArmorySDK/lib/haxebullet
+-cp C:/blender/ArmorySDK/lib/zui
+-D hxcpp_smart_strings
+-D C:/blender/ArmorySDK/armory
+-D C:/blender/ArmorySDK/iron
+-D mynodes
+-D C:/blender/ArmorySDK/lib/haxebullet
+-D C:/blender/ArmorySDK/lib/zui
+-D arm_deferred
+-D arm_csm
+-D rp_hdr
+-D rp_renderer=Deferred
+-D rp_shadowmap
+-D rp_shadowmap_cascade=1024
+-D rp_shadowmap_cube=512
+-D rp_background=World
+-D rp_render_to_texture
+-D rp_compositornodes
+-D rp_antialiasing=SMAA
+-D rp_supersampling=1
+-D rp_ssgi=SSAO
+-D arm_audio
+-D arm_physics
+-D arm_bullet
+-D arm_noembed
+-D arm_soundcompress
+-D arm_ui
+-D arm_skin
+-D arm_particles
+-D arm_resizable
+-D sys_krom
+-D sys_g1
+-D sys_g2
+-D sys_g3
+-D sys_g4
+-D sys_a1
+-D sys_a2
+-D kha_js
+-D kha_krom
+-D kha_krom_js
+-D kha_direct3d11
+-D kha_g1
+-D kha_g2
+-D kha_g3
+-D kha_g4
+-D kha_a1
+-D kha_a2
+-D kha
+-D kha_version=1810
+-D kha_project_name=merge_v3
+-js krom\krom.js.temp
+arm.node.KM100
+--macro keep('arm.node.KM100')
+arm.node.Spawn_Beams_Control_v3
+--macro keep('arm.node.Spawn_Beams_Control_v3')
+arm.NewUI
+--macro keep('arm.NewUI')
+arm.Mirror_v4_wrong_coordinate_system
+--macro keep('arm.Mirror_v4_wrong_coordinate_system')
+armory.trait.physics.bullet.RigidBody
+--macro keep('armory.trait.physics.bullet.RigidBody')
+arm.PumpLaserProps
+--macro keep('arm.PumpLaserProps')
+arm.node.LDM56
+--macro keep('arm.node.LDM56')
+arm.node.PT1B
+--macro keep('arm.node.PT1B')
+armory.trait.physics.bullet.PhysicsWorld
+--macro keep('armory.trait.physics.bullet.PhysicsWorld')
+arm.node.UPH
+--macro keep('arm.node.UPH')
+arm.node.Kamera_Bewegung
+--macro keep('arm.node.Kamera_Bewegung')
+-main Main
