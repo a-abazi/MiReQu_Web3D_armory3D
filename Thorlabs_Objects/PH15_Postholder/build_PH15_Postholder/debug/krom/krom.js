@@ -613,23 +613,25 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		this.post.transform.setMatrix(mP);
 		this.post.transform.scale = this.nScale;
 		this.post.visible = true;
-		var tmp2 = this.post.transform;
 		var _this17 = this.post.transform.world;
-		var _this18 = new iron_math_Vec4(_this17.self._20,_this17.self._21,_this17.self._22);
-		var n = Math.sqrt(_this18.x * _this18.x + _this18.y * _this18.y + _this18.z * _this18.z);
+		this.post.transform.move(new iron_math_Vec4(_this17.self._20,_this17.self._21,_this17.self._22),this.postDist);
+		var tmp2 = this.post.transform;
+		var _this18 = this.post.transform.world;
+		var _this19 = new iron_math_Vec4(_this18.self._20,_this18.self._21,_this18.self._22);
+		var n = Math.sqrt(_this19.x * _this19.x + _this19.y * _this19.y + _this19.z * _this19.z);
 		if(n > 0.0) {
 			var invN = 1.0 / n;
-			_this18.x *= invN;
-			_this18.y *= invN;
-			_this18.z *= invN;
+			_this19.x *= invN;
+			_this19.y *= invN;
+			_this19.z *= invN;
 		}
-		tmp2.rotate(_this18,this.postAngle);
+		tmp2.rotate(_this19,this.postAngle);
 		this.rbSync(this.post);
-		var _this19 = this.post.getChild("C_PostBottom").transform.world;
-		var x4 = _this19.self._30;
-		var y4 = _this19.self._31;
-		var z4 = _this19.self._32;
-		var w3 = _this19.self._33;
+		var _this20 = this.post.getChild("C_PostBottom").transform.world;
+		var x4 = _this20.self._30;
+		var y4 = _this20.self._31;
+		var z4 = _this20.self._32;
+		var w3 = _this20.self._33;
 		if(w3 == null) {
 			w3 = 1.0;
 		}
@@ -646,11 +648,11 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var _this_y = y4;
 		var _this_z = z4;
 		var _this_w = w3;
-		var _this20 = this.top.getChild("C_Top").transform.world;
-		var x5 = _this20.self._30;
-		var y5 = _this20.self._31;
-		var z5 = _this20.self._32;
-		var w4 = _this20.self._33;
+		var _this21 = this.top.getChild("C_Top").transform.world;
+		var x5 = _this21.self._30;
+		var y5 = _this21.self._31;
+		var z5 = _this21.self._32;
+		var w4 = _this21.self._33;
 		if(w4 == null) {
 			w4 = 1.0;
 		}
@@ -668,11 +670,11 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var p_z = z5;
 		var p_w = w4;
 		this.postPosLim = Math.sqrt((p_x - _this_x) * (p_x - _this_x) + (p_y - _this_y) * (p_y - _this_y) + (p_z - _this_z) * (p_z - _this_z));
-		var _this21 = this.post.getChild("C_PostBottom").transform.world;
-		var x6 = _this21.self._30;
-		var y6 = _this21.self._31;
-		var z6 = _this21.self._32;
-		var w5 = _this21.self._33;
+		var _this22 = this.post.getChild("C_PostBottom").transform.world;
+		var x6 = _this22.self._30;
+		var y6 = _this22.self._31;
+		var z6 = _this22.self._32;
+		var w5 = _this22.self._33;
 		if(w5 == null) {
 			w5 = 1.0;
 		}
@@ -689,11 +691,11 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var _this_y1 = y6;
 		var _this_z1 = z6;
 		var _this_w1 = w5;
-		var _this22 = this.top.getChild("C_Bottom").transform.world;
-		var x7 = _this22.self._30;
-		var y7 = _this22.self._31;
-		var z7 = _this22.self._32;
-		var w6 = _this22.self._33;
+		var _this23 = this.top.getChild("C_Bottom").transform.world;
+		var x7 = _this23.self._30;
+		var y7 = _this23.self._31;
+		var z7 = _this23.self._32;
+		var w6 = _this23.self._33;
 		if(w6 == null) {
 			w6 = 1.0;
 		}
@@ -781,22 +783,18 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 			this.updatePartsMoving();
 		}
 		if(keyboard.down("up")) {
-			if(this.postDist + this.postTrans < this.postPosLim) {
-				this.postDist += this.postTrans;
-			}
-			this.updatePartsSnap();
+			this.transPost(1);
 		}
 		if(keyboard.down("down")) {
-			if(this.postDist - this.postTrans > this.postNegLim) {
-				this.postDist -= this.postTrans;
-			}
-			this.updatePartsSnap();
+			this.transPost(-1);
 		}
 		if(keyboard.down("left")) {
+			this.postAngle = (this.postAngle + this.postAngleTravel) % (Math.PI * 2);
 			this.baseAngle = (this.baseAngle + this.baseAngleTravel) % (Math.PI * 2);
 			this.updatePartsSnap();
 		}
 		if(keyboard.down("right")) {
+			this.postAngle = (this.postAngle - this.postAngleTravel) % (Math.PI * 2);
 			this.baseAngle = (this.baseAngle - this.baseAngleTravel) % (Math.PI * 2);
 			this.updatePartsSnap();
 		}
@@ -834,11 +832,11 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 				this.switchStateScrew();
 			}
 			if(rb != null && rb.object == this.object && this.mState == 0) {
-				haxe_Log.trace("state 0 Locked yo",{ fileName : "arm/UPH2_Base.hx", lineNumber : 245, className : "arm.UPH2_Base", methodName : "onUpdate"});
+				haxe_Log.trace("state 0 Locked yo",{ fileName : "arm/UPH2_Base.hx", lineNumber : 230, className : "arm.UPH2_Base", methodName : "onUpdate"});
 			} else if(rb != null && rb.object == this.object && this.mState == 1) {
-				haxe_Log.trace("state 1 now transl",{ fileName : "arm/UPH2_Base.hx", lineNumber : 249, className : "arm.UPH2_Base", methodName : "onUpdate"});
+				haxe_Log.trace("state 1 now transl",{ fileName : "arm/UPH2_Base.hx", lineNumber : 234, className : "arm.UPH2_Base", methodName : "onUpdate"});
 			} else if(rb != null && rb.object == this.object && this.mState == 2) {
-				haxe_Log.trace("state 2 now translating",{ fileName : "arm/UPH2_Base.hx", lineNumber : 253, className : "arm.UPH2_Base", methodName : "onUpdate"});
+				haxe_Log.trace("state 2 now translating",{ fileName : "arm/UPH2_Base.hx", lineNumber : 238, className : "arm.UPH2_Base", methodName : "onUpdate"});
 			}
 		}
 	}
@@ -940,6 +938,7 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 			_this.z *= l;
 			_this.w *= l;
 		}
+		this.rbSync(this.object);
 		var corrVrot_x = 0.0;
 		var corrVrot_y = 0.0;
 		var corrVrot_z = 0.0;
@@ -1011,6 +1010,20 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		tmp.rotate(_this7,this.postAngle);
 		this.rbSync(this.post);
 	}
+	,transPost: function(multiplier) {
+		if(this.sState == 1) {
+			if(multiplier < 0) {
+				if(this.postDist + multiplier * this.postTrans > this.postNegLim) {
+					this.postDist += multiplier * this.postTrans;
+				}
+			} else if(multiplier > 0) {
+				if(this.postDist + multiplier * this.postTrans < this.postPosLim) {
+					this.postDist += multiplier * this.postTrans;
+				}
+			}
+			this.updatePartsSnap();
+		}
+	}
 	,xySnapToBasis: function(mainObj,mScrew,zero,baseX,baseY) {
 		var _this = new iron_math_Vec4();
 		var v = mScrew.transform.loc;
@@ -1039,15 +1052,11 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 	}
 	,switchStateScrew: function() {
 		if(this.sState == 0) {
-			var _this = this.screw.transform.world;
-			this.screw.transform.move(new iron_math_Vec4(_this.self._10,_this.self._11,_this.self._12),-1 * this.sTravel);
 			this.sState = 1;
-			this.rbSync(this.screw);
+			this.updatePartsSnap();
 		} else {
-			var _this1 = this.mScrew.transform.world;
-			this.screw.transform.move(new iron_math_Vec4(_this1.self._10,_this1.self._11,_this1.self._12),this.sTravel);
 			this.sState = 0;
-			this.rbSync(this.screw);
+			this.updatePartsSnap();
 		}
 	}
 	,switchStateMScrew: function() {
