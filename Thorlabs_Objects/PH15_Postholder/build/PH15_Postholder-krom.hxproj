@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project version="2">
+	<!-- Output SWF options -->
+	<output>
+		<movie outputType="Application" />
+		<movie input="" />
+		<movie path="krom\krom.js.temp" />
+		<movie fps="30" />
+		<movie width="800" />
+		<movie height="600" />
+		<movie version="16" />
+		<movie minorVersion="0" />
+		<movie platform="JavaScript" />
+		<movie background="#ffffff" />
+		<movie preferredSDK="..\..\..\..\..\blender\ArmorySDK\Kha\Tools\haxe" />
+	</output>
+	<!-- Other classes to be compiled into your SWF -->
+	<classpaths>
+		<class path="..\..\..\..\..\blender\ArmorySDK\Kha\Sources" />
+		<class path="..\..\..\..\..\blender\ArmorySDK\Kha\Backends\Krom" />
+		<class path="..\Sources" />
+		<class path="..\..\..\..\..\blender\ArmorySDK\armory\Sources" />
+		<class path="..\..\..\..\..\blender\ArmorySDK\iron\Sources" />
+		<class path="..\Libraries\mynodes\Sources" />
+		<class path="..\..\..\..\..\blender\ArmorySDK\lib\haxebullet\Sources" />
+		<class path="..\..\..\..\..\blender\ArmorySDK\armory" />
+		<class path="..\..\..\..\..\blender\ArmorySDK\iron" />
+		<class path="..\Libraries\mynodes" />
+		<class path="..\..\..\..\..\blender\ArmorySDK\lib\haxebullet" />
+	</classpaths>
+	<!-- Build options -->
+	<build>
+		<option directives="" />
+		<option flashStrict="False" />
+		<option noInlineOnDebug="False" />
+		<option mainClass="Main" />
+		<option enabledebug="False" />
+		<option additional="-D hxcpp_smart_strings&#xA;-D C:/blender/ArmorySDK/armory&#xA;-D C:/blender/ArmorySDK/iron&#xA;-D mynodes&#xA;-D C:/blender/ArmorySDK/lib/haxebullet&#xA;-D arm_deferred&#xA;-D arm_csm&#xA;-D rp_hdr&#xA;-D rp_renderer=Deferred&#xA;-D rp_shadowmap&#xA;-D rp_shadowmap_cascade=1024&#xA;-D rp_shadowmap_cube=512&#xA;-D rp_background=World&#xA;-D rp_render_to_texture&#xA;-D rp_compositornodes&#xA;-D rp_antialiasing=SMAA&#xA;-D rp_supersampling=1&#xA;-D rp_ssgi=SSAO&#xA;-D rp_overlays&#xA;-D arm_audio&#xA;-D arm_physics&#xA;-D arm_bullet&#xA;-D arm_noembed&#xA;-D arm_soundcompress&#xA;-D arm_skin&#xA;-D arm_particles&#xA;-D sys_krom&#xA;-D sys_g1&#xA;-D sys_g2&#xA;-D sys_g3&#xA;-D sys_g4&#xA;-D sys_a1&#xA;-D sys_a2&#xA;-D kha_js&#xA;-D kha_krom&#xA;-D kha_krom_js&#xA;-D kha_direct3d11&#xA;-D kha_g1&#xA;-D kha_g2&#xA;-D kha_g3&#xA;-D kha_g4&#xA;-D kha_a1&#xA;-D kha_a2&#xA;-D kha&#xA;-D kha_version=1810&#xA;-D kha_project_name=PH15_Postholder&#xA;-D kha_output=&quot;c:\MiReQuGitTest\Test\Thorlabs_Objects\PH15_Postholder\build\krom\krom.js.temp&quot;&#xA;arm.node.Movement_Central&#xA;--macro keep(&apos;arm.node.Movement_Central&apos;)&#xA;arm.UPH2_Base&#xA;--macro keep(&apos;arm.UPH2_Base&apos;)&#xA;armory.trait.physics.bullet.PhysicsWorld&#xA;--macro keep(&apos;armory.trait.physics.bullet.PhysicsWorld&apos;)&#xA;armory.trait.physics.bullet.RigidBody&#xA;--macro keep(&apos;armory.trait.physics.bullet.RigidBody&apos;)&#xA;" />
+	</build>
+	<!-- haxelib libraries -->
+	<haxelib>
+		<!-- example: <library name="..." /> -->
+	</haxelib>
+	<!-- Class files to compile (other referenced classes will automatically be included) -->
+	<compileTargets>
+		<compile path="..\Sources\Main.hx" />
+	</compileTargets>
+	<!-- Paths to exclude from the Project Explorer tree -->
+	<hiddenPaths>
+		<!-- example: <hidden path="..." /> -->
+	</hiddenPaths>
+	<!-- Executed before build -->
+	<preBuildCommand />
+	<!-- Executed after build -->
+	<postBuildCommand alwaysRun="False" />
+	<!-- Other project options -->
+	<options>
+		<option showHiddenPaths="False" />
+		<option testMovie="Custom" />
+		<option testMovieCommand="run_krom.bat" />
+	</options>
+	<!-- Plugin storage -->
+	<storage />
+</project>

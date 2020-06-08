@@ -56,8 +56,6 @@
 -D kha_version=1810
 -D kha_project_name=PH15_Postholder
 -js krom\krom.js.temp
-arm.node.Movement_Central
---macro keep('arm.node.Movement_Central')
 arm.UPH2_Base
 --macro keep('arm.UPH2_Base')
 armory.trait.physics.bullet.PhysicsWorld

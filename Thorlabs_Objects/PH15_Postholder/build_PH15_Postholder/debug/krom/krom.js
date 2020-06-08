@@ -365,7 +365,11 @@ iron_Trait.prototype = {
 	,__class__: iron_Trait
 };
 var arm_UPH2_$Base = function() {
-	this.baseTrans = 0.01;
+	this.planegroup = 3;
+	this.hitVec = null;
+	this.xyPlane = null;
+	this.movingObj = null;
+	this.baseTrans = 0.1;
 	this.baseDist = 0.0;
 	this.baseAngleTravel = Math.PI * 2. / 100.;
 	this.postTrans = 0.01;
@@ -424,6 +428,10 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 	,baseY: null
 	,corrVTop: null
 	,corrScrew: null
+	,movingObj: null
+	,xyPlane: null
+	,hitVec: null
+	,planegroup: null
 	,onInit: function() {
 		var _this = this.object.transform.rot;
 		var _this1 = this.object.transform.world;
@@ -725,212 +733,81 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var p_w1 = w6;
 		this.postNegLim = Math.sqrt((p_x1 - _this_x1) * (p_x1 - _this_x1) + (p_y1 - _this_y1) * (p_y1 - _this_y1) + (p_z1 - _this_z1) * (p_z1 - _this_z1));
 		this.postTravelDist = Math.abs(this.postPosLim) + Math.abs(this.postNegLim);
-		var _this25 = this.object.getChild("C_Screw_Pos").transform.world;
-		var x8 = _this25.self._30;
-		var y8 = _this25.self._31;
-		var z8 = _this25.self._32;
-		var w7 = _this25.self._33;
-		if(w7 == null) {
-			w7 = 1.0;
-		}
-		if(z8 == null) {
-			z8 = 0.0;
-		}
-		if(y8 == null) {
-			y8 = 0.0;
-		}
-		if(x8 == null) {
-			x8 = 0.0;
-		}
-		var _this_x2 = x8;
-		var _this_y2 = y8;
-		var _this_z2 = z8;
-		var _this_w2 = w7;
-		var _this26 = this.object.getChild("C_Screw_LimPos").transform.world;
-		var x9 = _this26.self._30;
-		var y9 = _this26.self._31;
-		var z9 = _this26.self._32;
-		var w8 = _this26.self._33;
-		if(w8 == null) {
-			w8 = 1.0;
-		}
-		if(z9 == null) {
-			z9 = 0.0;
-		}
-		if(y9 == null) {
-			y9 = 0.0;
-		}
-		if(x9 == null) {
-			x9 = 0.0;
-		}
-		var p_x2 = x9;
-		var p_y2 = y9;
-		var p_z2 = z9;
-		var p_w2 = w8;
-		this.basePosLim = Math.sqrt((p_x2 - _this_x2) * (p_x2 - _this_x2) + (p_y2 - _this_y2) * (p_y2 - _this_y2) + (p_z2 - _this_z2) * (p_z2 - _this_z2));
-		var _this27 = this.object.getChild("C_Screw_Pos").transform.world;
-		var x10 = _this27.self._30;
-		var y10 = _this27.self._31;
-		var z10 = _this27.self._32;
-		var w9 = _this27.self._33;
-		if(w9 == null) {
-			w9 = 1.0;
-		}
-		if(z10 == null) {
-			z10 = 0.0;
-		}
-		if(y10 == null) {
-			y10 = 0.0;
-		}
-		if(x10 == null) {
-			x10 = 0.0;
-		}
-		var _this_x3 = x10;
-		var _this_y3 = y10;
-		var _this_z3 = z10;
-		var _this_w3 = w9;
-		var _this28 = this.object.getChild("C_Screw_LimNeg").transform.world;
-		var x11 = _this28.self._30;
-		var y11 = _this28.self._31;
-		var z11 = _this28.self._32;
-		var w10 = _this28.self._33;
-		if(w10 == null) {
-			w10 = 1.0;
-		}
-		if(z11 == null) {
-			z11 = 0.0;
-		}
-		if(y11 == null) {
-			y11 = 0.0;
-		}
-		if(x11 == null) {
-			x11 = 0.0;
-		}
-		var p_x3 = x11;
-		var p_y3 = y11;
-		var p_z3 = z11;
-		var p_w3 = w10;
-		this.baseNegLim = -1 * Math.sqrt((p_x3 - _this_x3) * (p_x3 - _this_x3) + (p_y3 - _this_y3) * (p_y3 - _this_y3) + (p_z3 - _this_z3) * (p_z3 - _this_z3));
-		this.baseTravelDist = Math.abs(this.basePosLim) + Math.abs(this.baseNegLim);
 	}
 	,onUpdate: function() {
 		var keyboard = iron_system_Input.getKeyboard();
 		var mouse = iron_system_Input.getMouse();
-		var x = 0.01;
-		var y = 0;
-		var z = 0;
-		var w = 1;
-		if(w == null) {
-			w = 1.0;
-		}
-		if(z == null) {
-			z = 0.0;
-		}
-		if(y == null) {
-			y = 0.0;
-		}
-		if(x == null) {
-			x = 0.0;
-		}
-		var vec_x = x;
-		var vec_y = y;
-		var vec_z = z;
-		var vec_w = w;
-		var x1 = -0.01;
-		var y1 = 0;
-		var z1 = 0;
-		var w1 = 1;
-		if(w1 == null) {
-			w1 = 1.0;
-		}
-		if(z1 == null) {
-			z1 = 0.0;
-		}
-		if(y1 == null) {
-			y1 = 0.0;
-		}
-		if(x1 == null) {
-			x1 = 0.0;
-		}
-		var vec_B_x = x1;
-		var vec_B_y = y1;
-		var vec_B_z = z1;
-		var vec_B_w = w1;
-		if(keyboard.down("w")) {
-			var _this = this.object.transform.loc;
-			_this.x += vec_x;
-			_this.y += vec_y;
-			_this.z += vec_z;
-			this.object.transform.buildMatrix();
-			var rigidBody = this.object.getTrait(armory_trait_physics_bullet_RigidBody);
-			if(rigidBody != null) {
-				rigidBody.syncTransform();
-			}
-			this.updatePartsMoving();
-		}
-		if(keyboard.down("s")) {
-			var _this1 = this.object.transform.loc;
-			_this1.x += vec_B_x;
-			_this1.y += vec_B_y;
-			_this1.z += vec_B_z;
-			this.object.transform.buildMatrix();
-			var rigidBody1 = this.object.getTrait(armory_trait_physics_bullet_RigidBody);
-			if(rigidBody1 != null) {
-				rigidBody1.syncTransform();
-			}
-			this.updatePartsMoving();
-		}
-		if(keyboard.down("up")) {
-			this.transBase(1);
-		}
-		if(keyboard.down("down")) {
-			this.transBase(-1);
-		}
-		if(keyboard.down("left")) {
-			this.rotBase(1);
-		}
-		if(keyboard.down("right")) {
-			this.rotBase(-1);
-		}
-		if(keyboard.down("space")) {
-			this.updatePartsSnap();
-		}
+		var rb = null;
 		if(mouse.started("left")) {
-			var mouse_c = iron_system_Input.getMouse();
-			var x2 = mouse_c.x;
-			var y2 = mouse_c.y;
-			var z2 = 0;
-			var w2 = 1;
-			if(w2 == null) {
-				w2 = 1.0;
+			var x = mouse.x;
+			var y = mouse.y;
+			var z = 0;
+			var w = 1;
+			if(w == null) {
+				w = 1.0;
 			}
-			if(z2 == null) {
-				z2 = 0.0;
+			if(z == null) {
+				z = 0.0;
 			}
-			if(y2 == null) {
-				y2 = 0.0;
+			if(y == null) {
+				y = 0.0;
 			}
-			if(x2 == null) {
-				x2 = 0.0;
+			if(x == null) {
+				x = 0.0;
 			}
-			var coords_x = x2;
-			var coords_y = y2;
-			var coords_z = z2;
-			var coords_w = w2;
+			var coords_x = x;
+			var coords_y = y;
+			var coords_z = z;
+			var coords_w = w;
 			var physics = armory_trait_physics_bullet_PhysicsWorld.active;
-			var rb = physics.pickClosest(coords_x,coords_y);
-			if(rb != null && rb.object == this.mScrew) {
-				this.switchStateMScrew();
+			rb = physics.pickClosest(coords_x,coords_y);
+			if(rb != null) {
+				this.movingObj = rb.object;
+				if(rb.object == this.mScrew) {
+					this.switchStateMScrew();
+				} else if(rb.object == this.screw) {
+					this.switchStateScrew();
+				}
 			}
-			if(rb != null && rb.object == this.screw) {
-				this.switchStateScrew();
+		}
+		if(mouse.released("left")) {
+			this.movingObj = null;
+			if(this.xyPlane != null) {
+				this.xyPlane.remove();
 			}
-			if(rb != null && rb.object == this.object && this.mState == 0) {
-				haxe_Log.trace("state 0 Locked yo",{ fileName : "arm/UPH2_Base.hx", lineNumber : 245, className : "arm.UPH2_Base", methodName : "onUpdate"});
-			} else if(rb != null && rb.object == this.object && this.mState == 1) {
-				haxe_Log.trace("state 1 now transl",{ fileName : "arm/UPH2_Base.hx", lineNumber : 249, className : "arm.UPH2_Base", methodName : "onUpdate"});
-			} else if(rb != null && rb.object == this.object && this.mState == 2) {
-				haxe_Log.trace("state 2 now translating",{ fileName : "arm/UPH2_Base.hx", lineNumber : 253, className : "arm.UPH2_Base", methodName : "onUpdate"});
+			this.hitVec = null;
+			this.updateParts();
+		}
+		if(mouse.down("left") && this.movingObj != null) {
+			if(this.movingObj == this.post) {
+				var multip = 0.1;
+				this.rotPost(mouse.movementX * multip);
+				this.transPost(mouse.movementY * -1 * multip);
+			} else if(this.movingObj == this.object && this.mState == 0) {
+				haxe_Log.trace("state 0 Locked yo",{ fileName : "arm/UPH2_Base.hx", lineNumber : 234, className : "arm.UPH2_Base", methodName : "onUpdate"});
+			} else if(this.movingObj == this.object && this.mState == 1) {
+				haxe_Log.trace("state 1 now transl",{ fileName : "arm/UPH2_Base.hx", lineNumber : 238, className : "arm.UPH2_Base", methodName : "onUpdate"});
+				var multip1 = 0.025;
+				var clickpos = this.worldToScreenSpace(new iron_math_Vec4(mouse.x,mouse.y,0));
+				var v = this.object.transform.loc;
+				clickpos.x -= v.x;
+				clickpos.y -= v.y;
+				clickpos.z -= v.z;
+				haxe_Log.trace(clickpos,{ fileName : "arm/UPH2_Base.hx", lineNumber : 242, className : "arm.UPH2_Base", methodName : "onUpdate"});
+			} else if(this.movingObj == this.object && this.mState == 2) {
+				if(this.hitVec == null) {
+					this.hitVec = this.mouseToPlaneHit(mouse.x,mouse.y,1,1);
+					if(this.hitVec != null) {
+						this.xyPlane = this.spawnXYPlane(this.hitVec);
+					}
+				}
+				var moveVec = this.mouseToPlaneHit(mouse.x,mouse.y,1,1 << this.planegroup - 1);
+				haxe_Log.trace(moveVec,{ fileName : "arm/UPH2_Base.hx", lineNumber : 254, className : "arm.UPH2_Base", methodName : "onUpdate"});
+				moveVec.sub(this.object.transform.loc);
+				haxe_Log.trace(moveVec,{ fileName : "arm/UPH2_Base.hx", lineNumber : 257, className : "arm.UPH2_Base", methodName : "onUpdate"});
+				this.object.transform.translate(moveVec.x,moveVec.y,0);
+				this.rbSync(this.object);
+				this.updateParts();
 			}
 		}
 	}
@@ -1018,143 +895,120 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		tmp.rotate(_this9,this.postAngle);
 		this.rbSync(this.post);
 	}
-	,updatePartsSnap: function() {
+	,updateParts: function() {
 		this.nScale = new iron_math_Vec4(0.01,0.01,0.01,1);
-		var tmp = this.object.transform;
-		var _this = this.object.getChild("C_Screw_Pos").transform.world;
-		var _this1 = new iron_math_Vec4(_this.self._10,_this.self._11,_this.self._12);
-		var n = Math.sqrt(_this1.x * _this1.x + _this1.y * _this1.y + _this1.z * _this1.z);
-		if(n > 0.0) {
-			var invN = 1.0 / n;
-			_this1.x *= invN;
-			_this1.y *= invN;
-			_this1.z *= invN;
-		}
-		tmp.move(_this1,-1 * this.baseDist);
-		this.rbSync(this.object);
-		var tmp1 = this.object.getChild("C_Screw_Pos").transform;
-		var _this2 = this.object.getChild("C_Screw_Pos").transform.world;
-		var _this3 = new iron_math_Vec4(_this2.self._10,_this2.self._11,_this2.self._12);
-		var n1 = Math.sqrt(_this3.x * _this3.x + _this3.y * _this3.y + _this3.z * _this3.z);
-		if(n1 > 0.0) {
-			var invN1 = 1.0 / n1;
-			_this3.x *= invN1;
-			_this3.y *= invN1;
-			_this3.z *= invN1;
-		}
-		tmp1.move(_this3,this.baseDist);
-		this.rbSync(this.object);
 		var mST = this.object.getChild("C_Screw_Pos").transform.world;
 		this.mScrew.transform.setMatrix(mST);
 		this.mScrew.transform.scale = this.nScale;
 		this.rbSync(this.mScrew);
-		var corrVxy = this.xySnapToBasis(this.object,this.mScrew,this.zero,this.baseX,this.baseY);
-		this.object.transform.translate(corrVxy.x,corrVxy.y,0);
-		this.object.transform.buildMatrix();
-		this.rbSync(this.object);
-		this.mScrew.transform.translate(corrVxy.x,corrVxy.y,0);
-		var _this4 = this.mScrew.transform.world;
-		this.mScrew.transform.move(new iron_math_Vec4(_this4.self._20,_this4.self._21,_this4.self._22),this.mState * this.mSTravel);
+		var _this = this.mScrew.transform.world;
+		this.mScrew.transform.move(new iron_math_Vec4(_this.self._20,_this.self._21,_this.self._22),this.mState * this.mSTravel);
 		this.rbSync(this.mScrew);
-		var _this5 = this.object.transform.rot;
-		var _this6 = this.object.transform.world;
-		var x = _this6.self._20;
-		var y = _this6.self._21;
-		var z = _this6.self._22;
-		if(z == null) {
-			z = 0.0;
+		if(this.mState == 0 || this.mState == 1) {
+			var corrVxy = this.xySnapToBasis(this.object,this.mScrew,this.zero,this.baseX,this.baseY);
+			this.rbSync(this.object);
+			this.mScrew.transform.translate(corrVxy.x,corrVxy.y,0);
+			this.rbSync(this.mScrew);
+			var _this1 = this.object.transform.rot;
+			var _this2 = this.object.transform.world;
+			var x = _this2.self._20;
+			var y = _this2.self._21;
+			var z = _this2.self._22;
+			if(z == null) {
+				z = 0.0;
+			}
+			if(y == null) {
+				y = 0.0;
+			}
+			if(x == null) {
+				x = 0.0;
+			}
+			var axis_x = x;
+			var axis_y = y;
+			var axis_z = z;
+			var axis_w = 1.0;
+			var n = Math.sqrt(axis_x * axis_x + axis_y * axis_y + axis_z * axis_z);
+			if(n > 0.0) {
+				var invN = 1.0 / n;
+				axis_x *= invN;
+				axis_y *= invN;
+				axis_z *= invN;
+			}
+			var angle = this.baseAngle;
+			var s = Math.sin(angle * 0.5);
+			_this1.x = axis_x * s;
+			_this1.y = axis_y * s;
+			_this1.z = axis_z * s;
+			_this1.w = Math.cos(angle * 0.5);
+			var l = Math.sqrt(_this1.x * _this1.x + _this1.y * _this1.y + _this1.z * _this1.z + _this1.w * _this1.w);
+			if(l == 0.0) {
+				_this1.x = 0;
+				_this1.y = 0;
+				_this1.z = 0;
+				_this1.w = 0;
+			} else {
+				l = 1.0 / l;
+				_this1.x *= l;
+				_this1.y *= l;
+				_this1.z *= l;
+				_this1.w *= l;
+			}
+			this.rbSync(this.object);
+			var corrVrot_x = 0.0;
+			var corrVrot_y = 0.0;
+			var corrVrot_z = 0.0;
+			var corrVrot_w = 1.0;
+			var _this3 = this.object.getChild("C_Screw_Pos").transform.world;
+			var x1 = _this3.self._30;
+			var y1 = _this3.self._31;
+			var z1 = _this3.self._32;
+			var w = _this3.self._33;
+			if(w == null) {
+				w = 1.0;
+			}
+			if(z1 == null) {
+				z1 = 0.0;
+			}
+			if(y1 == null) {
+				y1 = 0.0;
+			}
+			if(x1 == null) {
+				x1 = 0.0;
+			}
+			var v_x = x1;
+			var v_y = y1;
+			var v_z = z1;
+			var v_w = w;
+			corrVrot_x = v_x;
+			corrVrot_y = v_y;
+			corrVrot_z = v_z;
+			corrVrot_w = v_w;
+			var v = this.mScrew.transform.loc;
+			corrVrot_x -= v.x;
+			corrVrot_y -= v.y;
+			corrVrot_z -= v.z;
+			this.object.transform.translate(-1 * corrVrot_x,-1 * corrVrot_y,0);
+			this.rbSync(this.object);
 		}
-		if(y == null) {
-			y = 0.0;
-		}
-		if(x == null) {
-			x = 0.0;
-		}
-		var axis_x = x;
-		var axis_y = y;
-		var axis_z = z;
-		var axis_w = 1.0;
-		var n2 = Math.sqrt(axis_x * axis_x + axis_y * axis_y + axis_z * axis_z);
-		if(n2 > 0.0) {
-			var invN2 = 1.0 / n2;
-			axis_x *= invN2;
-			axis_y *= invN2;
-			axis_z *= invN2;
-		}
-		var angle = this.baseAngle;
-		var s = Math.sin(angle * 0.5);
-		_this5.x = axis_x * s;
-		_this5.y = axis_y * s;
-		_this5.z = axis_z * s;
-		_this5.w = Math.cos(angle * 0.5);
-		var l = Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z + _this5.w * _this5.w);
-		if(l == 0.0) {
-			_this5.x = 0;
-			_this5.y = 0;
-			_this5.z = 0;
-			_this5.w = 0;
-		} else {
-			l = 1.0 / l;
-			_this5.x *= l;
-			_this5.y *= l;
-			_this5.z *= l;
-			_this5.w *= l;
-		}
-		this.rbSync(this.object);
-		var corrVrot_x = 0.0;
-		var corrVrot_y = 0.0;
-		var corrVrot_z = 0.0;
-		var corrVrot_w = 1.0;
-		var _this7 = this.object.getChild("C_Screw_Pos").transform.world;
-		var x1 = _this7.self._30;
-		var y1 = _this7.self._31;
-		var z1 = _this7.self._32;
-		var w = _this7.self._33;
-		if(w == null) {
-			w = 1.0;
-		}
-		if(z1 == null) {
-			z1 = 0.0;
-		}
-		if(y1 == null) {
-			y1 = 0.0;
-		}
-		if(x1 == null) {
-			x1 = 0.0;
-		}
-		var v_x = x1;
-		var v_y = y1;
-		var v_z = z1;
-		var v_w = w;
-		corrVrot_x = v_x;
-		corrVrot_y = v_y;
-		corrVrot_z = v_z;
-		corrVrot_w = v_w;
-		var v = this.mScrew.transform.loc;
-		corrVrot_x -= v.x;
-		corrVrot_y -= v.y;
-		corrVrot_z -= v.z;
-		this.object.transform.translate(-1 * corrVrot_x,-1 * corrVrot_y,0);
-		this.rbSync(this.object);
 		var mT = this.object.getChild("C_UPH").transform.world;
 		this.top.transform.setMatrix(mT);
 		this.top.transform.scale = this.nScale;
-		var _this8 = this.top.transform.loc;
+		var _this4 = this.top.transform.loc;
 		var v1 = this.corrVTop;
-		_this8.x -= v1.x;
-		_this8.y -= v1.y;
-		_this8.z -= v1.z;
+		_this4.x -= v1.x;
+		_this4.y -= v1.y;
+		_this4.z -= v1.z;
 		this.rbSync(this.top);
 		var mS = this.top.getChild("C_Screw").transform.world;
 		this.screw.transform.setMatrix(mS);
 		this.screw.transform.scale = this.nScale;
 		this.rbSync(this.screw);
-		var _this9 = new iron_math_Vec4();
-		var _this10 = this.screw.getChild("C").transform.world;
-		var x2 = _this10.self._30;
-		var y2 = _this10.self._31;
-		var z2 = _this10.self._32;
-		var w1 = _this10.self._33;
+		var _this5 = new iron_math_Vec4();
+		var _this6 = this.screw.getChild("C").transform.world;
+		var x2 = _this6.self._30;
+		var y2 = _this6.self._31;
+		var z2 = _this6.self._32;
+		var w1 = _this6.self._33;
 		if(w1 == null) {
 			w1 = 1.0;
 		}
@@ -1171,70 +1025,163 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var v_y1 = y2;
 		var v_z1 = z2;
 		var v_w1 = w1;
-		_this9.x = v_x1;
-		_this9.y = v_y1;
-		_this9.z = v_z1;
-		_this9.w = v_w1;
-		var _this11 = _this9;
+		_this5.x = v_x1;
+		_this5.y = v_y1;
+		_this5.z = v_z1;
+		_this5.w = v_w1;
+		var _this7 = _this5;
 		var v2 = this.screw.transform.loc;
-		_this11.x -= v2.x;
-		_this11.y -= v2.y;
-		_this11.z -= v2.z;
-		this.corrScrew = _this11;
+		_this7.x -= v2.x;
+		_this7.y -= v2.y;
+		_this7.z -= v2.z;
+		this.corrScrew = _this7;
 		if(this.sState == 0) {
-			var _this12 = this.corrScrew;
-			_this12.x *= 0.5;
-			_this12.y *= 0.5;
-			_this12.z *= 0.5;
+			var _this8 = this.corrScrew;
+			_this8.x *= 0.5;
+			_this8.y *= 0.5;
+			_this8.z *= 0.5;
 		}
-		var _this13 = this.screw.transform.loc;
+		var _this9 = this.screw.transform.loc;
 		var v3 = this.corrScrew;
-		_this13.x -= v3.x;
-		_this13.y -= v3.y;
-		_this13.z -= v3.z;
+		_this9.x -= v3.x;
+		_this9.y -= v3.y;
+		_this9.z -= v3.z;
 		this.rbSync(this.screw);
 		var mP = this.top.getChild("C_Top").transform.world;
 		this.post.transform.setMatrix(mP);
 		this.post.transform.scale = this.nScale;
-		var _this14 = this.post.transform.world;
-		this.post.transform.move(new iron_math_Vec4(_this14.self._20,_this14.self._21,_this14.self._22),this.postDist);
-		var tmp2 = this.post.transform;
-		var _this15 = this.post.transform.world;
-		var _this16 = new iron_math_Vec4(_this15.self._20,_this15.self._21,_this15.self._22);
-		var n3 = Math.sqrt(_this16.x * _this16.x + _this16.y * _this16.y + _this16.z * _this16.z);
-		if(n3 > 0.0) {
-			var invN3 = 1.0 / n3;
-			_this16.x *= invN3;
-			_this16.y *= invN3;
-			_this16.z *= invN3;
+		var _this10 = this.post.transform.world;
+		this.post.transform.move(new iron_math_Vec4(_this10.self._20,_this10.self._21,_this10.self._22),this.postDist);
+		var tmp = this.post.transform;
+		var _this11 = this.post.transform.world;
+		var _this12 = new iron_math_Vec4(_this11.self._20,_this11.self._21,_this11.self._22);
+		var n1 = Math.sqrt(_this12.x * _this12.x + _this12.y * _this12.y + _this12.z * _this12.z);
+		if(n1 > 0.0) {
+			var invN1 = 1.0 / n1;
+			_this12.x *= invN1;
+			_this12.y *= invN1;
+			_this12.z *= invN1;
 		}
-		tmp2.rotate(_this16,this.postAngle);
+		tmp.rotate(_this12,this.postAngle);
 		this.rbSync(this.post);
 	}
 	,rotBase: function(multiplier) {
 		if(this.mState == 1) {
 			this.baseAngle = (this.baseAngle + multiplier * this.baseAngleTravel) % (Math.PI * 2);
-			this.updatePartsSnap();
+			this.updateParts();
 		}
 	}
 	,transBase: function(multiplier) {
 		if(this.mState == 1) {
+			multiplier *= -1;
+			var scalefactor = 0.01;
 			if(multiplier < 0) {
-				if(this.baseDist + multiplier * this.baseTrans > this.baseNegLim) {
-					this.baseDist += multiplier * this.baseTrans;
+				var _this = this.object.getChild("C_Screw_Pos").transform.world;
+				var x = _this.self._30;
+				var y = _this.self._31;
+				var z = _this.self._32;
+				var w = _this.self._33;
+				if(w == null) {
+					w = 1.0;
+				}
+				if(z == null) {
+					z = 0.0;
+				}
+				if(y == null) {
+					y = 0.0;
+				}
+				if(x == null) {
+					x = 0.0;
+				}
+				var _this_x = x;
+				var _this_y = y;
+				var _this_z = z;
+				var _this_w = w;
+				var _this1 = this.object.getChild("C_Screw_LimNeg").transform.world;
+				var x1 = _this1.self._30;
+				var y1 = _this1.self._31;
+				var z1 = _this1.self._32;
+				var w1 = _this1.self._33;
+				if(w1 == null) {
+					w1 = 1.0;
+				}
+				if(z1 == null) {
+					z1 = 0.0;
+				}
+				if(y1 == null) {
+					y1 = 0.0;
+				}
+				if(x1 == null) {
+					x1 = 0.0;
+				}
+				var p_x = x1;
+				var p_y = y1;
+				var p_z = z1;
+				var p_w = w1;
+				var baseDist = Math.sqrt((p_x - _this_x) * (p_x - _this_x) + (p_y - _this_y) * (p_y - _this_y) + (p_z - _this_z) * (p_z - _this_z));
+				if(baseDist + multiplier * this.baseTrans * scalefactor > 0) {
+					haxe_Log.trace(baseDist,{ fileName : "arm/UPH2_Base.hx", lineNumber : 377, className : "arm.UPH2_Base", methodName : "transBase"});
+					haxe_Log.trace(multiplier * this.baseTrans,{ fileName : "arm/UPH2_Base.hx", lineNumber : 378, className : "arm.UPH2_Base", methodName : "transBase"});
+					this.object.getChild("C_Screw_Pos").transform.translate(0,multiplier * this.baseTrans,0);
+					this.rbSync(this.object);
 				}
 			} else if(multiplier > 0) {
-				if(this.baseDist + multiplier * this.baseTrans < this.basePosLim) {
-					this.baseDist += multiplier * this.baseTrans;
+				var _this2 = this.object.getChild("C_Screw_Pos").transform.world;
+				var x2 = _this2.self._30;
+				var y2 = _this2.self._31;
+				var z2 = _this2.self._32;
+				var w2 = _this2.self._33;
+				if(w2 == null) {
+					w2 = 1.0;
+				}
+				if(z2 == null) {
+					z2 = 0.0;
+				}
+				if(y2 == null) {
+					y2 = 0.0;
+				}
+				if(x2 == null) {
+					x2 = 0.0;
+				}
+				var _this_x1 = x2;
+				var _this_y1 = y2;
+				var _this_z1 = z2;
+				var _this_w1 = w2;
+				var _this3 = this.object.getChild("C_Screw_LimPos").transform.world;
+				var x3 = _this3.self._30;
+				var y3 = _this3.self._31;
+				var z3 = _this3.self._32;
+				var w3 = _this3.self._33;
+				if(w3 == null) {
+					w3 = 1.0;
+				}
+				if(z3 == null) {
+					z3 = 0.0;
+				}
+				if(y3 == null) {
+					y3 = 0.0;
+				}
+				if(x3 == null) {
+					x3 = 0.0;
+				}
+				var p_x1 = x3;
+				var p_y1 = y3;
+				var p_z1 = z3;
+				var p_w1 = w3;
+				var baseDist1 = Math.sqrt((p_x1 - _this_x1) * (p_x1 - _this_x1) + (p_y1 - _this_y1) * (p_y1 - _this_y1) + (p_z1 - _this_z1) * (p_z1 - _this_z1));
+				if(baseDist1 - multiplier * this.baseTrans * scalefactor > 0) {
+					haxe_Log.trace(baseDist1,{ fileName : "arm/UPH2_Base.hx", lineNumber : 386, className : "arm.UPH2_Base", methodName : "transBase"});
+					this.object.getChild("C_Screw_Pos").transform.translate(0,multiplier * this.baseTrans,0);
+					this.rbSync(this.object);
 				}
 			}
-			this.updatePartsSnap();
+			this.updateParts();
 		}
 	}
 	,rotPost: function(multiplier) {
 		if(this.sState == 1) {
 			this.postAngle = (this.postAngle + multiplier * this.postAngleTravel) % (Math.PI * 2);
-			this.updatePartsSnap();
+			this.updateParts();
 		}
 	}
 	,transPost: function(multiplier) {
@@ -1248,7 +1195,7 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 					this.postDist += multiplier * this.postTrans;
 				}
 			}
-			this.updatePartsSnap();
+			this.updateParts();
 		}
 	}
 	,xySnapToBasis: function(mainObj,mScrew,zero,baseX,baseY) {
@@ -1280,22 +1227,22 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 	,switchStateScrew: function() {
 		if(this.sState == 0) {
 			this.sState = 1;
-			this.updatePartsSnap();
+			this.updateParts();
 		} else {
 			this.sState = 0;
-			this.updatePartsSnap();
+			this.updateParts();
 		}
 	}
 	,switchStateMScrew: function() {
 		if(this.mState == 0) {
 			this.mState = 1;
-			this.updatePartsSnap();
+			this.updateParts();
 		} else if(this.mState == 1) {
 			this.mState = 2;
-			this.updatePartsSnap();
+			this.updateParts();
 		} else {
 			this.mState = 0;
-			this.updatePartsSnap();
+			this.updateParts();
 		}
 	}
 	,spawnObject: function(objectName,visible) {
@@ -1316,760 +1263,328 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		},spawnChildren);
 		return object;
 	}
+	,spawnXYPlane: function(loc) {
+		var _gthis = this;
+		var object;
+		var matrix = null;
+		var spawnChildren = false;
+		iron_Scene.active.spawnObject("xyPlane",null,function(o) {
+			object = o;
+			if(matrix != null) {
+				object.transform.setMatrix(matrix);
+				var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
+				if(rigidBody != null) {
+					object.transform.buildMatrix();
+					rigidBody.syncTransform();
+					rigidBody.group = _gthis.planegroup;
+				}
+			}
+			object.visible = false;
+		},spawnChildren);
+		object.transform.loc = loc;
+		return object;
+	}
 	,rbSync: function(object) {
 		var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
 		if(rigidBody != null) {
 			rigidBody.syncTransform();
 		}
 	}
+	,screenToWorldSpace: function(v1) {
+		var v = new iron_math_Vec4();
+		var m = new iron_math_Mat4(1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0);
+		if(v1 == null) {
+			return null;
+		}
+		var cam = iron_Scene.active.camera;
+		v.x = v1.x;
+		v.y = v1.y;
+		v.z = v1.z;
+		v.w = v1.w;
+		var m1 = cam.P;
+		var a00 = m1.self._00;
+		var a01 = m1.self._01;
+		var a02 = m1.self._02;
+		var a03 = m1.self._03;
+		var a10 = m1.self._10;
+		var a11 = m1.self._11;
+		var a12 = m1.self._12;
+		var a13 = m1.self._13;
+		var a20 = m1.self._20;
+		var a21 = m1.self._21;
+		var a22 = m1.self._22;
+		var a23 = m1.self._23;
+		var a30 = m1.self._30;
+		var a31 = m1.self._31;
+		var a32 = m1.self._32;
+		var a33 = m1.self._33;
+		var b00 = a00 * a11 - a01 * a10;
+		var b01 = a00 * a12 - a02 * a10;
+		var b02 = a00 * a13 - a03 * a10;
+		var b03 = a01 * a12 - a02 * a11;
+		var b04 = a01 * a13 - a03 * a11;
+		var b05 = a02 * a13 - a03 * a12;
+		var b06 = a20 * a31 - a21 * a30;
+		var b07 = a20 * a32 - a22 * a30;
+		var b08 = a20 * a33 - a23 * a30;
+		var b09 = a21 * a32 - a22 * a31;
+		var b10 = a21 * a33 - a23 * a31;
+		var b11 = a22 * a33 - a23 * a32;
+		var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+		if(det == 0.0) {
+			m.self._00 = 1.0;
+			m.self._01 = 0.0;
+			m.self._02 = 0.0;
+			m.self._03 = 0.0;
+			m.self._10 = 0.0;
+			m.self._11 = 1.0;
+			m.self._12 = 0.0;
+			m.self._13 = 0.0;
+			m.self._20 = 0.0;
+			m.self._21 = 0.0;
+			m.self._22 = 1.0;
+			m.self._23 = 0.0;
+			m.self._30 = 0.0;
+			m.self._31 = 0.0;
+			m.self._32 = 0.0;
+			m.self._33 = 1.0;
+		} else {
+			det = 1.0 / det;
+			m.self._00 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+			m.self._01 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+			m.self._02 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+			m.self._03 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+			m.self._10 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+			m.self._11 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+			m.self._12 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+			m.self._13 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+			m.self._20 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+			m.self._21 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+			m.self._22 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+			m.self._23 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+			m.self._30 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+			m.self._31 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+			m.self._32 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+			m.self._33 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
+		}
+		var x = v.x;
+		var y = v.y;
+		var z = v.z;
+		var d = 1.0 / (m.self._03 * x + m.self._13 * y + m.self._23 * z + m.self._33);
+		v.x = (m.self._00 * x + m.self._10 * y + m.self._20 * z + m.self._30) * d;
+		v.y = (m.self._01 * x + m.self._11 * y + m.self._21 * z + m.self._31) * d;
+		v.z = (m.self._02 * x + m.self._12 * y + m.self._22 * z + m.self._32) * d;
+		var m2 = cam.V;
+		var a001 = m2.self._00;
+		var a011 = m2.self._01;
+		var a021 = m2.self._02;
+		var a031 = m2.self._03;
+		var a101 = m2.self._10;
+		var a111 = m2.self._11;
+		var a121 = m2.self._12;
+		var a131 = m2.self._13;
+		var a201 = m2.self._20;
+		var a211 = m2.self._21;
+		var a221 = m2.self._22;
+		var a231 = m2.self._23;
+		var a301 = m2.self._30;
+		var a311 = m2.self._31;
+		var a321 = m2.self._32;
+		var a331 = m2.self._33;
+		var b001 = a001 * a111 - a011 * a101;
+		var b011 = a001 * a121 - a021 * a101;
+		var b021 = a001 * a131 - a031 * a101;
+		var b031 = a011 * a121 - a021 * a111;
+		var b041 = a011 * a131 - a031 * a111;
+		var b051 = a021 * a131 - a031 * a121;
+		var b061 = a201 * a311 - a211 * a301;
+		var b071 = a201 * a321 - a221 * a301;
+		var b081 = a201 * a331 - a231 * a301;
+		var b091 = a211 * a321 - a221 * a311;
+		var b101 = a211 * a331 - a231 * a311;
+		var b111 = a221 * a331 - a231 * a321;
+		var det1 = b001 * b111 - b011 * b101 + b021 * b091 + b031 * b081 - b041 * b071 + b051 * b061;
+		if(det1 == 0.0) {
+			m.self._00 = 1.0;
+			m.self._01 = 0.0;
+			m.self._02 = 0.0;
+			m.self._03 = 0.0;
+			m.self._10 = 0.0;
+			m.self._11 = 1.0;
+			m.self._12 = 0.0;
+			m.self._13 = 0.0;
+			m.self._20 = 0.0;
+			m.self._21 = 0.0;
+			m.self._22 = 1.0;
+			m.self._23 = 0.0;
+			m.self._30 = 0.0;
+			m.self._31 = 0.0;
+			m.self._32 = 0.0;
+			m.self._33 = 1.0;
+		} else {
+			det1 = 1.0 / det1;
+			m.self._00 = (a111 * b111 - a121 * b101 + a131 * b091) * det1;
+			m.self._01 = (a021 * b101 - a011 * b111 - a031 * b091) * det1;
+			m.self._02 = (a311 * b051 - a321 * b041 + a331 * b031) * det1;
+			m.self._03 = (a221 * b041 - a211 * b051 - a231 * b031) * det1;
+			m.self._10 = (a121 * b081 - a101 * b111 - a131 * b071) * det1;
+			m.self._11 = (a001 * b111 - a021 * b081 + a031 * b071) * det1;
+			m.self._12 = (a321 * b021 - a301 * b051 - a331 * b011) * det1;
+			m.self._13 = (a201 * b051 - a221 * b021 + a231 * b011) * det1;
+			m.self._20 = (a101 * b101 - a111 * b081 + a131 * b061) * det1;
+			m.self._21 = (a011 * b081 - a001 * b101 - a031 * b061) * det1;
+			m.self._22 = (a301 * b041 - a311 * b021 + a331 * b001) * det1;
+			m.self._23 = (a211 * b021 - a201 * b041 - a231 * b001) * det1;
+			m.self._30 = (a111 * b071 - a101 * b091 - a121 * b061) * det1;
+			m.self._31 = (a001 * b091 - a011 * b071 + a021 * b061) * det1;
+			m.self._32 = (a311 * b011 - a301 * b031 - a321 * b001) * det1;
+			m.self._33 = (a201 * b031 - a211 * b011 + a221 * b001) * det1;
+		}
+		var x1 = v.x;
+		var y1 = v.y;
+		var z1 = v.z;
+		var d1 = 1.0 / (m.self._03 * x1 + m.self._13 * y1 + m.self._23 * z1 + m.self._33);
+		v.x = (m.self._00 * x1 + m.self._10 * y1 + m.self._20 * z1 + m.self._30) * d1;
+		v.y = (m.self._01 * x1 + m.self._11 * y1 + m.self._21 * z1 + m.self._31) * d1;
+		v.z = (m.self._02 * x1 + m.self._12 * y1 + m.self._22 * z1 + m.self._32) * d1;
+		return v;
+	}
+	,screenMoveToWorldMove: function(v1) {
+		var v = new iron_math_Vec4();
+		var _this = this.object.transform.world;
+		var x = _this.self._20;
+		var y = _this.self._21;
+		var z = _this.self._22;
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var axis_x = x;
+		var axis_y = y;
+		var axis_z = z;
+		var axis_w = 1.0;
+		var n = Math.sqrt(axis_x * axis_x + axis_y * axis_y + axis_z * axis_z);
+		if(n > 0.0) {
+			var invN = 1.0 / n;
+			axis_x *= invN;
+			axis_y *= invN;
+			axis_z *= invN;
+		}
+		var _this1 = iron_Scene.active.camera.transform.rot;
+		var l = Math.sqrt(_this1.x * _this1.x + _this1.y * _this1.y + _this1.z * _this1.z + _this1.w * _this1.w);
+		if(l == 0.0) {
+			_this1.x = 0;
+			_this1.y = 0;
+			_this1.z = 0;
+			_this1.w = 0;
+		} else {
+			l = 1.0 / l;
+			_this1.x *= l;
+			_this1.y *= l;
+			_this1.z *= l;
+			_this1.w *= l;
+		}
+		var angle = 2 * Math.acos(_this1.w);
+		var s = Math.sqrt(1 - _this1.w * _this1.w);
+		if(s < 0.001) {
+			axis_x = _this1.x;
+			axis_y = _this1.y;
+			axis_z = _this1.z;
+		} else {
+			axis_x = _this1.x / s;
+			axis_y = _this1.y / s;
+			axis_z = _this1.z / s;
+		}
+		var angle1 = angle;
+		v.x = v1.x;
+		v.y = v1.y;
+		v.z = v1.z;
+		v.w = v1.w;
+		var quat_x = 0.0;
+		var quat_y = 0.0;
+		var quat_z = 0.0;
+		var quat_w = 1.0;
+		var s1 = Math.sin(angle1 * 0.5);
+		quat_x = axis_x * s1;
+		quat_y = axis_y * s1;
+		quat_z = axis_z * s1;
+		quat_w = Math.cos(angle1 * 0.5);
+		var l1 = Math.sqrt(quat_x * quat_x + quat_y * quat_y + quat_z * quat_z + quat_w * quat_w);
+		if(l1 == 0.0) {
+			quat_x = 0;
+			quat_y = 0;
+			quat_z = 0;
+			quat_w = 0;
+		} else {
+			l1 = 1.0 / l1;
+			quat_x *= l1;
+			quat_y *= l1;
+			quat_z *= l1;
+			quat_w *= l1;
+		}
+		var ix = quat_w * v.x + quat_y * v.z - quat_z * v.y;
+		var iy = quat_w * v.y + quat_z * v.x - quat_x * v.z;
+		var iz = quat_w * v.z + quat_x * v.y - quat_y * v.x;
+		var iw = -quat_x * v.x - quat_y * v.y - quat_z * v.z;
+		v.x = ix * quat_w + iw * -quat_x + iy * -quat_z - iz * -quat_y;
+		v.y = iy * quat_w + iw * -quat_y + iz * -quat_x - ix * -quat_z;
+		v.z = iz * quat_w + iw * -quat_z + ix * -quat_y - iy * -quat_x;
+		return v;
+	}
+	,worldToScreenSpace: function(v1) {
+		var v = new iron_math_Vec4();
+		if(v1 == null) {
+			return null;
+		}
+		var cam = iron_Scene.active.camera;
+		v.x = v1.x;
+		v.y = v1.y;
+		v.z = v1.z;
+		v.w = v1.w;
+		var m = cam.V;
+		var x = v.x;
+		var y = v.y;
+		var z = v.z;
+		var d = 1.0 / (m.self._03 * x + m.self._13 * y + m.self._23 * z + m.self._33);
+		v.x = (m.self._00 * x + m.self._10 * y + m.self._20 * z + m.self._30) * d;
+		v.y = (m.self._01 * x + m.self._11 * y + m.self._21 * z + m.self._31) * d;
+		v.z = (m.self._02 * x + m.self._12 * y + m.self._22 * z + m.self._32) * d;
+		var m1 = cam.P;
+		var x1 = v.x;
+		var y1 = v.y;
+		var z1 = v.z;
+		var d1 = 1.0 / (m1.self._03 * x1 + m1.self._13 * y1 + m1.self._23 * z1 + m1.self._33);
+		v.x = (m1.self._00 * x1 + m1.self._10 * y1 + m1.self._20 * z1 + m1.self._30) * d1;
+		v.y = (m1.self._01 * x1 + m1.self._11 * y1 + m1.self._21 * z1 + m1.self._31) * d1;
+		v.z = (m1.self._02 * x1 + m1.self._12 * y1 + m1.self._22 * z1 + m1.self._32) * d1;
+		return v;
+	}
+	,mouseToPlaneHit: function(inputX,inputY,group,mask) {
+		var camera = iron_Scene.active.camera;
+		var physics = armory_trait_physics_bullet_PhysicsWorld.active;
+		var start = new iron_math_Vec4();
+		var end = new iron_math_Vec4();
+		iron_math_RayCaster.getDirection(start,end,inputX,inputY,camera);
+		var _this = camera.transform.world;
+		var hit = physics.rayCast(new iron_math_Vec4(_this.self._30,_this.self._31,_this.self._32,_this.self._33),end,group,mask);
+		if(hit != null) {
+			var _this1 = new iron_math_Vec4();
+			var v = hit.pos;
+			_this1.x = v.x;
+			_this1.y = v.y;
+			_this1.z = v.z;
+			_this1.w = v.w;
+			return _this1;
+		} else {
+			return null;
+		}
+	}
 	,__class__: arm_UPH2_$Base
-});
-var armory_logicnode_LogicTree = function() {
-	this.paused = false;
-	this.loopBreak = false;
-	iron_Trait.call(this);
-};
-$hxClasses["armory.logicnode.LogicTree"] = armory_logicnode_LogicTree;
-armory_logicnode_LogicTree.__name__ = "armory.logicnode.LogicTree";
-armory_logicnode_LogicTree.__super__ = iron_Trait;
-armory_logicnode_LogicTree.prototype = $extend(iron_Trait.prototype,{
-	loopBreak: null
-	,add: function() {
-	}
-	,paused: null
-	,pause: function() {
-		if(this.paused) {
-			return;
-		}
-		this.paused = true;
-		if(this._update != null) {
-			var _g = 0;
-			var _g1 = this._update;
-			while(_g < _g1.length) {
-				var f = _g1[_g];
-				++_g;
-				iron_App.removeUpdate(f);
-			}
-		}
-		if(this._lateUpdate != null) {
-			var _g2 = 0;
-			var _g11 = this._lateUpdate;
-			while(_g2 < _g11.length) {
-				var f1 = _g11[_g2];
-				++_g2;
-				iron_App.removeLateUpdate(f1);
-			}
-		}
-	}
-	,resume: function() {
-		if(!this.paused) {
-			return;
-		}
-		this.paused = false;
-		if(this._update != null) {
-			var _g = 0;
-			var _g1 = this._update;
-			while(_g < _g1.length) {
-				var f = _g1[_g];
-				++_g;
-				iron_App.notifyOnUpdate(f);
-			}
-		}
-		if(this._lateUpdate != null) {
-			var _g2 = 0;
-			var _g11 = this._lateUpdate;
-			while(_g2 < _g11.length) {
-				var f1 = _g11[_g2];
-				++_g2;
-				iron_App.notifyOnLateUpdate(f1);
-			}
-		}
-	}
-	,__class__: armory_logicnode_LogicTree
-});
-var arm_node_Movement_$Central = function() {
-	armory_logicnode_LogicTree.call(this);
-	this.functionNodes = new haxe_ds_StringMap();
-	this.functionOutputNodes = new haxe_ds_StringMap();
-	this.notifyOnAdd($bind(this,this.add));
-};
-$hxClasses["arm.node.Movement_Central"] = arm_node_Movement_$Central;
-arm_node_Movement_$Central.__name__ = "arm.node.Movement_Central";
-arm_node_Movement_$Central.__super__ = armory_logicnode_LogicTree;
-arm_node_Movement_$Central.prototype = $extend(armory_logicnode_LogicTree.prototype,{
-	functionNodes: null
-	,functionOutputNodes: null
-	,add: function() {
-		var _SetProperty_003 = new armory_logicnode_SetPropertyNode(this);
-		var _OnInit_001 = new armory_logicnode_OnInitNode(this);
-		_OnInit_001.addOutputs([_SetProperty_003]);
-		_SetProperty_003.addInput(_OnInit_001,0);
-		var _Self_009 = new armory_logicnode_SelfNode(this);
-		_Self_009.addOutputs([_SetProperty_003]);
-		_SetProperty_003.addInput(_Self_009,0);
-		_SetProperty_003.addInput(new armory_logicnode_StringNode(this,"speed"),0);
-		var _Vector_001 = new armory_logicnode_VectorNode(this);
-		var _Float = new armory_logicnode_FloatNode(this);
-		_Float.addInput(new armory_logicnode_FloatNode(this,0.02500000037252903),0);
-		_Float.addOutputs([_Vector_001,_Vector_001]);
-		_Vector_001.addInput(_Float,0);
-		_Vector_001.addInput(_Float,0);
-		_Vector_001.addInput(new armory_logicnode_FloatNode(this,0.0),0);
-		_Vector_001.addOutputs([_SetProperty_003]);
-		_SetProperty_003.addInput(_Vector_001,0);
-		_SetProperty_003.addOutputs([new armory_logicnode_NullNode(this)]);
-		var _SetProperty = new armory_logicnode_SetPropertyNode(this);
-		var _OnInit = new armory_logicnode_OnInitNode(this);
-		_OnInit.addOutputs([_SetProperty]);
-		_SetProperty.addInput(_OnInit,0);
-		var _Self_005 = new armory_logicnode_SelfNode(this);
-		_Self_005.addOutputs([_SetProperty]);
-		_SetProperty.addInput(_Self_005,0);
-		_SetProperty.addInput(new armory_logicnode_StringNode(this,"Object_movable"),0);
-		var _Boolean = new armory_logicnode_BooleanNode(this);
-		_Boolean.addInput(new armory_logicnode_BooleanNode(this,false),0);
-		_Boolean.addOutputs([_SetProperty]);
-		_SetProperty.addInput(_Boolean,0);
-		_SetProperty.addOutputs([new armory_logicnode_NullNode(this)]);
-		var _TranslateObject_001 = new armory_logicnode_TranslateObjectNode(this);
-		var _Gate_002 = new armory_logicnode_GateNode(this);
-		_Gate_002.property0 = "Equal";
-		_Gate_002.property1 = 9.999999747378752e-05;
-		var _OnUpdate = new armory_logicnode_OnUpdateNode(this);
-		_OnUpdate.property0 = "Update";
-		_OnUpdate.addOutputs([_Gate_002]);
-		_Gate_002.addInput(_OnUpdate,0);
-		var _MouseCoords_001 = new armory_logicnode_MouseCoordsNode(this);
-		_MouseCoords_001.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_MouseCoords_001.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		var _Vector_003 = new armory_logicnode_VectorNode(this);
-		_Vector_003.addInput(new armory_logicnode_FloatNode(this,0.0),0);
-		_Vector_003.addInput(new armory_logicnode_FloatNode(this,0.0),0);
-		_Vector_003.addInput(_MouseCoords_001,2);
-		_Vector_003.addOutputs([_TranslateObject_001]);
-		_MouseCoords_001.addOutputs([_Gate_002,_Vector_003]);
-		_Gate_002.addInput(_MouseCoords_001,2);
-		var _Integer = new armory_logicnode_IntegerNode(this);
-		_Integer.addInput(new armory_logicnode_IntegerNode(this,0),0);
-		_Integer.addOutputs([_Gate_002]);
-		_Gate_002.addInput(_Integer,0);
-		_Gate_002.addOutputs([new armory_logicnode_NullNode(this)]);
-		_Gate_002.addOutputs([_TranslateObject_001]);
-		_TranslateObject_001.addInput(_Gate_002,1);
-		var _ActiveCamera_001 = new armory_logicnode_ActiveCameraNode(this);
-		_ActiveCamera_001.addOutputs([_TranslateObject_001]);
-		_TranslateObject_001.addInput(_ActiveCamera_001,0);
-		_TranslateObject_001.addInput(_Vector_003,0);
-		_TranslateObject_001.addInput(new armory_logicnode_BooleanNode(this,true),0);
-		_TranslateObject_001.addOutputs([new armory_logicnode_NullNode(this)]);
-		var _RotateObjectAroundAxis_002 = new armory_logicnode_RotateObjectAroundAxisNode(this);
-		var _Node = new armory_logicnode_OnMouseNode(this);
-		_Node.property0 = "Down";
-		_Node.property1 = "right";
-		var _RotateObject = new armory_logicnode_RotateObjectNode(this);
-		_RotateObject.addInput(_Node,0);
-		var _ActiveCamera_002 = new armory_logicnode_ActiveCameraNode(this);
-		_ActiveCamera_002.addOutputs([_RotateObjectAroundAxis_002,_RotateObject]);
-		_RotateObject.addInput(_ActiveCamera_002,0);
-		var _Vector_004 = new armory_logicnode_VectorNode(this);
-		var _SeparateXYZ_001 = new armory_logicnode_SeparateVectorNode(this);
-		var _VectorMath_004 = new armory_logicnode_VectorMathNode(this);
-		_VectorMath_004.property0 = "Multiply";
-		var _MouseCoords_003 = new armory_logicnode_MouseCoordsNode(this);
-		_MouseCoords_003.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_MouseCoords_003.addOutputs([_VectorMath_004]);
-		_MouseCoords_003.addOutputs([new armory_logicnode_IntegerNode(this,0)]);
-		_VectorMath_004.addInput(_MouseCoords_003,1);
-		_VectorMath_004.addInput(new armory_logicnode_VectorNode(this,-0.004999999888241291,-0.004999999888241291,0.0),0);
-		_VectorMath_004.addOutputs([_SeparateXYZ_001]);
-		_VectorMath_004.addOutputs([new armory_logicnode_FloatNode(this,0.0)]);
-		_SeparateXYZ_001.addInput(_VectorMath_004,0);
-		_SeparateXYZ_001.addOutputs([_RotateObjectAroundAxis_002]);
-		_SeparateXYZ_001.addOutputs([_Vector_004]);
-		_SeparateXYZ_001.addOutputs([new armory_logicnode_FloatNode(this,0.0)]);
-		_Vector_004.addInput(_SeparateXYZ_001,1);
-		_Vector_004.addInput(new armory_logicnode_FloatNode(this,0.0),0);
-		_Vector_004.addInput(new armory_logicnode_FloatNode(this,0.0),0);
-		_Vector_004.addOutputs([_RotateObject]);
-		_RotateObject.addInput(_Vector_004,0);
-		_RotateObject.addOutputs([new armory_logicnode_NullNode(this)]);
-		_Node.addOutputs([_RotateObject,_RotateObjectAroundAxis_002]);
-		_RotateObjectAroundAxis_002.addInput(_Node,0);
-		_RotateObjectAroundAxis_002.addInput(_ActiveCamera_002,0);
-		_RotateObjectAroundAxis_002.addInput(new armory_logicnode_VectorNode(this,0.0,0.0,1.0),0);
-		_RotateObjectAroundAxis_002.addInput(_SeparateXYZ_001,0);
-		_RotateObjectAroundAxis_002.addOutputs([new armory_logicnode_NullNode(this)]);
-		var _RemoveObject = new armory_logicnode_RemoveObjectNode(this);
-		var _OnKeyboard_002 = new armory_logicnode_OnKeyboardNode(this);
-		_OnKeyboard_002.property0 = "Started";
-		_OnKeyboard_002.property1 = "delete";
-		_OnKeyboard_002.addOutputs([_RemoveObject]);
-		_RemoveObject.addInput(_OnKeyboard_002,0);
-		var _PickObject_002 = new armory_logicnode_PickObjectNode(this);
-		var _MouseCoords_004 = new armory_logicnode_MouseCoordsNode(this);
-		_MouseCoords_004.addOutputs([_PickObject_002]);
-		_MouseCoords_004.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_MouseCoords_004.addOutputs([new armory_logicnode_IntegerNode(this,0)]);
-		_PickObject_002.addInput(_MouseCoords_004,0);
-		_PickObject_002.addOutputs([_RemoveObject]);
-		_PickObject_002.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_RemoveObject.addInput(_PickObject_002,0);
-		_RemoveObject.addOutputs([new armory_logicnode_NullNode(this)]);
-		var _SetProperty_015 = new armory_logicnode_SetPropertyNode(this);
-		var _OnInit_002 = new armory_logicnode_OnInitNode(this);
-		var _SetProperty_010 = new armory_logicnode_SetPropertyNode(this);
-		_SetProperty_010.addInput(_OnInit_002,0);
-		var _GlobalObject = new armory_logicnode_GlobalObjectNode(this);
-		_GlobalObject.addOutputs([_SetProperty_010,_SetProperty_015]);
-		_SetProperty_010.addInput(_GlobalObject,0);
-		_SetProperty_010.addInput(new armory_logicnode_StringNode(this,"move_permission"),0);
-		var _Boolean_003 = new armory_logicnode_BooleanNode(this);
-		_Boolean_003.addInput(new armory_logicnode_BooleanNode(this,false),0);
-		_Boolean_003.addOutputs([_SetProperty_010]);
-		_SetProperty_010.addInput(_Boolean_003,0);
-		_SetProperty_010.addOutputs([new armory_logicnode_NullNode(this)]);
-		_OnInit_002.addOutputs([_SetProperty_010,_SetProperty_015]);
-		_SetProperty_015.addInput(_OnInit_002,0);
-		_SetProperty_015.addInput(_GlobalObject,0);
-		_SetProperty_015.addInput(new armory_logicnode_StringNode(this,"rot_speed"),0);
-		var _Float_001 = new armory_logicnode_FloatNode(this);
-		_Float_001.addInput(new armory_logicnode_FloatNode(this,0.009999999776482582),0);
-		_Float_001.addOutputs([_SetProperty_015]);
-		_SetProperty_015.addInput(_Float_001,0);
-		_SetProperty_015.addOutputs([new armory_logicnode_NullNode(this)]);
-		var _SetProperty_016 = new armory_logicnode_SetPropertyNode(this);
-		var _SetProperty_013 = new armory_logicnode_SetPropertyNode(this);
-		var _SetLocation_006 = new armory_logicnode_SetLocationNode(this);
-		var _SetProperty_012 = new armory_logicnode_SetPropertyNode(this);
-		var _SpawnObject_005 = new armory_logicnode_SpawnObjectNode(this);
-		var _SetLocation_005 = new armory_logicnode_SetLocationNode(this);
-		var _SetProperty_011 = new armory_logicnode_SetPropertyNode(this);
-		var _SpawnObject_004 = new armory_logicnode_SpawnObjectNode(this);
-		var _RemoveObject_001 = new armory_logicnode_RemoveObjectNode(this);
-		var _Gate_001 = new armory_logicnode_GateNode(this);
-		_Gate_001.property0 = "And";
-		_Gate_001.property1 = 9.999999747378752e-05;
-		var _OnMouse_001 = new armory_logicnode_OnMouseNode(this);
-		_OnMouse_001.property0 = "Released";
-		_OnMouse_001.property1 = "left";
-		_OnMouse_001.addOutputs([_Gate_001]);
-		_Gate_001.addInput(_OnMouse_001,0);
-		var _GetProperty_012 = new armory_logicnode_GetPropertyNode(this);
-		var _GlobalObject_011 = new armory_logicnode_GlobalObjectNode(this);
-		var _GetProperty_009 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_009.addInput(_GlobalObject_011,0);
-		_GetProperty_009.addInput(new armory_logicnode_StringNode(this,"move_permission"),0);
-		_GetProperty_009.addOutputs([_Gate_001]);
-		_GetProperty_009.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_GlobalObject_011.addOutputs([_GetProperty_012,_GetProperty_009]);
-		_GetProperty_012.addInput(_GlobalObject_011,0);
-		_GetProperty_012.addInput(new armory_logicnode_StringNode(this,"Object_movable"),0);
-		_GetProperty_012.addOutputs([_Gate_001]);
-		_GetProperty_012.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_Gate_001.addInput(_GetProperty_012,0);
-		_Gate_001.addInput(_GetProperty_009,0);
-		_Gate_001.addOutputs([_RemoveObject_001]);
-		_Gate_001.addOutputs([new armory_logicnode_NullNode(this)]);
-		_RemoveObject_001.addInput(_Gate_001,0);
-		var _GetProperty_014 = new armory_logicnode_GetPropertyNode(this);
-		var _GlobalObject_012 = new armory_logicnode_GlobalObjectNode(this);
-		_GlobalObject_012.addOutputs([_GetProperty_014]);
-		_GetProperty_014.addInput(_GlobalObject_012,0);
-		_GetProperty_014.addInput(new armory_logicnode_StringNode(this,"Object_move_arrows"),0);
-		_GetProperty_014.addOutputs([_RemoveObject_001]);
-		_GetProperty_014.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_RemoveObject_001.addInput(_GetProperty_014,0);
-		_RemoveObject_001.addOutputs([_SpawnObject_004]);
-		_SpawnObject_004.addInput(_RemoveObject_001,0);
-		_SpawnObject_004.addInput(new armory_logicnode_ObjectNode(this,"Arrow clock wise"),0);
-		_SpawnObject_004.addInput(new armory_logicnode_NullNode(this),0);
-		_SpawnObject_004.addInput(new armory_logicnode_BooleanNode(this,true),0);
-		_SpawnObject_004.addOutputs([_SetProperty_011]);
-		_SpawnObject_004.addOutputs([_SetLocation_005,_SetProperty_011]);
-		_SetProperty_011.addInput(_SpawnObject_004,0);
-		var _GlobalObject_013 = new armory_logicnode_GlobalObjectNode(this);
-		var _GetProperty_016 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_016.addInput(_GlobalObject_013,0);
-		_GetProperty_016.addInput(new armory_logicnode_StringNode(this,"Object_to_move"),0);
-		var _GetLocation = new armory_logicnode_GetLocationNode(this);
-		_GetLocation.addInput(_GetProperty_016,0);
-		var _VectorMath = new armory_logicnode_VectorMathNode(this);
-		_VectorMath.property0 = "Subtract";
-		_VectorMath.addInput(_GetLocation,0);
-		var _Vector = new armory_logicnode_VectorNode(this);
-		_Vector.addInput(new armory_logicnode_FloatNode(this,0.0),0);
-		var _GetProperty_018 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_018.addInput(_GetProperty_016,0);
-		_GetProperty_018.addInput(new armory_logicnode_StringNode(this,"size_xy"),0);
-		_GetProperty_018.addOutputs([_Vector]);
-		_GetProperty_018.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_Vector.addInput(_GetProperty_018,0);
-		_Vector.addInput(new armory_logicnode_FloatNode(this,0.0),0);
-		_Vector.addOutputs([_VectorMath]);
-		_VectorMath.addInput(_Vector,0);
-		_VectorMath.addOutputs([_SetLocation_005]);
-		_VectorMath.addOutputs([new armory_logicnode_FloatNode(this,0.0)]);
-		_GetLocation.addOutputs([_VectorMath]);
-		_GetProperty_016.addOutputs([_GetLocation,_GetProperty_018]);
-		_GetProperty_016.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_GlobalObject_013.addOutputs([_SetProperty_011,_GetProperty_016]);
-		_SetProperty_011.addInput(_GlobalObject_013,0);
-		_SetProperty_011.addInput(new armory_logicnode_StringNode(this,"Object_rot_arrows_cw"),0);
-		_SetProperty_011.addInput(_SpawnObject_004,1);
-		_SetProperty_011.addOutputs([_SetLocation_005]);
-		_SetLocation_005.addInput(_SetProperty_011,0);
-		_SetLocation_005.addInput(_SpawnObject_004,1);
-		_SetLocation_005.addInput(_VectorMath,0);
-		_SetLocation_005.addOutputs([_SpawnObject_005]);
-		_SpawnObject_005.addInput(_SetLocation_005,0);
-		_SpawnObject_005.addInput(new armory_logicnode_ObjectNode(this,"Arrow counter clock wise"),0);
-		_SpawnObject_005.addInput(new armory_logicnode_NullNode(this),0);
-		_SpawnObject_005.addInput(new armory_logicnode_BooleanNode(this,true),0);
-		_SpawnObject_005.addOutputs([_SetProperty_012]);
-		_SpawnObject_005.addOutputs([_SetLocation_006,_SetProperty_012]);
-		_SetProperty_012.addInput(_SpawnObject_005,0);
-		var _GlobalObject_014 = new armory_logicnode_GlobalObjectNode(this);
-		var _GetProperty_017 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_017.addInput(_GlobalObject_014,0);
-		_GetProperty_017.addInput(new armory_logicnode_StringNode(this,"Object_to_move"),0);
-		var _GetLocation_002 = new armory_logicnode_GetLocationNode(this);
-		_GetLocation_002.addInput(_GetProperty_017,0);
-		var _VectorMath_001 = new armory_logicnode_VectorMathNode(this);
-		_VectorMath_001.property0 = "Add";
-		_VectorMath_001.addInput(_GetLocation_002,0);
-		var _Vector_002 = new armory_logicnode_VectorNode(this);
-		_Vector_002.addInput(new armory_logicnode_FloatNode(this,0.0),0);
-		var _GetProperty_019 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_019.addInput(_GetProperty_017,0);
-		_GetProperty_019.addInput(new armory_logicnode_StringNode(this,"size_xy"),0);
-		_GetProperty_019.addOutputs([_Vector_002]);
-		_GetProperty_019.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_Vector_002.addInput(_GetProperty_019,0);
-		_Vector_002.addInput(new armory_logicnode_FloatNode(this,0.0),0);
-		_Vector_002.addOutputs([_VectorMath_001]);
-		_VectorMath_001.addInput(_Vector_002,0);
-		_VectorMath_001.addOutputs([_SetLocation_006]);
-		_VectorMath_001.addOutputs([new armory_logicnode_FloatNode(this,0.0)]);
-		_GetLocation_002.addOutputs([_VectorMath_001]);
-		_GetProperty_017.addOutputs([_GetLocation_002,_GetProperty_019]);
-		_GetProperty_017.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_GlobalObject_014.addOutputs([_GetProperty_017,_SetProperty_012]);
-		_SetProperty_012.addInput(_GlobalObject_014,0);
-		_SetProperty_012.addInput(new armory_logicnode_StringNode(this,"Object_rot_arrows_ccw"),0);
-		_SetProperty_012.addInput(_SpawnObject_005,1);
-		_SetProperty_012.addOutputs([_SetLocation_006]);
-		_SetLocation_006.addInput(_SetProperty_012,0);
-		_SetLocation_006.addInput(_SpawnObject_005,1);
-		_SetLocation_006.addInput(_VectorMath_001,0);
-		_SetLocation_006.addOutputs([_SetProperty_013]);
-		_SetProperty_013.addInput(_SetLocation_006,0);
-		var _GlobalObject_015 = new armory_logicnode_GlobalObjectNode(this);
-		_GlobalObject_015.addOutputs([_SetProperty_013]);
-		_SetProperty_013.addInput(_GlobalObject_015,0);
-		_SetProperty_013.addInput(new armory_logicnode_StringNode(this,"rot_active"),0);
-		var _Boolean_001 = new armory_logicnode_BooleanNode(this);
-		_Boolean_001.addInput(new armory_logicnode_BooleanNode(this,true),0);
-		_Boolean_001.addOutputs([_SetProperty_013]);
-		_SetProperty_013.addInput(_Boolean_001,0);
-		_SetProperty_013.addOutputs([_SetProperty_016]);
-		_SetProperty_016.addInput(_SetProperty_013,0);
-		var _GlobalObject_016 = new armory_logicnode_GlobalObjectNode(this);
-		var _GetProperty_028 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_028.addInput(_GlobalObject_016,0);
-		_GetProperty_028.addInput(new armory_logicnode_StringNode(this,"Object_to_move"),0);
-		_GetProperty_028.addOutputs([_SetProperty_016]);
-		_GetProperty_028.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_GlobalObject_016.addOutputs([_GetProperty_028,_SetProperty_016]);
-		_SetProperty_016.addInput(_GlobalObject_016,0);
-		_SetProperty_016.addInput(new armory_logicnode_StringNode(this,"object_to_rotate"),0);
-		_SetProperty_016.addInput(_GetProperty_028,0);
-		_SetProperty_016.addOutputs([new armory_logicnode_NullNode(this)]);
-		var _TranslateObject = new armory_logicnode_TranslateObjectNode(this);
-		var _Gate_004 = new armory_logicnode_GateNode(this);
-		_Gate_004.property0 = "Or";
-		_Gate_004.property1 = 9.999999747378752e-05;
-		var _Gate = new armory_logicnode_GateNode(this);
-		_Gate.property0 = "And";
-		_Gate.property1 = 9.999999747378752e-05;
-		var _OnMouse = new armory_logicnode_OnMouseNode(this);
-		_OnMouse.property0 = "Down";
-		_OnMouse.property1 = "left";
-		_OnMouse.addOutputs([_Gate]);
-		_Gate.addInput(_OnMouse,0);
-		var _GetProperty_005 = new armory_logicnode_GetPropertyNode(this);
-		var _GlobalObject_007 = new armory_logicnode_GlobalObjectNode(this);
-		var _GetProperty_008 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_008.addInput(_GlobalObject_007,0);
-		_GetProperty_008.addInput(new armory_logicnode_StringNode(this,"move_permission"),0);
-		_GetProperty_008.addOutputs([_Gate]);
-		_GetProperty_008.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_GlobalObject_007.addOutputs([_GetProperty_005,_GetProperty_008]);
-		_GetProperty_005.addInput(_GlobalObject_007,0);
-		_GetProperty_005.addInput(new armory_logicnode_StringNode(this,"Object_movable"),0);
-		_GetProperty_005.addOutputs([_Gate]);
-		_GetProperty_005.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_Gate.addInput(_GetProperty_005,0);
-		_Gate.addInput(_GetProperty_008,0);
-		var _TranslateObject_002 = new armory_logicnode_TranslateObjectNode(this);
-		_TranslateObject_002.addInput(_Gate,0);
-		var _GetProperty_029 = new armory_logicnode_GetPropertyNode(this);
-		var _GlobalObject_008 = new armory_logicnode_GlobalObjectNode(this);
-		var _GetProperty_030 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_030.addInput(_GlobalObject_008,0);
-		_GetProperty_030.addInput(new armory_logicnode_StringNode(this,"Object_move_arrows"),0);
-		var _TranslateObject_003 = new armory_logicnode_TranslateObjectNode(this);
-		_TranslateObject_003.addInput(_TranslateObject_002,0);
-		_TranslateObject_003.addInput(_GetProperty_030,0);
-		var _RotateVectorAroundAxis_001 = new armory_logicnode_RotateVectorAroundAxisNode(this);
-		var _VectorMath_005 = new armory_logicnode_VectorMathNode(this);
-		_VectorMath_005.property0 = "Multiply";
-		var _MouseCoords_005 = new armory_logicnode_MouseCoordsNode(this);
-		_MouseCoords_005.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_MouseCoords_005.addOutputs([_VectorMath_005]);
-		_MouseCoords_005.addOutputs([new armory_logicnode_IntegerNode(this,0)]);
-		_VectorMath_005.addInput(_MouseCoords_005,1);
-		_VectorMath_005.addInput(new armory_logicnode_VectorNode(this,0.05000000074505806,-0.05000000074505806,0.0),0);
-		_VectorMath_005.addOutputs([_RotateVectorAroundAxis_001]);
-		_VectorMath_005.addOutputs([new armory_logicnode_FloatNode(this,0.0)]);
-		_RotateVectorAroundAxis_001.addInput(_VectorMath_005,0);
-		_RotateVectorAroundAxis_001.addInput(new armory_logicnode_VectorNode(this,0.0,0.0,1.0),0);
-		var _VectorAngles2DXY_001 = new armory_logicnode_VectorAngles2D(this);
-		_VectorAngles2DXY_001.addInput(new armory_logicnode_VectorNode(this,1.0,0.0,0.0),0);
-		var _VectorFromTransform_001 = new armory_logicnode_VectorFromTransformNode(this);
-		_VectorFromTransform_001.property0 = "Right";
-		var _GetTransform_001 = new armory_logicnode_GetTransformNode(this);
-		var _ActiveCamera_003 = new armory_logicnode_ActiveCameraNode(this);
-		_ActiveCamera_003.addOutputs([_GetTransform_001]);
-		_GetTransform_001.addInput(_ActiveCamera_003,0);
-		_GetTransform_001.addOutputs([_VectorFromTransform_001]);
-		_VectorFromTransform_001.addInput(_GetTransform_001,0);
-		_VectorFromTransform_001.addOutputs([_VectorAngles2DXY_001]);
-		_VectorAngles2DXY_001.addInput(_VectorFromTransform_001,0);
-		_VectorAngles2DXY_001.addOutputs([_RotateVectorAroundAxis_001]);
-		_VectorAngles2DXY_001.addOutputs([new armory_logicnode_FloatNode(this,0.0)]);
-		_RotateVectorAroundAxis_001.addInput(_VectorAngles2DXY_001,0);
-		_RotateVectorAroundAxis_001.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_RotateVectorAroundAxis_001.addOutputs([_TranslateObject_002,_TranslateObject_003]);
-		_RotateVectorAroundAxis_001.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_TranslateObject_003.addInput(_RotateVectorAroundAxis_001,1);
-		_TranslateObject_003.addInput(new armory_logicnode_BooleanNode(this,false),0);
-		var _Merge = new armory_logicnode_MergeNode(this);
-		_Merge.addInput(_TranslateObject_002,0);
-		_Merge.addInput(_TranslateObject_003,0);
-		var _RotateObjectAroundAxis = new armory_logicnode_RotateObjectAroundAxisNode(this);
-		var _IsTrue = new armory_logicnode_IsTrueNode(this);
-		_IsTrue.addInput(_Gate_004,0);
-		var _Compare_002 = new armory_logicnode_CompareNode(this);
-		_Compare_002.property0 = "Equal";
-		_Compare_002.property1 = 9.999999747378752e-05;
-		var _GetProperty_023 = new armory_logicnode_GetPropertyNode(this);
-		var _GlobalObject_009 = new armory_logicnode_GlobalObjectNode(this);
-		var _GetProperty_024 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_024.addInput(_GlobalObject_009,0);
-		_GetProperty_024.addInput(new armory_logicnode_StringNode(this,"Object_rot_arrows_ccw"),0);
-		var _Compare_003 = new armory_logicnode_CompareNode(this);
-		_Compare_003.property0 = "Equal";
-		_Compare_003.property1 = 9.999999747378752e-05;
-		_Compare_003.addInput(_GetProperty_023,0);
-		_Compare_003.addInput(_GetProperty_024,0);
-		var _IsTrue_002 = new armory_logicnode_IsTrueNode(this);
-		_IsTrue_002.addInput(_Gate_004,0);
-		_IsTrue_002.addInput(_Compare_003,0);
-		var _RotateObjectAroundAxis_001 = new armory_logicnode_RotateObjectAroundAxisNode(this);
-		_RotateObjectAroundAxis_001.addInput(_IsTrue_002,0);
-		var _GetProperty_026 = new armory_logicnode_GetPropertyNode(this);
-		var _GlobalObject_010 = new armory_logicnode_GlobalObjectNode(this);
-		var _GetProperty_027 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_027.addInput(_GlobalObject_010,0);
-		_GetProperty_027.addInput(new armory_logicnode_StringNode(this,"rot_speed"),0);
-		var _Math = new armory_logicnode_MathNode(this);
-		_Math.property0 = "Multiply";
-		_Math.property1 = "false";
-		_Math.addInput(_GetProperty_027,0);
-		_Math.addInput(new armory_logicnode_FloatNode(this,-1.0),0);
-		_Math.addOutputs([_RotateObjectAroundAxis]);
-		_GetProperty_027.addOutputs([_Math,_RotateObjectAroundAxis_001]);
-		_GetProperty_027.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_GlobalObject_010.addOutputs([_GetProperty_026,_GetProperty_027]);
-		_GetProperty_026.addInput(_GlobalObject_010,0);
-		_GetProperty_026.addInput(new armory_logicnode_StringNode(this,"object_to_rotate"),0);
-		_GetProperty_026.addOutputs([_RotateObjectAroundAxis,_RotateObjectAroundAxis_001]);
-		_GetProperty_026.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_RotateObjectAroundAxis_001.addInput(_GetProperty_026,0);
-		_RotateObjectAroundAxis_001.addInput(new armory_logicnode_VectorNode(this,0.0,0.0,1.0),0);
-		_RotateObjectAroundAxis_001.addInput(_GetProperty_027,0);
-		_RotateObjectAroundAxis_001.addOutputs([_Merge]);
-		_IsTrue_002.addOutputs([_RotateObjectAroundAxis_001]);
-		_Compare_003.addOutputs([_Gate_004,_IsTrue_002]);
-		_GetProperty_024.addOutputs([_Compare_003]);
-		_GetProperty_024.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		var _GetProperty_025 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_025.addInput(_GlobalObject_009,0);
-		_GetProperty_025.addInput(new armory_logicnode_StringNode(this,"Object_rot_arrows_cw"),0);
-		_GetProperty_025.addOutputs([_Compare_002]);
-		_GetProperty_025.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_GlobalObject_009.addOutputs([_GetProperty_023,_GetProperty_024,_GetProperty_025]);
-		_GetProperty_023.addInput(_GlobalObject_009,0);
-		_GetProperty_023.addInput(new armory_logicnode_StringNode(this,"Object_to_move"),0);
-		_GetProperty_023.addOutputs([_Compare_003,_Compare_002]);
-		_GetProperty_023.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_Compare_002.addInput(_GetProperty_023,0);
-		_Compare_002.addInput(_GetProperty_025,0);
-		_Compare_002.addOutputs([_Gate_004,_IsTrue]);
-		_IsTrue.addInput(_Compare_002,0);
-		_IsTrue.addOutputs([_RotateObjectAroundAxis]);
-		_RotateObjectAroundAxis.addInput(_IsTrue,0);
-		_RotateObjectAroundAxis.addInput(_GetProperty_026,0);
-		_RotateObjectAroundAxis.addInput(new armory_logicnode_VectorNode(this,0.0,0.0,1.0),0);
-		_RotateObjectAroundAxis.addInput(_Math,0);
-		_RotateObjectAroundAxis.addOutputs([_Merge]);
-		_Merge.addInput(_RotateObjectAroundAxis,0);
-		_Merge.addInput(_RotateObjectAroundAxis_001,0);
-		var _RotateObjectAroundAxis_003 = new armory_logicnode_RotateObjectAroundAxisNode(this);
-		var _OnKeyboard = new armory_logicnode_OnKeyboardNode(this);
-		_OnKeyboard.property0 = "Down";
-		_OnKeyboard.property1 = "up";
-		_OnKeyboard.addOutputs([_RotateObjectAroundAxis_003]);
-		_RotateObjectAroundAxis_003.addInput(_OnKeyboard,0);
-		var _GetObject = new armory_logicnode_GetObjectNode(this);
-		_GetObject.addInput(new armory_logicnode_StringNode(this,"KM100_Base"),0);
-		var _GetTransform_002 = new armory_logicnode_GetTransformNode(this);
-		_GetTransform_002.addInput(_GetObject,0);
-		var _VectorFromTransform_002 = new armory_logicnode_VectorFromTransformNode(this);
-		_VectorFromTransform_002.property0 = "Look";
-		_VectorFromTransform_002.addInput(_GetTransform_002,0);
-		var _RotateObjectAroundAxis_004 = new armory_logicnode_RotateObjectAroundAxisNode(this);
-		var _OnKeyboard_001 = new armory_logicnode_OnKeyboardNode(this);
-		_OnKeyboard_001.property0 = "Down";
-		_OnKeyboard_001.property1 = "down";
-		_OnKeyboard_001.addOutputs([_RotateObjectAroundAxis_004]);
-		_RotateObjectAroundAxis_004.addInput(_OnKeyboard_001,0);
-		_RotateObjectAroundAxis_004.addInput(_GetObject,0);
-		_RotateObjectAroundAxis_004.addInput(_VectorFromTransform_002,0);
-		var _DegtoRad = new armory_logicnode_DegToRadNode(this);
-		_DegtoRad.addInput(new armory_logicnode_FloatNode(this,1.0),0);
-		var _Math_002 = new armory_logicnode_MathNode(this);
-		_Math_002.property0 = "Multiply";
-		_Math_002.property1 = "false";
-		_Math_002.addInput(_DegtoRad,0);
-		_Math_002.addInput(new armory_logicnode_FloatNode(this,-1.0),0);
-		_Math_002.addOutputs([_RotateObjectAroundAxis_003]);
-		_DegtoRad.addOutputs([_RotateObjectAroundAxis_004,_Math_002]);
-		_RotateObjectAroundAxis_004.addInput(_DegtoRad,0);
-		_RotateObjectAroundAxis_004.addOutputs([_Merge]);
-		_VectorFromTransform_002.addOutputs([_RotateObjectAroundAxis_003,_RotateObjectAroundAxis_004]);
-		_GetTransform_002.addOutputs([_VectorFromTransform_002]);
-		_GetObject.addOutputs([_GetTransform_002,_RotateObjectAroundAxis_003,_RotateObjectAroundAxis_004]);
-		_RotateObjectAroundAxis_003.addInput(_GetObject,0);
-		_RotateObjectAroundAxis_003.addInput(_VectorFromTransform_002,0);
-		_RotateObjectAroundAxis_003.addInput(_Math_002,0);
-		_RotateObjectAroundAxis_003.addOutputs([_Merge]);
-		_Merge.addInput(_RotateObjectAroundAxis_003,0);
-		_Merge.addInput(_RotateObjectAroundAxis_004,0);
-		var _SendEvent = new armory_logicnode_SendEventNode(this);
-		_SendEvent.addInput(_Merge,0);
-		_SendEvent.addInput(new armory_logicnode_StringNode(this,"Calc_Beams"),0);
-		_SendEvent.addInput(new armory_logicnode_ObjectNode(this,""),0);
-		_SendEvent.addOutputs([new armory_logicnode_NullNode(this)]);
-		_Merge.addOutputs([_SendEvent]);
-		_TranslateObject_003.addOutputs([_Merge]);
-		_GetProperty_030.addOutputs([_TranslateObject_003]);
-		_GetProperty_030.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_GlobalObject_008.addOutputs([_GetProperty_030,_GetProperty_029]);
-		_GetProperty_029.addInput(_GlobalObject_008,0);
-		_GetProperty_029.addInput(new armory_logicnode_StringNode(this,"Object_to_move"),0);
-		_GetProperty_029.addOutputs([_TranslateObject_002]);
-		_GetProperty_029.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_TranslateObject_002.addInput(_GetProperty_029,0);
-		_TranslateObject_002.addInput(_RotateVectorAroundAxis_001,1);
-		_TranslateObject_002.addInput(new armory_logicnode_BooleanNode(this,false),0);
-		_TranslateObject_002.addOutputs([_TranslateObject_003,_Merge]);
-		_Gate.addOutputs([_TranslateObject_002]);
-		_Gate.addOutputs([_Gate_004]);
-		_Gate_004.addInput(_Gate,1);
-		_Gate_004.addInput(_Compare_002,0);
-		_Gate_004.addInput(_Compare_003,0);
-		_Gate_004.addOutputs([_IsTrue,_IsTrue_002]);
-		_Gate_004.addOutputs([_TranslateObject]);
-		_TranslateObject.addInput(_Gate_004,1);
-		var _ActiveCamera = new armory_logicnode_ActiveCameraNode(this);
-		var _GetTransform = new armory_logicnode_GetTransformNode(this);
-		_GetTransform.addInput(_ActiveCamera,0);
-		var _VectorFromTransform = new armory_logicnode_VectorFromTransformNode(this);
-		_VectorFromTransform.property0 = "Right";
-		_VectorFromTransform.addInput(_GetTransform,0);
-		var _VectorAngles2DXY = new armory_logicnode_VectorAngles2D(this);
-		_VectorAngles2DXY.addInput(new armory_logicnode_VectorNode(this,1.0,0.0,0.0),0);
-		_VectorAngles2DXY.addInput(_VectorFromTransform,0);
-		var _RotateVectorAroundAxis = new armory_logicnode_RotateVectorAroundAxisNode(this);
-		var _VectorMath_003 = new armory_logicnode_VectorMathNode(this);
-		_VectorMath_003.property0 = "Multiply";
-		var _MouseCoords = new armory_logicnode_MouseCoordsNode(this);
-		_MouseCoords.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_MouseCoords.addOutputs([_VectorMath_003]);
-		_MouseCoords.addOutputs([new armory_logicnode_IntegerNode(this,0)]);
-		_VectorMath_003.addInput(_MouseCoords,1);
-		_VectorMath_003.addInput(new armory_logicnode_VectorNode(this,-0.10000000149011612,0.10000000149011612,0.0),0);
-		_VectorMath_003.addOutputs([_RotateVectorAroundAxis]);
-		_VectorMath_003.addOutputs([new armory_logicnode_FloatNode(this,0.0)]);
-		_RotateVectorAroundAxis.addInput(_VectorMath_003,0);
-		_RotateVectorAroundAxis.addInput(new armory_logicnode_VectorNode(this,0.0,0.0,1.0),0);
-		_RotateVectorAroundAxis.addInput(_VectorAngles2DXY,0);
-		_RotateVectorAroundAxis.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_RotateVectorAroundAxis.addOutputs([_TranslateObject]);
-		_RotateVectorAroundAxis.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_VectorAngles2DXY.addOutputs([_RotateVectorAroundAxis]);
-		_VectorAngles2DXY.addOutputs([new armory_logicnode_FloatNode(this,0.0)]);
-		_VectorFromTransform.addOutputs([_VectorAngles2DXY]);
-		_GetTransform.addOutputs([_VectorFromTransform]);
-		_ActiveCamera.addOutputs([_GetTransform,_TranslateObject]);
-		_TranslateObject.addInput(_ActiveCamera,0);
-		_TranslateObject.addInput(_RotateVectorAroundAxis,1);
-		_TranslateObject.addInput(new armory_logicnode_BooleanNode(this,false),0);
-		_TranslateObject.addOutputs([new armory_logicnode_NullNode(this)]);
-		var _ShowMouse = new armory_logicnode_ShowMouseNode(this);
-		_ShowMouse.addInput(new armory_logicnode_NullNode(this),0);
-		_ShowMouse.addInput(new armory_logicnode_BooleanNode(this,false),0);
-		_ShowMouse.addOutputs([new armory_logicnode_NullNode(this)]);
-		var _SetProperty_007 = new armory_logicnode_SetPropertyNode(this);
-		var _SetLocation_003 = new armory_logicnode_SetLocationNode(this);
-		var _SetProperty_006 = new armory_logicnode_SetPropertyNode(this);
-		var _SpawnObject_002 = new armory_logicnode_SpawnObjectNode(this);
-		var _IsTrue_001 = new armory_logicnode_IsTrueNode(this);
-		var _SetProperty_004 = new armory_logicnode_SetPropertyNode(this);
-		var _SetProperty_001 = new armory_logicnode_SetPropertyNode(this);
-		var _OnMouse_003 = new armory_logicnode_OnMouseNode(this);
-		_OnMouse_003.property0 = "Started";
-		_OnMouse_003.property1 = "left";
-		_OnMouse_003.addOutputs([_SetProperty_001]);
-		_SetProperty_001.addInput(_OnMouse_003,0);
-		var _GlobalObject_001 = new armory_logicnode_GlobalObjectNode(this);
-		_GlobalObject_001.addOutputs([_SetProperty_001,_SetProperty_004]);
-		_SetProperty_001.addInput(_GlobalObject_001,0);
-		_SetProperty_001.addInput(new armory_logicnode_StringNode(this,"Object_movable"),0);
-		var _GetProperty_004 = new armory_logicnode_GetPropertyNode(this);
-		var _PickObject = new armory_logicnode_PickObjectNode(this);
-		var _MouseCoords_002 = new armory_logicnode_MouseCoordsNode(this);
-		_MouseCoords_002.addOutputs([_PickObject]);
-		_MouseCoords_002.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_MouseCoords_002.addOutputs([new armory_logicnode_IntegerNode(this,0)]);
-		_PickObject.addInput(_MouseCoords_002,0);
-		_PickObject.addOutputs([_GetProperty_004,_SetProperty_004]);
-		_PickObject.addOutputs([new armory_logicnode_VectorNode(this,0.0,0.0,0.0)]);
-		_GetProperty_004.addInput(_PickObject,0);
-		_GetProperty_004.addInput(new armory_logicnode_StringNode(this,"movable"),0);
-		_GetProperty_004.addOutputs([_SetProperty_001]);
-		_GetProperty_004.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_SetProperty_001.addInput(_GetProperty_004,0);
-		_SetProperty_001.addOutputs([_SetProperty_004]);
-		_SetProperty_004.addInput(_SetProperty_001,0);
-		_SetProperty_004.addInput(_GlobalObject_001,0);
-		_SetProperty_004.addInput(new armory_logicnode_StringNode(this,"Object_to_move"),0);
-		_SetProperty_004.addInput(_PickObject,0);
-		var _Gate_003 = new armory_logicnode_GateNode(this);
-		_Gate_003.property0 = "Or";
-		_Gate_003.property1 = 9.999999747378752e-05;
-		_Gate_003.addInput(_SetProperty_004,0);
-		var _Compare = new armory_logicnode_CompareNode(this);
-		_Compare.property0 = "Equal";
-		_Compare.property1 = 9.999999747378752e-05;
-		var _GetProperty_022 = new armory_logicnode_GetPropertyNode(this);
-		var _GlobalObject_006 = new armory_logicnode_GlobalObjectNode(this);
-		var _GetProperty_021 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_021.addInput(_GlobalObject_006,0);
-		_GetProperty_021.addInput(new armory_logicnode_StringNode(this,"Object_rot_arrows_cw"),0);
-		var _RemoveObject_003 = new armory_logicnode_RemoveObjectNode(this);
-		var _RemoveObject_002 = new armory_logicnode_RemoveObjectNode(this);
-		_RemoveObject_002.addInput(_Gate_003,1);
-		var _GetProperty_020 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_020.addInput(_GlobalObject_006,0);
-		_GetProperty_020.addInput(new armory_logicnode_StringNode(this,"Object_rot_arrows_ccw"),0);
-		var _Compare_001 = new armory_logicnode_CompareNode(this);
-		_Compare_001.property0 = "Equal";
-		_Compare_001.property1 = 9.999999747378752e-05;
-		_Compare_001.addInput(_GetProperty_022,0);
-		_Compare_001.addInput(_GetProperty_020,0);
-		_Compare_001.addOutputs([_Gate_003]);
-		_GetProperty_020.addOutputs([_RemoveObject_002,_Compare_001]);
-		_GetProperty_020.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_RemoveObject_002.addInput(_GetProperty_020,0);
-		_RemoveObject_002.addOutputs([_RemoveObject_003]);
-		_RemoveObject_003.addInput(_RemoveObject_002,0);
-		_RemoveObject_003.addInput(_GetProperty_021,0);
-		var _SetProperty_014 = new armory_logicnode_SetPropertyNode(this);
-		_SetProperty_014.addInput(_RemoveObject_003,0);
-		var _GlobalObject_005 = new armory_logicnode_GlobalObjectNode(this);
-		_GlobalObject_005.addOutputs([_SetProperty_014]);
-		_SetProperty_014.addInput(_GlobalObject_005,0);
-		_SetProperty_014.addInput(new armory_logicnode_StringNode(this,"rot_active"),0);
-		var _Boolean_004 = new armory_logicnode_BooleanNode(this);
-		_Boolean_004.addInput(new armory_logicnode_BooleanNode(this,false),0);
-		_Boolean_004.addOutputs([_SetProperty_014]);
-		_SetProperty_014.addInput(_Boolean_004,0);
-		_SetProperty_014.addOutputs([new armory_logicnode_NullNode(this)]);
-		_RemoveObject_003.addOutputs([_SetProperty_014]);
-		_GetProperty_021.addOutputs([_RemoveObject_003,_Compare]);
-		_GetProperty_021.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_GlobalObject_006.addOutputs([_GetProperty_021,_GetProperty_020,_GetProperty_022]);
-		_GetProperty_022.addInput(_GlobalObject_006,0);
-		_GetProperty_022.addInput(new armory_logicnode_StringNode(this,"Object_to_move"),0);
-		_GetProperty_022.addOutputs([_Compare_001,_Compare]);
-		_GetProperty_022.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_Compare.addInput(_GetProperty_022,0);
-		_Compare.addInput(_GetProperty_021,0);
-		_Compare.addOutputs([_Gate_003]);
-		_Gate_003.addInput(_Compare,0);
-		_Gate_003.addInput(_Compare_001,0);
-		_Gate_003.addOutputs([new armory_logicnode_NullNode(this)]);
-		_Gate_003.addOutputs([_RemoveObject_002]);
-		_SetProperty_004.addOutputs([_IsTrue_001,_Gate_003]);
-		_IsTrue_001.addInput(_SetProperty_004,0);
-		var _GetProperty_007 = new armory_logicnode_GetPropertyNode(this);
-		var _GlobalObject_002 = new armory_logicnode_GlobalObjectNode(this);
-		_GlobalObject_002.addOutputs([_GetProperty_007]);
-		_GetProperty_007.addInput(_GlobalObject_002,0);
-		_GetProperty_007.addInput(new armory_logicnode_StringNode(this,"Object_movable"),0);
-		_GetProperty_007.addOutputs([_IsTrue_001]);
-		_GetProperty_007.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_IsTrue_001.addInput(_GetProperty_007,0);
-		_IsTrue_001.addOutputs([_SpawnObject_002]);
-		_SpawnObject_002.addInput(_IsTrue_001,0);
-		_SpawnObject_002.addInput(new armory_logicnode_ObjectNode(this,"Movement_arrows"),0);
-		_SpawnObject_002.addInput(new armory_logicnode_NullNode(this),0);
-		_SpawnObject_002.addInput(new armory_logicnode_BooleanNode(this,true),0);
-		_SpawnObject_002.addOutputs([_SetProperty_006]);
-		_SpawnObject_002.addOutputs([_SetLocation_003,_SetProperty_006]);
-		_SetProperty_006.addInput(_SpawnObject_002,0);
-		var _GlobalObject_003 = new armory_logicnode_GlobalObjectNode(this);
-		var _GetProperty_010 = new armory_logicnode_GetPropertyNode(this);
-		_GetProperty_010.addInput(_GlobalObject_003,0);
-		_GetProperty_010.addInput(new armory_logicnode_StringNode(this,"Object_to_move"),0);
-		var _GetLocation_001 = new armory_logicnode_GetLocationNode(this);
-		_GetLocation_001.addInput(_GetProperty_010,0);
-		_GetLocation_001.addOutputs([_SetLocation_003]);
-		_GetProperty_010.addOutputs([_GetLocation_001]);
-		_GetProperty_010.addOutputs([new armory_logicnode_StringNode(this,"")]);
-		_GlobalObject_003.addOutputs([_GetProperty_010,_SetProperty_006]);
-		_SetProperty_006.addInput(_GlobalObject_003,0);
-		_SetProperty_006.addInput(new armory_logicnode_StringNode(this,"Object_move_arrows"),0);
-		_SetProperty_006.addInput(_SpawnObject_002,1);
-		_SetProperty_006.addOutputs([_SetLocation_003]);
-		_SetLocation_003.addInput(_SetProperty_006,0);
-		_SetLocation_003.addInput(_SpawnObject_002,1);
-		_SetLocation_003.addInput(_GetLocation_001,0);
-		_SetLocation_003.addOutputs([_SetProperty_007]);
-		_SetProperty_007.addInput(_SetLocation_003,0);
-		var _GlobalObject_004 = new armory_logicnode_GlobalObjectNode(this);
-		_GlobalObject_004.addOutputs([_SetProperty_007]);
-		_SetProperty_007.addInput(_GlobalObject_004,0);
-		_SetProperty_007.addInput(new armory_logicnode_StringNode(this,"move_permission"),0);
-		var _Boolean_002 = new armory_logicnode_BooleanNode(this);
-		_Boolean_002.addInput(new armory_logicnode_BooleanNode(this,true),0);
-		_Boolean_002.addOutputs([_SetProperty_007]);
-		_SetProperty_007.addInput(_Boolean_002,0);
-		_SetProperty_007.addOutputs([new armory_logicnode_NullNode(this)]);
-	}
-	,__class__: arm_node_Movement_$Central
 });
 var armory_data_Config = function() { };
 $hxClasses["armory.data.Config"] = armory_data_Config;
@@ -2091,1587 +1606,6 @@ armory_data_Config.save = function() {
 	var bytes = haxe_io_Bytes.ofString(JSON.stringify(armory_data_Config.raw));
 	Krom.fileSaveBytes(path,bytes.b.bufferValue);
 };
-var armory_logicnode_LogicNode = function(tree) {
-	this.outputs = [];
-	this.inputs = [];
-	this.tree = tree;
-};
-$hxClasses["armory.logicnode.LogicNode"] = armory_logicnode_LogicNode;
-armory_logicnode_LogicNode.__name__ = "armory.logicnode.LogicNode";
-armory_logicnode_LogicNode.prototype = {
-	tree: null
-	,inputs: null
-	,outputs: null
-	,addInput: function(node,from) {
-		this.inputs.push(new armory_logicnode_LogicNodeInput(node,from));
-	}
-	,addOutputs: function(nodes) {
-		this.outputs.push(nodes);
-	}
-	,run: function(from) {
-	}
-	,runOutput: function(i) {
-		if(i >= this.outputs.length) {
-			return;
-		}
-		var _g = 0;
-		var _g1 = this.outputs[i];
-		while(_g < _g1.length) {
-			var o = _g1[_g];
-			++_g;
-			var _g2 = 0;
-			var _g11 = o.inputs.length;
-			while(_g2 < _g11) {
-				var j = _g2++;
-				if(o.inputs[j].node == this) {
-					o.run(j);
-					break;
-				}
-			}
-		}
-	}
-	,get: function(from) {
-		return this;
-	}
-	,set: function(value) {
-	}
-	,__class__: armory_logicnode_LogicNode
-};
-var armory_logicnode_ActiveCameraNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.ActiveCameraNode"] = armory_logicnode_ActiveCameraNode;
-armory_logicnode_ActiveCameraNode.__name__ = "armory.logicnode.ActiveCameraNode";
-armory_logicnode_ActiveCameraNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_ActiveCameraNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		return iron_Scene.active.camera;
-	}
-	,__class__: armory_logicnode_ActiveCameraNode
-});
-var armory_logicnode_BooleanNode = function(tree,value) {
-	if(value == null) {
-		value = false;
-	}
-	armory_logicnode_LogicNode.call(this,tree);
-	this.value = value;
-};
-$hxClasses["armory.logicnode.BooleanNode"] = armory_logicnode_BooleanNode;
-armory_logicnode_BooleanNode.__name__ = "armory.logicnode.BooleanNode";
-armory_logicnode_BooleanNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_BooleanNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	value: null
-	,get: function(from) {
-		if(this.inputs.length > 0) {
-			return this.inputs[0].get();
-		}
-		return this.value;
-	}
-	,set: function(value) {
-		if(this.inputs.length > 0) {
-			this.inputs[0].set(value);
-		} else {
-			this.value = value;
-		}
-	}
-	,__class__: armory_logicnode_BooleanNode
-});
-var armory_logicnode_CompareNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.CompareNode"] = armory_logicnode_CompareNode;
-armory_logicnode_CompareNode.__name__ = "armory.logicnode.CompareNode";
-armory_logicnode_CompareNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_CompareNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	property0: null
-	,property1: null
-	,get: function(from) {
-		var v1 = this.inputs[0].get();
-		var v2 = this.inputs[1].get();
-		var cond = false;
-		switch(this.property0) {
-		case "Almost Equal":
-			cond = ((v1) instanceof iron_math_Vec4) ? v1.almostEquals(v2,this.property1) : Math.abs(v1 - v2) < this.property1;
-			break;
-		case "And":
-			cond = true;
-			var _g = 0;
-			var _g1 = this.inputs;
-			while(_g < _g1.length) {
-				var input = _g1[_g];
-				++_g;
-				if(!input.get()) {
-					cond = false;
-					break;
-				}
-			}
-			break;
-		case "Equal":
-			cond = ((v1) instanceof iron_math_Vec4) ? v1.equals(v2) : v1 == v2;
-			break;
-		case "Greater":
-			cond = v1 > v2;
-			break;
-		case "Greater Equal":
-			cond = v1 >= v2;
-			break;
-		case "Less":
-			cond = v1 < v2;
-			break;
-		case "Less Equal":
-			cond = v1 <= v2;
-			break;
-		case "Or":
-			var _g2 = 0;
-			var _g11 = this.inputs;
-			while(_g2 < _g11.length) {
-				var input1 = _g11[_g2];
-				++_g2;
-				if(input1.get()) {
-					cond = true;
-					break;
-				}
-			}
-			break;
-		}
-		return cond;
-	}
-	,__class__: armory_logicnode_CompareNode
-});
-var armory_logicnode_DegToRadNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.DegToRadNode"] = armory_logicnode_DegToRadNode;
-armory_logicnode_DegToRadNode.__name__ = "armory.logicnode.DegToRadNode";
-armory_logicnode_DegToRadNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_DegToRadNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		var deg = this.inputs[0].get();
-		return deg * 0.0174532924;
-	}
-	,__class__: armory_logicnode_DegToRadNode
-});
-var armory_logicnode_FloatNode = function(tree,value) {
-	if(value == null) {
-		value = 0.0;
-	}
-	armory_logicnode_LogicNode.call(this,tree);
-	this.value = value;
-};
-$hxClasses["armory.logicnode.FloatNode"] = armory_logicnode_FloatNode;
-armory_logicnode_FloatNode.__name__ = "armory.logicnode.FloatNode";
-armory_logicnode_FloatNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_FloatNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	value: null
-	,get: function(from) {
-		if(this.inputs.length > 0) {
-			return this.inputs[0].get();
-		}
-		return this.value;
-	}
-	,set: function(value) {
-		if(this.inputs.length > 0) {
-			this.inputs[0].set(value);
-		} else {
-			this.value = value;
-		}
-	}
-	,__class__: armory_logicnode_FloatNode
-});
-var armory_logicnode_FunctionNode = function(tree) {
-	this.args = [];
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.FunctionNode"] = armory_logicnode_FunctionNode;
-armory_logicnode_FunctionNode.__name__ = "armory.logicnode.FunctionNode";
-armory_logicnode_FunctionNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_FunctionNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	args: null
-	,result: null
-	,run: function(from) {
-		this.runOutput(0);
-	}
-	,get: function(from) {
-		return this.args[from - 1];
-	}
-	,__class__: armory_logicnode_FunctionNode
-});
-var armory_logicnode_FunctionOutputNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.FunctionOutputNode"] = armory_logicnode_FunctionOutputNode;
-armory_logicnode_FunctionOutputNode.__name__ = "armory.logicnode.FunctionOutputNode";
-armory_logicnode_FunctionOutputNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_FunctionOutputNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	result: null
-	,run: function(from) {
-		this.result = this.inputs[1].get();
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_FunctionOutputNode
-});
-var armory_logicnode_GateNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.GateNode"] = armory_logicnode_GateNode;
-armory_logicnode_GateNode.__name__ = "armory.logicnode.GateNode";
-armory_logicnode_GateNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_GateNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	property0: null
-	,property1: null
-	,run: function(from) {
-		var v1 = this.inputs[1].get();
-		var v2 = this.inputs[2].get();
-		var cond = false;
-		switch(this.property0) {
-		case "Almost Equal":
-			cond = ((v1) instanceof iron_math_Vec4) ? v1.almostEquals(v2,this.property1) : Math.abs(v1 - v2) < this.property1;
-			break;
-		case "And":
-			cond = true;
-			var _g = 1;
-			var _g1 = this.inputs.length;
-			while(_g < _g1) {
-				var i = _g++;
-				if(!this.inputs[i].get()) {
-					cond = false;
-					break;
-				}
-			}
-			break;
-		case "Equal":
-			cond = ((v1) instanceof iron_math_Vec4) ? v1.equals(v2) : v1 == v2;
-			break;
-		case "Greater":
-			cond = v1 > v2;
-			break;
-		case "Greater Equal":
-			cond = v1 >= v2;
-			break;
-		case "Less":
-			cond = v1 < v2;
-			break;
-		case "Less Equal":
-			cond = v1 <= v2;
-			break;
-		case "Or":
-			var _g2 = 1;
-			var _g11 = this.inputs.length;
-			while(_g2 < _g11) {
-				var i1 = _g2++;
-				if(this.inputs[i1].get()) {
-					cond = true;
-					break;
-				}
-			}
-			break;
-		}
-		if(cond) {
-			this.runOutput(0);
-		} else {
-			this.runOutput(1);
-		}
-	}
-	,__class__: armory_logicnode_GateNode
-});
-var armory_logicnode_GetLocationNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.GetLocationNode"] = armory_logicnode_GetLocationNode;
-armory_logicnode_GetLocationNode.__name__ = "armory.logicnode.GetLocationNode";
-armory_logicnode_GetLocationNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_GetLocationNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		var object = this.inputs[0].get();
-		if(object == null) {
-			return null;
-		}
-		var _this = object.transform.world;
-		return new iron_math_Vec4(_this.self._30,_this.self._31,_this.self._32,_this.self._33);
-	}
-	,__class__: armory_logicnode_GetLocationNode
-});
-var armory_logicnode_GetObjectNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.GetObjectNode"] = armory_logicnode_GetObjectNode;
-armory_logicnode_GetObjectNode.__name__ = "armory.logicnode.GetObjectNode";
-armory_logicnode_GetObjectNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_GetObjectNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		var objectName = this.inputs[0].get();
-		return iron_Scene.active.getChild(objectName);
-	}
-	,__class__: armory_logicnode_GetObjectNode
-});
-var armory_logicnode_GetPropertyNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.GetPropertyNode"] = armory_logicnode_GetPropertyNode;
-armory_logicnode_GetPropertyNode.__name__ = "armory.logicnode.GetPropertyNode";
-armory_logicnode_GetPropertyNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_GetPropertyNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		var object = this.inputs[0].get();
-		var property = this.inputs[1].get();
-		if(from == 0) {
-			if(object == null || object.properties == null) {
-				return null;
-			}
-			var _this = object.properties;
-			if(__map_reserved[property] != null) {
-				return _this.getReserved(property);
-			} else {
-				return _this.h[property];
-			}
-		} else {
-			return property;
-		}
-	}
-	,__class__: armory_logicnode_GetPropertyNode
-});
-var armory_logicnode_GetTransformNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.GetTransformNode"] = armory_logicnode_GetTransformNode;
-armory_logicnode_GetTransformNode.__name__ = "armory.logicnode.GetTransformNode";
-armory_logicnode_GetTransformNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_GetTransformNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		var object = this.inputs[0].get();
-		if(object == null) {
-			return null;
-		}
-		return object.transform.world;
-	}
-	,__class__: armory_logicnode_GetTransformNode
-});
-var armory_logicnode_GlobalObjectNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.GlobalObjectNode"] = armory_logicnode_GlobalObjectNode;
-armory_logicnode_GlobalObjectNode.__name__ = "armory.logicnode.GlobalObjectNode";
-armory_logicnode_GlobalObjectNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_GlobalObjectNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		return iron_Scene.global;
-	}
-	,__class__: armory_logicnode_GlobalObjectNode
-});
-var armory_logicnode_IntegerNode = function(tree,value) {
-	if(value == null) {
-		value = 0;
-	}
-	armory_logicnode_LogicNode.call(this,tree);
-	this.value = value;
-};
-$hxClasses["armory.logicnode.IntegerNode"] = armory_logicnode_IntegerNode;
-armory_logicnode_IntegerNode.__name__ = "armory.logicnode.IntegerNode";
-armory_logicnode_IntegerNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_IntegerNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	value: null
-	,get: function(from) {
-		if(this.inputs.length > 0) {
-			return this.inputs[0].get();
-		}
-		return this.value;
-	}
-	,set: function(value) {
-		if(this.inputs.length > 0) {
-			this.inputs[0].set(value);
-		} else {
-			this.value = value;
-		}
-	}
-	,__class__: armory_logicnode_IntegerNode
-});
-var armory_logicnode_IsTrueNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.IsTrueNode"] = armory_logicnode_IsTrueNode;
-armory_logicnode_IsTrueNode.__name__ = "armory.logicnode.IsTrueNode";
-armory_logicnode_IsTrueNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_IsTrueNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	run: function(from) {
-		var v1 = this.inputs[1].get();
-		if(v1) {
-			this.runOutput(0);
-		}
-	}
-	,__class__: armory_logicnode_IsTrueNode
-});
-var armory_logicnode_LogicNodeInput = function(node,from) {
-	this.node = node;
-	this.from = from;
-};
-$hxClasses["armory.logicnode.LogicNodeInput"] = armory_logicnode_LogicNodeInput;
-armory_logicnode_LogicNodeInput.__name__ = "armory.logicnode.LogicNodeInput";
-armory_logicnode_LogicNodeInput.prototype = {
-	node: null
-	,from: null
-	,get: function() {
-		return this.node.get(this.from);
-	}
-	,set: function(value) {
-		this.node.set(value);
-	}
-	,__class__: armory_logicnode_LogicNodeInput
-};
-var armory_logicnode_MathNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.MathNode"] = armory_logicnode_MathNode;
-armory_logicnode_MathNode.__name__ = "armory.logicnode.MathNode";
-armory_logicnode_MathNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_MathNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	property0: null
-	,property1: null
-	,get: function(from) {
-		var v1 = this.inputs[0].get();
-		var v2 = this.inputs[1].get();
-		var f = 0.0;
-		switch(this.property0) {
-		case "Abs":
-			f = Math.abs(v1);
-			break;
-		case "Add":
-			f = v1 + v2;
-			break;
-		case "Arccosine":
-			f = Math.acos(v1);
-			break;
-		case "Arcsine":
-			f = Math.asin(v1);
-			break;
-		case "Arctan2":
-			f = Math.atan2(v1,v2);
-			break;
-		case "Arctangent":
-			f = Math.atan(v1);
-			break;
-		case "Ceil":
-			f = Math.ceil(v1);
-			break;
-		case "Cosine":
-			f = Math.cos(v1);
-			break;
-		case "Divide":
-			f = v1 / v2;
-			break;
-		case "Floor":
-			f = Math.floor(v1);
-			break;
-		case "Fract":
-			f -= f | 0;
-			break;
-		case "Greater Than":
-			f = v1 > v2 ? 1.0 : 0.0;
-			break;
-		case "Less Than":
-			f = v1 < v2 ? 1.0 : 0.0;
-			break;
-		case "Logarithm":
-			f = Math.log(v1);
-			break;
-		case "Max":
-			f = Math.max(v1,v2);
-			break;
-		case "Min":
-			f = Math.min(v1,v2);
-			break;
-		case "Modulo":
-			f = v1 % v2;
-			break;
-		case "Multiply":
-			f = v1 * v2;
-			break;
-		case "Power":
-			f = Math.pow(v1,v2);
-			break;
-		case "Round":
-			f = Math.round(v1);
-			break;
-		case "Sine":
-			f = Math.sin(v1);
-			break;
-		case "Square Root":
-			f = Math.sqrt(v1);
-			break;
-		case "Subtract":
-			f = v1 - v2;
-			break;
-		case "Tangent":
-			f = Math.tan(v1);
-			break;
-		}
-		if(this.property1 == "true") {
-			f = f < 0.0 ? 0.0 : f > 1.0 ? 1.0 : f;
-		}
-		return f;
-	}
-	,__class__: armory_logicnode_MathNode
-});
-var armory_logicnode_MergeNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.MergeNode"] = armory_logicnode_MergeNode;
-armory_logicnode_MergeNode.__name__ = "armory.logicnode.MergeNode";
-armory_logicnode_MergeNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_MergeNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	run: function(from) {
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_MergeNode
-});
-var armory_logicnode_MouseCoordsNode = function(tree) {
-	this.coords = new iron_math_Vec4();
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.MouseCoordsNode"] = armory_logicnode_MouseCoordsNode;
-armory_logicnode_MouseCoordsNode.__name__ = "armory.logicnode.MouseCoordsNode";
-armory_logicnode_MouseCoordsNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_MouseCoordsNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	coords: null
-	,get: function(from) {
-		var mouse = iron_system_Input.getMouse();
-		if(from == 0) {
-			this.coords.x = mouse.x;
-			this.coords.y = mouse.y;
-			return this.coords;
-		} else if(from == 1) {
-			this.coords.x = mouse.movementX;
-			this.coords.y = mouse.movementY;
-			return this.coords;
-		} else {
-			return mouse.wheelDelta;
-		}
-	}
-	,__class__: armory_logicnode_MouseCoordsNode
-});
-var armory_logicnode_NullNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.NullNode"] = armory_logicnode_NullNode;
-armory_logicnode_NullNode.__name__ = "armory.logicnode.NullNode";
-armory_logicnode_NullNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_NullNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		return null;
-	}
-	,__class__: armory_logicnode_NullNode
-});
-var armory_logicnode_ObjectNode = function(tree,objectName) {
-	if(objectName == null) {
-		objectName = "";
-	}
-	this.value = null;
-	this.objectName = objectName;
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.ObjectNode"] = armory_logicnode_ObjectNode;
-armory_logicnode_ObjectNode.__name__ = "armory.logicnode.ObjectNode";
-armory_logicnode_ObjectNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_ObjectNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	objectName: null
-	,value: null
-	,get: function(from) {
-		if(this.inputs.length > 0) {
-			return this.inputs[0].get();
-		}
-		if(this.value == null) {
-			this.value = this.objectName != "" ? iron_Scene.active.getChild(this.objectName) : this.tree.object;
-		}
-		return this.value;
-	}
-	,set: function(value) {
-		if(this.inputs.length > 0) {
-			this.inputs[0].set(value);
-		} else {
-			this.objectName = value.name;
-			this.value = value;
-		}
-	}
-	,__class__: armory_logicnode_ObjectNode
-});
-var armory_logicnode_OnInitNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-	tree.notifyOnInit($bind(this,this.init));
-};
-$hxClasses["armory.logicnode.OnInitNode"] = armory_logicnode_OnInitNode;
-armory_logicnode_OnInitNode.__name__ = "armory.logicnode.OnInitNode";
-armory_logicnode_OnInitNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_OnInitNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	init: function() {
-		var noPhysics = armory_trait_physics_bullet_PhysicsWorld.active == null || armory_trait_physics_bullet_PhysicsWorld.active._lateUpdate == null;
-		if(noPhysics) {
-			this.runOutput(0);
-		} else {
-			armory_trait_physics_bullet_PhysicsWorld.active.notifyOnPreUpdate($bind(this,this.physics_init));
-		}
-	}
-	,physics_init: function() {
-		armory_trait_physics_bullet_PhysicsWorld.active.removePreUpdate($bind(this,this.physics_init));
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_OnInitNode
-});
-var armory_logicnode_OnKeyboardNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-	tree.notifyOnUpdate($bind(this,this.update));
-};
-$hxClasses["armory.logicnode.OnKeyboardNode"] = armory_logicnode_OnKeyboardNode;
-armory_logicnode_OnKeyboardNode.__name__ = "armory.logicnode.OnKeyboardNode";
-armory_logicnode_OnKeyboardNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_OnKeyboardNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	property0: null
-	,property1: null
-	,update: function() {
-		var keyboard = iron_system_Input.getKeyboard();
-		var b = false;
-		switch(this.property0) {
-		case "Down":
-			b = keyboard.down(this.property1);
-			break;
-		case "Released":
-			b = keyboard.released(this.property1);
-			break;
-		case "Started":
-			b = keyboard.started(this.property1);
-			break;
-		}
-		if(b) {
-			this.runOutput(0);
-		}
-	}
-	,__class__: armory_logicnode_OnKeyboardNode
-});
-var armory_logicnode_OnMouseNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-	tree.notifyOnUpdate($bind(this,this.update));
-};
-$hxClasses["armory.logicnode.OnMouseNode"] = armory_logicnode_OnMouseNode;
-armory_logicnode_OnMouseNode.__name__ = "armory.logicnode.OnMouseNode";
-armory_logicnode_OnMouseNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_OnMouseNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	property0: null
-	,property1: null
-	,update: function() {
-		var mouse = iron_system_Input.getMouse();
-		var b = false;
-		switch(this.property0) {
-		case "Down":
-			b = mouse.down(this.property1);
-			break;
-		case "Moved":
-			b = mouse.moved;
-			break;
-		case "Released":
-			b = mouse.released(this.property1);
-			break;
-		case "Started":
-			b = mouse.started(this.property1);
-			break;
-		}
-		if(b) {
-			this.runOutput(0);
-		}
-	}
-	,__class__: armory_logicnode_OnMouseNode
-});
-var armory_logicnode_OnUpdateNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-	tree.notifyOnInit($bind(this,this.init));
-};
-$hxClasses["armory.logicnode.OnUpdateNode"] = armory_logicnode_OnUpdateNode;
-armory_logicnode_OnUpdateNode.__name__ = "armory.logicnode.OnUpdateNode";
-armory_logicnode_OnUpdateNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_OnUpdateNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	property0: null
-	,init: function() {
-		switch(this.property0) {
-		case "Late Update":
-			this.tree.notifyOnLateUpdate($bind(this,this.update));
-			break;
-		case "Physics Pre-Update":
-			armory_trait_physics_bullet_PhysicsWorld.active.notifyOnPreUpdate($bind(this,this.update));
-			break;
-		default:
-			this.tree.notifyOnUpdate($bind(this,this.update));
-		}
-	}
-	,update: function() {
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_OnUpdateNode
-});
-var armory_logicnode_PickObjectNode = function(tree) {
-	this.v = new iron_math_Vec4();
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.PickObjectNode"] = armory_logicnode_PickObjectNode;
-armory_logicnode_PickObjectNode.__name__ = "armory.logicnode.PickObjectNode";
-armory_logicnode_PickObjectNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_PickObjectNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	v: null
-	,get: function(from) {
-		var coords = this.inputs[0].get();
-		if(coords == null) {
-			return null;
-		}
-		var physics = armory_trait_physics_bullet_PhysicsWorld.active;
-		var rb = physics.pickClosest(coords.x,coords.y);
-		if(rb == null) {
-			return null;
-		}
-		if(from == 0) {
-			return rb.object;
-		} else {
-			var _this = this.v;
-			_this.x = physics.hitPointWorld.x;
-			_this.y = physics.hitPointWorld.y;
-			_this.z = physics.hitPointWorld.z;
-			_this.w = 1.0;
-			return _this;
-		}
-	}
-	,__class__: armory_logicnode_PickObjectNode
-});
-var armory_logicnode_RemoveObjectNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.RemoveObjectNode"] = armory_logicnode_RemoveObjectNode;
-armory_logicnode_RemoveObjectNode.__name__ = "armory.logicnode.RemoveObjectNode";
-armory_logicnode_RemoveObjectNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_RemoveObjectNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	run: function(from) {
-		var object = this.inputs[1].get();
-		if(object == null) {
-			return;
-		}
-		object.remove();
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_RemoveObjectNode
-});
-var armory_logicnode_RotateObjectAroundAxisNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.RotateObjectAroundAxisNode"] = armory_logicnode_RotateObjectAroundAxisNode;
-armory_logicnode_RotateObjectAroundAxisNode.__name__ = "armory.logicnode.RotateObjectAroundAxisNode";
-armory_logicnode_RotateObjectAroundAxisNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_RotateObjectAroundAxisNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	run: function(from) {
-		var object = this.inputs[1].get();
-		var axis = this.inputs[2].get();
-		var angle = this.inputs[3].get();
-		if(object == null || axis == null) {
-			return;
-		}
-		var n = Math.sqrt(axis.x * axis.x + axis.y * axis.y + axis.z * axis.z);
-		if(n > 0.0) {
-			var invN = 1.0 / n;
-			axis.x *= invN;
-			axis.y *= invN;
-			axis.z *= invN;
-		}
-		object.transform.rotate(axis,angle);
-		var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
-		if(rigidBody != null) {
-			rigidBody.syncTransform();
-		}
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_RotateObjectAroundAxisNode
-});
-var armory_logicnode_RotateObjectNode = function(tree) {
-	this.q = new iron_math_Quat();
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.RotateObjectNode"] = armory_logicnode_RotateObjectNode;
-armory_logicnode_RotateObjectNode.__name__ = "armory.logicnode.RotateObjectNode";
-armory_logicnode_RotateObjectNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_RotateObjectNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	q: null
-	,run: function(from) {
-		var object = this.inputs[1].get();
-		var vec = this.inputs[2].get();
-		if(object == null || vec == null) {
-			return;
-		}
-		var _this = this.q;
-		var f = vec.x / 2;
-		var c1 = Math.cos(f);
-		var s1 = Math.sin(f);
-		f = vec.y / 2;
-		var c2 = Math.cos(f);
-		var s2 = Math.sin(f);
-		f = vec.z / 2;
-		var c3 = Math.cos(f);
-		var s3 = Math.sin(f);
-		_this.x = s1 * c2 * c3 + c1 * s2 * s3;
-		_this.y = c1 * s2 * c3 + s1 * c2 * s3;
-		_this.z = c1 * c2 * s3 - s1 * s2 * c3;
-		_this.w = c1 * c2 * c3 - s1 * s2 * s3;
-		var _this1 = object.transform.rot;
-		var q = this.q;
-		var q1x = _this1.x;
-		var q1y = _this1.y;
-		var q1z = _this1.z;
-		var q1w = _this1.w;
-		var q2x = q.x;
-		var q2y = q.y;
-		var q2z = q.z;
-		var q2w = q.w;
-		_this1.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-		_this1.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-		_this1.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-		_this1.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-		object.transform.buildMatrix();
-		var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
-		if(rigidBody != null) {
-			rigidBody.syncTransform();
-		}
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_RotateObjectNode
-});
-var armory_logicnode_RotateVectorAroundAxisNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.RotateVectorAroundAxisNode"] = armory_logicnode_RotateVectorAroundAxisNode;
-armory_logicnode_RotateVectorAroundAxisNode.__name__ = "armory.logicnode.RotateVectorAroundAxisNode";
-armory_logicnode_RotateVectorAroundAxisNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_RotateVectorAroundAxisNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		var vector = this.inputs[0].get();
-		var axis = this.inputs[1].get();
-		var angle = this.inputs[2].get();
-		var v = new iron_math_Vec4();
-		var v_x = 0.0;
-		var v_y = 0.0;
-		var v_z = 0.0;
-		var v_w = 1.0;
-		var x = 1;
-		var y = 0;
-		var z = 0;
-		var w = 1;
-		if(w == null) {
-			w = 1.0;
-		}
-		if(z == null) {
-			z = 0.0;
-		}
-		if(y == null) {
-			y = 0.0;
-		}
-		if(x == null) {
-			x = 0.0;
-		}
-		var x_x = x;
-		var x_y = y;
-		var x_z = z;
-		var x_w = w;
-		var q_xyz_x = 0.0;
-		var q_xyz_y = 0.0;
-		var q_xyz_z = 0.0;
-		var q_xyz_w = 1.0;
-		var rot_quat_x = 0.0;
-		var rot_quat_y = 0.0;
-		var rot_quat_z = 0.0;
-		var rot_quat_w = 1.0;
-		var fin_quat = new iron_math_Quat();
-		if(vector == null || axis == null) {
-			return null;
-		}
-		var n = Math.sqrt(axis.x * axis.x + axis.y * axis.y + axis.z * axis.z);
-		if(n > 0.0) {
-			var invN = 1.0 / n;
-			axis.x *= invN;
-			axis.y *= invN;
-			axis.z *= invN;
-		}
-		var s = Math.sin(angle * 0.5);
-		rot_quat_x = axis.x * s;
-		rot_quat_y = axis.y * s;
-		rot_quat_z = axis.z * s;
-		rot_quat_w = Math.cos(angle * 0.5);
-		var l = Math.sqrt(rot_quat_x * rot_quat_x + rot_quat_y * rot_quat_y + rot_quat_z * rot_quat_z + rot_quat_w * rot_quat_w);
-		if(l == 0.0) {
-			rot_quat_x = 0;
-			rot_quat_y = 0;
-			rot_quat_z = 0;
-			rot_quat_w = 0;
-		} else {
-			l = 1.0 / l;
-			rot_quat_x *= l;
-			rot_quat_y *= l;
-			rot_quat_z *= l;
-			rot_quat_w *= l;
-		}
-		q_xyz_x = rot_quat_x;
-		q_xyz_y = rot_quat_y;
-		q_xyz_z = rot_quat_z;
-		q_xyz_w = 1.0;
-		var ax = q_xyz_x;
-		var ay = q_xyz_y;
-		var az = q_xyz_z;
-		var bx = vector.x;
-		var by = vector.y;
-		var bz = vector.z;
-		v_x = ay * bz - az * by;
-		v_y = az * bx - ax * bz;
-		v_z = ax * by - ay * bx;
-		v_x *= 2;
-		v_y *= 2;
-		v_z *= 2;
-		var ax1 = q_xyz_x;
-		var ay1 = q_xyz_y;
-		var az1 = q_xyz_z;
-		var bx1 = v_x;
-		var by1 = v_y;
-		var bz1 = v_z;
-		v.x = ay1 * bz1 - az1 * by1;
-		v.y = az1 * bx1 - ax1 * bz1;
-		v.z = ax1 * by1 - ay1 * bx1;
-		var f = rot_quat_w;
-		v_x *= f;
-		v_y *= f;
-		v_z *= f;
-		v.x += v_x;
-		v.y += v_y;
-		v.z += v_z;
-		v.x += vector.x;
-		v.y += vector.y;
-		v.z += vector.z;
-		var a = iron_math_Quat.helpVec0;
-		var dot = x_x * v.x + x_y * v.y + x_z * v.z;
-		if(dot < -0.999999) {
-			var a1 = iron_math_Quat.xAxis;
-			var ax2 = a1.x;
-			var ay2 = a1.y;
-			var az2 = a1.z;
-			var bx2 = x_x;
-			var by2 = x_y;
-			var bz2 = x_z;
-			a.x = ay2 * bz2 - az2 * by2;
-			a.y = az2 * bx2 - ax2 * bz2;
-			a.z = ax2 * by2 - ay2 * bx2;
-			if(Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z) < 0.000001) {
-				var a2 = iron_math_Quat.yAxis;
-				var ax11 = a2.x;
-				var ay11 = a2.y;
-				var az11 = a2.z;
-				var bx11 = x_x;
-				var by11 = x_y;
-				var bz11 = x_z;
-				a.x = ay11 * bz11 - az11 * by11;
-				a.y = az11 * bx11 - ax11 * bz11;
-				a.z = ax11 * by11 - ay11 * bx11;
-			}
-			var n1 = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
-			if(n1 > 0.0) {
-				var invN1 = 1.0 / n1;
-				a.x *= invN1;
-				a.y *= invN1;
-				a.z *= invN1;
-			}
-			var angle1 = Math.PI;
-			var s1 = Math.sin(angle1 * 0.5);
-			fin_quat.x = a.x * s1;
-			fin_quat.y = a.y * s1;
-			fin_quat.z = a.z * s1;
-			fin_quat.w = Math.cos(angle1 * 0.5);
-			var l1 = Math.sqrt(fin_quat.x * fin_quat.x + fin_quat.y * fin_quat.y + fin_quat.z * fin_quat.z + fin_quat.w * fin_quat.w);
-			if(l1 == 0.0) {
-				fin_quat.x = 0;
-				fin_quat.y = 0;
-				fin_quat.z = 0;
-				fin_quat.w = 0;
-			} else {
-				l1 = 1.0 / l1;
-				fin_quat.x *= l1;
-				fin_quat.y *= l1;
-				fin_quat.z *= l1;
-				fin_quat.w *= l1;
-			}
-		} else if(dot > 0.999999) {
-			fin_quat.x = 0;
-			fin_quat.y = 0;
-			fin_quat.z = 0;
-			fin_quat.w = 1;
-		} else {
-			var ax21 = x_x;
-			var ay21 = x_y;
-			var az21 = x_z;
-			var bx21 = v.x;
-			var by21 = v.y;
-			var bz21 = v.z;
-			a.x = ay21 * bz21 - az21 * by21;
-			a.y = az21 * bx21 - ax21 * bz21;
-			a.z = ax21 * by21 - ay21 * bx21;
-			fin_quat.x = a.x;
-			fin_quat.y = a.y;
-			fin_quat.z = a.z;
-			fin_quat.w = 1 + dot;
-			var l11 = Math.sqrt(fin_quat.x * fin_quat.x + fin_quat.y * fin_quat.y + fin_quat.z * fin_quat.z + fin_quat.w * fin_quat.w);
-			if(l11 == 0.0) {
-				fin_quat.x = 0;
-				fin_quat.y = 0;
-				fin_quat.z = 0;
-				fin_quat.w = 0;
-			} else {
-				l11 = 1.0 / l11;
-				fin_quat.x *= l11;
-				fin_quat.y *= l11;
-				fin_quat.z *= l11;
-				fin_quat.w *= l11;
-			}
-		}
-		switch(from) {
-		case 0:
-			var a3 = -2 * (fin_quat.x * fin_quat.z - fin_quat.w * fin_quat.y);
-			var b = fin_quat.w * fin_quat.w + fin_quat.x * fin_quat.x - fin_quat.y * fin_quat.y - fin_quat.z * fin_quat.z;
-			var c = 2 * (fin_quat.x * fin_quat.y + fin_quat.w * fin_quat.z);
-			var d = -2 * (fin_quat.y * fin_quat.z - fin_quat.w * fin_quat.x);
-			var e = fin_quat.w * fin_quat.w - fin_quat.x * fin_quat.x + fin_quat.y * fin_quat.y - fin_quat.z * fin_quat.z;
-			return new iron_math_Vec4(Math.atan2(d,e),Math.atan2(a3,b),Math.asin(c));
-		case 1:
-			return v;
-		case 2:
-			return fin_quat;
-		}
-		return null;
-	}
-	,__class__: armory_logicnode_RotateVectorAroundAxisNode
-});
-var armory_logicnode_SelfNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.SelfNode"] = armory_logicnode_SelfNode;
-armory_logicnode_SelfNode.__name__ = "armory.logicnode.SelfNode";
-armory_logicnode_SelfNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_SelfNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		return this.tree.object;
-	}
-	,__class__: armory_logicnode_SelfNode
-});
-var armory_logicnode_SendEventNode = function(tree) {
-	this.entries = null;
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.SendEventNode"] = armory_logicnode_SendEventNode;
-armory_logicnode_SendEventNode.__name__ = "armory.logicnode.SendEventNode";
-armory_logicnode_SendEventNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_SendEventNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	entries: null
-	,run: function(from) {
-		var name = this.inputs[1].get();
-		var object = this.inputs.length > 2 ? this.inputs[2].get() : this.tree.object;
-		if(object == null) {
-			return;
-		}
-		var all = armory_system_Event.get(name);
-		if(all != null) {
-			this.entries = [];
-			var _g = 0;
-			while(_g < all.length) {
-				var e = all[_g];
-				++_g;
-				if(e.mask == object.uid) {
-					this.entries.push(e);
-				}
-			}
-		}
-		if(this.entries == null) {
-			return;
-		}
-		var _g1 = 0;
-		var _g11 = this.entries;
-		while(_g1 < _g11.length) {
-			var e1 = _g11[_g1];
-			++_g1;
-			e1.onEvent();
-		}
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_SendEventNode
-});
-var armory_logicnode_SeparateVectorNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.SeparateVectorNode"] = armory_logicnode_SeparateVectorNode;
-armory_logicnode_SeparateVectorNode.__name__ = "armory.logicnode.SeparateVectorNode";
-armory_logicnode_SeparateVectorNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_SeparateVectorNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		var vector = this.inputs[0].get();
-		if(vector == null) {
-			return 0.0;
-		}
-		if(from == 0) {
-			return vector.x;
-		} else if(from == 1) {
-			return vector.y;
-		} else {
-			return vector.z;
-		}
-	}
-	,__class__: armory_logicnode_SeparateVectorNode
-});
-var armory_logicnode_SetLocationNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.SetLocationNode"] = armory_logicnode_SetLocationNode;
-armory_logicnode_SetLocationNode.__name__ = "armory.logicnode.SetLocationNode";
-armory_logicnode_SetLocationNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_SetLocationNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	run: function(from) {
-		var object = this.inputs[1].get();
-		var vec = this.inputs[2].get();
-		if(object == null || vec == null) {
-			return;
-		}
-		var _this = object.transform.loc;
-		_this.x = vec.x;
-		_this.y = vec.y;
-		_this.z = vec.z;
-		_this.w = vec.w;
-		object.transform.buildMatrix();
-		var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
-		if(rigidBody != null) {
-			rigidBody.syncTransform();
-		}
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_SetLocationNode
-});
-var armory_logicnode_SetPropertyNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.SetPropertyNode"] = armory_logicnode_SetPropertyNode;
-armory_logicnode_SetPropertyNode.__name__ = "armory.logicnode.SetPropertyNode";
-armory_logicnode_SetPropertyNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_SetPropertyNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	run: function(from) {
-		var object = this.inputs[1].get();
-		var property = this.inputs[2].get();
-		var value = this.inputs[3].get();
-		if(object == null) {
-			return;
-		}
-		if(object.properties == null) {
-			object.properties = new haxe_ds_StringMap();
-		}
-		var _this = object.properties;
-		var value1 = value;
-		if(__map_reserved[property] != null) {
-			_this.setReserved(property,value1);
-		} else {
-			_this.h[property] = value1;
-		}
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_SetPropertyNode
-});
-var armory_logicnode_ShowMouseNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.ShowMouseNode"] = armory_logicnode_ShowMouseNode;
-armory_logicnode_ShowMouseNode.__name__ = "armory.logicnode.ShowMouseNode";
-armory_logicnode_ShowMouseNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_ShowMouseNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	run: function(from) {
-		var show = this.inputs[1].get();
-		var mouse = iron_system_Input.getMouse();
-		if(show) {
-			mouse.show();
-		} else {
-			mouse.hide();
-		}
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_ShowMouseNode
-});
-var armory_logicnode_SpawnObjectNode = function(tree) {
-	this.matrices = [];
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.SpawnObjectNode"] = armory_logicnode_SpawnObjectNode;
-armory_logicnode_SpawnObjectNode.__name__ = "armory.logicnode.SpawnObjectNode";
-armory_logicnode_SpawnObjectNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_SpawnObjectNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	object: null
-	,matrices: null
-	,run: function(from) {
-		var _gthis = this;
-		var objectName = "";
-		var objectInput = this.inputs[1].get();
-		if(objectInput == null) {
-			objectName = (js_Boot.__cast(this.inputs[1].node , armory_logicnode_ObjectNode)).objectName;
-		} else {
-			objectName = objectInput.name;
-		}
-		if(objectName == "") {
-			objectName = this.tree.object.name;
-		}
-		var m = this.inputs[2].get();
-		this.matrices.push(m != null ? new iron_math_Mat4(m.self._00,m.self._10,m.self._20,m.self._30,m.self._01,m.self._11,m.self._21,m.self._31,m.self._02,m.self._12,m.self._22,m.self._32,m.self._03,m.self._13,m.self._23,m.self._33) : null);
-		var spawnChildren = this.inputs.length > 3 ? this.inputs[3].get() : true;
-		iron_Scene.active.spawnObject(objectName,null,function(o) {
-			_gthis.object = o;
-			var matrix = _gthis.matrices.pop();
-			if(matrix != null) {
-				_gthis.object.transform.setMatrix(matrix);
-				var rigidBody = _gthis.object.getTrait(armory_trait_physics_bullet_RigidBody);
-				if(rigidBody != null) {
-					_gthis.object.transform.buildMatrix();
-					rigidBody.syncTransform();
-				}
-			}
-			_gthis.object.visible = true;
-			_gthis.runOutput(0);
-		},spawnChildren);
-	}
-	,get: function(from) {
-		return this.object;
-	}
-	,__class__: armory_logicnode_SpawnObjectNode
-});
-var armory_logicnode_StringNode = function(tree,value) {
-	if(value == null) {
-		value = "";
-	}
-	armory_logicnode_LogicNode.call(this,tree);
-	this.value = value;
-};
-$hxClasses["armory.logicnode.StringNode"] = armory_logicnode_StringNode;
-armory_logicnode_StringNode.__name__ = "armory.logicnode.StringNode";
-armory_logicnode_StringNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_StringNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	value: null
-	,get: function(from) {
-		if(this.inputs.length > 0) {
-			return this.inputs[0].get();
-		}
-		return this.value;
-	}
-	,set: function(value) {
-		if(this.inputs.length > 0) {
-			this.inputs[0].set(value);
-		} else {
-			this.value = value;
-		}
-	}
-	,__class__: armory_logicnode_StringNode
-});
-var armory_logicnode_TranslateObjectNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.TranslateObjectNode"] = armory_logicnode_TranslateObjectNode;
-armory_logicnode_TranslateObjectNode.__name__ = "armory.logicnode.TranslateObjectNode";
-armory_logicnode_TranslateObjectNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_TranslateObjectNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	run: function(from) {
-		var object = this.inputs[1].get();
-		var vec = this.inputs[2].get();
-		var local = this.inputs.length > 3 && this.inputs[3].get();
-		if(object == null || vec == null) {
-			return;
-		}
-		if(!local) {
-			var _this = object.transform.loc;
-			_this.x += vec.x;
-			_this.y += vec.y;
-			_this.z += vec.z;
-			object.transform.buildMatrix();
-		} else {
-			var _this1 = object.transform.local;
-			object.transform.move(new iron_math_Vec4(_this1.self._10,_this1.self._11,_this1.self._12),vec.y);
-			var _this2 = object.transform.local;
-			object.transform.move(new iron_math_Vec4(_this2.self._20,_this2.self._21,_this2.self._22),vec.z);
-			var _this3 = object.transform.local;
-			object.transform.move(new iron_math_Vec4(_this3.self._00,_this3.self._01,_this3.self._02),vec.x);
-			object.transform.buildMatrix();
-		}
-		var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
-		if(rigidBody != null) {
-			rigidBody.syncTransform();
-		}
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_TranslateObjectNode
-});
-var armory_logicnode_VectorAngles2D = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.VectorAngles2D"] = armory_logicnode_VectorAngles2D;
-armory_logicnode_VectorAngles2D.__name__ = "armory.logicnode.VectorAngles2D";
-armory_logicnode_VectorAngles2D.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_VectorAngles2D.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		var v1 = this.inputs[0].get();
-		var v2 = this.inputs[1].get();
-		if(v1 == null || v1 == null) {
-			return null;
-		}
-		var dot = v1.x * v2.x + v1.y * v2.y;
-		var det = v1.x * v2.y - v1.y * v2.x;
-		var alpha = Math.atan2(det,dot);
-		switch(from) {
-		case 0:
-			return alpha;
-		case 1:
-			return alpha * (180 / Math.PI);
-		}
-		return null;
-	}
-	,__class__: armory_logicnode_VectorAngles2D
-});
-var armory_logicnode_VectorFromTransformNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.VectorFromTransformNode"] = armory_logicnode_VectorFromTransformNode;
-armory_logicnode_VectorFromTransformNode.__name__ = "armory.logicnode.VectorFromTransformNode";
-armory_logicnode_VectorFromTransformNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_VectorFromTransformNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	property0: null
-	,get: function(from) {
-		var m = this.inputs[0].get();
-		if(m == null) {
-			return null;
-		}
-		switch(this.property0) {
-		case "Look":
-			return new iron_math_Vec4(m.self._10,m.self._11,m.self._12);
-		case "Quaternion":
-			var q = new iron_math_Quat();
-			var _this = iron_math_Quat.helpMat;
-			_this.self._00 = m.self._00;
-			_this.self._01 = m.self._01;
-			_this.self._02 = m.self._02;
-			_this.self._03 = m.self._03;
-			_this.self._10 = m.self._10;
-			_this.self._11 = m.self._11;
-			_this.self._12 = m.self._12;
-			_this.self._13 = m.self._13;
-			_this.self._20 = m.self._20;
-			_this.self._21 = m.self._21;
-			_this.self._22 = m.self._22;
-			_this.self._23 = m.self._23;
-			_this.self._30 = m.self._30;
-			_this.self._31 = m.self._31;
-			_this.self._32 = m.self._32;
-			_this.self._33 = m.self._33;
-			var _this1 = iron_math_Quat.helpMat;
-			var _this2 = iron_math_Mat4.helpVec;
-			_this2.x = _this1.self._00;
-			_this2.y = _this1.self._01;
-			_this2.z = _this1.self._02;
-			_this2.w = 1.0;
-			var _this3 = _this2;
-			var scale = 1.0 / Math.sqrt(_this3.x * _this3.x + _this3.y * _this3.y + _this3.z * _this3.z);
-			_this1.self._00 *= scale;
-			_this1.self._01 *= scale;
-			_this1.self._02 *= scale;
-			var _this4 = iron_math_Mat4.helpVec;
-			_this4.x = _this1.self._10;
-			_this4.y = _this1.self._11;
-			_this4.z = _this1.self._12;
-			_this4.w = 1.0;
-			var _this5 = _this4;
-			scale = 1.0 / Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z);
-			_this1.self._10 *= scale;
-			_this1.self._11 *= scale;
-			_this1.self._12 *= scale;
-			var _this6 = iron_math_Mat4.helpVec;
-			_this6.x = _this1.self._20;
-			_this6.y = _this1.self._21;
-			_this6.z = _this1.self._22;
-			_this6.w = 1.0;
-			var _this7 = _this6;
-			scale = 1.0 / Math.sqrt(_this7.x * _this7.x + _this7.y * _this7.y + _this7.z * _this7.z);
-			_this1.self._20 *= scale;
-			_this1.self._21 *= scale;
-			_this1.self._22 *= scale;
-			_this1.self._03 = 0.0;
-			_this1.self._13 = 0.0;
-			_this1.self._23 = 0.0;
-			_this1.self._30 = 0.0;
-			_this1.self._31 = 0.0;
-			_this1.self._32 = 0.0;
-			_this1.self._33 = 1.0;
-			var m1 = iron_math_Quat.helpMat;
-			var m11 = m1.self._00;
-			var m12 = m1.self._10;
-			var m13 = m1.self._20;
-			var m21 = m1.self._01;
-			var m22 = m1.self._11;
-			var m23 = m1.self._21;
-			var m31 = m1.self._02;
-			var m32 = m1.self._12;
-			var m33 = m1.self._22;
-			var tr = m11 + m22 + m33;
-			var s = 0.0;
-			if(tr > 0) {
-				s = 0.5 / Math.sqrt(tr + 1.0);
-				q.w = 0.25 / s;
-				q.x = (m32 - m23) * s;
-				q.y = (m13 - m31) * s;
-				q.z = (m21 - m12) * s;
-			} else if(m11 > m22 && m11 > m33) {
-				s = 2.0 * Math.sqrt(1.0 + m11 - m22 - m33);
-				q.w = (m32 - m23) / s;
-				q.x = 0.25 * s;
-				q.y = (m12 + m21) / s;
-				q.z = (m13 + m31) / s;
-			} else if(m22 > m33) {
-				s = 2.0 * Math.sqrt(1.0 + m22 - m11 - m33);
-				q.w = (m13 - m31) / s;
-				q.x = (m12 + m21) / s;
-				q.y = 0.25 * s;
-				q.z = (m23 + m32) / s;
-			} else {
-				s = 2.0 * Math.sqrt(1.0 + m33 - m11 - m22);
-				q.w = (m21 - m12) / s;
-				q.x = (m13 + m31) / s;
-				q.y = (m23 + m32) / s;
-				q.z = 0.25 * s;
-			}
-			return q;
-		case "Right":
-			return new iron_math_Vec4(m.self._00,m.self._01,m.self._02);
-		case "Up":
-			return new iron_math_Vec4(m.self._20,m.self._21,m.self._22);
-		}
-		return null;
-	}
-	,__class__: armory_logicnode_VectorFromTransformNode
-});
-var armory_logicnode_VectorMathNode = function(tree) {
-	this.v = new iron_math_Vec4();
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.VectorMathNode"] = armory_logicnode_VectorMathNode;
-armory_logicnode_VectorMathNode.__name__ = "armory.logicnode.VectorMathNode";
-armory_logicnode_VectorMathNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_VectorMathNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	property0: null
-	,v: null
-	,get: function(from) {
-		var v1 = this.inputs[0].get();
-		var v2 = this.inputs[1].get();
-		if(v1 == null || v2 == null) {
-			return null;
-		}
-		var _this = this.v;
-		_this.x = v1.x;
-		_this.y = v1.y;
-		_this.z = v1.z;
-		_this.w = v1.w;
-		var f = 0.0;
-		switch(this.property0) {
-		case "Add":
-			var _this1 = this.v;
-			_this1.x += v2.x;
-			_this1.y += v2.y;
-			_this1.z += v2.z;
-			break;
-		case "Average":
-			var _this2 = this.v;
-			_this2.x += v2.x;
-			_this2.y += v2.y;
-			_this2.z += v2.z;
-			this.v.x *= 0.5;
-			this.v.y *= 0.5;
-			this.v.z *= 0.5;
-			break;
-		case "Cross Product":
-			var _this3 = this.v;
-			var ax = _this3.x;
-			var ay = _this3.y;
-			var az = _this3.z;
-			var vx = v2.x;
-			var vy = v2.y;
-			var vz = v2.z;
-			_this3.x = ay * vz - az * vy;
-			_this3.y = az * vx - ax * vz;
-			_this3.z = ax * vy - ay * vx;
-			break;
-		case "Distance":
-			var _this4 = this.v;
-			f = Math.sqrt((v2.x - _this4.x) * (v2.x - _this4.x) + (v2.y - _this4.y) * (v2.y - _this4.y) + (v2.z - _this4.z) * (v2.z - _this4.z));
-			break;
-		case "Dot Product":
-			var _this5 = this.v;
-			f = _this5.x * v2.x + _this5.y * v2.y + _this5.z * v2.z;
-			var _this6 = this.v;
-			_this6.x = f;
-			_this6.y = f;
-			_this6.z = f;
-			_this6.w = 1.0;
-			break;
-		case "Length":
-			var _this7 = this.v;
-			f = Math.sqrt(_this7.x * _this7.x + _this7.y * _this7.y + _this7.z * _this7.z);
-			break;
-		case "Multiply":
-			this.v.x *= v2.x;
-			this.v.y *= v2.y;
-			this.v.z *= v2.z;
-			break;
-		case "Normalize":
-			var _this8 = this.v;
-			var n = Math.sqrt(_this8.x * _this8.x + _this8.y * _this8.y + _this8.z * _this8.z);
-			if(n > 0.0) {
-				var invN = 1.0 / n;
-				_this8.x *= invN;
-				_this8.y *= invN;
-				_this8.z *= invN;
-			}
-			break;
-		case "Subtract":
-			var _this9 = this.v;
-			_this9.x -= v2.x;
-			_this9.y -= v2.y;
-			_this9.z -= v2.z;
-			break;
-		}
-		if(from == 0) {
-			return this.v;
-		} else {
-			return f;
-		}
-	}
-	,__class__: armory_logicnode_VectorMathNode
-});
-var armory_logicnode_VectorNode = function(tree,x,y,z) {
-	this.value = new iron_math_Vec4();
-	armory_logicnode_LogicNode.call(this,tree);
-	if(x != null) {
-		this.addInput(new armory_logicnode_FloatNode(tree,x),0);
-		this.addInput(new armory_logicnode_FloatNode(tree,y),0);
-		this.addInput(new armory_logicnode_FloatNode(tree,z),0);
-	}
-};
-$hxClasses["armory.logicnode.VectorNode"] = armory_logicnode_VectorNode;
-armory_logicnode_VectorNode.__name__ = "armory.logicnode.VectorNode";
-armory_logicnode_VectorNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_VectorNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	value: null
-	,get: function(from) {
-		this.value.x = this.inputs[0].get();
-		this.value.y = this.inputs[1].get();
-		this.value.z = this.inputs[2].get();
-		return this.value;
-	}
-	,set: function(value) {
-		this.inputs[0].set(value.x);
-		this.inputs[1].set(value.y);
-		this.inputs[2].set(value.z);
-	}
-	,__class__: armory_logicnode_VectorNode
-});
 var armory_object_Uniforms = function() { };
 $hxClasses["armory.object.Uniforms"] = armory_object_Uniforms;
 armory_object_Uniforms.__name__ = "armory.object.Uniforms";
@@ -3988,130 +1922,6 @@ armory_renderpath_RenderPathCreator.get = function() {
 	armory_renderpath_RenderPathDeferred.init(armory_renderpath_RenderPathCreator.path);
 	armory_renderpath_RenderPathCreator.path.commands = armory_renderpath_RenderPathDeferred.commands;
 	return armory_renderpath_RenderPathCreator.path;
-};
-var haxe_IMap = function() { };
-$hxClasses["haxe.IMap"] = haxe_IMap;
-haxe_IMap.__name__ = "haxe.IMap";
-haxe_IMap.__isInterface__ = true;
-var haxe_ds_StringMap = function() {
-	this.h = { };
-};
-$hxClasses["haxe.ds.StringMap"] = haxe_ds_StringMap;
-haxe_ds_StringMap.__name__ = "haxe.ds.StringMap";
-haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
-haxe_ds_StringMap.prototype = {
-	h: null
-	,rh: null
-	,setReserved: function(key,value) {
-		if(this.rh == null) {
-			this.rh = { };
-		}
-		this.rh["$" + key] = value;
-	}
-	,getReserved: function(key) {
-		if(this.rh == null) {
-			return null;
-		} else {
-			return this.rh["$" + key];
-		}
-	}
-	,existsReserved: function(key) {
-		if(this.rh == null) {
-			return false;
-		}
-		return this.rh.hasOwnProperty("$" + key);
-	}
-	,remove: function(key) {
-		if(__map_reserved[key] != null) {
-			key = "$" + key;
-			if(this.rh == null || !this.rh.hasOwnProperty(key)) {
-				return false;
-			}
-			delete(this.rh[key]);
-			return true;
-		} else {
-			if(!this.h.hasOwnProperty(key)) {
-				return false;
-			}
-			delete(this.h[key]);
-			return true;
-		}
-	}
-	,arrayKeys: function() {
-		var out = [];
-		for( var key in this.h ) {
-		if(this.h.hasOwnProperty(key)) {
-			out.push(key);
-		}
-		}
-		if(this.rh != null) {
-			for( var key in this.rh ) {
-			if(key.charCodeAt(0) == 36) {
-				out.push(key.substr(1));
-			}
-			}
-		}
-		return out;
-	}
-	,__class__: haxe_ds_StringMap
-};
-var armory_system_Event = function() { };
-$hxClasses["armory.system.Event"] = armory_system_Event;
-armory_system_Event.__name__ = "armory.system.Event";
-armory_system_Event.send = function(name,mask) {
-	if(mask == null) {
-		mask = -1;
-	}
-	var entries = armory_system_Event.get(name);
-	if(entries != null) {
-		var _g = 0;
-		while(_g < entries.length) {
-			var e = entries[_g];
-			++_g;
-			if(mask == -1 || mask == e.mask) {
-				e.onEvent();
-			}
-		}
-	}
-};
-armory_system_Event.get = function(name) {
-	var _this = armory_system_Event.events;
-	if(__map_reserved[name] != null) {
-		return _this.getReserved(name);
-	} else {
-		return _this.h[name];
-	}
-};
-armory_system_Event.add = function(name,onEvent,mask) {
-	if(mask == null) {
-		mask = -1;
-	}
-	var e = { name : name, onEvent : onEvent, mask : mask};
-	var _this = armory_system_Event.events;
-	var entries = __map_reserved[name] != null ? _this.getReserved(name) : _this.h[name];
-	if(entries != null) {
-		entries.push(e);
-	} else {
-		var _this1 = armory_system_Event.events;
-		var value = [e];
-		if(__map_reserved[name] != null) {
-			_this1.setReserved(name,value);
-		} else {
-			_this1.h[name] = value;
-		}
-	}
-	return e;
-};
-armory_system_Event.remove = function(name) {
-	armory_system_Event.events.remove(name);
-};
-armory_system_Event.removeListener = function(event) {
-	var key = event.name;
-	var _this = armory_system_Event.events;
-	var entries = __map_reserved[key] != null ? _this.getReserved(key) : _this.h[key];
-	if(entries != null) {
-		HxOverrides.remove(entries,event);
-	}
 };
 var armory_system_Starter = function() { };
 $hxClasses["armory.system.Starter"] = armory_system_Starter;
@@ -4502,6 +2312,34 @@ armory_trait_physics_bullet_PhysicsWorld.prototype = $extend(iron_Trait.prototyp
 	}
 	,__class__: armory_trait_physics_bullet_PhysicsWorld
 });
+var haxe_IMap = function() { };
+$hxClasses["haxe.IMap"] = haxe_IMap;
+haxe_IMap.__name__ = "haxe.IMap";
+haxe_IMap.__isInterface__ = true;
+var haxe_ds_ObjectMap = function() {
+	this.h = { __keys__ : { }};
+};
+$hxClasses["haxe.ds.ObjectMap"] = haxe_ds_ObjectMap;
+haxe_ds_ObjectMap.__name__ = "haxe.ds.ObjectMap";
+haxe_ds_ObjectMap.__interfaces__ = [haxe_IMap];
+haxe_ds_ObjectMap.prototype = {
+	h: null
+	,set: function(key,value) {
+		var id = key.__id__ || (key.__id__ = $global.$haxeUID++);
+		this.h[id] = value;
+		this.h.__keys__[id] = key;
+	}
+	,remove: function(key) {
+		var id = key.__id__;
+		if(this.h.__keys__[id] == null) {
+			return false;
+		}
+		delete(this.h[id]);
+		delete(this.h.__keys__[id]);
+		return true;
+	}
+	,__class__: haxe_ds_ObjectMap
+};
 var kha_math_FastMatrix4 = function(_00,_10,_20,_30,_01,_11,_21,_31,_02,_12,_22,_32,_03,_13,_23,_33) {
 	this._00 = _00;
 	this._10 = _10;
@@ -6472,44 +4310,44 @@ armory_trait_physics_bullet_RigidBody.prototype = $extend(iron_Trait.prototype,{
 		_this1.self._31 = m.self._31;
 		_this1.self._32 = m.self._32;
 		_this1.self._33 = m.self._33;
-		var _this11 = iron_math_Quat.helpMat;
-		var _this2 = iron_math_Mat4.helpVec;
-		_this2.x = _this11.self._00;
-		_this2.y = _this11.self._01;
-		_this2.z = _this11.self._02;
-		_this2.w = 1.0;
-		var _this3 = _this2;
-		var scale = 1.0 / Math.sqrt(_this3.x * _this3.x + _this3.y * _this3.y + _this3.z * _this3.z);
-		_this11.self._00 *= scale;
-		_this11.self._01 *= scale;
-		_this11.self._02 *= scale;
-		var _this4 = iron_math_Mat4.helpVec;
-		_this4.x = _this11.self._10;
-		_this4.y = _this11.self._11;
-		_this4.z = _this11.self._12;
-		_this4.w = 1.0;
-		var _this5 = _this4;
-		scale = 1.0 / Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z);
-		_this11.self._10 *= scale;
-		_this11.self._11 *= scale;
-		_this11.self._12 *= scale;
-		var _this6 = iron_math_Mat4.helpVec;
-		_this6.x = _this11.self._20;
-		_this6.y = _this11.self._21;
-		_this6.z = _this11.self._22;
-		_this6.w = 1.0;
-		var _this7 = _this6;
-		scale = 1.0 / Math.sqrt(_this7.x * _this7.x + _this7.y * _this7.y + _this7.z * _this7.z);
-		_this11.self._20 *= scale;
-		_this11.self._21 *= scale;
-		_this11.self._22 *= scale;
-		_this11.self._03 = 0.0;
-		_this11.self._13 = 0.0;
-		_this11.self._23 = 0.0;
-		_this11.self._30 = 0.0;
-		_this11.self._31 = 0.0;
-		_this11.self._32 = 0.0;
-		_this11.self._33 = 1.0;
+		var _this2 = iron_math_Quat.helpMat;
+		var _this3 = iron_math_Mat4.helpVec;
+		_this3.x = _this2.self._00;
+		_this3.y = _this2.self._01;
+		_this3.z = _this2.self._02;
+		_this3.w = 1.0;
+		var _this4 = _this3;
+		var scale = 1.0 / Math.sqrt(_this4.x * _this4.x + _this4.y * _this4.y + _this4.z * _this4.z);
+		_this2.self._00 *= scale;
+		_this2.self._01 *= scale;
+		_this2.self._02 *= scale;
+		var _this5 = iron_math_Mat4.helpVec;
+		_this5.x = _this2.self._10;
+		_this5.y = _this2.self._11;
+		_this5.z = _this2.self._12;
+		_this5.w = 1.0;
+		var _this6 = _this5;
+		scale = 1.0 / Math.sqrt(_this6.x * _this6.x + _this6.y * _this6.y + _this6.z * _this6.z);
+		_this2.self._10 *= scale;
+		_this2.self._11 *= scale;
+		_this2.self._12 *= scale;
+		var _this7 = iron_math_Mat4.helpVec;
+		_this7.x = _this2.self._20;
+		_this7.y = _this2.self._21;
+		_this7.z = _this2.self._22;
+		_this7.w = 1.0;
+		var _this8 = _this7;
+		scale = 1.0 / Math.sqrt(_this8.x * _this8.x + _this8.y * _this8.y + _this8.z * _this8.z);
+		_this2.self._20 *= scale;
+		_this2.self._21 *= scale;
+		_this2.self._22 *= scale;
+		_this2.self._03 = 0.0;
+		_this2.self._13 = 0.0;
+		_this2.self._23 = 0.0;
+		_this2.self._30 = 0.0;
+		_this2.self._31 = 0.0;
+		_this2.self._32 = 0.0;
+		_this2.self._33 = 1.0;
 		var m1 = iron_math_Quat.helpMat;
 		var m11 = m1.self._00;
 		var m12 = m1.self._10;
@@ -6796,44 +4634,44 @@ armory_trait_physics_bullet_RigidBody.prototype = $extend(iron_Trait.prototype,{
 		_this1.self._31 = m.self._31;
 		_this1.self._32 = m.self._32;
 		_this1.self._33 = m.self._33;
-		var _this11 = iron_math_Quat.helpMat;
-		var _this2 = iron_math_Mat4.helpVec;
-		_this2.x = _this11.self._00;
-		_this2.y = _this11.self._01;
-		_this2.z = _this11.self._02;
-		_this2.w = 1.0;
-		var _this3 = _this2;
-		var scale = 1.0 / Math.sqrt(_this3.x * _this3.x + _this3.y * _this3.y + _this3.z * _this3.z);
-		_this11.self._00 *= scale;
-		_this11.self._01 *= scale;
-		_this11.self._02 *= scale;
-		var _this4 = iron_math_Mat4.helpVec;
-		_this4.x = _this11.self._10;
-		_this4.y = _this11.self._11;
-		_this4.z = _this11.self._12;
-		_this4.w = 1.0;
-		var _this5 = _this4;
-		scale = 1.0 / Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z);
-		_this11.self._10 *= scale;
-		_this11.self._11 *= scale;
-		_this11.self._12 *= scale;
-		var _this6 = iron_math_Mat4.helpVec;
-		_this6.x = _this11.self._20;
-		_this6.y = _this11.self._21;
-		_this6.z = _this11.self._22;
-		_this6.w = 1.0;
-		var _this7 = _this6;
-		scale = 1.0 / Math.sqrt(_this7.x * _this7.x + _this7.y * _this7.y + _this7.z * _this7.z);
-		_this11.self._20 *= scale;
-		_this11.self._21 *= scale;
-		_this11.self._22 *= scale;
-		_this11.self._03 = 0.0;
-		_this11.self._13 = 0.0;
-		_this11.self._23 = 0.0;
-		_this11.self._30 = 0.0;
-		_this11.self._31 = 0.0;
-		_this11.self._32 = 0.0;
-		_this11.self._33 = 1.0;
+		var _this2 = iron_math_Quat.helpMat;
+		var _this3 = iron_math_Mat4.helpVec;
+		_this3.x = _this2.self._00;
+		_this3.y = _this2.self._01;
+		_this3.z = _this2.self._02;
+		_this3.w = 1.0;
+		var _this4 = _this3;
+		var scale = 1.0 / Math.sqrt(_this4.x * _this4.x + _this4.y * _this4.y + _this4.z * _this4.z);
+		_this2.self._00 *= scale;
+		_this2.self._01 *= scale;
+		_this2.self._02 *= scale;
+		var _this5 = iron_math_Mat4.helpVec;
+		_this5.x = _this2.self._10;
+		_this5.y = _this2.self._11;
+		_this5.z = _this2.self._12;
+		_this5.w = 1.0;
+		var _this6 = _this5;
+		scale = 1.0 / Math.sqrt(_this6.x * _this6.x + _this6.y * _this6.y + _this6.z * _this6.z);
+		_this2.self._10 *= scale;
+		_this2.self._11 *= scale;
+		_this2.self._12 *= scale;
+		var _this7 = iron_math_Mat4.helpVec;
+		_this7.x = _this2.self._20;
+		_this7.y = _this2.self._21;
+		_this7.z = _this2.self._22;
+		_this7.w = 1.0;
+		var _this8 = _this7;
+		scale = 1.0 / Math.sqrt(_this8.x * _this8.x + _this8.y * _this8.y + _this8.z * _this8.z);
+		_this2.self._20 *= scale;
+		_this2.self._21 *= scale;
+		_this2.self._22 *= scale;
+		_this2.self._03 = 0.0;
+		_this2.self._13 = 0.0;
+		_this2.self._23 = 0.0;
+		_this2.self._30 = 0.0;
+		_this2.self._31 = 0.0;
+		_this2.self._32 = 0.0;
+		_this2.self._33 = 1.0;
 		var m1 = iron_math_Quat.helpMat;
 		var m11 = m1.self._00;
 		var m12 = m1.self._10;
@@ -7432,30 +5270,6 @@ haxe_ds__$List_ListNode.prototype = {
 	,next: null
 	,__class__: haxe_ds__$List_ListNode
 };
-var haxe_ds_ObjectMap = function() {
-	this.h = { __keys__ : { }};
-};
-$hxClasses["haxe.ds.ObjectMap"] = haxe_ds_ObjectMap;
-haxe_ds_ObjectMap.__name__ = "haxe.ds.ObjectMap";
-haxe_ds_ObjectMap.__interfaces__ = [haxe_IMap];
-haxe_ds_ObjectMap.prototype = {
-	h: null
-	,set: function(key,value) {
-		var id = key.__id__ || (key.__id__ = $global.$haxeUID++);
-		this.h[id] = value;
-		this.h.__keys__[id] = key;
-	}
-	,remove: function(key) {
-		var id = key.__id__;
-		if(this.h.__keys__[id] == null) {
-			return false;
-		}
-		delete(this.h[id]);
-		delete(this.h.__keys__[id]);
-		return true;
-	}
-	,__class__: haxe_ds_ObjectMap
-};
 var haxe_ds__$StringMap_StringMapIterator = function(map,keys) {
 	this.map = map;
 	this.keys = keys;
@@ -7482,6 +5296,68 @@ haxe_ds__$StringMap_StringMapIterator.prototype = {
 		}
 	}
 	,__class__: haxe_ds__$StringMap_StringMapIterator
+};
+var haxe_ds_StringMap = function() {
+	this.h = { };
+};
+$hxClasses["haxe.ds.StringMap"] = haxe_ds_StringMap;
+haxe_ds_StringMap.__name__ = "haxe.ds.StringMap";
+haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
+haxe_ds_StringMap.prototype = {
+	h: null
+	,rh: null
+	,setReserved: function(key,value) {
+		if(this.rh == null) {
+			this.rh = { };
+		}
+		this.rh["$" + key] = value;
+	}
+	,getReserved: function(key) {
+		if(this.rh == null) {
+			return null;
+		} else {
+			return this.rh["$" + key];
+		}
+	}
+	,existsReserved: function(key) {
+		if(this.rh == null) {
+			return false;
+		}
+		return this.rh.hasOwnProperty("$" + key);
+	}
+	,remove: function(key) {
+		if(__map_reserved[key] != null) {
+			key = "$" + key;
+			if(this.rh == null || !this.rh.hasOwnProperty(key)) {
+				return false;
+			}
+			delete(this.rh[key]);
+			return true;
+		} else {
+			if(!this.h.hasOwnProperty(key)) {
+				return false;
+			}
+			delete(this.h[key]);
+			return true;
+		}
+	}
+	,arrayKeys: function() {
+		var out = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) {
+			out.push(key);
+		}
+		}
+		if(this.rh != null) {
+			for( var key in this.rh ) {
+			if(key.charCodeAt(0) == 36) {
+				out.push(key.substr(1));
+			}
+			}
+		}
+		return out;
+	}
+	,__class__: haxe_ds_StringMap
 };
 var haxe_io_Bytes = function(data) {
 	this.length = data.byteLength;
@@ -9184,52 +7060,52 @@ iron_Scene.generateTransform = function(object,transform) {
 	_this1.y = _this.self._01;
 	_this1.z = _this.self._02;
 	_this1.w = 1.0;
-	var _this11 = _this1;
-	scale.x = Math.sqrt(_this11.x * _this11.x + _this11.y * _this11.y + _this11.z * _this11.z);
-	var _this2 = iron_math_Mat4.helpVec;
-	_this2.x = _this.self._10;
-	_this2.y = _this.self._11;
-	_this2.z = _this.self._12;
-	_this2.w = 1.0;
-	var _this3 = _this2;
-	scale.y = Math.sqrt(_this3.x * _this3.x + _this3.y * _this3.y + _this3.z * _this3.z);
-	var _this4 = iron_math_Mat4.helpVec;
-	_this4.x = _this.self._20;
-	_this4.y = _this.self._21;
-	_this4.z = _this.self._22;
-	_this4.w = 1.0;
-	var _this5 = _this4;
-	scale.z = Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z);
-	var _this6 = _this.self;
-	var m3 = _this6._12;
-	var m4 = _this6._22;
-	var m5 = _this6._32;
-	var m6 = _this6._13;
-	var m7 = _this6._23;
-	var m8 = _this6._33;
-	var c00 = _this6._11 * (m4 * m8 - m5 * m7) - _this6._21 * (m3 * m8 - m5 * m6) + _this6._31 * (m3 * m7 - m4 * m6);
-	var m31 = _this6._12;
-	var m41 = _this6._22;
-	var m51 = _this6._32;
-	var m61 = _this6._13;
-	var m71 = _this6._23;
-	var m81 = _this6._33;
-	var c01 = _this6._10 * (m41 * m81 - m51 * m71) - _this6._20 * (m31 * m81 - m51 * m61) + _this6._30 * (m31 * m71 - m41 * m61);
-	var m32 = _this6._11;
-	var m42 = _this6._21;
-	var m52 = _this6._31;
-	var m62 = _this6._13;
-	var m72 = _this6._23;
-	var m82 = _this6._33;
-	var c02 = _this6._10 * (m42 * m82 - m52 * m72) - _this6._20 * (m32 * m82 - m52 * m62) + _this6._30 * (m32 * m72 - m42 * m62);
-	var m33 = _this6._11;
-	var m43 = _this6._21;
-	var m53 = _this6._31;
-	var m63 = _this6._12;
-	var m73 = _this6._22;
-	var m83 = _this6._32;
-	var c03 = _this6._10 * (m43 * m83 - m53 * m73) - _this6._20 * (m33 * m83 - m53 * m63) + _this6._30 * (m33 * m73 - m43 * m63);
-	if(_this6._00 * c00 - _this6._01 * c01 + _this6._02 * c02 - _this6._03 * c03 < 0.0) {
+	var _this2 = _this1;
+	scale.x = Math.sqrt(_this2.x * _this2.x + _this2.y * _this2.y + _this2.z * _this2.z);
+	var _this3 = iron_math_Mat4.helpVec;
+	_this3.x = _this.self._10;
+	_this3.y = _this.self._11;
+	_this3.z = _this.self._12;
+	_this3.w = 1.0;
+	var _this4 = _this3;
+	scale.y = Math.sqrt(_this4.x * _this4.x + _this4.y * _this4.y + _this4.z * _this4.z);
+	var _this5 = iron_math_Mat4.helpVec;
+	_this5.x = _this.self._20;
+	_this5.y = _this.self._21;
+	_this5.z = _this.self._22;
+	_this5.w = 1.0;
+	var _this6 = _this5;
+	scale.z = Math.sqrt(_this6.x * _this6.x + _this6.y * _this6.y + _this6.z * _this6.z);
+	var _this7 = _this.self;
+	var m3 = _this7._12;
+	var m4 = _this7._22;
+	var m5 = _this7._32;
+	var m6 = _this7._13;
+	var m7 = _this7._23;
+	var m8 = _this7._33;
+	var c00 = _this7._11 * (m4 * m8 - m5 * m7) - _this7._21 * (m3 * m8 - m5 * m6) + _this7._31 * (m3 * m7 - m4 * m6);
+	var m31 = _this7._12;
+	var m41 = _this7._22;
+	var m51 = _this7._32;
+	var m61 = _this7._13;
+	var m71 = _this7._23;
+	var m81 = _this7._33;
+	var c01 = _this7._10 * (m41 * m81 - m51 * m71) - _this7._20 * (m31 * m81 - m51 * m61) + _this7._30 * (m31 * m71 - m41 * m61);
+	var m32 = _this7._11;
+	var m42 = _this7._21;
+	var m52 = _this7._31;
+	var m62 = _this7._13;
+	var m72 = _this7._23;
+	var m82 = _this7._33;
+	var c02 = _this7._10 * (m42 * m82 - m52 * m72) - _this7._20 * (m32 * m82 - m52 * m62) + _this7._30 * (m32 * m72 - m42 * m62);
+	var m33 = _this7._11;
+	var m43 = _this7._21;
+	var m53 = _this7._31;
+	var m63 = _this7._12;
+	var m73 = _this7._22;
+	var m83 = _this7._32;
+	var c03 = _this7._10 * (m43 * m83 - m53 * m73) - _this7._20 * (m33 * m83 - m53 * m63) + _this7._30 * (m33 * m73 - m43 * m63);
+	if(_this7._00 * c00 - _this7._01 * c01 + _this7._02 * c02 - _this7._03 * c03 < 0.0) {
 		scale.x = -scale.x;
 	}
 	var invs = 1.0 / scale.x;
@@ -11812,8 +9688,8 @@ var iron_data_MeshData = function(raw,done) {
 		var l = vertex_length * 4;
 		var this1 = new Int16Array(l);
 		bonea = this1;
-		var this11 = new Int16Array(l);
-		weighta = this11;
+		var this2 = new Int16Array(l);
+		weighta = this2;
 		var index = 0;
 		var ai = 0;
 		var _g4 = 0;
@@ -13917,52 +11793,52 @@ iron_object_Animation.prototype = {
 		_this3.y = _this2.self._01;
 		_this3.z = _this2.self._02;
 		_this3.w = 1.0;
-		var _this11 = _this3;
-		scale.x = Math.sqrt(_this11.x * _this11.x + _this11.y * _this11.y + _this11.z * _this11.z);
-		var _this21 = iron_math_Mat4.helpVec;
-		_this21.x = _this2.self._10;
-		_this21.y = _this2.self._11;
-		_this21.z = _this2.self._12;
-		_this21.w = 1.0;
-		var _this31 = _this21;
-		scale.y = Math.sqrt(_this31.x * _this31.x + _this31.y * _this31.y + _this31.z * _this31.z);
-		var _this4 = iron_math_Mat4.helpVec;
-		_this4.x = _this2.self._20;
-		_this4.y = _this2.self._21;
-		_this4.z = _this2.self._22;
-		_this4.w = 1.0;
-		var _this5 = _this4;
-		scale.z = Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z);
-		var _this6 = _this2.self;
-		var m3 = _this6._12;
-		var m4 = _this6._22;
-		var m5 = _this6._32;
-		var m6 = _this6._13;
-		var m7 = _this6._23;
-		var m8 = _this6._33;
-		var c00 = _this6._11 * (m4 * m8 - m5 * m7) - _this6._21 * (m3 * m8 - m5 * m6) + _this6._31 * (m3 * m7 - m4 * m6);
-		var m31 = _this6._12;
-		var m41 = _this6._22;
-		var m51 = _this6._32;
-		var m61 = _this6._13;
-		var m71 = _this6._23;
-		var m81 = _this6._33;
-		var c01 = _this6._10 * (m41 * m81 - m51 * m71) - _this6._20 * (m31 * m81 - m51 * m61) + _this6._30 * (m31 * m71 - m41 * m61);
-		var m32 = _this6._11;
-		var m42 = _this6._21;
-		var m52 = _this6._31;
-		var m62 = _this6._13;
-		var m72 = _this6._23;
-		var m82 = _this6._33;
-		var c02 = _this6._10 * (m42 * m82 - m52 * m72) - _this6._20 * (m32 * m82 - m52 * m62) + _this6._30 * (m32 * m72 - m42 * m62);
-		var m33 = _this6._11;
-		var m43 = _this6._21;
-		var m53 = _this6._31;
-		var m63 = _this6._12;
-		var m73 = _this6._22;
-		var m83 = _this6._32;
-		var c03 = _this6._10 * (m43 * m83 - m53 * m73) - _this6._20 * (m33 * m83 - m53 * m63) + _this6._30 * (m33 * m73 - m43 * m63);
-		if(_this6._00 * c00 - _this6._01 * c01 + _this6._02 * c02 - _this6._03 * c03 < 0.0) {
+		var _this4 = _this3;
+		scale.x = Math.sqrt(_this4.x * _this4.x + _this4.y * _this4.y + _this4.z * _this4.z);
+		var _this5 = iron_math_Mat4.helpVec;
+		_this5.x = _this2.self._10;
+		_this5.y = _this2.self._11;
+		_this5.z = _this2.self._12;
+		_this5.w = 1.0;
+		var _this6 = _this5;
+		scale.y = Math.sqrt(_this6.x * _this6.x + _this6.y * _this6.y + _this6.z * _this6.z);
+		var _this7 = iron_math_Mat4.helpVec;
+		_this7.x = _this2.self._20;
+		_this7.y = _this2.self._21;
+		_this7.z = _this2.self._22;
+		_this7.w = 1.0;
+		var _this8 = _this7;
+		scale.z = Math.sqrt(_this8.x * _this8.x + _this8.y * _this8.y + _this8.z * _this8.z);
+		var _this9 = _this2.self;
+		var m3 = _this9._12;
+		var m4 = _this9._22;
+		var m5 = _this9._32;
+		var m6 = _this9._13;
+		var m7 = _this9._23;
+		var m8 = _this9._33;
+		var c00 = _this9._11 * (m4 * m8 - m5 * m7) - _this9._21 * (m3 * m8 - m5 * m6) + _this9._31 * (m3 * m7 - m4 * m6);
+		var m31 = _this9._12;
+		var m41 = _this9._22;
+		var m51 = _this9._32;
+		var m61 = _this9._13;
+		var m71 = _this9._23;
+		var m81 = _this9._33;
+		var c01 = _this9._10 * (m41 * m81 - m51 * m71) - _this9._20 * (m31 * m81 - m51 * m61) + _this9._30 * (m31 * m71 - m41 * m61);
+		var m32 = _this9._11;
+		var m42 = _this9._21;
+		var m52 = _this9._31;
+		var m62 = _this9._13;
+		var m72 = _this9._23;
+		var m82 = _this9._33;
+		var c02 = _this9._10 * (m42 * m82 - m52 * m72) - _this9._20 * (m32 * m82 - m52 * m62) + _this9._30 * (m32 * m72 - m42 * m62);
+		var m33 = _this9._11;
+		var m43 = _this9._21;
+		var m53 = _this9._31;
+		var m63 = _this9._12;
+		var m73 = _this9._22;
+		var m83 = _this9._32;
+		var c03 = _this9._10 * (m43 * m83 - m53 * m73) - _this9._20 * (m33 * m83 - m53 * m63) + _this9._30 * (m33 * m73 - m43 * m63);
+		if(_this9._00 * c00 - _this9._01 * c01 + _this9._02 * c02 - _this9._03 * c03 < 0.0) {
 			scale.x = -scale.x;
 		}
 		var invs = 1.0 / scale.x;
@@ -14014,78 +11890,78 @@ iron_object_Animation.prototype = {
 			quat.y = (m23 + m321) / s1;
 			quat.z = 0.25 * s1;
 		}
-		var _this7 = iron_object_Animation.m2;
+		var _this10 = iron_object_Animation.m2;
 		var loc1 = iron_object_Animation.vpos2;
 		var quat1 = iron_object_Animation.q2;
 		var scale1 = iron_object_Animation.vscl2;
-		loc1.x = _this7.self._30;
-		loc1.y = _this7.self._31;
-		loc1.z = _this7.self._32;
-		var _this8 = iron_math_Mat4.helpVec;
-		_this8.x = _this7.self._00;
-		_this8.y = _this7.self._01;
-		_this8.z = _this7.self._02;
-		_this8.w = 1.0;
-		var _this12 = _this8;
+		loc1.x = _this10.self._30;
+		loc1.y = _this10.self._31;
+		loc1.z = _this10.self._32;
+		var _this11 = iron_math_Mat4.helpVec;
+		_this11.x = _this10.self._00;
+		_this11.y = _this10.self._01;
+		_this11.z = _this10.self._02;
+		_this11.w = 1.0;
+		var _this12 = _this11;
 		scale1.x = Math.sqrt(_this12.x * _this12.x + _this12.y * _this12.y + _this12.z * _this12.z);
-		var _this22 = iron_math_Mat4.helpVec;
-		_this22.x = _this7.self._10;
-		_this22.y = _this7.self._11;
-		_this22.z = _this7.self._12;
-		_this22.w = 1.0;
-		var _this32 = _this22;
-		scale1.y = Math.sqrt(_this32.x * _this32.x + _this32.y * _this32.y + _this32.z * _this32.z);
-		var _this41 = iron_math_Mat4.helpVec;
-		_this41.x = _this7.self._20;
-		_this41.y = _this7.self._21;
-		_this41.z = _this7.self._22;
-		_this41.w = 1.0;
-		var _this51 = _this41;
-		scale1.z = Math.sqrt(_this51.x * _this51.x + _this51.y * _this51.y + _this51.z * _this51.z);
-		var _this61 = _this7.self;
-		var m34 = _this61._12;
-		var m44 = _this61._22;
-		var m54 = _this61._32;
-		var m64 = _this61._13;
-		var m74 = _this61._23;
-		var m84 = _this61._33;
-		var c001 = _this61._11 * (m44 * m84 - m54 * m74) - _this61._21 * (m34 * m84 - m54 * m64) + _this61._31 * (m34 * m74 - m44 * m64);
-		var m312 = _this61._12;
-		var m411 = _this61._22;
-		var m511 = _this61._32;
-		var m611 = _this61._13;
-		var m711 = _this61._23;
-		var m811 = _this61._33;
-		var c011 = _this61._10 * (m411 * m811 - m511 * m711) - _this61._20 * (m312 * m811 - m511 * m611) + _this61._30 * (m312 * m711 - m411 * m611);
-		var m322 = _this61._11;
-		var m421 = _this61._21;
-		var m521 = _this61._31;
-		var m621 = _this61._13;
-		var m721 = _this61._23;
-		var m821 = _this61._33;
-		var c021 = _this61._10 * (m421 * m821 - m521 * m721) - _this61._20 * (m322 * m821 - m521 * m621) + _this61._30 * (m322 * m721 - m421 * m621);
-		var m332 = _this61._11;
-		var m431 = _this61._21;
-		var m531 = _this61._31;
-		var m631 = _this61._12;
-		var m731 = _this61._22;
-		var m831 = _this61._32;
-		var c031 = _this61._10 * (m431 * m831 - m531 * m731) - _this61._20 * (m332 * m831 - m531 * m631) + _this61._30 * (m332 * m731 - m431 * m631);
-		if(_this61._00 * c001 - _this61._01 * c011 + _this61._02 * c021 - _this61._03 * c031 < 0.0) {
+		var _this13 = iron_math_Mat4.helpVec;
+		_this13.x = _this10.self._10;
+		_this13.y = _this10.self._11;
+		_this13.z = _this10.self._12;
+		_this13.w = 1.0;
+		var _this14 = _this13;
+		scale1.y = Math.sqrt(_this14.x * _this14.x + _this14.y * _this14.y + _this14.z * _this14.z);
+		var _this15 = iron_math_Mat4.helpVec;
+		_this15.x = _this10.self._20;
+		_this15.y = _this10.self._21;
+		_this15.z = _this10.self._22;
+		_this15.w = 1.0;
+		var _this16 = _this15;
+		scale1.z = Math.sqrt(_this16.x * _this16.x + _this16.y * _this16.y + _this16.z * _this16.z);
+		var _this17 = _this10.self;
+		var m34 = _this17._12;
+		var m44 = _this17._22;
+		var m54 = _this17._32;
+		var m64 = _this17._13;
+		var m74 = _this17._23;
+		var m84 = _this17._33;
+		var c001 = _this17._11 * (m44 * m84 - m54 * m74) - _this17._21 * (m34 * m84 - m54 * m64) + _this17._31 * (m34 * m74 - m44 * m64);
+		var m35 = _this17._12;
+		var m45 = _this17._22;
+		var m55 = _this17._32;
+		var m65 = _this17._13;
+		var m75 = _this17._23;
+		var m85 = _this17._33;
+		var c011 = _this17._10 * (m45 * m85 - m55 * m75) - _this17._20 * (m35 * m85 - m55 * m65) + _this17._30 * (m35 * m75 - m45 * m65);
+		var m36 = _this17._11;
+		var m46 = _this17._21;
+		var m56 = _this17._31;
+		var m66 = _this17._13;
+		var m76 = _this17._23;
+		var m86 = _this17._33;
+		var c021 = _this17._10 * (m46 * m86 - m56 * m76) - _this17._20 * (m36 * m86 - m56 * m66) + _this17._30 * (m36 * m76 - m46 * m66);
+		var m37 = _this17._11;
+		var m47 = _this17._21;
+		var m57 = _this17._31;
+		var m67 = _this17._12;
+		var m77 = _this17._22;
+		var m87 = _this17._32;
+		var c031 = _this17._10 * (m47 * m87 - m57 * m77) - _this17._20 * (m37 * m87 - m57 * m67) + _this17._30 * (m37 * m77 - m47 * m67);
+		if(_this17._00 * c001 - _this17._01 * c011 + _this17._02 * c021 - _this17._03 * c031 < 0.0) {
 			scale1.x = -scale1.x;
 		}
 		var invs1 = 1.0 / scale1.x;
-		iron_math_Mat4.helpMat.self._00 = _this7.self._00 * invs1;
-		iron_math_Mat4.helpMat.self._01 = _this7.self._01 * invs1;
-		iron_math_Mat4.helpMat.self._02 = _this7.self._02 * invs1;
+		iron_math_Mat4.helpMat.self._00 = _this10.self._00 * invs1;
+		iron_math_Mat4.helpMat.self._01 = _this10.self._01 * invs1;
+		iron_math_Mat4.helpMat.self._02 = _this10.self._02 * invs1;
 		invs1 = 1.0 / scale1.y;
-		iron_math_Mat4.helpMat.self._10 = _this7.self._10 * invs1;
-		iron_math_Mat4.helpMat.self._11 = _this7.self._11 * invs1;
-		iron_math_Mat4.helpMat.self._12 = _this7.self._12 * invs1;
+		iron_math_Mat4.helpMat.self._10 = _this10.self._10 * invs1;
+		iron_math_Mat4.helpMat.self._11 = _this10.self._11 * invs1;
+		iron_math_Mat4.helpMat.self._12 = _this10.self._12 * invs1;
 		invs1 = 1.0 / scale1.z;
-		iron_math_Mat4.helpMat.self._20 = _this7.self._20 * invs1;
-		iron_math_Mat4.helpMat.self._21 = _this7.self._21 * invs1;
-		iron_math_Mat4.helpMat.self._22 = _this7.self._22 * invs1;
+		iron_math_Mat4.helpMat.self._20 = _this10.self._20 * invs1;
+		iron_math_Mat4.helpMat.self._21 = _this10.self._21 * invs1;
+		iron_math_Mat4.helpMat.self._22 = _this10.self._22 * invs1;
 		var m2 = iron_math_Mat4.helpMat;
 		var m111 = m2.self._00;
 		var m121 = m2.self._10;
@@ -14093,49 +11969,49 @@ iron_object_Animation.prototype = {
 		var m211 = m2.self._01;
 		var m221 = m2.self._11;
 		var m231 = m2.self._21;
-		var m3111 = m2.self._02;
-		var m3211 = m2.self._12;
-		var m3311 = m2.self._22;
-		var tr1 = m111 + m221 + m3311;
+		var m312 = m2.self._02;
+		var m322 = m2.self._12;
+		var m332 = m2.self._22;
+		var tr1 = m111 + m221 + m332;
 		var s2 = 0.0;
 		if(tr1 > 0) {
 			s2 = 0.5 / Math.sqrt(tr1 + 1.0);
 			quat1.w = 0.25 / s2;
-			quat1.x = (m3211 - m231) * s2;
-			quat1.y = (m131 - m3111) * s2;
+			quat1.x = (m322 - m231) * s2;
+			quat1.y = (m131 - m312) * s2;
 			quat1.z = (m211 - m121) * s2;
-		} else if(m111 > m221 && m111 > m3311) {
-			s2 = 2.0 * Math.sqrt(1.0 + m111 - m221 - m3311);
-			quat1.w = (m3211 - m231) / s2;
+		} else if(m111 > m221 && m111 > m332) {
+			s2 = 2.0 * Math.sqrt(1.0 + m111 - m221 - m332);
+			quat1.w = (m322 - m231) / s2;
 			quat1.x = 0.25 * s2;
 			quat1.y = (m121 + m211) / s2;
-			quat1.z = (m131 + m3111) / s2;
-		} else if(m221 > m3311) {
-			s2 = 2.0 * Math.sqrt(1.0 + m221 - m111 - m3311);
-			quat1.w = (m131 - m3111) / s2;
+			quat1.z = (m131 + m312) / s2;
+		} else if(m221 > m332) {
+			s2 = 2.0 * Math.sqrt(1.0 + m221 - m111 - m332);
+			quat1.w = (m131 - m312) / s2;
 			quat1.x = (m121 + m211) / s2;
 			quat1.y = 0.25 * s2;
-			quat1.z = (m231 + m3211) / s2;
+			quat1.z = (m231 + m322) / s2;
 		} else {
-			s2 = 2.0 * Math.sqrt(1.0 + m3311 - m111 - m221);
+			s2 = 2.0 * Math.sqrt(1.0 + m332 - m111 - m221);
 			quat1.w = (m211 - m121) / s2;
-			quat1.x = (m131 + m3111) / s2;
-			quat1.y = (m231 + m3211) / s2;
+			quat1.x = (m131 + m312) / s2;
+			quat1.y = (m231 + m322) / s2;
 			quat1.z = 0.25 * s2;
 		}
-		var _this9 = iron_object_Animation.vp;
+		var _this18 = iron_object_Animation.vp;
 		var from = iron_object_Animation.vpos;
 		var to = iron_object_Animation.vpos2;
-		_this9.x = from.x + (to.x - from.x) * s;
-		_this9.y = from.y + (to.y - from.y) * s;
-		_this9.z = from.z + (to.z - from.z) * s;
-		var _this10 = iron_object_Animation.vs;
+		_this18.x = from.x + (to.x - from.x) * s;
+		_this18.y = from.y + (to.y - from.y) * s;
+		_this18.z = from.z + (to.z - from.z) * s;
+		var _this19 = iron_object_Animation.vs;
 		var from1 = iron_object_Animation.vscl;
 		var to1 = iron_object_Animation.vscl2;
-		_this10.x = from1.x + (to1.x - from1.x) * s;
-		_this10.y = from1.y + (to1.y - from1.y) * s;
-		_this10.z = from1.z + (to1.z - from1.z) * s;
-		var _this13 = iron_object_Animation.q3;
+		_this19.x = from1.x + (to1.x - from1.x) * s;
+		_this19.y = from1.y + (to1.y - from1.y) * s;
+		_this19.z = from1.z + (to1.z - from1.z) * s;
+		var _this20 = iron_object_Animation.q3;
 		var from2 = iron_object_Animation.q1;
 		var to2 = iron_object_Animation.q2;
 		var fromx = from2.x;
@@ -14149,22 +12025,22 @@ iron_object_Animation.prototype = {
 			fromz = -fromz;
 			fromw = -fromw;
 		}
-		_this13.x = fromx + (to2.x - fromx) * s;
-		_this13.y = fromy + (to2.y - fromy) * s;
-		_this13.z = fromz + (to2.z - fromz) * s;
-		_this13.w = fromw + (to2.w - fromw) * s;
-		var l = Math.sqrt(_this13.x * _this13.x + _this13.y * _this13.y + _this13.z * _this13.z + _this13.w * _this13.w);
+		_this20.x = fromx + (to2.x - fromx) * s;
+		_this20.y = fromy + (to2.y - fromy) * s;
+		_this20.z = fromz + (to2.z - fromz) * s;
+		_this20.w = fromw + (to2.w - fromw) * s;
+		var l = Math.sqrt(_this20.x * _this20.x + _this20.y * _this20.y + _this20.z * _this20.z + _this20.w * _this20.w);
 		if(l == 0.0) {
-			_this13.x = 0;
-			_this13.y = 0;
-			_this13.z = 0;
-			_this13.w = 0;
+			_this20.x = 0;
+			_this20.y = 0;
+			_this20.z = 0;
+			_this20.w = 0;
 		} else {
 			l = 1.0 / l;
-			_this13.x *= l;
-			_this13.y *= l;
-			_this13.z *= l;
-			_this13.w *= l;
+			_this20.x *= l;
+			_this20.y *= l;
+			_this20.z *= l;
+			_this20.w *= l;
 		}
 		var q = iron_object_Animation.q3;
 		var x = q.x;
@@ -15296,52 +13172,52 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				_this3.y = _this2.self._01;
 				_this3.z = _this2.self._02;
 				_this3.w = 1.0;
-				var _this11 = _this3;
-				scale.x = Math.sqrt(_this11.x * _this11.x + _this11.y * _this11.y + _this11.z * _this11.z);
-				var _this21 = iron_math_Mat4.helpVec;
-				_this21.x = _this2.self._10;
-				_this21.y = _this2.self._11;
-				_this21.z = _this2.self._12;
-				_this21.w = 1.0;
-				var _this31 = _this21;
-				scale.y = Math.sqrt(_this31.x * _this31.x + _this31.y * _this31.y + _this31.z * _this31.z);
-				var _this4 = iron_math_Mat4.helpVec;
-				_this4.x = _this2.self._20;
-				_this4.y = _this2.self._21;
-				_this4.z = _this2.self._22;
-				_this4.w = 1.0;
-				var _this5 = _this4;
-				scale.z = Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z);
-				var _this6 = _this2.self;
-				var m3 = _this6._12;
-				var m4 = _this6._22;
-				var m5 = _this6._32;
-				var m6 = _this6._13;
-				var m7 = _this6._23;
-				var m8 = _this6._33;
-				var c00 = _this6._11 * (m4 * m8 - m5 * m7) - _this6._21 * (m3 * m8 - m5 * m6) + _this6._31 * (m3 * m7 - m4 * m6);
-				var m31 = _this6._12;
-				var m41 = _this6._22;
-				var m51 = _this6._32;
-				var m61 = _this6._13;
-				var m71 = _this6._23;
-				var m81 = _this6._33;
-				var c01 = _this6._10 * (m41 * m81 - m51 * m71) - _this6._20 * (m31 * m81 - m51 * m61) + _this6._30 * (m31 * m71 - m41 * m61);
-				var m32 = _this6._11;
-				var m42 = _this6._21;
-				var m52 = _this6._31;
-				var m62 = _this6._13;
-				var m72 = _this6._23;
-				var m82 = _this6._33;
-				var c02 = _this6._10 * (m42 * m82 - m52 * m72) - _this6._20 * (m32 * m82 - m52 * m62) + _this6._30 * (m32 * m72 - m42 * m62);
-				var m33 = _this6._11;
-				var m43 = _this6._21;
-				var m53 = _this6._31;
-				var m63 = _this6._12;
-				var m73 = _this6._22;
-				var m83 = _this6._32;
-				var c03 = _this6._10 * (m43 * m83 - m53 * m73) - _this6._20 * (m33 * m83 - m53 * m63) + _this6._30 * (m33 * m73 - m43 * m63);
-				if(_this6._00 * c00 - _this6._01 * c01 + _this6._02 * c02 - _this6._03 * c03 < 0.0) {
+				var _this4 = _this3;
+				scale.x = Math.sqrt(_this4.x * _this4.x + _this4.y * _this4.y + _this4.z * _this4.z);
+				var _this5 = iron_math_Mat4.helpVec;
+				_this5.x = _this2.self._10;
+				_this5.y = _this2.self._11;
+				_this5.z = _this2.self._12;
+				_this5.w = 1.0;
+				var _this6 = _this5;
+				scale.y = Math.sqrt(_this6.x * _this6.x + _this6.y * _this6.y + _this6.z * _this6.z);
+				var _this7 = iron_math_Mat4.helpVec;
+				_this7.x = _this2.self._20;
+				_this7.y = _this2.self._21;
+				_this7.z = _this2.self._22;
+				_this7.w = 1.0;
+				var _this8 = _this7;
+				scale.z = Math.sqrt(_this8.x * _this8.x + _this8.y * _this8.y + _this8.z * _this8.z);
+				var _this9 = _this2.self;
+				var m3 = _this9._12;
+				var m4 = _this9._22;
+				var m5 = _this9._32;
+				var m6 = _this9._13;
+				var m7 = _this9._23;
+				var m8 = _this9._33;
+				var c00 = _this9._11 * (m4 * m8 - m5 * m7) - _this9._21 * (m3 * m8 - m5 * m6) + _this9._31 * (m3 * m7 - m4 * m6);
+				var m31 = _this9._12;
+				var m41 = _this9._22;
+				var m51 = _this9._32;
+				var m61 = _this9._13;
+				var m71 = _this9._23;
+				var m81 = _this9._33;
+				var c01 = _this9._10 * (m41 * m81 - m51 * m71) - _this9._20 * (m31 * m81 - m51 * m61) + _this9._30 * (m31 * m71 - m41 * m61);
+				var m32 = _this9._11;
+				var m42 = _this9._21;
+				var m52 = _this9._31;
+				var m62 = _this9._13;
+				var m72 = _this9._23;
+				var m82 = _this9._33;
+				var c02 = _this9._10 * (m42 * m82 - m52 * m72) - _this9._20 * (m32 * m82 - m52 * m62) + _this9._30 * (m32 * m72 - m42 * m62);
+				var m33 = _this9._11;
+				var m43 = _this9._21;
+				var m53 = _this9._31;
+				var m63 = _this9._12;
+				var m73 = _this9._22;
+				var m83 = _this9._32;
+				var c03 = _this9._10 * (m43 * m83 - m53 * m73) - _this9._20 * (m33 * m83 - m53 * m63) + _this9._30 * (m33 * m73 - m43 * m63);
+				if(_this9._00 * c00 - _this9._01 * c01 + _this9._02 * c02 - _this9._03 * c03 < 0.0) {
 					scale.x = -scale.x;
 				}
 				var invs = 1.0 / scale.x;
@@ -15393,78 +13269,78 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 					quat.y = (m23 + m321) / s1;
 					quat.z = 0.25 * s1;
 				}
-				var _this7 = iron_object_BoneAnimation.m;
+				var _this10 = iron_object_BoneAnimation.m;
 				var loc1 = iron_object_BoneAnimation.vpos2;
 				var quat1 = iron_object_BoneAnimation.q2;
 				var scale1 = iron_object_BoneAnimation.vscl2;
-				loc1.x = _this7.self._30;
-				loc1.y = _this7.self._31;
-				loc1.z = _this7.self._32;
-				var _this8 = iron_math_Mat4.helpVec;
-				_this8.x = _this7.self._00;
-				_this8.y = _this7.self._01;
-				_this8.z = _this7.self._02;
-				_this8.w = 1.0;
-				var _this12 = _this8;
+				loc1.x = _this10.self._30;
+				loc1.y = _this10.self._31;
+				loc1.z = _this10.self._32;
+				var _this11 = iron_math_Mat4.helpVec;
+				_this11.x = _this10.self._00;
+				_this11.y = _this10.self._01;
+				_this11.z = _this10.self._02;
+				_this11.w = 1.0;
+				var _this12 = _this11;
 				scale1.x = Math.sqrt(_this12.x * _this12.x + _this12.y * _this12.y + _this12.z * _this12.z);
-				var _this22 = iron_math_Mat4.helpVec;
-				_this22.x = _this7.self._10;
-				_this22.y = _this7.self._11;
-				_this22.z = _this7.self._12;
-				_this22.w = 1.0;
-				var _this32 = _this22;
-				scale1.y = Math.sqrt(_this32.x * _this32.x + _this32.y * _this32.y + _this32.z * _this32.z);
-				var _this41 = iron_math_Mat4.helpVec;
-				_this41.x = _this7.self._20;
-				_this41.y = _this7.self._21;
-				_this41.z = _this7.self._22;
-				_this41.w = 1.0;
-				var _this51 = _this41;
-				scale1.z = Math.sqrt(_this51.x * _this51.x + _this51.y * _this51.y + _this51.z * _this51.z);
-				var _this61 = _this7.self;
-				var m34 = _this61._12;
-				var m44 = _this61._22;
-				var m54 = _this61._32;
-				var m64 = _this61._13;
-				var m74 = _this61._23;
-				var m84 = _this61._33;
-				var c001 = _this61._11 * (m44 * m84 - m54 * m74) - _this61._21 * (m34 * m84 - m54 * m64) + _this61._31 * (m34 * m74 - m44 * m64);
-				var m312 = _this61._12;
-				var m411 = _this61._22;
-				var m511 = _this61._32;
-				var m611 = _this61._13;
-				var m711 = _this61._23;
-				var m811 = _this61._33;
-				var c011 = _this61._10 * (m411 * m811 - m511 * m711) - _this61._20 * (m312 * m811 - m511 * m611) + _this61._30 * (m312 * m711 - m411 * m611);
-				var m322 = _this61._11;
-				var m421 = _this61._21;
-				var m521 = _this61._31;
-				var m621 = _this61._13;
-				var m721 = _this61._23;
-				var m821 = _this61._33;
-				var c021 = _this61._10 * (m421 * m821 - m521 * m721) - _this61._20 * (m322 * m821 - m521 * m621) + _this61._30 * (m322 * m721 - m421 * m621);
-				var m332 = _this61._11;
-				var m431 = _this61._21;
-				var m531 = _this61._31;
-				var m631 = _this61._12;
-				var m731 = _this61._22;
-				var m831 = _this61._32;
-				var c031 = _this61._10 * (m431 * m831 - m531 * m731) - _this61._20 * (m332 * m831 - m531 * m631) + _this61._30 * (m332 * m731 - m431 * m631);
-				if(_this61._00 * c001 - _this61._01 * c011 + _this61._02 * c021 - _this61._03 * c031 < 0.0) {
+				var _this13 = iron_math_Mat4.helpVec;
+				_this13.x = _this10.self._10;
+				_this13.y = _this10.self._11;
+				_this13.z = _this10.self._12;
+				_this13.w = 1.0;
+				var _this14 = _this13;
+				scale1.y = Math.sqrt(_this14.x * _this14.x + _this14.y * _this14.y + _this14.z * _this14.z);
+				var _this15 = iron_math_Mat4.helpVec;
+				_this15.x = _this10.self._20;
+				_this15.y = _this10.self._21;
+				_this15.z = _this10.self._22;
+				_this15.w = 1.0;
+				var _this16 = _this15;
+				scale1.z = Math.sqrt(_this16.x * _this16.x + _this16.y * _this16.y + _this16.z * _this16.z);
+				var _this17 = _this10.self;
+				var m34 = _this17._12;
+				var m44 = _this17._22;
+				var m54 = _this17._32;
+				var m64 = _this17._13;
+				var m74 = _this17._23;
+				var m84 = _this17._33;
+				var c001 = _this17._11 * (m44 * m84 - m54 * m74) - _this17._21 * (m34 * m84 - m54 * m64) + _this17._31 * (m34 * m74 - m44 * m64);
+				var m35 = _this17._12;
+				var m45 = _this17._22;
+				var m55 = _this17._32;
+				var m65 = _this17._13;
+				var m75 = _this17._23;
+				var m85 = _this17._33;
+				var c011 = _this17._10 * (m45 * m85 - m55 * m75) - _this17._20 * (m35 * m85 - m55 * m65) + _this17._30 * (m35 * m75 - m45 * m65);
+				var m36 = _this17._11;
+				var m46 = _this17._21;
+				var m56 = _this17._31;
+				var m66 = _this17._13;
+				var m76 = _this17._23;
+				var m86 = _this17._33;
+				var c021 = _this17._10 * (m46 * m86 - m56 * m76) - _this17._20 * (m36 * m86 - m56 * m66) + _this17._30 * (m36 * m76 - m46 * m66);
+				var m37 = _this17._11;
+				var m47 = _this17._21;
+				var m57 = _this17._31;
+				var m67 = _this17._12;
+				var m77 = _this17._22;
+				var m87 = _this17._32;
+				var c031 = _this17._10 * (m47 * m87 - m57 * m77) - _this17._20 * (m37 * m87 - m57 * m67) + _this17._30 * (m37 * m77 - m47 * m67);
+				if(_this17._00 * c001 - _this17._01 * c011 + _this17._02 * c021 - _this17._03 * c031 < 0.0) {
 					scale1.x = -scale1.x;
 				}
 				var invs1 = 1.0 / scale1.x;
-				iron_math_Mat4.helpMat.self._00 = _this7.self._00 * invs1;
-				iron_math_Mat4.helpMat.self._01 = _this7.self._01 * invs1;
-				iron_math_Mat4.helpMat.self._02 = _this7.self._02 * invs1;
+				iron_math_Mat4.helpMat.self._00 = _this10.self._00 * invs1;
+				iron_math_Mat4.helpMat.self._01 = _this10.self._01 * invs1;
+				iron_math_Mat4.helpMat.self._02 = _this10.self._02 * invs1;
 				invs1 = 1.0 / scale1.y;
-				iron_math_Mat4.helpMat.self._10 = _this7.self._10 * invs1;
-				iron_math_Mat4.helpMat.self._11 = _this7.self._11 * invs1;
-				iron_math_Mat4.helpMat.self._12 = _this7.self._12 * invs1;
+				iron_math_Mat4.helpMat.self._10 = _this10.self._10 * invs1;
+				iron_math_Mat4.helpMat.self._11 = _this10.self._11 * invs1;
+				iron_math_Mat4.helpMat.self._12 = _this10.self._12 * invs1;
 				invs1 = 1.0 / scale1.z;
-				iron_math_Mat4.helpMat.self._20 = _this7.self._20 * invs1;
-				iron_math_Mat4.helpMat.self._21 = _this7.self._21 * invs1;
-				iron_math_Mat4.helpMat.self._22 = _this7.self._22 * invs1;
+				iron_math_Mat4.helpMat.self._20 = _this10.self._20 * invs1;
+				iron_math_Mat4.helpMat.self._21 = _this10.self._21 * invs1;
+				iron_math_Mat4.helpMat.self._22 = _this10.self._22 * invs1;
 				var m10 = iron_math_Mat4.helpMat;
 				var m111 = m10.self._00;
 				var m121 = m10.self._10;
@@ -15472,49 +13348,49 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				var m211 = m10.self._01;
 				var m221 = m10.self._11;
 				var m231 = m10.self._21;
-				var m3111 = m10.self._02;
-				var m3211 = m10.self._12;
-				var m3311 = m10.self._22;
-				var tr1 = m111 + m221 + m3311;
+				var m312 = m10.self._02;
+				var m322 = m10.self._12;
+				var m332 = m10.self._22;
+				var tr1 = m111 + m221 + m332;
 				var s2 = 0.0;
 				if(tr1 > 0) {
 					s2 = 0.5 / Math.sqrt(tr1 + 1.0);
 					quat1.w = 0.25 / s2;
-					quat1.x = (m3211 - m231) * s2;
-					quat1.y = (m131 - m3111) * s2;
+					quat1.x = (m322 - m231) * s2;
+					quat1.y = (m131 - m312) * s2;
 					quat1.z = (m211 - m121) * s2;
-				} else if(m111 > m221 && m111 > m3311) {
-					s2 = 2.0 * Math.sqrt(1.0 + m111 - m221 - m3311);
-					quat1.w = (m3211 - m231) / s2;
+				} else if(m111 > m221 && m111 > m332) {
+					s2 = 2.0 * Math.sqrt(1.0 + m111 - m221 - m332);
+					quat1.w = (m322 - m231) / s2;
 					quat1.x = 0.25 * s2;
 					quat1.y = (m121 + m211) / s2;
-					quat1.z = (m131 + m3111) / s2;
-				} else if(m221 > m3311) {
-					s2 = 2.0 * Math.sqrt(1.0 + m221 - m111 - m3311);
-					quat1.w = (m131 - m3111) / s2;
+					quat1.z = (m131 + m312) / s2;
+				} else if(m221 > m332) {
+					s2 = 2.0 * Math.sqrt(1.0 + m221 - m111 - m332);
+					quat1.w = (m131 - m312) / s2;
 					quat1.x = (m121 + m211) / s2;
 					quat1.y = 0.25 * s2;
-					quat1.z = (m231 + m3211) / s2;
+					quat1.z = (m231 + m322) / s2;
 				} else {
-					s2 = 2.0 * Math.sqrt(1.0 + m3311 - m111 - m221);
+					s2 = 2.0 * Math.sqrt(1.0 + m332 - m111 - m221);
 					quat1.w = (m211 - m121) / s2;
-					quat1.x = (m131 + m3111) / s2;
-					quat1.y = (m231 + m3211) / s2;
+					quat1.x = (m131 + m312) / s2;
+					quat1.y = (m231 + m322) / s2;
 					quat1.z = 0.25 * s2;
 				}
-				var _this9 = iron_object_BoneAnimation.v1;
+				var _this18 = iron_object_BoneAnimation.v1;
 				var from = iron_object_BoneAnimation.vpos;
 				var to = iron_object_BoneAnimation.vpos2;
-				_this9.x = from.x + (to.x - from.x) * s;
-				_this9.y = from.y + (to.y - from.y) * s;
-				_this9.z = from.z + (to.z - from.z) * s;
-				var _this10 = iron_object_BoneAnimation.v2;
+				_this18.x = from.x + (to.x - from.x) * s;
+				_this18.y = from.y + (to.y - from.y) * s;
+				_this18.z = from.z + (to.z - from.z) * s;
+				var _this19 = iron_object_BoneAnimation.v2;
 				var from1 = iron_object_BoneAnimation.vscl;
 				var to1 = iron_object_BoneAnimation.vscl2;
-				_this10.x = from1.x + (to1.x - from1.x) * s;
-				_this10.y = from1.y + (to1.y - from1.y) * s;
-				_this10.z = from1.z + (to1.z - from1.z) * s;
-				var _this13 = iron_object_BoneAnimation.q3;
+				_this19.x = from1.x + (to1.x - from1.x) * s;
+				_this19.y = from1.y + (to1.y - from1.y) * s;
+				_this19.z = from1.z + (to1.z - from1.z) * s;
+				var _this20 = iron_object_BoneAnimation.q3;
 				var from2 = iron_object_BoneAnimation.q1;
 				var to2 = iron_object_BoneAnimation.q2;
 				var fromx = from2.x;
@@ -15528,24 +13404,24 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 					fromz = -fromz;
 					fromw = -fromw;
 				}
-				_this13.x = fromx + (to2.x - fromx) * s;
-				_this13.y = fromy + (to2.y - fromy) * s;
-				_this13.z = fromz + (to2.z - fromz) * s;
-				_this13.w = fromw + (to2.w - fromw) * s;
-				var l = Math.sqrt(_this13.x * _this13.x + _this13.y * _this13.y + _this13.z * _this13.z + _this13.w * _this13.w);
+				_this20.x = fromx + (to2.x - fromx) * s;
+				_this20.y = fromy + (to2.y - fromy) * s;
+				_this20.z = fromz + (to2.z - fromz) * s;
+				_this20.w = fromw + (to2.w - fromw) * s;
+				var l = Math.sqrt(_this20.x * _this20.x + _this20.y * _this20.y + _this20.z * _this20.z + _this20.w * _this20.w);
 				if(l == 0.0) {
-					_this13.x = 0;
-					_this13.y = 0;
-					_this13.z = 0;
-					_this13.w = 0;
+					_this20.x = 0;
+					_this20.y = 0;
+					_this20.z = 0;
+					_this20.w = 0;
 				} else {
 					l = 1.0 / l;
-					_this13.x *= l;
-					_this13.y *= l;
-					_this13.z *= l;
-					_this13.w *= l;
+					_this20.x *= l;
+					_this20.y *= l;
+					_this20.z *= l;
+					_this20.w *= l;
 				}
-				var _this14 = iron_object_BoneAnimation.m;
+				var _this21 = iron_object_BoneAnimation.m;
 				var q = iron_object_BoneAnimation.q3;
 				var x = q.x;
 				var y = q.y;
@@ -15563,67 +13439,67 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				var wx = w * x2;
 				var wy = w * y2;
 				var wz = w * z2;
-				_this14.self._00 = 1.0 - (yy + zz);
-				_this14.self._10 = xy - wz;
-				_this14.self._20 = xz + wy;
-				_this14.self._01 = xy + wz;
-				_this14.self._11 = 1.0 - (xx + zz);
-				_this14.self._21 = yz - wx;
-				_this14.self._02 = xz - wy;
-				_this14.self._12 = yz + wx;
-				_this14.self._22 = 1.0 - (xx + yy);
-				_this14.self._03 = 0.0;
-				_this14.self._13 = 0.0;
-				_this14.self._23 = 0.0;
-				_this14.self._30 = 0.0;
-				_this14.self._31 = 0.0;
-				_this14.self._32 = 0.0;
-				_this14.self._33 = 1.0;
-				var _this15 = iron_object_BoneAnimation.m;
+				_this21.self._00 = 1.0 - (yy + zz);
+				_this21.self._10 = xy - wz;
+				_this21.self._20 = xz + wy;
+				_this21.self._01 = xy + wz;
+				_this21.self._11 = 1.0 - (xx + zz);
+				_this21.self._21 = yz - wx;
+				_this21.self._02 = xz - wy;
+				_this21.self._12 = yz + wx;
+				_this21.self._22 = 1.0 - (xx + yy);
+				_this21.self._03 = 0.0;
+				_this21.self._13 = 0.0;
+				_this21.self._23 = 0.0;
+				_this21.self._30 = 0.0;
+				_this21.self._31 = 0.0;
+				_this21.self._32 = 0.0;
+				_this21.self._33 = 1.0;
+				var _this22 = iron_object_BoneAnimation.m;
 				var v = iron_object_BoneAnimation.v2;
 				var x1 = v.x;
 				var y1 = v.y;
 				var z1 = v.z;
-				_this15.self._00 *= x1;
-				_this15.self._01 *= x1;
-				_this15.self._02 *= x1;
-				_this15.self._03 *= x1;
-				_this15.self._10 *= y1;
-				_this15.self._11 *= y1;
-				_this15.self._12 *= y1;
-				_this15.self._13 *= y1;
-				_this15.self._20 *= z1;
-				_this15.self._21 *= z1;
-				_this15.self._22 *= z1;
-				_this15.self._23 *= z1;
+				_this22.self._00 *= x1;
+				_this22.self._01 *= x1;
+				_this22.self._02 *= x1;
+				_this22.self._03 *= x1;
+				_this22.self._10 *= y1;
+				_this22.self._11 *= y1;
+				_this22.self._12 *= y1;
+				_this22.self._13 *= y1;
+				_this22.self._20 *= z1;
+				_this22.self._21 *= z1;
+				_this22.self._22 *= z1;
+				_this22.self._23 *= z1;
 				iron_object_BoneAnimation.m.self._30 = iron_object_BoneAnimation.v1.x;
 				iron_object_BoneAnimation.m.self._31 = iron_object_BoneAnimation.v1.y;
 				iron_object_BoneAnimation.m.self._32 = iron_object_BoneAnimation.v1.z;
 			}
 			if(this.absMats != null && i < this.absMats.length) {
-				var _this16 = this.absMats[i];
+				var _this23 = this.absMats[i];
 				var m14 = iron_object_BoneAnimation.m;
-				_this16.self._00 = m14.self._00;
-				_this16.self._01 = m14.self._01;
-				_this16.self._02 = m14.self._02;
-				_this16.self._03 = m14.self._03;
-				_this16.self._10 = m14.self._10;
-				_this16.self._11 = m14.self._11;
-				_this16.self._12 = m14.self._12;
-				_this16.self._13 = m14.self._13;
-				_this16.self._20 = m14.self._20;
-				_this16.self._21 = m14.self._21;
-				_this16.self._22 = m14.self._22;
-				_this16.self._23 = m14.self._23;
-				_this16.self._30 = m14.self._30;
-				_this16.self._31 = m14.self._31;
-				_this16.self._32 = m14.self._32;
-				_this16.self._33 = m14.self._33;
+				_this23.self._00 = m14.self._00;
+				_this23.self._01 = m14.self._01;
+				_this23.self._02 = m14.self._02;
+				_this23.self._03 = m14.self._03;
+				_this23.self._10 = m14.self._10;
+				_this23.self._11 = m14.self._11;
+				_this23.self._12 = m14.self._12;
+				_this23.self._13 = m14.self._13;
+				_this23.self._20 = m14.self._20;
+				_this23.self._21 = m14.self._21;
+				_this23.self._22 = m14.self._22;
+				_this23.self._23 = m14.self._23;
+				_this23.self._30 = m14.self._30;
+				_this23.self._31 = m14.self._31;
+				_this23.self._32 = m14.self._32;
+				_this23.self._33 = m14.self._33;
 			}
 			if(this.boneChildren != null) {
 				this.updateBoneChildren(bones[i],iron_object_BoneAnimation.m);
 			}
-			var _this17 = iron_object_BoneAnimation.m;
+			var _this24 = iron_object_BoneAnimation.m;
 			var b = iron_object_BoneAnimation.m;
 			var a = this.data.geom.skeletonTransformsI[i];
 			var a00 = a.self._00;
@@ -15646,34 +13522,34 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 			var b1 = b.self._10;
 			var b2 = b.self._20;
 			var b3 = b.self._30;
-			_this17.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-			_this17.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-			_this17.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-			_this17.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			_this24.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this24.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this24.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this24.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
 			b0 = b.self._01;
 			b1 = b.self._11;
 			b2 = b.self._21;
 			b3 = b.self._31;
-			_this17.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-			_this17.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-			_this17.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-			_this17.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			_this24.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this24.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this24.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this24.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
 			b0 = b.self._02;
 			b1 = b.self._12;
 			b2 = b.self._22;
 			b3 = b.self._32;
-			_this17.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-			_this17.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-			_this17.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-			_this17.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			_this24.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this24.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this24.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this24.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
 			b0 = b.self._03;
 			b1 = b.self._13;
 			b2 = b.self._23;
 			b3 = b.self._33;
-			_this17.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-			_this17.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-			_this17.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-			_this17.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			_this24.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this24.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this24.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this24.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
 			this.updateSkinBuffer(iron_object_BoneAnimation.m,i);
 		}
 	}
@@ -16094,52 +13970,52 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 			_this2.y = m.self._01;
 			_this2.z = m.self._02;
 			_this2.w = 1.0;
-			var _this11 = _this2;
-			scale.x = Math.sqrt(_this11.x * _this11.x + _this11.y * _this11.y + _this11.z * _this11.z);
-			var _this21 = iron_math_Mat4.helpVec;
-			_this21.x = m.self._10;
-			_this21.y = m.self._11;
-			_this21.z = m.self._12;
-			_this21.w = 1.0;
-			var _this3 = _this21;
-			scale.y = Math.sqrt(_this3.x * _this3.x + _this3.y * _this3.y + _this3.z * _this3.z);
+			var _this3 = _this2;
+			scale.x = Math.sqrt(_this3.x * _this3.x + _this3.y * _this3.y + _this3.z * _this3.z);
 			var _this4 = iron_math_Mat4.helpVec;
-			_this4.x = m.self._20;
-			_this4.y = m.self._21;
-			_this4.z = m.self._22;
+			_this4.x = m.self._10;
+			_this4.y = m.self._11;
+			_this4.z = m.self._12;
 			_this4.w = 1.0;
 			var _this5 = _this4;
-			scale.z = Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z);
-			var _this6 = m.self;
-			var m3 = _this6._12;
-			var m4 = _this6._22;
-			var m5 = _this6._32;
-			var m6 = _this6._13;
-			var m7 = _this6._23;
-			var m8 = _this6._33;
-			var c00 = _this6._11 * (m4 * m8 - m5 * m7) - _this6._21 * (m3 * m8 - m5 * m6) + _this6._31 * (m3 * m7 - m4 * m6);
-			var m31 = _this6._12;
-			var m41 = _this6._22;
-			var m51 = _this6._32;
-			var m61 = _this6._13;
-			var m71 = _this6._23;
-			var m81 = _this6._33;
-			var c01 = _this6._10 * (m41 * m81 - m51 * m71) - _this6._20 * (m31 * m81 - m51 * m61) + _this6._30 * (m31 * m71 - m41 * m61);
-			var m32 = _this6._11;
-			var m42 = _this6._21;
-			var m52 = _this6._31;
-			var m62 = _this6._13;
-			var m72 = _this6._23;
-			var m82 = _this6._33;
-			var c02 = _this6._10 * (m42 * m82 - m52 * m72) - _this6._20 * (m32 * m82 - m52 * m62) + _this6._30 * (m32 * m72 - m42 * m62);
-			var m33 = _this6._11;
-			var m43 = _this6._21;
-			var m53 = _this6._31;
-			var m63 = _this6._12;
-			var m73 = _this6._22;
-			var m83 = _this6._32;
-			var c03 = _this6._10 * (m43 * m83 - m53 * m73) - _this6._20 * (m33 * m83 - m53 * m63) + _this6._30 * (m33 * m73 - m43 * m63);
-			if(_this6._00 * c00 - _this6._01 * c01 + _this6._02 * c02 - _this6._03 * c03 < 0.0) {
+			scale.y = Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z);
+			var _this6 = iron_math_Mat4.helpVec;
+			_this6.x = m.self._20;
+			_this6.y = m.self._21;
+			_this6.z = m.self._22;
+			_this6.w = 1.0;
+			var _this7 = _this6;
+			scale.z = Math.sqrt(_this7.x * _this7.x + _this7.y * _this7.y + _this7.z * _this7.z);
+			var _this8 = m.self;
+			var m3 = _this8._12;
+			var m4 = _this8._22;
+			var m5 = _this8._32;
+			var m6 = _this8._13;
+			var m7 = _this8._23;
+			var m8 = _this8._33;
+			var c00 = _this8._11 * (m4 * m8 - m5 * m7) - _this8._21 * (m3 * m8 - m5 * m6) + _this8._31 * (m3 * m7 - m4 * m6);
+			var m31 = _this8._12;
+			var m41 = _this8._22;
+			var m51 = _this8._32;
+			var m61 = _this8._13;
+			var m71 = _this8._23;
+			var m81 = _this8._33;
+			var c01 = _this8._10 * (m41 * m81 - m51 * m71) - _this8._20 * (m31 * m81 - m51 * m61) + _this8._30 * (m31 * m71 - m41 * m61);
+			var m32 = _this8._11;
+			var m42 = _this8._21;
+			var m52 = _this8._31;
+			var m62 = _this8._13;
+			var m72 = _this8._23;
+			var m82 = _this8._33;
+			var c02 = _this8._10 * (m42 * m82 - m52 * m72) - _this8._20 * (m32 * m82 - m52 * m62) + _this8._30 * (m32 * m72 - m42 * m62);
+			var m33 = _this8._11;
+			var m43 = _this8._21;
+			var m53 = _this8._31;
+			var m63 = _this8._12;
+			var m73 = _this8._22;
+			var m83 = _this8._32;
+			var c03 = _this8._10 * (m43 * m83 - m53 * m73) - _this8._20 * (m33 * m83 - m53 * m63) + _this8._30 * (m33 * m73 - m43 * m63);
+			if(_this8._00 * c00 - _this8._01 * c01 + _this8._02 * c02 - _this8._03 * c03 < 0.0) {
 				scale.x = -scale.x;
 			}
 			var invs = 1.0 / scale.x;
@@ -16191,24 +14067,24 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				quat.y = (m23 + m321) / s;
 				quat.z = 0.25 * s;
 			}
-			var _this7 = iron_object_BoneAnimation.v2;
-			_this7.x = goal.x;
-			_this7.y = goal.y;
-			_this7.z = goal.z;
-			_this7.w = goal.w;
-			var _this8 = _this7;
-			_this8.x -= startLoc_x;
-			_this8.y -= startLoc_y;
-			_this8.z -= startLoc_z;
-			var _this9 = _this8;
-			var n = Math.sqrt(_this9.x * _this9.x + _this9.y * _this9.y + _this9.z * _this9.z);
+			var _this9 = iron_object_BoneAnimation.v2;
+			_this9.x = goal.x;
+			_this9.y = goal.y;
+			_this9.z = goal.z;
+			_this9.w = goal.w;
+			var _this10 = _this9;
+			_this10.x -= startLoc_x;
+			_this10.y -= startLoc_y;
+			_this10.z -= startLoc_z;
+			var _this11 = _this10;
+			var n = Math.sqrt(_this11.x * _this11.x + _this11.y * _this11.y + _this11.z * _this11.z);
 			if(n > 0.0) {
 				var invN = 1.0 / n;
-				_this9.x *= invN;
-				_this9.y *= invN;
-				_this9.z *= invN;
+				_this11.x *= invN;
+				_this11.y *= invN;
+				_this11.z *= invN;
 			}
-			var _this10 = iron_object_BoneAnimation.q1;
+			var _this12 = iron_object_BoneAnimation.q1;
 			var v1 = iron_object_BoneAnimation.v1;
 			var v2 = iron_object_BoneAnimation.v2;
 			var a = iron_math_Quat.helpVec0;
@@ -16245,28 +14121,28 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				}
 				var angle = Math.PI;
 				var s1 = Math.sin(angle * 0.5);
-				_this10.x = a.x * s1;
-				_this10.y = a.y * s1;
-				_this10.z = a.z * s1;
-				_this10.w = Math.cos(angle * 0.5);
-				var l1 = Math.sqrt(_this10.x * _this10.x + _this10.y * _this10.y + _this10.z * _this10.z + _this10.w * _this10.w);
+				_this12.x = a.x * s1;
+				_this12.y = a.y * s1;
+				_this12.z = a.z * s1;
+				_this12.w = Math.cos(angle * 0.5);
+				var l1 = Math.sqrt(_this12.x * _this12.x + _this12.y * _this12.y + _this12.z * _this12.z + _this12.w * _this12.w);
 				if(l1 == 0.0) {
-					_this10.x = 0;
-					_this10.y = 0;
-					_this10.z = 0;
-					_this10.w = 0;
+					_this12.x = 0;
+					_this12.y = 0;
+					_this12.z = 0;
+					_this12.w = 0;
 				} else {
 					l1 = 1.0 / l1;
-					_this10.x *= l1;
-					_this10.y *= l1;
-					_this10.z *= l1;
-					_this10.w *= l1;
+					_this12.x *= l1;
+					_this12.y *= l1;
+					_this12.z *= l1;
+					_this12.w *= l1;
 				}
 			} else if(dot > 0.999999) {
-				_this10.x = 0;
-				_this10.y = 0;
-				_this10.z = 0;
-				_this10.w = 1;
+				_this12.x = 0;
+				_this12.y = 0;
+				_this12.z = 0;
+				_this12.w = 1;
 			} else {
 				var ax2 = v1.x;
 				var ay2 = v1.y;
@@ -16277,22 +14153,22 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				a.x = ay2 * bz2 - az2 * by2;
 				a.y = az2 * bx2 - ax2 * bz2;
 				a.z = ax2 * by2 - ay2 * bx2;
-				_this10.x = a.x;
-				_this10.y = a.y;
-				_this10.z = a.z;
-				_this10.w = 1 + dot;
-				var l11 = Math.sqrt(_this10.x * _this10.x + _this10.y * _this10.y + _this10.z * _this10.z + _this10.w * _this10.w);
-				if(l11 == 0.0) {
-					_this10.x = 0;
-					_this10.y = 0;
-					_this10.z = 0;
-					_this10.w = 0;
+				_this12.x = a.x;
+				_this12.y = a.y;
+				_this12.z = a.z;
+				_this12.w = 1 + dot;
+				var l2 = Math.sqrt(_this12.x * _this12.x + _this12.y * _this12.y + _this12.z * _this12.z + _this12.w * _this12.w);
+				if(l2 == 0.0) {
+					_this12.x = 0;
+					_this12.y = 0;
+					_this12.z = 0;
+					_this12.w = 0;
 				} else {
-					l11 = 1.0 / l11;
-					_this10.x *= l11;
-					_this10.y *= l11;
-					_this10.z *= l11;
-					_this10.w *= l11;
+					l2 = 1.0 / l2;
+					_this12.x *= l2;
+					_this12.y *= l2;
+					_this12.z *= l2;
+					_this12.w *= l2;
 				}
 			}
 			var loc1 = iron_object_BoneAnimation.vpos;
@@ -16330,21 +14206,21 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 			m.self._31 = 0.0;
 			m.self._32 = 0.0;
 			m.self._33 = 1.0;
-			var x11 = sc.x;
-			var y11 = sc.y;
-			var z11 = sc.z;
-			m.self._00 *= x11;
-			m.self._01 *= x11;
-			m.self._02 *= x11;
-			m.self._03 *= x11;
-			m.self._10 *= y11;
-			m.self._11 *= y11;
-			m.self._12 *= y11;
-			m.self._13 *= y11;
-			m.self._20 *= z11;
-			m.self._21 *= z11;
-			m.self._22 *= z11;
-			m.self._23 *= z11;
+			var x3 = sc.x;
+			var y3 = sc.y;
+			var z3 = sc.z;
+			m.self._00 *= x3;
+			m.self._01 *= x3;
+			m.self._02 *= x3;
+			m.self._03 *= x3;
+			m.self._10 *= y3;
+			m.self._11 *= y3;
+			m.self._12 *= y3;
+			m.self._13 *= y3;
+			m.self._20 *= z3;
+			m.self._21 *= z3;
+			m.self._22 *= z3;
+			m.self._23 *= z3;
 			m.self._30 = loc1.x;
 			m.self._31 = loc1.y;
 			m.self._32 = loc1.z;
@@ -16408,57 +14284,57 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				loc2.x = m2.self._30;
 				loc2.y = m2.self._31;
 				loc2.z = m2.self._32;
-				var _this12 = iron_math_Mat4.helpVec;
-				_this12.x = m2.self._00;
-				_this12.y = m2.self._01;
-				_this12.z = m2.self._02;
-				_this12.w = 1.0;
-				var _this13 = _this12;
-				scale1.x = Math.sqrt(_this13.x * _this13.x + _this13.y * _this13.y + _this13.z * _this13.z);
-				var _this22 = iron_math_Mat4.helpVec;
-				_this22.x = m2.self._10;
-				_this22.y = m2.self._11;
-				_this22.z = m2.self._12;
-				_this22.w = 1.0;
-				var _this31 = _this22;
-				scale1.y = Math.sqrt(_this31.x * _this31.x + _this31.y * _this31.y + _this31.z * _this31.z);
-				var _this41 = iron_math_Mat4.helpVec;
-				_this41.x = m2.self._20;
-				_this41.y = m2.self._21;
-				_this41.z = m2.self._22;
-				_this41.w = 1.0;
-				var _this51 = _this41;
-				scale1.z = Math.sqrt(_this51.x * _this51.x + _this51.y * _this51.y + _this51.z * _this51.z);
-				var _this61 = m2.self;
-				var m34 = _this61._12;
-				var m44 = _this61._22;
-				var m54 = _this61._32;
-				var m64 = _this61._13;
-				var m74 = _this61._23;
-				var m84 = _this61._33;
-				var c001 = _this61._11 * (m44 * m84 - m54 * m74) - _this61._21 * (m34 * m84 - m54 * m64) + _this61._31 * (m34 * m74 - m44 * m64);
-				var m312 = _this61._12;
-				var m411 = _this61._22;
-				var m511 = _this61._32;
-				var m611 = _this61._13;
-				var m711 = _this61._23;
-				var m811 = _this61._33;
-				var c011 = _this61._10 * (m411 * m811 - m511 * m711) - _this61._20 * (m312 * m811 - m511 * m611) + _this61._30 * (m312 * m711 - m411 * m611);
-				var m322 = _this61._11;
-				var m421 = _this61._21;
-				var m521 = _this61._31;
-				var m621 = _this61._13;
-				var m721 = _this61._23;
-				var m821 = _this61._33;
-				var c021 = _this61._10 * (m421 * m821 - m521 * m721) - _this61._20 * (m322 * m821 - m521 * m621) + _this61._30 * (m322 * m721 - m421 * m621);
-				var m332 = _this61._11;
-				var m431 = _this61._21;
-				var m531 = _this61._31;
-				var m631 = _this61._12;
-				var m731 = _this61._22;
-				var m831 = _this61._32;
-				var c031 = _this61._10 * (m431 * m831 - m531 * m731) - _this61._20 * (m332 * m831 - m531 * m631) + _this61._30 * (m332 * m731 - m431 * m631);
-				if(_this61._00 * c001 - _this61._01 * c011 + _this61._02 * c021 - _this61._03 * c031 < 0.0) {
+				var _this13 = iron_math_Mat4.helpVec;
+				_this13.x = m2.self._00;
+				_this13.y = m2.self._01;
+				_this13.z = m2.self._02;
+				_this13.w = 1.0;
+				var _this14 = _this13;
+				scale1.x = Math.sqrt(_this14.x * _this14.x + _this14.y * _this14.y + _this14.z * _this14.z);
+				var _this15 = iron_math_Mat4.helpVec;
+				_this15.x = m2.self._10;
+				_this15.y = m2.self._11;
+				_this15.z = m2.self._12;
+				_this15.w = 1.0;
+				var _this16 = _this15;
+				scale1.y = Math.sqrt(_this16.x * _this16.x + _this16.y * _this16.y + _this16.z * _this16.z);
+				var _this17 = iron_math_Mat4.helpVec;
+				_this17.x = m2.self._20;
+				_this17.y = m2.self._21;
+				_this17.z = m2.self._22;
+				_this17.w = 1.0;
+				var _this18 = _this17;
+				scale1.z = Math.sqrt(_this18.x * _this18.x + _this18.y * _this18.y + _this18.z * _this18.z);
+				var _this19 = m2.self;
+				var m34 = _this19._12;
+				var m44 = _this19._22;
+				var m54 = _this19._32;
+				var m64 = _this19._13;
+				var m74 = _this19._23;
+				var m84 = _this19._33;
+				var c001 = _this19._11 * (m44 * m84 - m54 * m74) - _this19._21 * (m34 * m84 - m54 * m64) + _this19._31 * (m34 * m74 - m44 * m64);
+				var m35 = _this19._12;
+				var m45 = _this19._22;
+				var m55 = _this19._32;
+				var m65 = _this19._13;
+				var m75 = _this19._23;
+				var m85 = _this19._33;
+				var c011 = _this19._10 * (m45 * m85 - m55 * m75) - _this19._20 * (m35 * m85 - m55 * m65) + _this19._30 * (m35 * m75 - m45 * m65);
+				var m36 = _this19._11;
+				var m46 = _this19._21;
+				var m56 = _this19._31;
+				var m66 = _this19._13;
+				var m76 = _this19._23;
+				var m86 = _this19._33;
+				var c021 = _this19._10 * (m46 * m86 - m56 * m76) - _this19._20 * (m36 * m86 - m56 * m66) + _this19._30 * (m36 * m76 - m46 * m66);
+				var m37 = _this19._11;
+				var m47 = _this19._21;
+				var m57 = _this19._31;
+				var m67 = _this19._12;
+				var m77 = _this19._22;
+				var m87 = _this19._32;
+				var c031 = _this19._10 * (m47 * m87 - m57 * m77) - _this19._20 * (m37 * m87 - m57 * m67) + _this19._30 * (m37 * m77 - m47 * m67);
+				if(_this19._00 * c001 - _this19._01 * c011 + _this19._02 * c021 - _this19._03 * c031 < 0.0) {
 					scale1.x = -scale1.x;
 				}
 				var invs1 = 1.0 / scale1.x;
@@ -16480,34 +14356,34 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				var m211 = m9.self._01;
 				var m221 = m9.self._11;
 				var m231 = m9.self._21;
-				var m3111 = m9.self._02;
-				var m3211 = m9.self._12;
-				var m3311 = m9.self._22;
-				var tr1 = m111 + m221 + m3311;
+				var m312 = m9.self._02;
+				var m322 = m9.self._12;
+				var m332 = m9.self._22;
+				var tr1 = m111 + m221 + m332;
 				var s2 = 0.0;
 				if(tr1 > 0) {
 					s2 = 0.5 / Math.sqrt(tr1 + 1.0);
 					quat2.w = 0.25 / s2;
-					quat2.x = (m3211 - m231) * s2;
-					quat2.y = (m131 - m3111) * s2;
+					quat2.x = (m322 - m231) * s2;
+					quat2.y = (m131 - m312) * s2;
 					quat2.z = (m211 - m121) * s2;
-				} else if(m111 > m221 && m111 > m3311) {
-					s2 = 2.0 * Math.sqrt(1.0 + m111 - m221 - m3311);
-					quat2.w = (m3211 - m231) / s2;
+				} else if(m111 > m221 && m111 > m332) {
+					s2 = 2.0 * Math.sqrt(1.0 + m111 - m221 - m332);
+					quat2.w = (m322 - m231) / s2;
 					quat2.x = 0.25 * s2;
 					quat2.y = (m121 + m211) / s2;
-					quat2.z = (m131 + m3111) / s2;
-				} else if(m221 > m3311) {
-					s2 = 2.0 * Math.sqrt(1.0 + m221 - m111 - m3311);
-					quat2.w = (m131 - m3111) / s2;
+					quat2.z = (m131 + m312) / s2;
+				} else if(m221 > m332) {
+					s2 = 2.0 * Math.sqrt(1.0 + m221 - m111 - m332);
+					quat2.w = (m131 - m312) / s2;
 					quat2.x = (m121 + m211) / s2;
 					quat2.y = 0.25 * s2;
-					quat2.z = (m231 + m3211) / s2;
+					quat2.z = (m231 + m322) / s2;
 				} else {
-					s2 = 2.0 * Math.sqrt(1.0 + m3311 - m111 - m221);
+					s2 = 2.0 * Math.sqrt(1.0 + m332 - m111 - m221);
 					quat2.w = (m211 - m121) / s2;
-					quat2.x = (m131 + m3111) / s2;
-					quat2.y = (m231 + m3211) / s2;
+					quat2.x = (m131 + m312) / s2;
+					quat2.y = (m231 + m322) / s2;
 					quat2.z = 0.25 * s2;
 				}
 				var loc3 = iron_object_BoneAnimation.vpos;
@@ -16516,19 +14392,19 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				var quat_z = 0.0;
 				var quat_w = 1.0;
 				var sc1 = iron_object_BoneAnimation.vscl;
-				var x3 = quat_x;
-				var y3 = quat_y;
-				var z3 = quat_z;
+				var x4 = quat_x;
+				var y4 = quat_y;
+				var z4 = quat_z;
 				var w3 = quat_w;
-				var x22 = x3 + x3;
-				var y21 = y3 + y3;
-				var z21 = z3 + z3;
-				var xx1 = x3 * x22;
-				var xy1 = x3 * y21;
-				var xz1 = x3 * z21;
-				var yy1 = y3 * y21;
-				var yz1 = y3 * z21;
-				var zz1 = z3 * z21;
+				var x22 = x4 + x4;
+				var y21 = y4 + y4;
+				var z21 = z4 + z4;
+				var xx1 = x4 * x22;
+				var xy1 = x4 * y21;
+				var xz1 = x4 * z21;
+				var yy1 = y4 * y21;
+				var yz1 = y4 * z21;
+				var zz1 = z4 * z21;
 				var wx1 = w3 * x22;
 				var wy1 = w3 * y21;
 				var wz1 = w3 * z21;
@@ -16548,21 +14424,21 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				m2.self._31 = 0.0;
 				m2.self._32 = 0.0;
 				m2.self._33 = 1.0;
-				var x12 = sc1.x;
-				var y12 = sc1.y;
-				var z12 = sc1.z;
-				m2.self._00 *= x12;
-				m2.self._01 *= x12;
-				m2.self._02 *= x12;
-				m2.self._03 *= x12;
-				m2.self._10 *= y12;
-				m2.self._11 *= y12;
-				m2.self._12 *= y12;
-				m2.self._13 *= y12;
-				m2.self._20 *= z12;
-				m2.self._21 *= z12;
-				m2.self._22 *= z12;
-				m2.self._23 *= z12;
+				var x5 = sc1.x;
+				var y5 = sc1.y;
+				var z5 = sc1.z;
+				m2.self._00 *= x5;
+				m2.self._01 *= x5;
+				m2.self._02 *= x5;
+				m2.self._03 *= x5;
+				m2.self._10 *= y5;
+				m2.self._11 *= y5;
+				m2.self._12 *= y5;
+				m2.self._13 *= y5;
+				m2.self._20 *= z5;
+				m2.self._21 *= z5;
+				m2.self._22 *= z5;
+				m2.self._23 *= z5;
 				m2.self._30 = loc3.x;
 				m2.self._31 = loc3.y;
 				m2.self._32 = loc3.z;
@@ -16584,8 +14460,8 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 		while(_g11 < bones.length) {
 			var b5 = bones[_g11];
 			++_g11;
-			var _this14 = this.getWorldMat(b5);
-			locs.push(new iron_math_Vec4(_this14.self._30,_this14.self._31,_this14.self._32,_this14.self._33));
+			var _this20 = this.getWorldMat(b5);
+			locs.push(new iron_math_Vec4(_this20.self._30,_this20.self._31,_this20.self._32,_this20.self._33));
 		}
 		var _g21 = 0;
 		var _g31 = maxIterations;
@@ -16610,15 +14486,15 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 			vec_x *= f;
 			vec_y *= f;
 			vec_z *= f;
-			var _this15 = locs[0];
-			_this15.x = goal.x;
-			_this15.y = goal.y;
-			_this15.z = goal.z;
-			_this15.w = goal.w;
-			var _this16 = locs[0];
-			_this16.x -= vec_x;
-			_this16.y -= vec_y;
-			_this16.z -= vec_z;
+			var _this21 = locs[0];
+			_this21.x = goal.x;
+			_this21.y = goal.y;
+			_this21.z = goal.z;
+			_this21.w = goal.w;
+			var _this22 = locs[0];
+			_this22.x -= vec_x;
+			_this22.y -= vec_y;
+			_this22.z -= vec_z;
 			var _g22 = 1;
 			var _g32 = locs.length;
 			while(_g22 < _g32) {
@@ -16643,33 +14519,33 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				vec_x *= f1;
 				vec_y *= f1;
 				vec_z *= f1;
-				var _this17 = locs[j];
+				var _this23 = locs[j];
 				var v5 = locs[j - 1];
-				_this17.x = v5.x;
-				_this17.y = v5.y;
-				_this17.z = v5.z;
-				_this17.w = v5.w;
-				var _this18 = locs[j];
-				_this18.x += vec_x;
-				_this18.y += vec_y;
-				_this18.z += vec_z;
+				_this23.x = v5.x;
+				_this23.y = v5.y;
+				_this23.z = v5.z;
+				_this23.w = v5.w;
+				var _this24 = locs[j];
+				_this24.x += vec_x;
+				_this24.y += vec_y;
+				_this24.z += vec_z;
 			}
-			var _this19 = locs[locs.length - 1];
-			_this19.x = startLoc_x;
-			_this19.y = startLoc_y;
-			_this19.z = startLoc_z;
-			_this19.w = startLoc_w;
-			var l2 = locs.length;
+			var _this25 = locs[locs.length - 1];
+			_this25.x = startLoc_x;
+			_this25.y = startLoc_y;
+			_this25.z = startLoc_z;
+			_this25.w = startLoc_w;
+			var l3 = locs.length;
 			var _g4 = 1;
-			var _g5 = l2;
+			var _g5 = l3;
 			while(_g4 < _g5) {
 				var j1 = _g4++;
-				var v6 = locs[l2 - j1 - 1];
+				var v6 = locs[l3 - j1 - 1];
 				vec_x = v6.x;
 				vec_y = v6.y;
 				vec_z = v6.z;
 				vec_w = v6.w;
-				var v7 = locs[l2 - j1];
+				var v7 = locs[l3 - j1];
 				vec_x -= v7.x;
 				vec_y -= v7.y;
 				vec_z -= v7.z;
@@ -16680,20 +14556,20 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 					vec_y *= invN4;
 					vec_z *= invN4;
 				}
-				var f2 = lengths[l2 - j1];
+				var f2 = lengths[l3 - j1];
 				vec_x *= f2;
 				vec_y *= f2;
 				vec_z *= f2;
-				var _this20 = locs[l2 - j1 - 1];
-				var v8 = locs[l2 - j1];
-				_this20.x = v8.x;
-				_this20.y = v8.y;
-				_this20.z = v8.z;
-				_this20.w = v8.w;
-				var _this23 = locs[l2 - j1 - 1];
-				_this23.x += vec_x;
-				_this23.y += vec_y;
-				_this23.z += vec_z;
+				var _this26 = locs[l3 - j1 - 1];
+				var v8 = locs[l3 - j1];
+				_this26.x = v8.x;
+				_this26.y = v8.y;
+				_this26.z = v8.z;
+				_this26.w = v8.w;
+				var _this27 = locs[l3 - j1 - 1];
+				_this27.x += vec_x;
+				_this27.y += vec_y;
+				_this27.z += vec_z;
 			}
 			var v11 = locs[0];
 			var vx1 = v11.x - goal.x;
@@ -16720,57 +14596,57 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 			loc4.x = m10.self._30;
 			loc4.y = m10.self._31;
 			loc4.z = m10.self._32;
-			var _this24 = iron_math_Mat4.helpVec;
-			_this24.x = m10.self._00;
-			_this24.y = m10.self._01;
-			_this24.z = m10.self._02;
-			_this24.w = 1.0;
-			var _this110 = _this24;
-			scale2.x = Math.sqrt(_this110.x * _this110.x + _this110.y * _this110.y + _this110.z * _this110.z);
-			var _this25 = iron_math_Mat4.helpVec;
-			_this25.x = m10.self._10;
-			_this25.y = m10.self._11;
-			_this25.z = m10.self._12;
-			_this25.w = 1.0;
-			var _this32 = _this25;
-			scale2.y = Math.sqrt(_this32.x * _this32.x + _this32.y * _this32.y + _this32.z * _this32.z);
-			var _this42 = iron_math_Mat4.helpVec;
-			_this42.x = m10.self._20;
-			_this42.y = m10.self._21;
-			_this42.z = m10.self._22;
-			_this42.w = 1.0;
-			var _this52 = _this42;
-			scale2.z = Math.sqrt(_this52.x * _this52.x + _this52.y * _this52.y + _this52.z * _this52.z);
-			var _this62 = m10.self;
-			var m35 = _this62._12;
-			var m45 = _this62._22;
-			var m55 = _this62._32;
-			var m65 = _this62._13;
-			var m75 = _this62._23;
-			var m85 = _this62._33;
-			var c002 = _this62._11 * (m45 * m85 - m55 * m75) - _this62._21 * (m35 * m85 - m55 * m65) + _this62._31 * (m35 * m75 - m45 * m65);
-			var m313 = _this62._12;
-			var m412 = _this62._22;
-			var m512 = _this62._32;
-			var m612 = _this62._13;
-			var m712 = _this62._23;
-			var m812 = _this62._33;
-			var c012 = _this62._10 * (m412 * m812 - m512 * m712) - _this62._20 * (m313 * m812 - m512 * m612) + _this62._30 * (m313 * m712 - m412 * m612);
-			var m323 = _this62._11;
-			var m422 = _this62._21;
-			var m522 = _this62._31;
-			var m622 = _this62._13;
-			var m722 = _this62._23;
-			var m822 = _this62._33;
-			var c022 = _this62._10 * (m422 * m822 - m522 * m722) - _this62._20 * (m323 * m822 - m522 * m622) + _this62._30 * (m323 * m722 - m422 * m622);
-			var m333 = _this62._11;
-			var m432 = _this62._21;
-			var m532 = _this62._31;
-			var m632 = _this62._12;
-			var m732 = _this62._22;
-			var m832 = _this62._32;
-			var c032 = _this62._10 * (m432 * m832 - m532 * m732) - _this62._20 * (m333 * m832 - m532 * m632) + _this62._30 * (m333 * m732 - m432 * m632);
-			if(_this62._00 * c002 - _this62._01 * c012 + _this62._02 * c022 - _this62._03 * c032 < 0.0) {
+			var _this28 = iron_math_Mat4.helpVec;
+			_this28.x = m10.self._00;
+			_this28.y = m10.self._01;
+			_this28.z = m10.self._02;
+			_this28.w = 1.0;
+			var _this29 = _this28;
+			scale2.x = Math.sqrt(_this29.x * _this29.x + _this29.y * _this29.y + _this29.z * _this29.z);
+			var _this30 = iron_math_Mat4.helpVec;
+			_this30.x = m10.self._10;
+			_this30.y = m10.self._11;
+			_this30.z = m10.self._12;
+			_this30.w = 1.0;
+			var _this31 = _this30;
+			scale2.y = Math.sqrt(_this31.x * _this31.x + _this31.y * _this31.y + _this31.z * _this31.z);
+			var _this32 = iron_math_Mat4.helpVec;
+			_this32.x = m10.self._20;
+			_this32.y = m10.self._21;
+			_this32.z = m10.self._22;
+			_this32.w = 1.0;
+			var _this33 = _this32;
+			scale2.z = Math.sqrt(_this33.x * _this33.x + _this33.y * _this33.y + _this33.z * _this33.z);
+			var _this34 = m10.self;
+			var m38 = _this34._12;
+			var m48 = _this34._22;
+			var m58 = _this34._32;
+			var m68 = _this34._13;
+			var m78 = _this34._23;
+			var m88 = _this34._33;
+			var c002 = _this34._11 * (m48 * m88 - m58 * m78) - _this34._21 * (m38 * m88 - m58 * m68) + _this34._31 * (m38 * m78 - m48 * m68);
+			var m39 = _this34._12;
+			var m49 = _this34._22;
+			var m59 = _this34._32;
+			var m69 = _this34._13;
+			var m79 = _this34._23;
+			var m89 = _this34._33;
+			var c012 = _this34._10 * (m49 * m89 - m59 * m79) - _this34._20 * (m39 * m89 - m59 * m69) + _this34._30 * (m39 * m79 - m49 * m69);
+			var m310 = _this34._11;
+			var m410 = _this34._21;
+			var m510 = _this34._31;
+			var m610 = _this34._13;
+			var m710 = _this34._23;
+			var m810 = _this34._33;
+			var c022 = _this34._10 * (m410 * m810 - m510 * m710) - _this34._20 * (m310 * m810 - m510 * m610) + _this34._30 * (m310 * m710 - m410 * m610);
+			var m313 = _this34._11;
+			var m411 = _this34._21;
+			var m511 = _this34._31;
+			var m611 = _this34._12;
+			var m711 = _this34._22;
+			var m811 = _this34._32;
+			var c032 = _this34._10 * (m411 * m811 - m511 * m711) - _this34._20 * (m313 * m811 - m511 * m611) + _this34._30 * (m313 * m711 - m411 * m611);
+			if(_this34._00 * c002 - _this34._01 * c012 + _this34._02 * c022 - _this34._03 * c032 < 0.0) {
 				scale2.x = -scale2.x;
 			}
 			var invs2 = 1.0 / scale2.x;
@@ -16792,65 +14668,65 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 			var m212 = m14.self._01;
 			var m222 = m14.self._11;
 			var m232 = m14.self._21;
-			var m3112 = m14.self._02;
-			var m3212 = m14.self._12;
-			var m3312 = m14.self._22;
-			var tr2 = m112 + m222 + m3312;
+			var m314 = m14.self._02;
+			var m323 = m14.self._12;
+			var m333 = m14.self._22;
+			var tr2 = m112 + m222 + m333;
 			var s3 = 0.0;
 			if(tr2 > 0) {
 				s3 = 0.5 / Math.sqrt(tr2 + 1.0);
 				quat3.w = 0.25 / s3;
-				quat3.x = (m3212 - m232) * s3;
-				quat3.y = (m132 - m3112) * s3;
+				quat3.x = (m323 - m232) * s3;
+				quat3.y = (m132 - m314) * s3;
 				quat3.z = (m212 - m122) * s3;
-			} else if(m112 > m222 && m112 > m3312) {
-				s3 = 2.0 * Math.sqrt(1.0 + m112 - m222 - m3312);
-				quat3.w = (m3212 - m232) / s3;
+			} else if(m112 > m222 && m112 > m333) {
+				s3 = 2.0 * Math.sqrt(1.0 + m112 - m222 - m333);
+				quat3.w = (m323 - m232) / s3;
 				quat3.x = 0.25 * s3;
 				quat3.y = (m122 + m212) / s3;
-				quat3.z = (m132 + m3112) / s3;
-			} else if(m222 > m3312) {
-				s3 = 2.0 * Math.sqrt(1.0 + m222 - m112 - m3312);
-				quat3.w = (m132 - m3112) / s3;
+				quat3.z = (m132 + m314) / s3;
+			} else if(m222 > m333) {
+				s3 = 2.0 * Math.sqrt(1.0 + m222 - m112 - m333);
+				quat3.w = (m132 - m314) / s3;
 				quat3.x = (m122 + m212) / s3;
 				quat3.y = 0.25 * s3;
-				quat3.z = (m232 + m3212) / s3;
+				quat3.z = (m232 + m323) / s3;
 			} else {
-				s3 = 2.0 * Math.sqrt(1.0 + m3312 - m112 - m222);
+				s3 = 2.0 * Math.sqrt(1.0 + m333 - m112 - m222);
 				quat3.w = (m212 - m122) / s3;
-				quat3.x = (m132 + m3112) / s3;
-				quat3.y = (m232 + m3212) / s3;
+				quat3.x = (m132 + m314) / s3;
+				quat3.y = (m232 + m323) / s3;
 				quat3.z = 0.25 * s3;
 			}
-			var l12 = i2 == 0 ? locs[i2] : locs[i2 - 1];
+			var l11 = i2 == 0 ? locs[i2] : locs[i2 - 1];
 			var l21 = i2 == 0 ? locs[i2 + 1] : locs[i2];
-			var _this26 = iron_object_BoneAnimation.v2;
-			_this26.x = l12.x;
-			_this26.y = l12.y;
-			_this26.z = l12.z;
-			_this26.w = l12.w;
-			var _this27 = _this26;
-			_this27.x -= l21.x;
-			_this27.y -= l21.y;
-			_this27.z -= l21.z;
-			var _this28 = _this27;
-			var n5 = Math.sqrt(_this28.x * _this28.x + _this28.y * _this28.y + _this28.z * _this28.z);
+			var _this35 = iron_object_BoneAnimation.v2;
+			_this35.x = l11.x;
+			_this35.y = l11.y;
+			_this35.z = l11.z;
+			_this35.w = l11.w;
+			var _this36 = _this35;
+			_this36.x -= l21.x;
+			_this36.y -= l21.y;
+			_this36.z -= l21.z;
+			var _this37 = _this36;
+			var n5 = Math.sqrt(_this37.x * _this37.x + _this37.y * _this37.y + _this37.z * _this37.z);
 			if(n5 > 0.0) {
 				var invN5 = 1.0 / n5;
-				_this28.x *= invN5;
-				_this28.y *= invN5;
-				_this28.z *= invN5;
+				_this37.x *= invN5;
+				_this37.y *= invN5;
+				_this37.z *= invN5;
 			}
-			var _this29 = iron_object_BoneAnimation.q1;
+			var _this38 = iron_object_BoneAnimation.q1;
 			var v12 = iron_object_BoneAnimation.v1;
 			var v21 = iron_object_BoneAnimation.v2;
 			var a3 = iron_math_Quat.helpVec0;
 			var dot1 = v12.x * v21.x + v12.y * v21.y + v12.z * v21.z;
 			if(dot1 < -0.999999) {
-				var a14 = iron_math_Quat.xAxis;
-				var ax3 = a14.x;
-				var ay3 = a14.y;
-				var az3 = a14.z;
+				var a4 = iron_math_Quat.xAxis;
+				var ax3 = a4.x;
+				var ay3 = a4.y;
+				var az3 = a4.z;
 				var bx3 = v12.x;
 				var by3 = v12.y;
 				var bz3 = v12.z;
@@ -16858,16 +14734,16 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				a3.y = az3 * bx3 - ax3 * bz3;
 				a3.z = ax3 * by3 - ay3 * bx3;
 				if(Math.sqrt(a3.x * a3.x + a3.y * a3.y + a3.z * a3.z) < 0.000001) {
-					var a24 = iron_math_Quat.yAxis;
-					var ax11 = a24.x;
-					var ay11 = a24.y;
-					var az11 = a24.z;
-					var bx11 = v12.x;
-					var by11 = v12.y;
-					var bz11 = v12.z;
-					a3.x = ay11 * bz11 - az11 * by11;
-					a3.y = az11 * bx11 - ax11 * bz11;
-					a3.z = ax11 * by11 - ay11 * bx11;
+					var a5 = iron_math_Quat.yAxis;
+					var ax4 = a5.x;
+					var ay4 = a5.y;
+					var az4 = a5.z;
+					var bx4 = v12.x;
+					var by4 = v12.y;
+					var bz4 = v12.z;
+					a3.x = ay4 * bz4 - az4 * by4;
+					a3.y = az4 * bx4 - ax4 * bz4;
+					a3.z = ax4 * by4 - ay4 * bx4;
 				}
 				var n6 = Math.sqrt(a3.x * a3.x + a3.y * a3.y + a3.z * a3.z);
 				if(n6 > 0.0) {
@@ -16878,54 +14754,54 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				}
 				var angle1 = Math.PI;
 				var s4 = Math.sin(angle1 * 0.5);
-				_this29.x = a3.x * s4;
-				_this29.y = a3.y * s4;
-				_this29.z = a3.z * s4;
-				_this29.w = Math.cos(angle1 * 0.5);
-				var l3 = Math.sqrt(_this29.x * _this29.x + _this29.y * _this29.y + _this29.z * _this29.z + _this29.w * _this29.w);
-				if(l3 == 0.0) {
-					_this29.x = 0;
-					_this29.y = 0;
-					_this29.z = 0;
-					_this29.w = 0;
+				_this38.x = a3.x * s4;
+				_this38.y = a3.y * s4;
+				_this38.z = a3.z * s4;
+				_this38.w = Math.cos(angle1 * 0.5);
+				var l4 = Math.sqrt(_this38.x * _this38.x + _this38.y * _this38.y + _this38.z * _this38.z + _this38.w * _this38.w);
+				if(l4 == 0.0) {
+					_this38.x = 0;
+					_this38.y = 0;
+					_this38.z = 0;
+					_this38.w = 0;
 				} else {
-					l3 = 1.0 / l3;
-					_this29.x *= l3;
-					_this29.y *= l3;
-					_this29.z *= l3;
-					_this29.w *= l3;
+					l4 = 1.0 / l4;
+					_this38.x *= l4;
+					_this38.y *= l4;
+					_this38.z *= l4;
+					_this38.w *= l4;
 				}
 			} else if(dot1 > 0.999999) {
-				_this29.x = 0;
-				_this29.y = 0;
-				_this29.z = 0;
-				_this29.w = 1;
+				_this38.x = 0;
+				_this38.y = 0;
+				_this38.z = 0;
+				_this38.w = 1;
 			} else {
-				var ax21 = v12.x;
-				var ay21 = v12.y;
-				var az21 = v12.z;
-				var bx21 = v21.x;
-				var by21 = v21.y;
-				var bz21 = v21.z;
-				a3.x = ay21 * bz21 - az21 * by21;
-				a3.y = az21 * bx21 - ax21 * bz21;
-				a3.z = ax21 * by21 - ay21 * bx21;
-				_this29.x = a3.x;
-				_this29.y = a3.y;
-				_this29.z = a3.z;
-				_this29.w = 1 + dot1;
-				var l13 = Math.sqrt(_this29.x * _this29.x + _this29.y * _this29.y + _this29.z * _this29.z + _this29.w * _this29.w);
-				if(l13 == 0.0) {
-					_this29.x = 0;
-					_this29.y = 0;
-					_this29.z = 0;
-					_this29.w = 0;
+				var ax5 = v12.x;
+				var ay5 = v12.y;
+				var az5 = v12.z;
+				var bx5 = v21.x;
+				var by5 = v21.y;
+				var bz5 = v21.z;
+				a3.x = ay5 * bz5 - az5 * by5;
+				a3.y = az5 * bx5 - ax5 * bz5;
+				a3.z = ax5 * by5 - ay5 * bx5;
+				_this38.x = a3.x;
+				_this38.y = a3.y;
+				_this38.z = a3.z;
+				_this38.w = 1 + dot1;
+				var l5 = Math.sqrt(_this38.x * _this38.x + _this38.y * _this38.y + _this38.z * _this38.z + _this38.w * _this38.w);
+				if(l5 == 0.0) {
+					_this38.x = 0;
+					_this38.y = 0;
+					_this38.z = 0;
+					_this38.w = 0;
 				} else {
-					l13 = 1.0 / l13;
-					_this29.x *= l13;
-					_this29.y *= l13;
-					_this29.z *= l13;
-					_this29.w *= l13;
+					l5 = 1.0 / l5;
+					_this38.x *= l5;
+					_this38.y *= l5;
+					_this38.z *= l5;
+					_this38.w *= l5;
 				}
 			}
 			var v9 = locs[i2];
@@ -16935,19 +14811,19 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 			vec_w = v9.w;
 			var quat4 = iron_object_BoneAnimation.q1;
 			var sc2 = iron_object_BoneAnimation.vscl;
-			var x4 = quat4.x;
-			var y4 = quat4.y;
-			var z4 = quat4.z;
+			var x6 = quat4.x;
+			var y6 = quat4.y;
+			var z6 = quat4.z;
 			var w4 = quat4.w;
-			var x23 = x4 + x4;
-			var y22 = y4 + y4;
-			var z22 = z4 + z4;
-			var xx2 = x4 * x23;
-			var xy2 = x4 * y22;
-			var xz2 = x4 * z22;
-			var yy2 = y4 * y22;
-			var yz2 = y4 * z22;
-			var zz2 = z4 * z22;
+			var x23 = x6 + x6;
+			var y22 = y6 + y6;
+			var z22 = z6 + z6;
+			var xx2 = x6 * x23;
+			var xy2 = x6 * y22;
+			var xz2 = x6 * z22;
+			var yy2 = y6 * y22;
+			var yz2 = y6 * z22;
+			var zz2 = z6 * z22;
 			var wx2 = w4 * x23;
 			var wy2 = w4 * y22;
 			var wz2 = w4 * z22;
@@ -16967,21 +14843,21 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 			m10.self._31 = 0.0;
 			m10.self._32 = 0.0;
 			m10.self._33 = 1.0;
-			var x13 = sc2.x;
-			var y13 = sc2.y;
-			var z13 = sc2.z;
-			m10.self._00 *= x13;
-			m10.self._01 *= x13;
-			m10.self._02 *= x13;
-			m10.self._03 *= x13;
-			m10.self._10 *= y13;
-			m10.self._11 *= y13;
-			m10.self._12 *= y13;
-			m10.self._13 *= y13;
-			m10.self._20 *= z13;
-			m10.self._21 *= z13;
-			m10.self._22 *= z13;
-			m10.self._23 *= z13;
+			var x7 = sc2.x;
+			var y7 = sc2.y;
+			var z7 = sc2.z;
+			m10.self._00 *= x7;
+			m10.self._01 *= x7;
+			m10.self._02 *= x7;
+			m10.self._03 *= x7;
+			m10.self._10 *= y7;
+			m10.self._11 *= y7;
+			m10.self._12 *= y7;
+			m10.self._13 *= y7;
+			m10.self._20 *= z7;
+			m10.self._21 *= z7;
+			m10.self._22 *= z7;
+			m10.self._23 *= z7;
 			m10.self._30 = vec_x;
 			m10.self._31 = vec_y;
 			m10.self._32 = vec_z;
@@ -18244,28 +16120,28 @@ iron_object_LightObject.prototype = $extend(iron_object_Object.prototype,{
 		_this5.y = _this4.self._01;
 		_this5.z = _this4.self._02;
 		_this5.w = 1.0;
-		var _this11 = _this5;
-		var scale = 1.0 / Math.sqrt(_this11.x * _this11.x + _this11.y * _this11.y + _this11.z * _this11.z);
+		var _this6 = _this5;
+		var scale = 1.0 / Math.sqrt(_this6.x * _this6.x + _this6.y * _this6.y + _this6.z * _this6.z);
 		_this4.self._00 *= scale;
 		_this4.self._01 *= scale;
 		_this4.self._02 *= scale;
-		var _this21 = iron_math_Mat4.helpVec;
-		_this21.x = _this4.self._10;
-		_this21.y = _this4.self._11;
-		_this21.z = _this4.self._12;
-		_this21.w = 1.0;
-		var _this31 = _this21;
-		scale = 1.0 / Math.sqrt(_this31.x * _this31.x + _this31.y * _this31.y + _this31.z * _this31.z);
+		var _this7 = iron_math_Mat4.helpVec;
+		_this7.x = _this4.self._10;
+		_this7.y = _this4.self._11;
+		_this7.z = _this4.self._12;
+		_this7.w = 1.0;
+		var _this8 = _this7;
+		scale = 1.0 / Math.sqrt(_this8.x * _this8.x + _this8.y * _this8.y + _this8.z * _this8.z);
 		_this4.self._10 *= scale;
 		_this4.self._11 *= scale;
 		_this4.self._12 *= scale;
-		var _this41 = iron_math_Mat4.helpVec;
-		_this41.x = _this4.self._20;
-		_this41.y = _this4.self._21;
-		_this41.z = _this4.self._22;
-		_this41.w = 1.0;
-		var _this51 = _this41;
-		scale = 1.0 / Math.sqrt(_this51.x * _this51.x + _this51.y * _this51.y + _this51.z * _this51.z);
+		var _this9 = iron_math_Mat4.helpVec;
+		_this9.x = _this4.self._20;
+		_this9.y = _this4.self._21;
+		_this9.z = _this4.self._22;
+		_this9.w = 1.0;
+		var _this10 = _this9;
+		scale = 1.0 / Math.sqrt(_this10.x * _this10.x + _this10.y * _this10.y + _this10.z * _this10.z);
 		_this4.self._20 *= scale;
 		_this4.self._21 *= scale;
 		_this4.self._22 *= scale;
@@ -18276,56 +16152,56 @@ iron_object_LightObject.prototype = $extend(iron_object_Object.prototype,{
 		_this4.self._31 = 0.0;
 		_this4.self._32 = 0.0;
 		_this4.self._33 = 1.0;
-		var _this6 = iron_object_LightObject.m;
+		var _this11 = iron_object_LightObject.m;
 		var m4 = this.V;
-		var a003 = _this6.self._00;
-		var a013 = _this6.self._01;
-		var a023 = _this6.self._02;
-		var a033 = _this6.self._03;
-		var a103 = _this6.self._10;
-		var a113 = _this6.self._11;
-		var a123 = _this6.self._12;
-		var a133 = _this6.self._13;
-		var a203 = _this6.self._20;
-		var a213 = _this6.self._21;
-		var a223 = _this6.self._22;
-		var a233 = _this6.self._23;
-		var a303 = _this6.self._30;
-		var a313 = _this6.self._31;
-		var a323 = _this6.self._32;
-		var a333 = _this6.self._33;
+		var a003 = _this11.self._00;
+		var a013 = _this11.self._01;
+		var a023 = _this11.self._02;
+		var a033 = _this11.self._03;
+		var a103 = _this11.self._10;
+		var a113 = _this11.self._11;
+		var a123 = _this11.self._12;
+		var a133 = _this11.self._13;
+		var a203 = _this11.self._20;
+		var a213 = _this11.self._21;
+		var a223 = _this11.self._22;
+		var a233 = _this11.self._23;
+		var a303 = _this11.self._30;
+		var a313 = _this11.self._31;
+		var a323 = _this11.self._32;
+		var a333 = _this11.self._33;
 		var b010 = m4.self._00;
 		var b12 = m4.self._10;
 		var b21 = m4.self._20;
 		var b31 = m4.self._30;
-		_this6.self._00 = a003 * b010 + a013 * b12 + a023 * b21 + a033 * b31;
-		_this6.self._10 = a103 * b010 + a113 * b12 + a123 * b21 + a133 * b31;
-		_this6.self._20 = a203 * b010 + a213 * b12 + a223 * b21 + a233 * b31;
-		_this6.self._30 = a303 * b010 + a313 * b12 + a323 * b21 + a333 * b31;
+		_this11.self._00 = a003 * b010 + a013 * b12 + a023 * b21 + a033 * b31;
+		_this11.self._10 = a103 * b010 + a113 * b12 + a123 * b21 + a133 * b31;
+		_this11.self._20 = a203 * b010 + a213 * b12 + a223 * b21 + a233 * b31;
+		_this11.self._30 = a303 * b010 + a313 * b12 + a323 * b21 + a333 * b31;
 		b010 = m4.self._01;
 		b12 = m4.self._11;
 		b21 = m4.self._21;
 		b31 = m4.self._31;
-		_this6.self._01 = a003 * b010 + a013 * b12 + a023 * b21 + a033 * b31;
-		_this6.self._11 = a103 * b010 + a113 * b12 + a123 * b21 + a133 * b31;
-		_this6.self._21 = a203 * b010 + a213 * b12 + a223 * b21 + a233 * b31;
-		_this6.self._31 = a303 * b010 + a313 * b12 + a323 * b21 + a333 * b31;
+		_this11.self._01 = a003 * b010 + a013 * b12 + a023 * b21 + a033 * b31;
+		_this11.self._11 = a103 * b010 + a113 * b12 + a123 * b21 + a133 * b31;
+		_this11.self._21 = a203 * b010 + a213 * b12 + a223 * b21 + a233 * b31;
+		_this11.self._31 = a303 * b010 + a313 * b12 + a323 * b21 + a333 * b31;
 		b010 = m4.self._02;
 		b12 = m4.self._12;
 		b21 = m4.self._22;
 		b31 = m4.self._32;
-		_this6.self._02 = a003 * b010 + a013 * b12 + a023 * b21 + a033 * b31;
-		_this6.self._12 = a103 * b010 + a113 * b12 + a123 * b21 + a133 * b31;
-		_this6.self._22 = a203 * b010 + a213 * b12 + a223 * b21 + a233 * b31;
-		_this6.self._32 = a303 * b010 + a313 * b12 + a323 * b21 + a333 * b31;
+		_this11.self._02 = a003 * b010 + a013 * b12 + a023 * b21 + a033 * b31;
+		_this11.self._12 = a103 * b010 + a113 * b12 + a123 * b21 + a133 * b31;
+		_this11.self._22 = a203 * b010 + a213 * b12 + a223 * b21 + a233 * b31;
+		_this11.self._32 = a303 * b010 + a313 * b12 + a323 * b21 + a333 * b31;
 		b010 = m4.self._03;
 		b12 = m4.self._13;
 		b21 = m4.self._23;
 		b31 = m4.self._33;
-		_this6.self._03 = a003 * b010 + a013 * b12 + a023 * b21 + a033 * b31;
-		_this6.self._13 = a103 * b010 + a113 * b12 + a123 * b21 + a133 * b31;
-		_this6.self._23 = a203 * b010 + a213 * b12 + a223 * b21 + a233 * b31;
-		_this6.self._33 = a303 * b010 + a313 * b12 + a323 * b21 + a333 * b31;
+		_this11.self._03 = a003 * b010 + a013 * b12 + a023 * b21 + a033 * b31;
+		_this11.self._13 = a103 * b010 + a113 * b12 + a123 * b21 + a133 * b31;
+		_this11.self._23 = a203 * b010 + a213 * b12 + a223 * b21 + a233 * b31;
+		_this11.self._33 = a303 * b010 + a313 * b12 + a323 * b21 + a333 * b31;
 		iron_object_LightObject.setCorners();
 		var _g3 = 0;
 		var _g12 = iron_object_LightObject.corners;
@@ -18415,24 +16291,24 @@ iron_object_LightObject.prototype = $extend(iron_object_Object.prototype,{
 		var ty1 = -(hy + bottom1) / tb1;
 		var tz1 = -(hz + near2) / fn1;
 		iron_object_LightObject.m = new iron_math_Mat4(2 / rl1,0,0,tx1,0,2 / tb1,0,ty1,0,0,-2 / fn1,tz1,0,0,0,1);
-		var _this7 = this.P;
+		var _this12 = this.P;
 		var m6 = iron_object_LightObject.m;
-		_this7.self._00 = m6.self._00;
-		_this7.self._01 = m6.self._01;
-		_this7.self._02 = m6.self._02;
-		_this7.self._03 = m6.self._03;
-		_this7.self._10 = m6.self._10;
-		_this7.self._11 = m6.self._11;
-		_this7.self._12 = m6.self._12;
-		_this7.self._13 = m6.self._13;
-		_this7.self._20 = m6.self._20;
-		_this7.self._21 = m6.self._21;
-		_this7.self._22 = m6.self._22;
-		_this7.self._23 = m6.self._23;
-		_this7.self._30 = m6.self._30;
-		_this7.self._31 = m6.self._31;
-		_this7.self._32 = m6.self._32;
-		_this7.self._33 = m6.self._33;
+		_this12.self._00 = m6.self._00;
+		_this12.self._01 = m6.self._01;
+		_this12.self._02 = m6.self._02;
+		_this12.self._03 = m6.self._03;
+		_this12.self._10 = m6.self._10;
+		_this12.self._11 = m6.self._11;
+		_this12.self._12 = m6.self._12;
+		_this12.self._13 = m6.self._13;
+		_this12.self._20 = m6.self._20;
+		_this12.self._21 = m6.self._21;
+		_this12.self._22 = m6.self._22;
+		_this12.self._23 = m6.self._23;
+		_this12.self._30 = m6.self._30;
+		_this12.self._31 = m6.self._31;
+		_this12.self._32 = m6.self._32;
+		_this12.self._33 = m6.self._33;
 		this.updateViewFrustum(camera);
 		if(this.cascadeVP == null) {
 			this.cascadeVP = [];
@@ -18443,24 +16319,24 @@ iron_object_LightObject.prototype = $extend(iron_object_Object.prototype,{
 				this.cascadeVP.push(new iron_math_Mat4(1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0));
 			}
 		}
-		var _this8 = this.cascadeVP[cascade];
+		var _this13 = this.cascadeVP[cascade];
 		var m7 = this.VP;
-		_this8.self._00 = m7.self._00;
-		_this8.self._01 = m7.self._01;
-		_this8.self._02 = m7.self._02;
-		_this8.self._03 = m7.self._03;
-		_this8.self._10 = m7.self._10;
-		_this8.self._11 = m7.self._11;
-		_this8.self._12 = m7.self._12;
-		_this8.self._13 = m7.self._13;
-		_this8.self._20 = m7.self._20;
-		_this8.self._21 = m7.self._21;
-		_this8.self._22 = m7.self._22;
-		_this8.self._23 = m7.self._23;
-		_this8.self._30 = m7.self._30;
-		_this8.self._31 = m7.self._31;
-		_this8.self._32 = m7.self._32;
-		_this8.self._33 = m7.self._33;
+		_this13.self._00 = m7.self._00;
+		_this13.self._01 = m7.self._01;
+		_this13.self._02 = m7.self._02;
+		_this13.self._03 = m7.self._03;
+		_this13.self._10 = m7.self._10;
+		_this13.self._11 = m7.self._11;
+		_this13.self._12 = m7.self._12;
+		_this13.self._13 = m7.self._13;
+		_this13.self._20 = m7.self._20;
+		_this13.self._21 = m7.self._21;
+		_this13.self._22 = m7.self._22;
+		_this13.self._23 = m7.self._23;
+		_this13.self._30 = m7.self._30;
+		_this13.self._31 = m7.self._31;
+		_this13.self._32 = m7.self._32;
+		_this13.self._33 = m7.self._33;
 	}
 	,updateViewFrustum: function(camera) {
 		var _this = this.VP;
@@ -20202,52 +18078,52 @@ iron_object_Transform.prototype = {
 		_this1.y = _this.self._01;
 		_this1.z = _this.self._02;
 		_this1.w = 1.0;
-		var _this11 = _this1;
-		scale.x = Math.sqrt(_this11.x * _this11.x + _this11.y * _this11.y + _this11.z * _this11.z);
-		var _this2 = iron_math_Mat4.helpVec;
-		_this2.x = _this.self._10;
-		_this2.y = _this.self._11;
-		_this2.z = _this.self._12;
-		_this2.w = 1.0;
-		var _this3 = _this2;
-		scale.y = Math.sqrt(_this3.x * _this3.x + _this3.y * _this3.y + _this3.z * _this3.z);
-		var _this4 = iron_math_Mat4.helpVec;
-		_this4.x = _this.self._20;
-		_this4.y = _this.self._21;
-		_this4.z = _this.self._22;
-		_this4.w = 1.0;
-		var _this5 = _this4;
-		scale.z = Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z);
-		var _this6 = _this.self;
-		var m3 = _this6._12;
-		var m4 = _this6._22;
-		var m5 = _this6._32;
-		var m6 = _this6._13;
-		var m7 = _this6._23;
-		var m8 = _this6._33;
-		var c00 = _this6._11 * (m4 * m8 - m5 * m7) - _this6._21 * (m3 * m8 - m5 * m6) + _this6._31 * (m3 * m7 - m4 * m6);
-		var m31 = _this6._12;
-		var m41 = _this6._22;
-		var m51 = _this6._32;
-		var m61 = _this6._13;
-		var m71 = _this6._23;
-		var m81 = _this6._33;
-		var c01 = _this6._10 * (m41 * m81 - m51 * m71) - _this6._20 * (m31 * m81 - m51 * m61) + _this6._30 * (m31 * m71 - m41 * m61);
-		var m32 = _this6._11;
-		var m42 = _this6._21;
-		var m52 = _this6._31;
-		var m62 = _this6._13;
-		var m72 = _this6._23;
-		var m82 = _this6._33;
-		var c02 = _this6._10 * (m42 * m82 - m52 * m72) - _this6._20 * (m32 * m82 - m52 * m62) + _this6._30 * (m32 * m72 - m42 * m62);
-		var m33 = _this6._11;
-		var m43 = _this6._21;
-		var m53 = _this6._31;
-		var m63 = _this6._12;
-		var m73 = _this6._22;
-		var m83 = _this6._32;
-		var c03 = _this6._10 * (m43 * m83 - m53 * m73) - _this6._20 * (m33 * m83 - m53 * m63) + _this6._30 * (m33 * m73 - m43 * m63);
-		if(_this6._00 * c00 - _this6._01 * c01 + _this6._02 * c02 - _this6._03 * c03 < 0.0) {
+		var _this2 = _this1;
+		scale.x = Math.sqrt(_this2.x * _this2.x + _this2.y * _this2.y + _this2.z * _this2.z);
+		var _this3 = iron_math_Mat4.helpVec;
+		_this3.x = _this.self._10;
+		_this3.y = _this.self._11;
+		_this3.z = _this.self._12;
+		_this3.w = 1.0;
+		var _this4 = _this3;
+		scale.y = Math.sqrt(_this4.x * _this4.x + _this4.y * _this4.y + _this4.z * _this4.z);
+		var _this5 = iron_math_Mat4.helpVec;
+		_this5.x = _this.self._20;
+		_this5.y = _this.self._21;
+		_this5.z = _this.self._22;
+		_this5.w = 1.0;
+		var _this6 = _this5;
+		scale.z = Math.sqrt(_this6.x * _this6.x + _this6.y * _this6.y + _this6.z * _this6.z);
+		var _this7 = _this.self;
+		var m3 = _this7._12;
+		var m4 = _this7._22;
+		var m5 = _this7._32;
+		var m6 = _this7._13;
+		var m7 = _this7._23;
+		var m8 = _this7._33;
+		var c00 = _this7._11 * (m4 * m8 - m5 * m7) - _this7._21 * (m3 * m8 - m5 * m6) + _this7._31 * (m3 * m7 - m4 * m6);
+		var m31 = _this7._12;
+		var m41 = _this7._22;
+		var m51 = _this7._32;
+		var m61 = _this7._13;
+		var m71 = _this7._23;
+		var m81 = _this7._33;
+		var c01 = _this7._10 * (m41 * m81 - m51 * m71) - _this7._20 * (m31 * m81 - m51 * m61) + _this7._30 * (m31 * m71 - m41 * m61);
+		var m32 = _this7._11;
+		var m42 = _this7._21;
+		var m52 = _this7._31;
+		var m62 = _this7._13;
+		var m72 = _this7._23;
+		var m82 = _this7._33;
+		var c02 = _this7._10 * (m42 * m82 - m52 * m72) - _this7._20 * (m32 * m82 - m52 * m62) + _this7._30 * (m32 * m72 - m42 * m62);
+		var m33 = _this7._11;
+		var m43 = _this7._21;
+		var m53 = _this7._31;
+		var m63 = _this7._12;
+		var m73 = _this7._22;
+		var m83 = _this7._32;
+		var c03 = _this7._10 * (m43 * m83 - m53 * m73) - _this7._20 * (m33 * m83 - m53 * m63) + _this7._30 * (m33 * m73 - m43 * m63);
+		if(_this7._00 * c00 - _this7._01 * c01 + _this7._02 * c02 - _this7._03 * c03 < 0.0) {
 			scale.x = -scale.x;
 		}
 		var invs = 1.0 / scale.x;
@@ -41681,8 +39557,8 @@ var Float = Number;
 var Bool = Boolean;
 var Class = { };
 var Enum = { };
-var __map_reserved = {};
 haxe_ds_ObjectMap.count = 0;
+var __map_reserved = {};
 Object.defineProperty(js__$Boot_HaxeError.prototype,"message",{ get : function() {
 	return String(this.val);
 }});
@@ -41701,7 +39577,6 @@ armory_renderpath_Inc.lastFrame = -1;
 armory_renderpath_RenderPathCreator.setTargetMeshes = armory_renderpath_RenderPathDeferred.setTargetMeshes;
 armory_renderpath_RenderPathCreator.drawMeshes = armory_renderpath_RenderPathDeferred.drawMeshes;
 armory_renderpath_RenderPathCreator.applyConfig = armory_renderpath_RenderPathDeferred.applyConfig;
-armory_system_Event.events = new haxe_ds_StringMap();
 armory_trait_physics_bullet_PhysicsWorld.sceneRemoved = false;
 armory_trait_physics_bullet_PhysicsWorld.nullvec = true;
 kha_math_FastMatrix4.width = 4;
