@@ -365,11 +365,13 @@ iron_Trait.prototype = {
 	,__class__: iron_Trait
 };
 var arm_UPH2_$Base = function() {
+	this.baseTrans = 0.01;
+	this.baseDist = 0.0;
 	this.baseAngleTravel = Math.PI * 2. / 100.;
-	this.postAngleTravel = Math.PI * 2. / 100.;
-	this.postAngle = 0;
 	this.postTrans = 0.01;
 	this.postDist = 0.0;
+	this.postAngleTravel = Math.PI * 2. / 100.;
+	this.postAngle = 0;
 	this.sState = 0;
 	this.sTravel = 1.5;
 	this.mState = 0;
@@ -398,15 +400,20 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 	,mState: null
 	,sTravel: null
 	,sState: null
+	,postAngle: null
+	,postAngleTravel: null
 	,postDist: null
 	,postTrans: null
 	,postPosLim: null
 	,postNegLim: null
 	,postTravelDist: null
-	,postAngle: null
-	,postAngleTravel: null
 	,baseAngle: null
 	,baseAngleTravel: null
+	,baseDist: null
+	,baseTrans: null
+	,basePosLim: null
+	,baseNegLim: null
+	,baseTravelDist: null
 	,plate: null
 	,mScrew: null
 	,screw: null
@@ -515,18 +522,20 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		this.object.transform.buildMatrix();
 		this.rbSync(this.object);
 		this.mScrew.transform.translate(corrVxy.x,corrVxy.y,0);
+		var _this8 = this.mScrew.transform.world;
+		this.mScrew.transform.move(new iron_math_Vec4(_this8.self._20,_this8.self._21,_this8.self._22),this.mState * this.mSTravel);
 		this.rbSync(this.mScrew);
 		this.top = this.spawnObject(this.topName,false);
 		var mT = this.object.getChild("C_UPH").transform.world;
 		this.top.transform.setMatrix(mT);
 		this.top.transform.scale = this.nScale;
 		this.rbSync(this.top);
-		var _this8 = new iron_math_Vec4();
-		var _this9 = this.top.getChild("C_Bottom").transform.world;
-		var x2 = _this9.self._30;
-		var y2 = _this9.self._31;
-		var z2 = _this9.self._32;
-		var w1 = _this9.self._33;
+		var _this9 = new iron_math_Vec4();
+		var _this10 = this.top.getChild("C_Bottom").transform.world;
+		var x2 = _this10.self._30;
+		var y2 = _this10.self._31;
+		var z2 = _this10.self._32;
+		var w1 = _this10.self._33;
 		if(w1 == null) {
 			w1 = 1.0;
 		}
@@ -543,21 +552,21 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var v_y = y2;
 		var v_z = z2;
 		var v_w = w1;
-		_this8.x = v_x;
-		_this8.y = v_y;
-		_this8.z = v_z;
-		_this8.w = v_w;
-		var _this10 = _this8;
+		_this9.x = v_x;
+		_this9.y = v_y;
+		_this9.z = v_z;
+		_this9.w = v_w;
+		var _this11 = _this9;
 		var v2 = this.top.transform.loc;
-		_this10.x -= v2.x;
-		_this10.y -= v2.y;
-		_this10.z -= v2.z;
-		this.corrVTop = _this10;
-		var _this11 = this.top.transform.loc;
+		_this11.x -= v2.x;
+		_this11.y -= v2.y;
+		_this11.z -= v2.z;
+		this.corrVTop = _this11;
+		var _this12 = this.top.transform.loc;
 		var v3 = this.corrVTop;
-		_this11.x -= v3.x;
-		_this11.y -= v3.y;
-		_this11.z -= v3.z;
+		_this12.x -= v3.x;
+		_this12.y -= v3.y;
+		_this12.z -= v3.z;
 		this.top.visible = true;
 		this.rbSync(this.top);
 		this.screw = this.spawnObject(this.screwName,false);
@@ -565,12 +574,12 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		this.screw.transform.setMatrix(mS);
 		this.screw.transform.scale = this.nScale;
 		this.rbSync(this.screw);
-		var _this12 = new iron_math_Vec4();
-		var _this13 = this.screw.getChild("C").transform.world;
-		var x3 = _this13.self._30;
-		var y3 = _this13.self._31;
-		var z3 = _this13.self._32;
-		var w2 = _this13.self._33;
+		var _this13 = new iron_math_Vec4();
+		var _this14 = this.screw.getChild("C").transform.world;
+		var x3 = _this14.self._30;
+		var y3 = _this14.self._31;
+		var z3 = _this14.self._32;
+		var w2 = _this14.self._33;
 		if(w2 == null) {
 			w2 = 1.0;
 		}
@@ -587,25 +596,27 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var v_y1 = y3;
 		var v_z1 = z3;
 		var v_w1 = w2;
-		_this12.x = v_x1;
-		_this12.y = v_y1;
-		_this12.z = v_z1;
-		_this12.w = v_w1;
-		var _this14 = _this12;
+		_this13.x = v_x1;
+		_this13.y = v_y1;
+		_this13.z = v_z1;
+		_this13.w = v_w1;
+		var _this15 = _this13;
 		var v4 = this.screw.transform.loc;
-		_this14.x -= v4.x;
-		_this14.y -= v4.y;
-		_this14.z -= v4.z;
-		var _this15 = _this14;
-		_this15.x *= 0.5;
-		_this15.y *= 0.5;
-		_this15.z *= 0.5;
+		_this15.x -= v4.x;
+		_this15.y -= v4.y;
+		_this15.z -= v4.z;
 		this.corrScrew = _this15;
-		var _this16 = this.screw.transform.loc;
+		if(this.sState == 0) {
+			var _this16 = this.corrScrew;
+			_this16.x *= 0.5;
+			_this16.y *= 0.5;
+			_this16.z *= 0.5;
+		}
+		var _this17 = this.screw.transform.loc;
 		var v5 = this.corrScrew;
-		_this16.x -= v5.x;
-		_this16.y -= v5.y;
-		_this16.z -= v5.z;
+		_this17.x -= v5.x;
+		_this17.y -= v5.y;
+		_this17.z -= v5.z;
 		this.screw.visible = true;
 		this.rbSync(this.screw);
 		this.post = this.spawnObject(this.postName,false);
@@ -613,25 +624,25 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		this.post.transform.setMatrix(mP);
 		this.post.transform.scale = this.nScale;
 		this.post.visible = true;
-		var _this17 = this.post.transform.world;
-		this.post.transform.move(new iron_math_Vec4(_this17.self._20,_this17.self._21,_this17.self._22),this.postDist);
-		var tmp2 = this.post.transform;
 		var _this18 = this.post.transform.world;
-		var _this19 = new iron_math_Vec4(_this18.self._20,_this18.self._21,_this18.self._22);
-		var n = Math.sqrt(_this19.x * _this19.x + _this19.y * _this19.y + _this19.z * _this19.z);
+		this.post.transform.move(new iron_math_Vec4(_this18.self._20,_this18.self._21,_this18.self._22),this.postDist);
+		var tmp2 = this.post.transform;
+		var _this19 = this.post.transform.world;
+		var _this20 = new iron_math_Vec4(_this19.self._20,_this19.self._21,_this19.self._22);
+		var n = Math.sqrt(_this20.x * _this20.x + _this20.y * _this20.y + _this20.z * _this20.z);
 		if(n > 0.0) {
 			var invN = 1.0 / n;
-			_this19.x *= invN;
-			_this19.y *= invN;
-			_this19.z *= invN;
+			_this20.x *= invN;
+			_this20.y *= invN;
+			_this20.z *= invN;
 		}
-		tmp2.rotate(_this19,this.postAngle);
+		tmp2.rotate(_this20,this.postAngle);
 		this.rbSync(this.post);
-		var _this20 = this.post.getChild("C_PostBottom").transform.world;
-		var x4 = _this20.self._30;
-		var y4 = _this20.self._31;
-		var z4 = _this20.self._32;
-		var w3 = _this20.self._33;
+		var _this21 = this.post.getChild("C_PostBottom").transform.world;
+		var x4 = _this21.self._30;
+		var y4 = _this21.self._31;
+		var z4 = _this21.self._32;
+		var w3 = _this21.self._33;
 		if(w3 == null) {
 			w3 = 1.0;
 		}
@@ -648,11 +659,11 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var _this_y = y4;
 		var _this_z = z4;
 		var _this_w = w3;
-		var _this21 = this.top.getChild("C_Top").transform.world;
-		var x5 = _this21.self._30;
-		var y5 = _this21.self._31;
-		var z5 = _this21.self._32;
-		var w4 = _this21.self._33;
+		var _this22 = this.top.getChild("C_Top").transform.world;
+		var x5 = _this22.self._30;
+		var y5 = _this22.self._31;
+		var z5 = _this22.self._32;
+		var w4 = _this22.self._33;
 		if(w4 == null) {
 			w4 = 1.0;
 		}
@@ -670,11 +681,11 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var p_z = z5;
 		var p_w = w4;
 		this.postPosLim = Math.sqrt((p_x - _this_x) * (p_x - _this_x) + (p_y - _this_y) * (p_y - _this_y) + (p_z - _this_z) * (p_z - _this_z));
-		var _this22 = this.post.getChild("C_PostBottom").transform.world;
-		var x6 = _this22.self._30;
-		var y6 = _this22.self._31;
-		var z6 = _this22.self._32;
-		var w5 = _this22.self._33;
+		var _this23 = this.post.getChild("C_PostBottom").transform.world;
+		var x6 = _this23.self._30;
+		var y6 = _this23.self._31;
+		var z6 = _this23.self._32;
+		var w5 = _this23.self._33;
 		if(w5 == null) {
 			w5 = 1.0;
 		}
@@ -691,11 +702,11 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var _this_y1 = y6;
 		var _this_z1 = z6;
 		var _this_w1 = w5;
-		var _this23 = this.top.getChild("C_Bottom").transform.world;
-		var x7 = _this23.self._30;
-		var y7 = _this23.self._31;
-		var z7 = _this23.self._32;
-		var w6 = _this23.self._33;
+		var _this24 = this.top.getChild("C_Bottom").transform.world;
+		var x7 = _this24.self._30;
+		var y7 = _this24.self._31;
+		var z7 = _this24.self._32;
+		var w6 = _this24.self._33;
 		if(w6 == null) {
 			w6 = 1.0;
 		}
@@ -714,6 +725,93 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var p_w1 = w6;
 		this.postNegLim = Math.sqrt((p_x1 - _this_x1) * (p_x1 - _this_x1) + (p_y1 - _this_y1) * (p_y1 - _this_y1) + (p_z1 - _this_z1) * (p_z1 - _this_z1));
 		this.postTravelDist = Math.abs(this.postPosLim) + Math.abs(this.postNegLim);
+		var _this25 = this.object.getChild("C_Screw_Pos").transform.world;
+		var x8 = _this25.self._30;
+		var y8 = _this25.self._31;
+		var z8 = _this25.self._32;
+		var w7 = _this25.self._33;
+		if(w7 == null) {
+			w7 = 1.0;
+		}
+		if(z8 == null) {
+			z8 = 0.0;
+		}
+		if(y8 == null) {
+			y8 = 0.0;
+		}
+		if(x8 == null) {
+			x8 = 0.0;
+		}
+		var _this_x2 = x8;
+		var _this_y2 = y8;
+		var _this_z2 = z8;
+		var _this_w2 = w7;
+		var _this26 = this.object.getChild("C_Screw_LimPos").transform.world;
+		var x9 = _this26.self._30;
+		var y9 = _this26.self._31;
+		var z9 = _this26.self._32;
+		var w8 = _this26.self._33;
+		if(w8 == null) {
+			w8 = 1.0;
+		}
+		if(z9 == null) {
+			z9 = 0.0;
+		}
+		if(y9 == null) {
+			y9 = 0.0;
+		}
+		if(x9 == null) {
+			x9 = 0.0;
+		}
+		var p_x2 = x9;
+		var p_y2 = y9;
+		var p_z2 = z9;
+		var p_w2 = w8;
+		this.basePosLim = Math.sqrt((p_x2 - _this_x2) * (p_x2 - _this_x2) + (p_y2 - _this_y2) * (p_y2 - _this_y2) + (p_z2 - _this_z2) * (p_z2 - _this_z2));
+		var _this27 = this.object.getChild("C_Screw_Pos").transform.world;
+		var x10 = _this27.self._30;
+		var y10 = _this27.self._31;
+		var z10 = _this27.self._32;
+		var w9 = _this27.self._33;
+		if(w9 == null) {
+			w9 = 1.0;
+		}
+		if(z10 == null) {
+			z10 = 0.0;
+		}
+		if(y10 == null) {
+			y10 = 0.0;
+		}
+		if(x10 == null) {
+			x10 = 0.0;
+		}
+		var _this_x3 = x10;
+		var _this_y3 = y10;
+		var _this_z3 = z10;
+		var _this_w3 = w9;
+		var _this28 = this.object.getChild("C_Screw_LimNeg").transform.world;
+		var x11 = _this28.self._30;
+		var y11 = _this28.self._31;
+		var z11 = _this28.self._32;
+		var w10 = _this28.self._33;
+		if(w10 == null) {
+			w10 = 1.0;
+		}
+		if(z11 == null) {
+			z11 = 0.0;
+		}
+		if(y11 == null) {
+			y11 = 0.0;
+		}
+		if(x11 == null) {
+			x11 = 0.0;
+		}
+		var p_x3 = x11;
+		var p_y3 = y11;
+		var p_z3 = z11;
+		var p_w3 = w10;
+		this.baseNegLim = -1 * Math.sqrt((p_x3 - _this_x3) * (p_x3 - _this_x3) + (p_y3 - _this_y3) * (p_y3 - _this_y3) + (p_z3 - _this_z3) * (p_z3 - _this_z3));
+		this.baseTravelDist = Math.abs(this.basePosLim) + Math.abs(this.baseNegLim);
 	}
 	,onUpdate: function() {
 		var keyboard = iron_system_Input.getKeyboard();
@@ -783,20 +881,16 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 			this.updatePartsMoving();
 		}
 		if(keyboard.down("up")) {
-			this.transPost(1);
+			this.transBase(1);
 		}
 		if(keyboard.down("down")) {
-			this.transPost(-1);
+			this.transBase(-1);
 		}
 		if(keyboard.down("left")) {
-			this.postAngle = (this.postAngle + this.postAngleTravel) % (Math.PI * 2);
-			this.baseAngle = (this.baseAngle + this.baseAngleTravel) % (Math.PI * 2);
-			this.updatePartsSnap();
+			this.rotBase(1);
 		}
 		if(keyboard.down("right")) {
-			this.postAngle = (this.postAngle - this.postAngleTravel) % (Math.PI * 2);
-			this.baseAngle = (this.baseAngle - this.baseAngleTravel) % (Math.PI * 2);
-			this.updatePartsSnap();
+			this.rotBase(-1);
 		}
 		if(keyboard.down("space")) {
 			this.updatePartsSnap();
@@ -832,11 +926,11 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 				this.switchStateScrew();
 			}
 			if(rb != null && rb.object == this.object && this.mState == 0) {
-				haxe_Log.trace("state 0 Locked yo",{ fileName : "arm/UPH2_Base.hx", lineNumber : 230, className : "arm.UPH2_Base", methodName : "onUpdate"});
+				haxe_Log.trace("state 0 Locked yo",{ fileName : "arm/UPH2_Base.hx", lineNumber : 245, className : "arm.UPH2_Base", methodName : "onUpdate"});
 			} else if(rb != null && rb.object == this.object && this.mState == 1) {
-				haxe_Log.trace("state 1 now transl",{ fileName : "arm/UPH2_Base.hx", lineNumber : 234, className : "arm.UPH2_Base", methodName : "onUpdate"});
+				haxe_Log.trace("state 1 now transl",{ fileName : "arm/UPH2_Base.hx", lineNumber : 249, className : "arm.UPH2_Base", methodName : "onUpdate"});
 			} else if(rb != null && rb.object == this.object && this.mState == 2) {
-				haxe_Log.trace("state 2 now translating",{ fileName : "arm/UPH2_Base.hx", lineNumber : 238, className : "arm.UPH2_Base", methodName : "onUpdate"});
+				haxe_Log.trace("state 2 now translating",{ fileName : "arm/UPH2_Base.hx", lineNumber : 253, className : "arm.UPH2_Base", methodName : "onUpdate"});
 			}
 		}
 	}
@@ -846,44 +940,110 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		this.mScrew.transform.setMatrix(mST);
 		this.mScrew.transform.scale = this.nScale;
 		this.rbSync(this.mScrew);
+		var _this = this.mScrew.transform.world;
+		this.mScrew.transform.move(new iron_math_Vec4(_this.self._20,_this.self._21,_this.self._22),this.mState * this.mSTravel);
+		this.rbSync(this.mScrew);
 		var mT = this.object.getChild("C_UPH").transform.world;
 		this.top.transform.setMatrix(mT);
 		this.top.transform.scale = this.nScale;
-		var _this = this.top.transform.loc;
+		var _this1 = this.top.transform.loc;
 		var v = this.corrVTop;
-		_this.x -= v.x;
-		_this.y -= v.y;
-		_this.z -= v.z;
+		_this1.x -= v.x;
+		_this1.y -= v.y;
+		_this1.z -= v.z;
 		this.rbSync(this.top);
 		var mS = this.top.getChild("C_Screw").transform.world;
 		this.screw.transform.setMatrix(mS);
 		this.screw.transform.scale = this.nScale;
-		var _this1 = this.screw.transform.loc;
-		var v1 = this.corrScrew;
-		_this1.x -= v1.x;
-		_this1.y -= v1.y;
-		_this1.z -= v1.z;
+		this.rbSync(this.screw);
+		var _this2 = new iron_math_Vec4();
+		var _this3 = this.screw.getChild("C").transform.world;
+		var x = _this3.self._30;
+		var y = _this3.self._31;
+		var z = _this3.self._32;
+		var w = _this3.self._33;
+		if(w == null) {
+			w = 1.0;
+		}
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var v_x = x;
+		var v_y = y;
+		var v_z = z;
+		var v_w = w;
+		_this2.x = v_x;
+		_this2.y = v_y;
+		_this2.z = v_z;
+		_this2.w = v_w;
+		var _this4 = _this2;
+		var v1 = this.screw.transform.loc;
+		_this4.x -= v1.x;
+		_this4.y -= v1.y;
+		_this4.z -= v1.z;
+		this.corrScrew = _this4;
+		if(this.sState == 0) {
+			var _this5 = this.corrScrew;
+			_this5.x *= 0.5;
+			_this5.y *= 0.5;
+			_this5.z *= 0.5;
+		}
+		var _this6 = this.screw.transform.loc;
+		var v2 = this.corrScrew;
+		_this6.x -= v2.x;
+		_this6.y -= v2.y;
+		_this6.z -= v2.z;
 		this.rbSync(this.screw);
 		var mP = this.top.getChild("C_Top").transform.world;
 		this.post.transform.setMatrix(mP);
 		this.post.transform.scale = this.nScale;
-		var _this2 = this.post.transform.world;
-		this.post.transform.move(new iron_math_Vec4(_this2.self._20,_this2.self._21,_this2.self._22),this.postDist);
+		var _this7 = this.post.transform.world;
+		this.post.transform.move(new iron_math_Vec4(_this7.self._20,_this7.self._21,_this7.self._22),this.postDist);
 		var tmp = this.post.transform;
-		var _this3 = this.post.transform.world;
-		var _this4 = new iron_math_Vec4(_this3.self._20,_this3.self._21,_this3.self._22);
-		var n = Math.sqrt(_this4.x * _this4.x + _this4.y * _this4.y + _this4.z * _this4.z);
+		var _this8 = this.post.transform.world;
+		var _this9 = new iron_math_Vec4(_this8.self._20,_this8.self._21,_this8.self._22);
+		var n = Math.sqrt(_this9.x * _this9.x + _this9.y * _this9.y + _this9.z * _this9.z);
 		if(n > 0.0) {
 			var invN = 1.0 / n;
-			_this4.x *= invN;
-			_this4.y *= invN;
-			_this4.z *= invN;
+			_this9.x *= invN;
+			_this9.y *= invN;
+			_this9.z *= invN;
 		}
-		tmp.rotate(_this4,this.postAngle);
+		tmp.rotate(_this9,this.postAngle);
 		this.rbSync(this.post);
 	}
 	,updatePartsSnap: function() {
 		this.nScale = new iron_math_Vec4(0.01,0.01,0.01,1);
+		var tmp = this.object.transform;
+		var _this = this.object.getChild("C_Screw_Pos").transform.world;
+		var _this1 = new iron_math_Vec4(_this.self._10,_this.self._11,_this.self._12);
+		var n = Math.sqrt(_this1.x * _this1.x + _this1.y * _this1.y + _this1.z * _this1.z);
+		if(n > 0.0) {
+			var invN = 1.0 / n;
+			_this1.x *= invN;
+			_this1.y *= invN;
+			_this1.z *= invN;
+		}
+		tmp.move(_this1,-1 * this.baseDist);
+		this.rbSync(this.object);
+		var tmp1 = this.object.getChild("C_Screw_Pos").transform;
+		var _this2 = this.object.getChild("C_Screw_Pos").transform.world;
+		var _this3 = new iron_math_Vec4(_this2.self._10,_this2.self._11,_this2.self._12);
+		var n1 = Math.sqrt(_this3.x * _this3.x + _this3.y * _this3.y + _this3.z * _this3.z);
+		if(n1 > 0.0) {
+			var invN1 = 1.0 / n1;
+			_this3.x *= invN1;
+			_this3.y *= invN1;
+			_this3.z *= invN1;
+		}
+		tmp1.move(_this3,this.baseDist);
+		this.rbSync(this.object);
 		var mST = this.object.getChild("C_Screw_Pos").transform.world;
 		this.mScrew.transform.setMatrix(mST);
 		this.mScrew.transform.scale = this.nScale;
@@ -893,12 +1053,14 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		this.object.transform.buildMatrix();
 		this.rbSync(this.object);
 		this.mScrew.transform.translate(corrVxy.x,corrVxy.y,0);
+		var _this4 = this.mScrew.transform.world;
+		this.mScrew.transform.move(new iron_math_Vec4(_this4.self._20,_this4.self._21,_this4.self._22),this.mState * this.mSTravel);
 		this.rbSync(this.mScrew);
-		var _this = this.object.transform.rot;
-		var _this1 = this.object.transform.world;
-		var x = _this1.self._20;
-		var y = _this1.self._21;
-		var z = _this1.self._22;
+		var _this5 = this.object.transform.rot;
+		var _this6 = this.object.transform.world;
+		var x = _this6.self._20;
+		var y = _this6.self._21;
+		var z = _this6.self._22;
 		if(z == null) {
 			z = 0.0;
 		}
@@ -912,42 +1074,42 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var axis_y = y;
 		var axis_z = z;
 		var axis_w = 1.0;
-		var n = Math.sqrt(axis_x * axis_x + axis_y * axis_y + axis_z * axis_z);
-		if(n > 0.0) {
-			var invN = 1.0 / n;
-			axis_x *= invN;
-			axis_y *= invN;
-			axis_z *= invN;
+		var n2 = Math.sqrt(axis_x * axis_x + axis_y * axis_y + axis_z * axis_z);
+		if(n2 > 0.0) {
+			var invN2 = 1.0 / n2;
+			axis_x *= invN2;
+			axis_y *= invN2;
+			axis_z *= invN2;
 		}
 		var angle = this.baseAngle;
 		var s = Math.sin(angle * 0.5);
-		_this.x = axis_x * s;
-		_this.y = axis_y * s;
-		_this.z = axis_z * s;
-		_this.w = Math.cos(angle * 0.5);
-		var l = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z + _this.w * _this.w);
+		_this5.x = axis_x * s;
+		_this5.y = axis_y * s;
+		_this5.z = axis_z * s;
+		_this5.w = Math.cos(angle * 0.5);
+		var l = Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z + _this5.w * _this5.w);
 		if(l == 0.0) {
-			_this.x = 0;
-			_this.y = 0;
-			_this.z = 0;
-			_this.w = 0;
+			_this5.x = 0;
+			_this5.y = 0;
+			_this5.z = 0;
+			_this5.w = 0;
 		} else {
 			l = 1.0 / l;
-			_this.x *= l;
-			_this.y *= l;
-			_this.z *= l;
-			_this.w *= l;
+			_this5.x *= l;
+			_this5.y *= l;
+			_this5.z *= l;
+			_this5.w *= l;
 		}
 		this.rbSync(this.object);
 		var corrVrot_x = 0.0;
 		var corrVrot_y = 0.0;
 		var corrVrot_z = 0.0;
 		var corrVrot_w = 1.0;
-		var _this2 = this.object.getChild("C_Screw_Pos").transform.world;
-		var x1 = _this2.self._30;
-		var y1 = _this2.self._31;
-		var z1 = _this2.self._32;
-		var w = _this2.self._33;
+		var _this7 = this.object.getChild("C_Screw_Pos").transform.world;
+		var x1 = _this7.self._30;
+		var y1 = _this7.self._31;
+		var z1 = _this7.self._32;
+		var w = _this7.self._33;
 		if(w == null) {
 			w = 1.0;
 		}
@@ -977,38 +1139,103 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		var mT = this.object.getChild("C_UPH").transform.world;
 		this.top.transform.setMatrix(mT);
 		this.top.transform.scale = this.nScale;
-		var _this3 = this.top.transform.loc;
+		var _this8 = this.top.transform.loc;
 		var v1 = this.corrVTop;
-		_this3.x -= v1.x;
-		_this3.y -= v1.y;
-		_this3.z -= v1.z;
+		_this8.x -= v1.x;
+		_this8.y -= v1.y;
+		_this8.z -= v1.z;
 		this.rbSync(this.top);
 		var mS = this.top.getChild("C_Screw").transform.world;
 		this.screw.transform.setMatrix(mS);
 		this.screw.transform.scale = this.nScale;
-		var _this4 = this.screw.transform.loc;
-		var v2 = this.corrScrew;
-		_this4.x -= v2.x;
-		_this4.y -= v2.y;
-		_this4.z -= v2.z;
+		this.rbSync(this.screw);
+		var _this9 = new iron_math_Vec4();
+		var _this10 = this.screw.getChild("C").transform.world;
+		var x2 = _this10.self._30;
+		var y2 = _this10.self._31;
+		var z2 = _this10.self._32;
+		var w1 = _this10.self._33;
+		if(w1 == null) {
+			w1 = 1.0;
+		}
+		if(z2 == null) {
+			z2 = 0.0;
+		}
+		if(y2 == null) {
+			y2 = 0.0;
+		}
+		if(x2 == null) {
+			x2 = 0.0;
+		}
+		var v_x1 = x2;
+		var v_y1 = y2;
+		var v_z1 = z2;
+		var v_w1 = w1;
+		_this9.x = v_x1;
+		_this9.y = v_y1;
+		_this9.z = v_z1;
+		_this9.w = v_w1;
+		var _this11 = _this9;
+		var v2 = this.screw.transform.loc;
+		_this11.x -= v2.x;
+		_this11.y -= v2.y;
+		_this11.z -= v2.z;
+		this.corrScrew = _this11;
+		if(this.sState == 0) {
+			var _this12 = this.corrScrew;
+			_this12.x *= 0.5;
+			_this12.y *= 0.5;
+			_this12.z *= 0.5;
+		}
+		var _this13 = this.screw.transform.loc;
+		var v3 = this.corrScrew;
+		_this13.x -= v3.x;
+		_this13.y -= v3.y;
+		_this13.z -= v3.z;
 		this.rbSync(this.screw);
 		var mP = this.top.getChild("C_Top").transform.world;
 		this.post.transform.setMatrix(mP);
 		this.post.transform.scale = this.nScale;
-		var _this5 = this.post.transform.world;
-		this.post.transform.move(new iron_math_Vec4(_this5.self._20,_this5.self._21,_this5.self._22),this.postDist);
-		var tmp = this.post.transform;
-		var _this6 = this.post.transform.world;
-		var _this7 = new iron_math_Vec4(_this6.self._20,_this6.self._21,_this6.self._22);
-		var n1 = Math.sqrt(_this7.x * _this7.x + _this7.y * _this7.y + _this7.z * _this7.z);
-		if(n1 > 0.0) {
-			var invN1 = 1.0 / n1;
-			_this7.x *= invN1;
-			_this7.y *= invN1;
-			_this7.z *= invN1;
+		var _this14 = this.post.transform.world;
+		this.post.transform.move(new iron_math_Vec4(_this14.self._20,_this14.self._21,_this14.self._22),this.postDist);
+		var tmp2 = this.post.transform;
+		var _this15 = this.post.transform.world;
+		var _this16 = new iron_math_Vec4(_this15.self._20,_this15.self._21,_this15.self._22);
+		var n3 = Math.sqrt(_this16.x * _this16.x + _this16.y * _this16.y + _this16.z * _this16.z);
+		if(n3 > 0.0) {
+			var invN3 = 1.0 / n3;
+			_this16.x *= invN3;
+			_this16.y *= invN3;
+			_this16.z *= invN3;
 		}
-		tmp.rotate(_this7,this.postAngle);
+		tmp2.rotate(_this16,this.postAngle);
 		this.rbSync(this.post);
+	}
+	,rotBase: function(multiplier) {
+		if(this.mState == 1) {
+			this.baseAngle = (this.baseAngle + multiplier * this.baseAngleTravel) % (Math.PI * 2);
+			this.updatePartsSnap();
+		}
+	}
+	,transBase: function(multiplier) {
+		if(this.mState == 1) {
+			if(multiplier < 0) {
+				if(this.baseDist + multiplier * this.baseTrans > this.baseNegLim) {
+					this.baseDist += multiplier * this.baseTrans;
+				}
+			} else if(multiplier > 0) {
+				if(this.baseDist + multiplier * this.baseTrans < this.basePosLim) {
+					this.baseDist += multiplier * this.baseTrans;
+				}
+			}
+			this.updatePartsSnap();
+		}
+	}
+	,rotPost: function(multiplier) {
+		if(this.sState == 1) {
+			this.postAngle = (this.postAngle + multiplier * this.postAngleTravel) % (Math.PI * 2);
+			this.updatePartsSnap();
+		}
 	}
 	,transPost: function(multiplier) {
 		if(this.sState == 1) {
@@ -1061,20 +1288,14 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 	}
 	,switchStateMScrew: function() {
 		if(this.mState == 0) {
-			var _this = this.mScrew.transform.world;
-			this.mScrew.transform.move(new iron_math_Vec4(_this.self._20,_this.self._21,_this.self._22),this.mSTravel);
 			this.mState = 1;
-			this.rbSync(this.mScrew);
+			this.updatePartsSnap();
 		} else if(this.mState == 1) {
-			var _this1 = this.mScrew.transform.world;
-			this.mScrew.transform.move(new iron_math_Vec4(_this1.self._20,_this1.self._21,_this1.self._22),this.mSTravel);
 			this.mState = 2;
-			this.rbSync(this.mScrew);
+			this.updatePartsSnap();
 		} else {
-			var _this2 = this.mScrew.transform.world;
-			this.mScrew.transform.move(new iron_math_Vec4(_this2.self._20,_this2.self._21,_this2.self._22),-2 * this.mSTravel);
 			this.mState = 0;
-			this.rbSync(this.mScrew);
+			this.updatePartsSnap();
 		}
 	}
 	,spawnObject: function(objectName,visible) {

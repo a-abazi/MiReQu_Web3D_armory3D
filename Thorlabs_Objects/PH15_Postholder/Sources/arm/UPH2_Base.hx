@@ -45,17 +45,25 @@ class UPH2_Base extends iron.Trait {
 										// 1 Post can be rotated and moved up/down 
 
 
+
+	var postAngle: Float = 0;
+	var postAngleTravel: Float = Math.PI*2./100.;
+
 	var postDist: Float = 0.0;
 	var postTrans: Float = 0.01;
 	var postPosLim: Float;
 	var postNegLim: Float;
 	var postTravelDist: Float;
 
-	var postAngle: Float = 0;
-	var postAngleTravel: Float = Math.PI*2./100.;
-
 	var baseAngle: Float;
 	var baseAngleTravel: Float = Math.PI*2./100.;
+
+	var baseDist: Float = 0.0;
+	var baseTrans: Float = 0.01;
+	var basePosLim: Float;
+	var baseNegLim: Float;
+	var baseTravelDist: Float;
+
 
 	var plate: Object;
 	var mScrew: Object;
@@ -117,6 +125,7 @@ class UPH2_Base extends iron.Trait {
 		object.transform.buildMatrix();
 		rbSync(object);
 		mScrew.transform.translate(corrVxy.x,corrVxy.y,0);
+		mScrew.transform.move(mScrew.transform.up(), mState * mSTravel);
 		rbSync(mScrew);
 
 		// spawn "Top" on the base, corrVTop is the correction vector concerning the location
@@ -136,7 +145,10 @@ class UPH2_Base extends iron.Trait {
 		screw.transform.setMatrix(mS);
 		screw.transform.scale = nScale;
 		rbSync(screw);
-		corrScrew = new Vec4().setFrom(screw.getChild("C").transform.world.getLoc()).sub(screw.transform.loc).mult(0.5);
+		corrScrew = new Vec4().setFrom(screw.getChild("C").transform.world.getLoc()).sub(screw.transform.loc);
+		if (sState == 0)
+			corrScrew.mult(0.5);
+
 		screw.transform.loc.sub(corrScrew);
 		screw.visible = true;
 		rbSync(screw);
@@ -157,6 +169,10 @@ class UPH2_Base extends iron.Trait {
 		postPosLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Top").transform.world.getLoc()));
 		postNegLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Bottom").transform.world.getLoc()));
 		postTravelDist = Math.abs(postPosLim) + Math.abs(postNegLim);
+
+		basePosLim = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos").transform.world.getLoc()));
+		baseNegLim = -1*(object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg").transform.world.getLoc()));
+		baseTravelDist = Math.abs(basePosLim)+ Math.abs(baseNegLim);
 
 	}
 			
@@ -187,23 +203,21 @@ class UPH2_Base extends iron.Trait {
 			updatePartsMoving();
 		}
 
-		if (keyboard.down("up")) transPost(1);
+		if (keyboard.down("up")){
+			transBase(1);
+		}
 		
-		if (keyboard.down("down")) transPost(-1);
+		if (keyboard.down("down")){
+			transBase(-1);
+		}
 
 		
 		if (keyboard.down("left")){
-			postAngle = (postAngle + postAngleTravel) % (Math.PI*2);
-			baseAngle = (baseAngle + baseAngleTravel) % (Math.PI*2);
-
-			updatePartsSnap();
+			rotBase(1);
 
 		}
 		if (keyboard.down("right")){
-			postAngle = (postAngle - postAngleTravel) % (Math.PI*2);
-			baseAngle = (baseAngle - baseAngleTravel) % (Math.PI*2);
-			updatePartsSnap();
-			
+			rotBase(-1);
 		}
 
 
@@ -251,10 +265,13 @@ class UPH2_Base extends iron.Trait {
 		// moving function to update all rigidbodys and children
 		// does not include the snap, TODO: integrate to one function
 		nScale = new Vec4(0.01,0.01,0.01,1);
+
 		
 		var mST = object.getChild("C_Screw_Pos").transform.world;
 		mScrew.transform.setMatrix(mST);
 		mScrew.transform.scale = nScale;
+		rbSync(mScrew);
+		mScrew.transform.move(mScrew.transform.up(), mState * mSTravel);
 		rbSync(mScrew);
 
 		var mT = object.getChild("C_UPH").transform.world;
@@ -266,6 +283,10 @@ class UPH2_Base extends iron.Trait {
 		var mS = top.getChild("C_Screw").transform.world;
 		screw.transform.setMatrix(mS);
 		screw.transform.scale = nScale;
+		rbSync(screw);
+		corrScrew = new Vec4().setFrom(screw.getChild("C").transform.world.getLoc()).sub(screw.transform.loc);
+		if (sState == 0)
+			corrScrew.mult(0.5);
 		screw.transform.loc.sub(corrScrew);
 		rbSync(screw);
 
@@ -283,17 +304,22 @@ class UPH2_Base extends iron.Trait {
 	function updatePartsSnap() {
 		nScale = new Vec4(0.01,0.01,0.01,1);
 		
+
 		var mST = object.getChild("C_Screw_Pos").transform.world;
 		mScrew.transform.setMatrix(mST);
 		mScrew.transform.scale = nScale;
 		rbSync(mScrew);
+
+
 
 		var corrVxy: Vec4 = xySnapToBasis(object,mScrew,zero,baseX,baseY);
 		object.transform.translate(corrVxy.x,corrVxy.y,0);
 		object.transform.buildMatrix();
 		rbSync(object);
 		mScrew.transform.translate(corrVxy.x,corrVxy.y,0);
+		mScrew.transform.move(mScrew.transform.up(), mState * mSTravel);
 		rbSync(mScrew);
+
 
 		object.transform.rot.fromAxisAngle(object.transform.up().normalize(), baseAngle);
 		rbSync(object);
@@ -312,6 +338,10 @@ class UPH2_Base extends iron.Trait {
 		var mS = top.getChild("C_Screw").transform.world;
 		screw.transform.setMatrix(mS);
 		screw.transform.scale = nScale;
+		rbSync(screw);
+		corrScrew = new Vec4().setFrom(screw.getChild("C").transform.world.getLoc()).sub(screw.transform.loc);
+		if (sState == 0)
+			corrScrew.mult(0.5);
 		screw.transform.loc.sub(corrScrew);
 		rbSync(screw);
 
@@ -323,6 +353,38 @@ class UPH2_Base extends iron.Trait {
 		post.transform.rotate(post.transform.up().normalize(),postAngle);
 		rbSync(post);
 		
+	}
+
+	function rotBase(multiplier: Float){
+		if ( mState ==1){
+			baseAngle = (baseAngle + multiplier * baseAngleTravel) % (Math.PI*2);
+			updatePartsSnap();
+		}
+	}
+
+
+	function transBase(multiplier: Float){
+		if (mState==1){
+			if (multiplier<0){
+				if (baseDist + multiplier*baseTrans > baseNegLim ){
+					baseDist = baseDist + multiplier*baseTrans;
+				}
+			}
+			else if(multiplier>0){			
+				if (baseDist + multiplier*baseTrans < basePosLim){
+					baseDist = baseDist + multiplier*baseTrans;
+				}
+			}
+		updatePartsSnap();	
+		}
+	}
+
+
+	function rotPost(multiplier: Float){
+		if (sState==1){
+			postAngle = (postAngle + multiplier * postAngleTravel) % (Math.PI*2);
+			updatePartsSnap();
+		}
 	}
 
 
@@ -360,38 +422,27 @@ class UPH2_Base extends iron.Trait {
 	
 	function switchStateScrew() {
 		if (sState == 0){
-			//screw.transform.move(screw.transform.look(), -1*sTravel);
-			//top.getChild("C_Screw").transform.move(top.getChild("C_Screw").transform.look(), -1*sTravel);
-			//rbSync(top);
 			sState = 1;
-			//rbSync(screw);
 			updatePartsSnap();
 		}
 		else {
-			//screw.transform.move(mScrew.transform.look(), sTravel);
-			//top.getChild("C_Screw").transform.move(top.getChild("C_Screw").transform.look(), 1*sTravel);
-			//rbSync(top);
 			sState = 0;
-			//rbSync(screw);
 			updatePartsSnap();
 		}
 	}
 
 	function switchStateMScrew(){
 		if (mState == 0){
-			mScrew.transform.move(mScrew.transform.up(), mSTravel);
 			mState = 1;
-			rbSync(mScrew);
+			updatePartsSnap();
 		} 
 		else if (mState == 1){
-			mScrew.transform.move(mScrew.transform.up(), mSTravel);
 			mState = 2;
-			rbSync(mScrew);
+			updatePartsSnap();
 		}
 		else {
-			mScrew.transform.move(mScrew.transform.up(), -2*mSTravel);
 			mState = 0;
-			rbSync(mScrew);
+			updatePartsSnap();
 		}
 	}
 
