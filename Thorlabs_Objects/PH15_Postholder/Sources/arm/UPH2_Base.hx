@@ -278,7 +278,6 @@ class UPH2_Base extends iron.Trait {
 
 	}
 
-
 	function updateParts() {
 		nScale = new Vec4(0.01,0.01,0.01,1);
 		
