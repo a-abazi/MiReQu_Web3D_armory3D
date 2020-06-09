@@ -16,7 +16,17 @@ import iron.math.Vec4;
 import iron.math.Mat4;
 import iron.math.RayCaster;
 
+// Important!! For the movement to work, a plane object xyPlane is required as a rigidbody in group 3
+// TODO: find out how to give an object an rigid body, and how to generate an object
+// TODO: when stage is ready, stage needs to be recognized as base not platte,
+// TODO: multiple platten
+// TODO: COnnection to object
+// TODO: Collisions!!!
+
+
 class UPH2_Base extends iron.Trait {	
+	
+	
 
 	@prop 
 	var plateName: String = "Platte";
@@ -83,7 +93,7 @@ class UPH2_Base extends iron.Trait {
 	var movingObj: Object = null;
 	var xyPlane: Object = null;
 	var hitVec: Vec4 = null;
-	var planegroup: Int = 3; //collection group for the helper plane
+	var planegroup: Int = 2; //third square in Blender 2^(n); n=2 (first square is n=0)
 
 	public function new() {
 		super();
@@ -96,7 +106,7 @@ class UPH2_Base extends iron.Trait {
 	// TODO: Movements !!!
 	// bugs: 
 	// 		- inital angle not correct for angles larger than pi (method of Quat(Iron) toAxisAngle)
-	// 		- Hex Screw translates relative to Top when base is rotated.
+
 
 
 
@@ -184,8 +194,6 @@ class UPH2_Base extends iron.Trait {
 	}
 
 
-
-			
 	function onUpdate(){
 		//updateParts();
 		var keyboard = Input.getKeyboard();
@@ -193,14 +201,9 @@ class UPH2_Base extends iron.Trait {
 		var rb = null;
 
 		if (mouse.started("left")){
-			var coords = new Vec4(mouse.x, mouse.y,0,1);
 			var physics = armory.trait.physics.PhysicsWorld.active;	
 
-			//helper plane to calculate movement of object in xy
-
-			
-
-			rb = physics.pickClosest(coords.x, coords.y);
+			rb = physics.pickClosest(mouse.x, mouse.y);
 			if (rb !=null) {
 				movingObj = rb.object;
 
@@ -219,7 +222,7 @@ class UPH2_Base extends iron.Trait {
 		if (mouse.released("left")) {
 			movingObj = null;
 			if (xyPlane != null) xyPlane.remove();
-			hitVec = null;
+			hitVec=null;
 			updateParts();
 		}
 
@@ -231,34 +234,43 @@ class UPH2_Base extends iron.Trait {
 			}
 
 			else if (movingObj == object && mState == 0){
-				trace("state 0 Locked yo");
-				//updateParts();
+				//trace("state 0 Locked yo");
+				updateParts();
 			}
-			else if (movingObj == object && mState == 1){
-				trace("state 1 now transl");
-				var multip = 0.025;
-				//var movingV = screenMoveToWorldMove(new Vec4(mouse.movementX * multip,mouse.movementY * -multip,0));
-				var clickpos = worldToScreenSpace(new Vec4(mouse.x,mouse.y,0));
-				trace (clickpos.sub(object.transform.loc));
-
-				//updateParts();
-			}
-			else if (movingObj == object && mState == 2){
+			else if ((movingObj == object || movingObj == top)&& mState == 1){
 				if (hitVec == null){
 					hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<0);
-					if (hitVec!= null ) xyPlane = spawnXYPlane(hitVec);
-					//TODo: figure out movement
-					//hitVec.subvecs(object.transform.loc, hitVec);
-				} 
+					xyPlane = spawnXYPlane(hitVec);
+				}
+				var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
+				if (newHitVec!= null ) {
+					var dirVecNew = new Vec4().setFrom(newHitVec).sub(object.getChild("C_Screw_Pos").transform.world.getLoc());
+					var newAngle = Math.atan2(dirVecNew.y,dirVecNew.x)-Math.atan2(1,0);
+					rotBaseTo(newAngle);
+					
+					var distold = object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo(hitVec);
+					var distnew = object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo(newHitVec);
+					transBaseBy(distold-distnew);
+					hitVec = newHitVec;
+				}
+				else trace("xyPlane not detected by rayCastmethod");
 				
-				var moveVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<planegroup-1) ; 
-				trace(moveVec);
-				moveVec.sub(object.transform.loc);
-				//moveVec.sub(hitVec);
-				trace(moveVec);
-				object.transform.translate( moveVec.x,moveVec.y ,0);
-				rbSync(object);
-				updateParts();
+			}
+			else if ((movingObj == object|| movingObj == top) && mState == 2){
+				if (hitVec == null){
+					hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<0);
+					xyPlane = spawnXYPlane(hitVec);
+				}
+				
+				var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup); 
+				if (newHitVec!= null ) {
+					var moveVec = new Vec4().setFrom(hitVec).sub(newHitVec);
+					object.transform.translate(-moveVec.x,-moveVec.y ,0);
+					hitVec = newHitVec;
+					rbSync(object);
+					updateParts();
+				}
+				else trace("xyPlane not detected by rayCastmethod");
 			}
 			
 		}
@@ -266,49 +278,6 @@ class UPH2_Base extends iron.Trait {
 
 	}
 
-
-
-
-	function updatePartsMoving() {
-		// moving function to update all rigidbodys and children
-		// does not include the snap, TODO: integrate to one function
-		nScale = new Vec4(0.01,0.01,0.01,1);
-
-		
-		var mST = object.getChild("C_Screw_Pos").transform.world;
-		mScrew.transform.setMatrix(mST);
-		mScrew.transform.scale = nScale;
-		rbSync(mScrew);
-		mScrew.transform.move(mScrew.transform.up(), mState * mSTravel);
-		rbSync(mScrew);
-
-
-		var mT = object.getChild("C_UPH").transform.world;
-		top.transform.setMatrix(mT);
-		top.transform.scale = nScale;
-		top.transform.loc.sub(corrVTop);
-		rbSync(top);
-
-		var mS = top.getChild("C_Screw").transform.world;
-		screw.transform.setMatrix(mS);
-		screw.transform.scale = nScale;
-		rbSync(screw);
-		corrScrew = new Vec4().setFrom(screw.getChild("C").transform.world.getLoc()).sub(screw.transform.loc);
-		if (sState == 0)
-			corrScrew.mult(0.5);
-		screw.transform.loc.sub(corrScrew);
-		rbSync(screw);
-
-
-		var mP = top.getChild("C_Top").transform.world;
-		post.transform.setMatrix(mP);
-		post.transform.scale = nScale;
-		post.transform.move(post.transform.up(),postDist);
-		post.transform.rotate(post.transform.up().normalize(),postAngle);
-		rbSync(post);
-		
-		
-	}
 
 	function updateParts() {
 		nScale = new Vec4(0.01,0.01,0.01,1);
@@ -368,6 +337,13 @@ class UPH2_Base extends iron.Trait {
 		}
 	}
 
+	function rotBaseTo(newAngle: Float){
+		if ( mState ==1){
+			baseAngle = newAngle % (Math.PI*2);
+			updateParts();
+		}
+	}
+
 	function transBase(multiplier: Float){
 		if (mState==1){
 			multiplier = multiplier*-1;
@@ -393,6 +369,24 @@ class UPH2_Base extends iron.Trait {
 		}
 	}
 
+	function transBaseBy(dist: Float){
+		if (mState==1){
+			var scalefactor = 100; // factor which results due to scaling, needs to be adjusted for other scales#
+			var baseDist = 0.;
+			if (dist<0){
+				baseDist = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg").transform.world.getLoc()));
+			}
+			else if(dist>0){			
+				baseDist = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos").transform.world.getLoc())); 	
+			}
+			if (baseDist - Math.abs(dist)>0){
+				object.getChild("C_Screw_Pos").transform.translate(0,dist*scalefactor,0);
+				(object);
+			}
+		updateParts();	
+		}
+	}
+
 
 	function rotPost(multiplier: Float){
 		if (sState==1){
@@ -400,7 +394,7 @@ class UPH2_Base extends iron.Trait {
 			updateParts();
 		}
 	}
-
+ 
 
 	function transPost(multiplier: Float){
 		if (sState==1){
@@ -483,7 +477,7 @@ class UPH2_Base extends iron.Trait {
 		return object;
 	}
 
-	function spawnXYPlane(loc: Vec4):Object {
+	function spawnXYPlane(loc: Vec4):Object{
 		var object: Object;
 		var matrix = null;
 		var spawnChildren = false;
@@ -503,7 +497,8 @@ class UPH2_Base extends iron.Trait {
 			object.visible = false;
 		}, spawnChildren);
 		object.transform.loc = loc;
-		
+		//trace(object.getTrait(RigidBody).group);
+		rbSync(object);
 		return object;
 	}
 
