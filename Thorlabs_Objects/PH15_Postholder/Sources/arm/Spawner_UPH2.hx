@@ -9,16 +9,16 @@ class Spawner_UPH2 extends iron.Trait {
 	public function new() {
 		super();
 
-		@prop 
+		@prop // angle of the base rotation, relative to the x-axis? counter clockwise? :TODO: Findout!
 		var baseAngleDegree: Float = 90;
 		
-		@prop
+		@prop // Translation from Screw, default should me 0.025m(base distance of holes)
 		var baseTranslation: Float = 0;
 
-		@prop
+		@prop // 
 		var postAngleDegree: Float = 90;
 
-		@prop
+		@prop // angle of the post rotation, relative to the x-axis? counter clockwise? :TODO: Findout!
 		var postTranslation: Float = 0;
 
 		@prop
@@ -55,7 +55,7 @@ class Spawner_UPH2 extends iron.Trait {
 		object.transform.loc = loc;
 		return object;
 	}
-	
+
 	function rbSync(object:Object) { 
 		// helping function for a rigid body object, 
 		// is used to align the the rigid bodys of object and children to their new parent matrix (location and rotation)

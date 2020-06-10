@@ -22,6 +22,8 @@ import iron.math.RayCaster;
 // TODO: multiple platten
 // TODO: COnnection to object
 // TODO: Collisions!!!
+// TODO (When Dynamic Meshes): Strech the post to get variables heights 
+// TODO: define a postheight property
 
 
 class UPH2_Base extends iron.Trait {	
@@ -103,21 +105,14 @@ class UPH2_Base extends iron.Trait {
 
 	};
 
-	// TODO: Movements !!!
-	// bugs: 
-	// 		- inital angle not correct for angles larger than pi (method of Quat(Iron) toAxisAngle)
-
-
-
 
 	function onInit() {
-		
+
 		// get base system from the plate object
 		plate = Scene.active.getChild(plateName);
 		zero = plate.getChildren()[2].transform.world.getLoc();
 		baseX = plate.getChildren()[0].transform.world.getLoc().sub(zero);
 		baseY = plate.getChildren()[1].transform.world.getLoc().sub(zero);
-
 
 		// set the object to correct z stage and to the baseAngle Value(outcommented)
 		object.transform.translate(0,0,zero.z -  object.getChild("C_Platte").transform.world.getLoc().z);
