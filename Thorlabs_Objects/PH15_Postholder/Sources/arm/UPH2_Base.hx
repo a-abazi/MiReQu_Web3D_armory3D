@@ -1,4 +1,3 @@
-
 package arm;
 import iron.Scene;
 import kha.graphics4.hxsl.Types.Vec;
@@ -26,9 +25,8 @@ import iron.math.RayCaster;
 // TODO: define a postheight property
 
 
+
 class UPH2_Base extends iron.Trait {	
-	
-	
 
 	@prop 
 	var plateName: String = "Platte";
@@ -106,8 +104,9 @@ class UPH2_Base extends iron.Trait {
 	};
 
 
-	function onInit() {
-
+	// TODO: add property readout
+	public function onInit() {
+	
 		// get base system from the plate object
 		plate = Scene.active.getChild(plateName);
 		zero = plate.getChildren()[2].transform.world.getLoc();
@@ -275,6 +274,7 @@ class UPH2_Base extends iron.Trait {
 
 	}
 
+	// TODO: add property readout
 	function updateParts() {
 		// general function that is called to update all the rigid bodys belongig to the base
 		// TODO: include call to componenent on Post (e.g. Mirror)
@@ -522,6 +522,11 @@ class UPH2_Base extends iron.Trait {
 		// is used to align the the rigid bodys of object and children to their new parent matrix (location and rotation)
 		var rigidBody = object.getTrait(RigidBody);
 		if (rigidBody != null) rigidBody.syncTransform();
+	}
+
+	function initProps(object:Object){
+		if (object == null) return;
+		if (object.properties == null) object.properties = new Map();
 	}
 
 	function mouseToPlaneHit (inputX, inputY,group, mask):Dynamic{

@@ -39,7 +39,6 @@ class Waveplate_half_v2 extends iron.Trait {
     
 
 
-
     public function GetChildProperties(parBeam:Object, pos:Vec4, dir:Vec4){
         var new_childprops:  Map<String,Dynamic> = parBeam.properties.copy();
         var normal_vec: Vec4 = object.transform.world.look().normalize(); // brauche ich später wahrscheinlich nochmal

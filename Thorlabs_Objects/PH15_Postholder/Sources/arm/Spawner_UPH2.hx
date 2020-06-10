@@ -53,6 +53,8 @@ class Spawner_UPH2 extends iron.Trait {
 			object.visible = visible;
 		}, spawnChildren);
 		object.transform.loc = loc;
+		if (object == null) return null;
+		if (object.properties == null) object.properties = new Map();
 		return object;
 	}
 
