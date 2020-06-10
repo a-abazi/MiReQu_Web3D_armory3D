@@ -16,13 +16,18 @@ import iron.math.Mat4;
 import iron.math.RayCaster;
 
 // Important!! For the movement to work, a plane object xyPlane is required as a rigidbody in group 3 (Blender: Physicsproperties/RigidBody/collections/ Blue Square in top Row and thirs cell ( left block))
+// Data of UPH and Post
+// 	UPH (Base+Top) has a height of 50mm(real) here 0.5m(500m)
+//	Post has a heigth of 0.5m, standard position is half out, 
+// Results in standard total height of 0.75m
+
 // TODO: find out how to give an object an rigid body, and how to generate an object (so xyPlane is not needed in Blender as separate object)
 // TODO: when stage is ready, stage needs to be recognized as base not platte
 // TODO: multiple platten
 // TODO: COnnection to object
 // TODO: Collisions!!!
-// TODO (When Dynamic Meshes): Strech the post to get variables heights 
-// TODO: define a postheight property
+// TODO: (When Dynamic Meshes): Strech the post to get variables heights 
+// TODO: change properties even after init 
 
 
 
@@ -106,7 +111,12 @@ class UPH2_Base extends iron.Trait {
 
 	// TODO: add property readout
 	public function onInit() {
-	
+
+		initProps(object);
+		
+		if (object.properties["baseAngle"] != null) allPropsToVariables(object);
+		else allVariablesToProbs(object);
+
 		// get base system from the plate object
 		plate = Scene.active.getChild(plateName);
 		zero = plate.getChildren()[2].transform.world.getLoc();
@@ -115,7 +125,7 @@ class UPH2_Base extends iron.Trait {
 
 		// set the object to correct z stage and to the baseAngle Value(outcommented)
 		object.transform.translate(0,0,zero.z -  object.getChild("C_Platte").transform.world.getLoc().z);
-		//object.transform.rot.fromAxisAngle(object.transform.up().normalize(), baseAngle);
+		object.transform.rot.fromAxisAngle(object.transform.up().normalize(), baseAngle);
 		object.transform.buildMatrix();
 		rbSync(object);
 
@@ -168,24 +178,51 @@ class UPH2_Base extends iron.Trait {
 		post.transform.setMatrix(mP);
 		post.transform.scale = nScale;
 		post.visible = true;
-		post.transform.move(post.transform.up(),postDist);
 		post.transform.rotate(post.transform.up().normalize(),postAngle);
 		rbSync(post);
 
-
 		// measure limits from the empty child objects, limits for postTravel
-		// (Angles don't need limits)
-		postPosLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Top").transform.world.getLoc()));
-		postNegLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Bottom").transform.world.getLoc()));
+		postPosLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Top").transform.world.getLoc())) + 0.01;
+		postNegLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Bottom").transform.world.getLoc())+0.13); // the Float value results from the base
 		postTravelDist = Math.abs(postPosLim) + Math.abs(postNegLim);
+		// limits for basetravel
+		// Important!! C_screw_Pos is not static and is moved around, these limits are only valid initially TODO: fix it
+		basePosLim = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos").transform.world.getLoc()));
+		baseNegLim = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg").transform.world.getLoc())); // the Float value results from the base
+		baseTravelDist = Math.abs(basePosLim) + Math.abs(baseNegLim);
+		trace(baseNegLim);
+		trace(basePosLim);
+		// check if supplied postDist is within limits
+		if (-1*postNegLim < postDist && postDist < postPosLim){
+			post.transform.move(post.transform.up(),postDist);
+			rbSync(post);
+		} 
+		else{
+			trace("Postheight not in limits");
+			postDist = 0;
+			rbSync(post);
+		}
 
+		// check if supplied baseDist is within limits
+		if (-1*baseNegLim < baseDist && baseDist < basePosLim){
+			transBaseBy(baseDist, true);
+		} 
+		else{
+			trace("BaseDist not in limits");
+		}
+
+
+		updateParts();
+		
 	}
 
 	// TODO: add a Boolean when screw should be locked, BUG: Snapping to other hole when in state 1, when fast mouse movement 
 	function onUpdate(){
 		// Movement of the parts is defined by this function, as well as called functions
 		var mouse = Input.getMouse();
+		var keyboard = Input.getKeyboard();
 		var rb = null;
+
 
 		// By left click a rigid body is chosen by raytracing(part of .pickClosest) to be movingObjeckt
 		// if a screw is clicked the state is switched
@@ -376,9 +413,9 @@ class UPH2_Base extends iron.Trait {
 		}
 	}
 
-	function transBaseBy(dist: Float){
+	function transBaseBy(dist: Float, ignoreState: Bool = false){
 	// translates base in relation to screw by a value dist, locked to values by the C_points
-		if (mState==1){
+		if (mState==1 || ignoreState){
 			var scalefactor = 100; // factor which results due to scaling, needs to be adjusted for other scales#
 			var baseDist = 0.;
 			if (dist<0){
@@ -406,16 +443,10 @@ class UPH2_Base extends iron.Trait {
 	function transPost(multiplier: Float){
 		// translates post by increments adjusted with multiplier
 		if (sState==1){
-			if (multiplier<0){
-				if (postDist + multiplier*postTrans > postNegLim ){
+			var newPostDist = postDist + multiplier*postTrans;
+			if ( newPostDist > -1*postNegLim && newPostDist< postPosLim){
 					postDist = postDist + multiplier*postTrans;
 				}
-			}
-			else if(multiplier>0){			
-				if (postDist + multiplier*postTrans < postPosLim){
-					postDist = postDist + multiplier*postTrans;
-				}
-			}
 		updateParts();	
 		}
 	}
@@ -524,9 +555,20 @@ class UPH2_Base extends iron.Trait {
 		if (rigidBody != null) rigidBody.syncTransform();
 	}
 
-	function initProps(object:Object){
+	inline function initProps(object:Object){
 		if (object == null) return;
 		if (object.properties == null) object.properties = new Map();
+	}
+
+	inline function allPropsToVariables(object:Object){
+		baseAngle = object.properties["baseAngle"];
+		postAngle = object.properties.get("postAngle");
+		baseDist	= object.properties.get("baseDist");
+		postDist	= object.properties.get("postDist");
+	}
+	
+	function allVariablesToProbs(object:Object){
+		trace(object.properties);
 	}
 
 	function mouseToPlaneHit (inputX, inputY,group, mask):Dynamic{
