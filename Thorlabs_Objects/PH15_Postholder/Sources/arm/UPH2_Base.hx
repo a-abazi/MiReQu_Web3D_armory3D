@@ -16,9 +16,9 @@ import iron.math.Vec4;
 import iron.math.Mat4;
 import iron.math.RayCaster;
 
-// Important!! For the movement to work, a plane object xyPlane is required as a rigidbody in group 3
-// TODO: find out how to give an object an rigid body, and how to generate an object
-// TODO: when stage is ready, stage needs to be recognized as base not platte,
+// Important!! For the movement to work, a plane object xyPlane is required as a rigidbody in group 3 (Blender: Physicsproperties/RigidBody/collections/ Blue Square in top Row and thirs cell ( left block))
+// TODO: find out how to give an object an rigid body, and how to generate an object (so xyPlane is not needed in Blender as separate object)
+// TODO: when stage is ready, stage needs to be recognized as base not platte
 // TODO: multiple platten
 // TODO: COnnection to object
 // TODO: Collisions!!!
@@ -111,9 +111,7 @@ class UPH2_Base extends iron.Trait {
 
 
 	function onInit() {
-		// TODO: not working for angles larger than PI, error in function from IRON, Method of Quat()
-		baseAngle = object.transform.rot.toAxisAngle(object.transform.up());
-
+		
 		// get base system from the plate object
 		plate = Scene.active.getChild(plateName);
 		zero = plate.getChildren()[2].transform.world.getLoc();
@@ -181,25 +179,22 @@ class UPH2_Base extends iron.Trait {
 		rbSync(post);
 
 
-		// measure limits from the empty child objects, limits for postTravel and TODO: limit  for base Travel,
+		// measure limits from the empty child objects, limits for postTravel
 		// (Angles don't need limits)
 		postPosLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Top").transform.world.getLoc()));
 		postNegLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Bottom").transform.world.getLoc()));
 		postTravelDist = Math.abs(postPosLim) + Math.abs(postNegLim);
 
-		//basePosLim = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos").transform.world.getLoc()));
-		//baseNegLim = -1*(object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg").transform.world.getLoc()));
-		//baseTravelDist = Math.abs(basePosLim)+ Math.abs(baseNegLim);
-
 	}
 
-
+	// TODO: add a Boolean when screw should be locked, BUG: Snapping to other hole when in state 1, when fast mouse movement 
 	function onUpdate(){
-		//updateParts();
-		var keyboard = Input.getKeyboard();
+		// Movement of the parts is defined by this function, as well as called functions
 		var mouse = Input.getMouse();
 		var rb = null;
 
+		// By left click a rigid body is chosen by raytracing(part of .pickClosest) to be movingObjeckt
+		// if a screw is clicked the state is switched
 		if (mouse.started("left")){
 			var physics = armory.trait.physics.PhysicsWorld.active;	
 
@@ -210,37 +205,43 @@ class UPH2_Base extends iron.Trait {
 				if (rb.object == mScrew){
 					switchStateMScrew();
 				}
-	
 				else if (rb.object == screw){
 					switchStateScrew();
 				}
-	
-
 			}
 		}
 		
+		// if mouse is released, variables are beeing resetted and the helping plane xyPlane is removed
 		if (mouse.released("left")) {
 			movingObj = null;
 			if (xyPlane != null) xyPlane.remove();
-			hitVec=null;
+			hitVec = null;
 			updateParts();
 		}
 
-		if (mouse.down("left")&& movingObj != null ){
+
+		// while mouse is held actions are performed for different cases of movingObj
+		if (mouse.down("left") && movingObj != null ){
+			
+			// the post is translated by y movement of mouse in z direction, rotated by x movement
+			// only if screw has correct state
 			if (movingObj == post) {
 				var multip = 0.1;
 				rotPost(mouse.movementX * multip);
 				transPost(mouse.movementY * -1 *multip);
 			}
 
+			// different cases for base depending on the state of screw
+			// simple update if state is 0
 			else if (movingObj == object && mState == 0){
-				//trace("state 0 Locked yo");
 				updateParts();
 			}
+			// for both cases an invisible xyPlane is spawned at clickheight to project mouse position in the world
+			// the base is rotated according to the mouseposition and translated with fixed screw
 			else if ((movingObj == object || movingObj == top)&& mState == 1){
 				if (hitVec == null){
 					hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<0);
-					xyPlane = spawnXYPlane(hitVec);
+					if (hitVec!=null) xyPlane = spawnXYPlane(hitVec);
 				}
 				var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 				if (newHitVec!= null ) {
@@ -256,14 +257,15 @@ class UPH2_Base extends iron.Trait {
 				else trace("xyPlane not detected by rayCastmethod");
 				
 			}
+			// base is translated freely according the mouse position and the other objects follow 
 			else if ((movingObj == object|| movingObj == top) && mState == 2){
 				if (hitVec == null){
 					hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<0);
-					xyPlane = spawnXYPlane(hitVec);
+					if (hitVec!=null) xyPlane = spawnXYPlane(hitVec);
 				}
 				
 				var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup); 
-				if (newHitVec!= null ) {
+				if (newHitVec!= null && hitVec != null ) {
 					var moveVec = new Vec4().setFrom(hitVec).sub(newHitVec);
 					object.transform.translate(-moveVec.x,-moveVec.y ,0);
 					hitVec = newHitVec;
@@ -279,16 +281,21 @@ class UPH2_Base extends iron.Trait {
 	}
 
 	function updateParts() {
-		nScale = new Vec4(0.01,0.01,0.01,1);
-		
+		// general function that is called to update all the rigid bodys belongig to the base
+		// TODO: include call to componenent on Post (e.g. Mirror)
+
+		nScale = new Vec4(0.01,0.01,0.01,1); // scale parameter to change the scale of objects
+
+		// screw (mScrew contact with plate) is updated according to C_point (Childobject )of the base
 		var mST = object.getChild("C_Screw_Pos").transform.world;
 		mScrew.transform.setMatrix(mST);
 		mScrew.transform.scale = nScale;
 		rbSync(mScrew);
-
+		// translation to indicate the state of the scre
 		mScrew.transform.move(mScrew.transform.up(), mState * mSTravel);
 		rbSync(mScrew);
 
+		// snapping to the correct hole of plate for correct states
 		if (mState == 0 || mState ==1 ){
 			var corrVxy: Vec4 = xySnapToBasis(object,mScrew,zero,baseX,baseY);
 			rbSync(object);
@@ -303,12 +310,14 @@ class UPH2_Base extends iron.Trait {
 			rbSync(object);
 		}
 
+		// sync the top to the base 
 		var mT = object.getChild("C_UPH").transform.world;
 		top.transform.setMatrix(mT);
 		top.transform.scale = nScale;
 		top.transform.loc.sub(corrVTop);
 		rbSync(top);
 
+		// sync the hexScrew to the top part, correctional vector depends on state of screw
 		var mS = top.getChild("C_Screw").transform.world;
 		screw.transform.setMatrix(mS);
 		screw.transform.scale = nScale;
@@ -319,7 +328,7 @@ class UPH2_Base extends iron.Trait {
 		screw.transform.loc.sub(corrScrew);
 		rbSync(screw);
 
-
+		// sync the post and translate/rotate it according to the properties
 		var mP = top.getChild("C_Top").transform.world;
 		post.transform.setMatrix(mP);
 		post.transform.scale = nScale;
@@ -329,7 +338,9 @@ class UPH2_Base extends iron.Trait {
 		
 	}
 
+	// TODO: switch to properties
 	function rotBase(multiplier: Float){
+		// increments baseAngle by value with multiplier
 		if ( mState ==1){
 			baseAngle = (baseAngle + multiplier * baseAngleTravel) % (Math.PI*2);
 			updateParts();
@@ -337,6 +348,7 @@ class UPH2_Base extends iron.Trait {
 	}
 
 	function rotBaseTo(newAngle: Float){
+		// swithces baseAngle to new angle
 		if ( mState ==1){
 			baseAngle = newAngle % (Math.PI*2);
 			updateParts();
@@ -344,6 +356,7 @@ class UPH2_Base extends iron.Trait {
 	}
 
 	function transBase(multiplier: Float){
+		// translates base in relation to screw by increments, locked to values by the C_points 
 		if (mState==1){
 			multiplier = multiplier*-1;
 			var scalefactor = 0.01; // factor which results due to scaling, needs to be adjusted for other scales
@@ -369,6 +382,7 @@ class UPH2_Base extends iron.Trait {
 	}
 
 	function transBaseBy(dist: Float){
+	// translates base in relation to screw by a value dist, locked to values by the C_points
 		if (mState==1){
 			var scalefactor = 100; // factor which results due to scaling, needs to be adjusted for other scales#
 			var baseDist = 0.;
@@ -386,16 +400,16 @@ class UPH2_Base extends iron.Trait {
 		}
 	}
 
-
 	function rotPost(multiplier: Float){
+		// rotates post by increments adjusted with multiplier
 		if (sState==1){
 			postAngle = (postAngle + multiplier * postAngleTravel) % (Math.PI*2);
 			updateParts();
 		}
 	}
  
-
 	function transPost(multiplier: Float){
+		// translates post by increments adjusted with multiplier
 		if (sState==1){
 			if (multiplier<0){
 				if (postDist + multiplier*postTrans > postNegLim ){
@@ -412,6 +426,7 @@ class UPH2_Base extends iron.Trait {
 	}
 
 	function xySnapToBasis(mainObj: Object, mScrew: Object, zero: Vec4, baseX: Vec4, baseY: Vec4):Vec4 {
+		// calculates a correctional vector to snap screw and base to the nearest hole of the plate object
 		var sV: Vec4 = new Vec4().setFrom(mScrew.transform.loc); // initial location of screw
 
 		sV.sub(zero);
@@ -428,6 +443,7 @@ class UPH2_Base extends iron.Trait {
 	}
 	
 	function switchStateScrew() {
+		// switches state of the hexScrew(connected to top, controls post movement)
 		if (sState == 0){
 			sState = 1;
 			updateParts();
@@ -439,6 +455,7 @@ class UPH2_Base extends iron.Trait {
 	}
 
 	function switchStateMScrew(){
+		// switches state of MScrew, (Connected to Base, controls basemovement)
 		if (mState == 0){
 			mState = 1;
 			updateParts();
@@ -477,6 +494,8 @@ class UPH2_Base extends iron.Trait {
 	}
 
 	function spawnXYPlane(loc: Vec4):Object{
+		// helping function to spawn invisible plane in XY
+		// used to project mouse from the screen coordinates to the world
 		var object: Object;
 		var matrix = null;
 		var spawnChildren = false;
@@ -495,7 +514,9 @@ class UPH2_Base extends iron.Trait {
 			}
 			object.visible = false;
 		}, spawnChildren);
+		//object.visible = true;
 		object.transform.loc = loc;
+		//trace(loc);
 		//trace(object.getTrait(RigidBody).group);
 		rbSync(object);
 		return object;
@@ -503,58 +524,22 @@ class UPH2_Base extends iron.Trait {
 
 	function rbSync(object:Object) { 
 		// helping function for a rigid body object, 
-		// is used to align the child objects of the rigid body to their new parent matrix (location and rotation)
+		// is used to align the the rigid bodys of object and children to their new parent matrix (location and rotation)
 		var rigidBody = object.getTrait(RigidBody);
 		if (rigidBody != null) rigidBody.syncTransform();
 	}
-	
 
-	function screenToWorldSpace(v1: Vec4): Vec4 {
-		var v = new Vec4();
-		var m = Mat4.identity();
-
-		if (v1 == null) return null;
-
-		var cam = iron.Scene.active.camera;
-		v.setFrom(v1);
-		m.getInverse(cam.P);
-		v.applyproj(m);
-		m.getInverse(cam.V);
-		v.applyproj(m);
-
-		return v;
-	}
-
-	function screenMoveToWorldMove(v1: Vec4): Vec4 {
-		var v = new Vec4();
-		var axis = object.transform.up().normalize();
-		var angle = Scene.active.camera.transform.rot.toAxisAngle(axis);
-		
-		v.setFrom(v1);
-		v.applyAxisAngle( axis, angle);
-		return v;
-	}
-
-
-	function worldToScreenSpace(v1 : Vec4): Vec4 {
-		var v = new Vec4();
-		if (v1 == null) return null;
-
-		var cam = iron.Scene.active.camera;
-		v.setFrom(v1);
-		v.applyproj(cam.V);
-		v.applyproj(cam.P);
-
-		return v;
-	}
-
-
-	function mouseToPlaneHit (inputX, inputY,group, mask):Dynamic{		
+	function mouseToPlaneHit (inputX, inputY,group, mask):Dynamic{
+		// rayCasts mouse position according to camera to return a vector
+		// modified by group and mask
+		// mask is a bitwise shifted integer
+		// used together with function spawnXYPlane()
+		// depends on  iron.math.RayCaster
 		var camera = iron.Scene.active.camera;
 		var physics = armory.trait.physics.PhysicsWorld.active;
 		var start = new Vec4();
 		var end = new Vec4();
-		RayCaster.getDirection(start, end, inputX, inputY, camera);
+		RayCaster.getDirection(start, end, inputX, inputY, camera); // changes arguments end
 		var hit = physics.rayCast(camera.transform.world.getLoc(), end,  group,mask);
 
 		if (hit!=null) return new Vec4().setFrom(hit.pos);

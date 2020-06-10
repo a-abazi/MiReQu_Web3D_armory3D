@@ -55,9 +55,10 @@ class Spawner_UPH2 extends iron.Trait {
 		object.transform.loc = loc;
 		return object;
 	}
+	
 	function rbSync(object:Object) { 
 		// helping function for a rigid body object, 
-		// is used to align the child objects of the rigid body to their new parent matrix (location and rotation)
+		// is used to align the the rigid bodys of object and children to their new parent matrix (location and rotation)
 		var rigidBody = object.getTrait(RigidBody);
 		if (rigidBody != null) rigidBody.syncTransform();
 	}
