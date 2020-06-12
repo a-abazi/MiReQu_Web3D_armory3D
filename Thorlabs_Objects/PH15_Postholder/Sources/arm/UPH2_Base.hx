@@ -27,7 +27,6 @@ import iron.math.RayCaster;
 // TODO: COnnection to object
 // TODO: Collisions!!!
 // TODO: (When Dynamic Meshes): Strech the post to get variables heights 
-// TODO: change properties even after init 
 
 
 
@@ -44,6 +43,9 @@ class UPH2_Base extends iron.Trait {
 	var postName: String = "UPH2_Post";
 	@prop 
 	var topName: String = "UPH2_Top";
+
+	@prop
+	var defaultControls: Bool = true;
 
 	//var children: Array <Object>;
 	var nScale: Vec4  = new Vec4(0.01,0.01,0.01,1);
@@ -109,7 +111,6 @@ class UPH2_Base extends iron.Trait {
 	};
 
 
-	// TODO: add property readout
 	public function onInit() {
 
 		initProps(object);
@@ -190,8 +191,7 @@ class UPH2_Base extends iron.Trait {
 		basePosLim = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos").transform.world.getLoc()));
 		baseNegLim = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg").transform.world.getLoc())); // the Float value results from the base
 		baseTravelDist = Math.abs(basePosLim) + Math.abs(baseNegLim);
-		trace(baseNegLim);
-		trace(basePosLim);
+
 		// check if supplied postDist is within limits
 		if (-1*postNegLim < postDist && postDist < postPosLim){
 			post.transform.move(post.transform.up(),postDist);
@@ -211,18 +211,20 @@ class UPH2_Base extends iron.Trait {
 			trace("BaseDist not in limits");
 		}
 
-
 		updateParts();
 		
 	}
 
 	// TODO: add a Boolean when screw should be locked, BUG: Snapping to other hole when in state 1, when fast mouse movement 
 	function onUpdate(){
+		if (!defaultControls) {
+			
+			return;
+		}
 		// Movement of the parts is defined by this function, as well as called functions
 		var mouse = Input.getMouse();
 		var keyboard = Input.getKeyboard();
 		var rb = null;
-
 
 		// By left click a rigid body is chosen by raytracing(part of .pickClosest) to be movingObjeckt
 		// if a screw is clicked the state is switched
@@ -311,10 +313,11 @@ class UPH2_Base extends iron.Trait {
 
 	}
 
-	// TODO: add property readout
 	function updateParts() {
 		// general function that is called to update all the rigid bodys belongig to the base
 		// TODO: include call to componenent on Post (e.g. Mirror)
+		
+		allPropsToVariables(object);
 
 		nScale = new Vec4(0.01,0.01,0.01,1); // scale parameter to change the scale of objects
 
@@ -367,14 +370,16 @@ class UPH2_Base extends iron.Trait {
 		post.transform.move(post.transform.up(),postDist);
 		post.transform.rotate(post.transform.up().normalize(),postAngle);
 		rbSync(post);
+
+		allVariablesToProbs(object);
 		
 	}
 
-	// TODO: switch to properties
 	function rotBase(multiplier: Float){
 		// increments baseAngle by value with multiplier
 		if ( mState ==1){
 			baseAngle = (baseAngle + multiplier * baseAngleTravel) % (Math.PI*2);
+			allVariablesToProbs(object);
 			updateParts();
 		}
 	}
@@ -383,6 +388,7 @@ class UPH2_Base extends iron.Trait {
 		// swithces baseAngle to new angle
 		if ( mState ==1){
 			baseAngle = newAngle % (Math.PI*2);
+			allVariablesToProbs(object);
 			updateParts();
 		}
 	}
@@ -427,7 +433,8 @@ class UPH2_Base extends iron.Trait {
 			if (baseDist - Math.abs(dist)>0){
 				object.getChild("C_Screw_Pos").transform.translate(0,dist*scalefactor,0);
 				(object);
-			}
+			}	
+		allVariablesToProbs(object);
 		updateParts();	
 		}
 	}
@@ -436,6 +443,7 @@ class UPH2_Base extends iron.Trait {
 		// rotates post by increments adjusted with multiplier
 		if (sState==1){
 			postAngle = (postAngle + multiplier * postAngleTravel) % (Math.PI*2);
+			allVariablesToProbs(object);
 			updateParts();
 		}
 	}
@@ -447,6 +455,7 @@ class UPH2_Base extends iron.Trait {
 			if ( newPostDist > -1*postNegLim && newPostDist< postPosLim){
 					postDist = postDist + multiplier*postTrans;
 				}
+		allVariablesToProbs(object);
 		updateParts();	
 		}
 	}
@@ -561,14 +570,18 @@ class UPH2_Base extends iron.Trait {
 	}
 
 	inline function allPropsToVariables(object:Object){
-		baseAngle = object.properties["baseAngle"];
-		postAngle = object.properties.get("postAngle");
-		baseDist	= object.properties.get("baseDist");
-		postDist	= object.properties.get("postDist");
+		baseAngle   = object.properties["baseAngle"];
+		postAngle   = object.properties["postAngle"];
+		baseDist	= object.properties["baseDist"];
+		postDist	= object.properties["postDist"];
 	}
 	
 	function allVariablesToProbs(object:Object){
-		trace(object.properties);
+		object.properties["baseAngle"] 	= baseAngle  ;
+		object.properties["postAngle"] 	= postAngle  ;
+		object.properties["baseDist"] 	= baseDist;
+		object.properties["postDist"] 	= postDist;
+
 	}
 
 	function mouseToPlaneHit (inputX, inputY,group, mask):Dynamic{
