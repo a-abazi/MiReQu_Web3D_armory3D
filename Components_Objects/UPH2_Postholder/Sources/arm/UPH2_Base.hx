@@ -88,6 +88,7 @@ class UPH2_Base extends iron.Trait {
 	var screw: Object;
 	var post: Object;
 	var top: Object;
+	var comp: Object;
 
 
 	var zero: Vec4;
@@ -218,7 +219,18 @@ class UPH2_Base extends iron.Trait {
 			trace("BaseDist not in limits");
 		}
 
+
+		if (object.properties["componentObjectName"] != null ){
+			comp = spawnObject(object.properties["componentObjectName"],true);
+			var mCC = post.getChild("C_Component").transform.world;
+			comp.transform.setMatrix(mCC);
+			comp.transform.scale = nScale;
+			rbSync(comp);
+		}
+
 		updateParts();
+
+		
 		
 	}
 
@@ -228,6 +240,8 @@ class UPH2_Base extends iron.Trait {
 			
 			return;
 		}
+		
+
 		// Movement of the parts is defined by this function, as well as called functions
 		var mouse = Input.getMouse();
 		var keyboard = Input.getKeyboard();
@@ -317,7 +331,6 @@ class UPH2_Base extends iron.Trait {
 			
 		}
 
-
 	}
 
 	function updateParts() {
@@ -379,6 +392,15 @@ class UPH2_Base extends iron.Trait {
 		rbSync(post);
 
 		allVariablesToProbs(object);
+
+		
+		if (comp!= null){
+			var mCC = post.getChild("C_Component").transform.world;
+			comp.transform.setMatrix(mCC);
+			comp.transform.scale = nScale;
+			rbSync(comp);
+
+		}
 		
 	}
 
