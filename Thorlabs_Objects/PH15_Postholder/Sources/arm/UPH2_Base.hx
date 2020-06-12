@@ -102,6 +102,8 @@ class UPH2_Base extends iron.Trait {
 	var hitVec: Vec4 = null;
 	var planegroup: Int = 2; //third square in Blender 2^(n); n=2 (first square is n=0)
 
+	var visib: Bool =  false;
+
 	public function new() {
 		super();
 		
@@ -112,8 +114,13 @@ class UPH2_Base extends iron.Trait {
 
 
 	public function onInit() {
-
 		initProps(object);
+
+		//checks if spawned by "spawner object", if not, the objects are set to be invisible
+		if (object.properties["spawned"]){
+			visib = true;
+		}
+		
 		
 		if (object.properties["baseAngle"] != null) allPropsToVariables(object);
 		else allVariablesToProbs(object);
@@ -136,7 +143,7 @@ class UPH2_Base extends iron.Trait {
 		var mST = object.getChild("C_Screw_Pos").transform.world;
 		mScrew.transform.setMatrix(mST);
 		mScrew.transform.scale = nScale;
-		mScrew.visible = true;
+		mScrew.visible = visib;
 		rbSync(mScrew);
 
 		//  snap the screw to correct place and base, too
@@ -156,7 +163,7 @@ class UPH2_Base extends iron.Trait {
 		rbSync(top);
 		corrVTop = new Vec4().setFrom(top.getChild("C_Bottom").transform.world.getLoc()).sub(top.transform.loc);
 		top.transform.loc.sub(corrVTop);
-		top.visible = true;
+		top.visible = visib;
 		rbSync(top);
 
 		// spawn the hex screw on the top part, see above  for corrScrew
@@ -170,7 +177,7 @@ class UPH2_Base extends iron.Trait {
 			corrScrew.mult(0.5);
 
 		screw.transform.loc.sub(corrScrew);
-		screw.visible = true;
+		screw.visible = visib;
 		rbSync(screw);
 
 		// spawn the post inside the top, with specified postDist and angle
@@ -178,7 +185,7 @@ class UPH2_Base extends iron.Trait {
 		var mP = top.getChild("C_Top").transform.world;
 		post.transform.setMatrix(mP);
 		post.transform.scale = nScale;
-		post.visible = true;
+		post.visible = visib;
 		post.transform.rotate(post.transform.up().normalize(),postAngle);
 		rbSync(post);
 

@@ -71,6 +71,7 @@ class Spawner_UPH2 extends iron.Trait {
 		pMap["postAngle"] = postAngle;
 		pMap["baseDist"] = baseDist;
 		pMap["postDist"] = postDist;
+		pMap["spawned"] = true;
 
 		return pMap;
 	}
