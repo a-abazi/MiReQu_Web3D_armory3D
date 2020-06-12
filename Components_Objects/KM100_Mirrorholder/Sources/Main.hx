@@ -11,11 +11,11 @@ class Main {
         armory.system.Starter.main(
             'Scene',
             0,
-            true,
+            false,
             true,
             false,
+            1200,
             800,
-            600,
             1,
             true,
             armory.renderpath.RenderPathCreator.get
