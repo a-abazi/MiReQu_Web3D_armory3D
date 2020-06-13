@@ -1,0 +1,7 @@
+newmtl lambert307SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd F25SSK_Occlusion_Diffusion.png
+Ni 1.00

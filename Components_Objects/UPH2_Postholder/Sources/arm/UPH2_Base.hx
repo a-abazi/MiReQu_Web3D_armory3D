@@ -221,10 +221,23 @@ class UPH2_Base extends iron.Trait {
 
 
 		if (object.properties["componentObjectName"] != null ){
+
 			comp = spawnObject(object.properties["componentObjectName"],true);
+			if (object.properties["Component_map"]!= null){
+				initProps(comp);
+				comp.properties = object.properties["Component_map"];
+			}
+			
+
+
 			var mCC = post.getChild("C_Component").transform.world;
 			comp.transform.setMatrix(mCC);
 			comp.transform.scale = nScale;
+			if (object.properties["Component_corrV"] != null) {
+				var compCorrV = object.properties["Component_corrV"];
+				comp.transform.loc.add(compCorrV);
+			}
+				
 			rbSync(comp);
 		}
 
@@ -335,7 +348,7 @@ class UPH2_Base extends iron.Trait {
 
 	function updateParts() {
 		// general function that is called to update all the rigid bodys belongig to the base
-		// TODO: include call to componenent on Post (e.g. Mirror)
+		// TODO: include call to componenent on Post (e.g. Mirror), Is it needed however??
 		
 		allPropsToVariables(object);
 
@@ -398,8 +411,11 @@ class UPH2_Base extends iron.Trait {
 			var mCC = post.getChild("C_Component").transform.world;
 			comp.transform.setMatrix(mCC);
 			comp.transform.scale = nScale;
+			if (object.properties["Component_corrV"] != null) {
+				var compCorrV = object.properties["Component_corrV"];
+				comp.transform.loc.add(compCorrV);
+			}
 			rbSync(comp);
-
 		}
 		
 	}
@@ -610,7 +626,6 @@ class UPH2_Base extends iron.Trait {
 		object.properties["postAngle"] 	= postAngle  ;
 		object.properties["baseDist"] 	= baseDist;
 		object.properties["postDist"] 	= postDist;
-
 	}
 
 	function mouseToPlaneHit (inputX, inputY,group, mask):Dynamic{

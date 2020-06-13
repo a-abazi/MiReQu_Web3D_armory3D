@@ -992,9 +992,31 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 		if((__map_reserved["componentObjectName"] != null ? _this35.getReserved("componentObjectName") : _this35.h["componentObjectName"]) != null) {
 			var _this36 = this.object.properties;
 			this.comp = this.spawnObject(__map_reserved["componentObjectName"] != null ? _this36.getReserved("componentObjectName") : _this36.h["componentObjectName"],true);
+			var _this37 = this.object.properties;
+			if((__map_reserved["Component_map"] != null ? _this37.getReserved("Component_map") : _this37.h["Component_map"]) != null) {
+				var object2 = this.comp;
+				if(object2 != null) {
+					if(object2.properties == null) {
+						object2.properties = new haxe_ds_StringMap();
+					}
+				}
+				var _this38 = this.object.properties;
+				var tmp3 = __map_reserved["Component_map"] != null ? _this38.getReserved("Component_map") : _this38.h["Component_map"];
+				this.comp.properties = tmp3;
+			}
 			var mCC = this.post.getChild("C_Component").transform.world;
 			this.comp.transform.setMatrix(mCC);
 			this.comp.transform.scale = this.nScale;
+			var _this39 = this.object.properties;
+			if((__map_reserved["Component_corrV"] != null ? _this39.getReserved("Component_corrV") : _this39.h["Component_corrV"]) != null) {
+				var _this40 = this.object.properties;
+				var compCorrV = __map_reserved["Component_corrV"] != null ? _this40.getReserved("Component_corrV") : _this40.h["Component_corrV"];
+				var _this41 = this.comp.transform.loc;
+				var v6 = compCorrV;
+				_this41.x += v6.x;
+				_this41.y += v6.y;
+				_this41.z += v6.z;
+			}
 			this.rbSync(this.comp);
 		}
 		this.updateParts();
@@ -1124,7 +1146,7 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 					this.transBaseBy(distold - distnew);
 					this.hitVec = newHitVec;
 				} else {
-					haxe_Log.trace("xyPlane not detected by rayCastmethod",{ fileName : "arm/UPH2_Base.hx", lineNumber : 311, className : "arm.UPH2_Base", methodName : "onUpdate"});
+					haxe_Log.trace("xyPlane not detected by rayCastmethod",{ fileName : "arm/UPH2_Base.hx", lineNumber : 324, className : "arm.UPH2_Base", methodName : "onUpdate"});
 				}
 			} else if((this.movingObj == this.object || this.movingObj == this.top) && this.mState == 2) {
 				if(this.hitVec == null) {
@@ -1152,7 +1174,7 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 					this.rbSync(this.object);
 					this.updateParts();
 				} else {
-					haxe_Log.trace("xyPlane not detected by rayCastmethod",{ fileName : "arm/UPH2_Base.hx", lineNumber : 329, className : "arm.UPH2_Base", methodName : "onUpdate"});
+					haxe_Log.trace("xyPlane not detected by rayCastmethod",{ fileName : "arm/UPH2_Base.hx", lineNumber : 342, className : "arm.UPH2_Base", methodName : "onUpdate"});
 				}
 			}
 		}
@@ -1340,6 +1362,16 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 			var mCC = this.post.getChild("C_Component").transform.world;
 			this.comp.transform.setMatrix(mCC);
 			this.comp.transform.scale = this.nScale;
+			var _this17 = this.object.properties;
+			if((__map_reserved["Component_corrV"] != null ? _this17.getReserved("Component_corrV") : _this17.h["Component_corrV"]) != null) {
+				var _this18 = this.object.properties;
+				var compCorrV = __map_reserved["Component_corrV"] != null ? _this18.getReserved("Component_corrV") : _this18.h["Component_corrV"];
+				var _this19 = this.comp.transform.loc;
+				var v4 = compCorrV;
+				_this19.x += v4.x;
+				_this19.y += v4.y;
+				_this19.z += v4.z;
+			}
 			this.rbSync(this.comp);
 		}
 	}
@@ -1406,8 +1438,8 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 				var p_w = w1;
 				var baseDist = Math.sqrt((p_x - _this_x) * (p_x - _this_x) + (p_y - _this_y) * (p_y - _this_y) + (p_z - _this_z) * (p_z - _this_z));
 				if(baseDist + multiplier * this.baseTrans * scalefactor > 0) {
-					haxe_Log.trace(baseDist,{ fileName : "arm/UPH2_Base.hx", lineNumber : 433, className : "arm.UPH2_Base", methodName : "transBase"});
-					haxe_Log.trace(multiplier * this.baseTrans,{ fileName : "arm/UPH2_Base.hx", lineNumber : 434, className : "arm.UPH2_Base", methodName : "transBase"});
+					haxe_Log.trace(baseDist,{ fileName : "arm/UPH2_Base.hx", lineNumber : 449, className : "arm.UPH2_Base", methodName : "transBase"});
+					haxe_Log.trace(multiplier * this.baseTrans,{ fileName : "arm/UPH2_Base.hx", lineNumber : 450, className : "arm.UPH2_Base", methodName : "transBase"});
 					this.object.getChild("C_Screw_Pos").transform.translate(0,multiplier * this.baseTrans,0);
 					this.rbSync(this.object);
 				}
@@ -1456,7 +1488,7 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 				var p_w1 = w3;
 				var baseDist1 = Math.sqrt((p_x1 - _this_x1) * (p_x1 - _this_x1) + (p_y1 - _this_y1) * (p_y1 - _this_y1) + (p_z1 - _this_z1) * (p_z1 - _this_z1));
 				if(baseDist1 - multiplier * this.baseTrans * scalefactor > 0) {
-					haxe_Log.trace(baseDist1,{ fileName : "arm/UPH2_Base.hx", lineNumber : 442, className : "arm.UPH2_Base", methodName : "transBase"});
+					haxe_Log.trace(baseDist1,{ fileName : "arm/UPH2_Base.hx", lineNumber : 458, className : "arm.UPH2_Base", methodName : "transBase"});
 					this.object.getChild("C_Screw_Pos").transform.translate(0,multiplier * this.baseTrans,0);
 					this.rbSync(this.object);
 				}

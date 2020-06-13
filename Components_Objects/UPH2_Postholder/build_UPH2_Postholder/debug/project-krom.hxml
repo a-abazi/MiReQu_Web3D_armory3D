@@ -56,18 +56,18 @@
 -D kha_version=1810
 -D kha_project_name=UPH2_Postholder
 -js krom\krom.js.temp
+armory.trait.physics.bullet.PhysicsWorld
+--macro keep('armory.trait.physics.bullet.PhysicsWorld')
 arm.UPH2_Base
 --macro keep('arm.UPH2_Base')
-armory.trait.internal.DebugConsole
---macro keep('armory.trait.internal.DebugConsole')
 arm.node.Kamera_Bewegung
 --macro keep('arm.node.Kamera_Bewegung')
 armory.trait.physics.bullet.RigidBody
 --macro keep('armory.trait.physics.bullet.RigidBody')
-armory.trait.physics.bullet.PhysicsWorld
---macro keep('armory.trait.physics.bullet.PhysicsWorld')
 armory.trait.internal.Bridge
 --macro keep('armory.trait.internal.Bridge')
+armory.trait.internal.DebugConsole
+--macro keep('armory.trait.internal.DebugConsole')
 arm.Spawner_UPH2
 --macro keep('arm.Spawner_UPH2')
 --times
