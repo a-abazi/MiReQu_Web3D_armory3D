@@ -1,6 +1,7 @@
 package arm;
 
 
+import js.html.Navigator;
 import iron.Scene;
 import kha.graphics4.hxsl.Types.Vec;
 import iron.math.Quat;
@@ -28,7 +29,7 @@ class KS1RS_Base extends iron.Trait {
 	var ringName: String = "KS1RS_Ring";	
 
 	var children: Array <Object>;
-	var scale: Vec4  = new Vec4(0.01,0.01,0.01,1);
+	var nScale: Vec4  = new Vec4(0.01,0.01,0.01,1);
 
 	var screwTopDist: Float = 0.0;
 	var screwBotDist: Float = 0.0;
@@ -52,7 +53,7 @@ class KS1RS_Base extends iron.Trait {
 	var xyPlane: Object = null;
 	var hitVec: Vec4 = null;
 	var planegroup: Int = 2; //third square in Blender 2^(n); n=2 (first square is n=0)
-
+	var visib: Bool =  false;
 
 	public function new() {
 		super();
@@ -68,45 +69,47 @@ class KS1RS_Base extends iron.Trait {
 		if (object.properties["ringAngle"] != null) allPropsToVariables(object);
 		else allVariablesToProbs(object);
 
+		if (object.properties["ringAngle"] != null) visib = true;
+
 		if (ringAngle == null) ringAngle = 0;
 		
 
 		screwTop = spawnObject(screwName,false);
 		var mST = object.getChild("C_Screw_Top_Zero").transform.world;
 		screwTop.transform.setMatrix(mST);
-		screwTop.transform.scale = scale;
-		screwTop.visible = true;
+		screwTop.transform.scale = nScale;
+		screwTop.visible = visib;
 		rbSync(screwTop);
 
 		screwBot = spawnObject(screwName,false);
 		var mSB = object.getChild("C_Screw_Bottom_Zero").transform.world;
 		screwBot.transform.setMatrix(mSB);
-		screwBot.transform.scale = scale;
-		screwBot.visible = true;
+		screwBot.transform.scale = nScale;
+		screwBot.visible = visib;
 		rbSync(screwBot);
 
 		screwMid = spawnObject(screwName,false);
 		var mSM = object.getChild("C_Screw_Middle_Zero").transform.world;
 		screwMid.transform.setMatrix(mSM);
-		screwMid.transform.scale = scale;
-		screwMid.visible = true;
+		screwMid.transform.scale = nScale;
+		screwMid.visible = visib;
 		rbSync(screwMid);
 
 		front = spawnObject(frontName,false);
 		front.transform.setMatrix(mSM);
-		front.transform.scale = scale;
-		front.visible = true;
+		front.transform.scale = nScale;
+		front.visible = visib;
 		rbSync(front);
 
 		for (child in front.getChildren()){
-			child.transform.scale = scale;
+			child.transform.scale = nScale;
 		}
 
 		ring = spawnObject(ringName,false);
 		var mR = front.getChildren()[0].transform.world;
 		ring.transform.setMatrix(mR);
-		ring.transform.scale = scale;
-		ring.visible = true;
+		ring.transform.scale = nScale;
+		ring.visible = visib;
 		ring.transform.rotate(ring.transform.look().normalize(), ringAngle);
 		rbSync(ring);
 
@@ -114,19 +117,21 @@ class KS1RS_Base extends iron.Trait {
 		bbo = spawnObject(bboName,false);
 		var mB = ring.getChildren()[0].transform.world;
 		bbo.transform.setMatrix(mB);
-		bbo.transform.scale = scale;
-		bbo.visible = true;
+		bbo.transform.scale = nScale;
+		bbo.visible = visib;
 		rbSync(bbo);
 
 		screwPosLim = (object.getChild("C_Screw_Bottom_Limit").transform.world.getLoc().distanceTo( screwBot.getChildren()[0].transform.world.getLoc()));
 		screwNegLim = (object.getChild("C_Screw_Bottom_Zero").transform.world.getLoc().distanceTo(object.getChild("C_Screw_Bottom_Limit_z").transform.world.getLoc()));
 		screwTravelDist = Math.abs(screwPosLim) + Math.abs(screwNegLim);
 
+		updateParts();
 	}
 	
 			
 	function onUpdate(){
-		//updateParts();
+		updateParts();
+		
 		var keyboard = Input.getKeyboard();
 		var mouse = Input.getMouse();		
 		var rb = null;
@@ -218,18 +223,21 @@ class KS1RS_Base extends iron.Trait {
 			if (rb != null && rb.object == screwBot){
 				if (screwBotDist < screwPosLim + screwTrans){
 					screwBotDist = screwBotDist + screwTrans;
+					trace(screwBotDist);
 				}
 				updateParts();
 			}
 			else if (rb != null && rb.object == screwTop){
 				if (screwTopDist < screwPosLim + screwTrans){
 					screwTopDist = screwTopDist + screwTrans;
+					trace(screwTopDist);
 				}
 				updateParts();
 			}
 			else if (rb != null && rb.object == screwMid){
 				if (screwMidDist < screwPosLim + screwTrans){
 					screwMidDist = screwMidDist + screwTrans;
+					trace(screwMidDist);
 				}
 				updateParts();
 			}
@@ -244,18 +252,21 @@ class KS1RS_Base extends iron.Trait {
 			if (rb != null && rb.object == screwBot){
 				if (-1*screwNegLim < screwBotDist - screwTrans){
 					screwBotDist = screwBotDist - screwTrans;
+					trace(screwBotDist);
 				}
 				updateParts();
 			}
 			else if (rb != null && rb.object == screwTop){
 				if (-1*screwNegLim < screwTopDist - screwTrans){
 					screwTopDist = screwTopDist - screwTrans;
+					trace(screwTopDist);
 				}
 				updateParts();
 			}
 			else if (rb != null && rb.object == screwMid){
 				if (-1*screwNegLim < screwMidDist - screwTrans){
 					screwMidDist = screwMidDist - screwTrans;
+					trace(screwMidDist);
 				}
 				updateParts();
 			}
@@ -265,36 +276,35 @@ class KS1RS_Base extends iron.Trait {
 			// });
 	}
 
-	function updateParts() {
+	public function updateParts() {
 
-		scale = new Vec4(0.01,0.01,0.01,1);
+		nScale = new Vec4(0.01,0.01,0.01,1);
 
-		trace(screwTopDist);
+		allPropsToVariables(object);
+		
+		
 
 		var numberRevolutions = 10;
 		var mST = object.getChild("C_Screw_Top_Zero").transform.world;
 		screwTop.transform.setMatrix(mST);
-		screwTop.transform.move(screwTop.transform.look().normalize(), -1 *screwTopDist);
+		screwTop.transform.move(screwTop.transform.look().normalize(), screwTopDist);
 		screwTop.transform.rotate(screwTop.transform.look().normalize(), screwTopDist/screwTravelDist * numberRevolutions * 2* Math.PI);
-		screwTop.transform.scale = scale;
+		screwTop.transform.scale = nScale;
 		rbSync(screwTop);
 
 		var mSB = object.getChild("C_Screw_Bottom_Zero").transform.world;
 		screwBot.transform.setMatrix(mSB);
-		screwBot.transform.move(screwBot.transform.look().normalize(), -1 *screwBotDist);
+		screwBot.transform.move(screwBot.transform.look().normalize(),screwBotDist);
 		screwBot.transform.rotate(screwBot.transform.look().normalize(), screwBotDist/screwTravelDist * numberRevolutions * 2 * Math.PI);
-		screwBot.transform.scale = scale;
+		screwBot.transform.scale = nScale;
 		rbSync(screwBot);
 
 		var mSM = object.getChild("C_Screw_Middle_Zero").transform.world;
 		screwMid.transform.setMatrix(mSM);
-		screwMid.transform.move(screwMid.transform.look().normalize(), -1 *screwMidDist);
+		screwMid.transform.move(screwMid.transform.look().normalize(), screwMidDist);
 		screwMid.transform.rotate(screwMid.transform.look().normalize(), screwMidDist/screwTravelDist * numberRevolutions * 2 * Math.PI);
-		screwMid.transform.scale = scale;
+		screwMid.transform.scale = nScale;
 		rbSync(screwMid);
-
-
-
 
 
 		// calculate correct rotation of mirror
@@ -307,43 +317,48 @@ class KS1RS_Base extends iron.Trait {
 
 		// calculate angles
 		var vU = new Vec4().setFrom(object.transform.up()).normalize();
-		var sgnU = Std.int(screwTopDist/Math.abs(screwTopDist));
+		var sgnU = Std.int((screwTopDist - screwMidDist)/Math.abs(screwTopDist - screwMidDist));
 		var angU = Math.acos(rotVecT.dot(vU))*sgnU;
 
 		var vR = new Vec4().setFrom(object.transform.right()).normalize();
-		var sgnB = Std.int(screwBotDist/Math.abs(screwBotDist));
+		var sgnB = Std.int((screwBotDist - screwMidDist)/Math.abs(screwBotDist - screwMidDist));
 		var angB = Math.acos(rotVecB.dot(vR))*sgnB;
 		
 		// update transform matrix
 		var mSM = object.getChild("C_Screw_Middle_Zero").transform.world;
-		front.transform.move(screwMid.transform.look().normalize(), -1 *screwMidDist);
 		front.transform.setMatrix(mSM);
-		front.transform.scale = scale;
+		front.transform.scale = nScale;
+		front.transform.move(screwMid.transform.look().normalize(), screwMidDist);
 
 		//calculate quaternions from angles, and calculate new total quaterion for rotation in new transfrom matrix
-		var q1 = new Quat().fromAxisAngle(new Vec4().setFrom(object.transform.right()).normalize(), angU);
+		var q1 = new Quat().fromAxisAngle(new Vec4().setFrom(object.transform.right()).normalize(), angU*-1);
 		var q2 = new Quat().fromAxisAngle(new Vec4().setFrom(object.transform.up()).normalize(), angB);
 		var rotF = new Quat();
 		rotF.mult(q1);
 		rotF.mult(q2);
 		rotF.mult(object.transform.rot);
 		front.transform.rot = rotF;
+		if (screwMidDist == screwBotDist && screwTopDist == screwBotDist ){ // if the values are equal rotF is NaN, by this check it is prevented, that the objects rot Value is Nan 
+			front.transform.rot = object.transform.rot;
+		} 
 		front.transform.buildMatrix();
+		
+		//trace("loc: "+ Std.string(front.transform.loc));
+		//trace("scale: "+ Std.string(front.transform.scale));
+		//trace("rot: "+ Std.string(front.transform.rot));
 		rbSync(front);
-
-
 
 
 		var mR = front.getChildren()[0].transform.world;
 		ring.transform.setMatrix(mR);
-		ring.transform.scale = scale;
+		ring.transform.scale = nScale;
 		ring.transform.rotate(ring.transform.look().normalize(), ringAngle);
 		rbSync(ring);
 
 
 		var mB = ring.getChildren()[0].transform.world;
 		bbo.transform.setMatrix(mB);
-		bbo.transform.scale = scale;
+		bbo.transform.scale = nScale;
 		rbSync(bbo);
 	}
 	
@@ -441,6 +456,7 @@ class KS1RS_Base extends iron.Trait {
 		var angle = Math.atan2(arg1.length(), arg2.dot(vec2));
 		return angle;
 	}
+
 }
 	
 

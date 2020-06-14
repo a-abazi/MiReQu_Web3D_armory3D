@@ -21,6 +21,7 @@
       <sourceFolder url="file://C:\blender\ArmorySDK\armory\Sources" isTestSource="false" />
       <sourceFolder url="file://C:\blender\ArmorySDK\iron\Sources" isTestSource="false" />
       <sourceFolder url="file://C:\blender\ArmorySDK\lib\haxebullet\Sources" isTestSource="false" />
+      <sourceFolder url="file://C:\blender\ArmorySDK\lib\zui\Sources" isTestSource="false" />
 
     </content>
     <content url="file://C:/blender/ArmorySDK/armory">
@@ -31,6 +32,9 @@
     </content>
     <content url="file://C:/blender/ArmorySDK/lib/haxebullet">
       <sourceFolder url="file://C:/blender/ArmorySDK/lib/haxebullet" isTestSource="false" />
+    </content>
+    <content url="file://C:/blender/ArmorySDK/lib/zui">
+      <sourceFolder url="file://C:/blender/ArmorySDK/lib/zui" isTestSource="false" />
     </content>
     
     <orderEntry type="jdk" jdkName="Haxe 3.2.0" jdkType="Haxe toolkit" />

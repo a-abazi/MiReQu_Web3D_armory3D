@@ -4,13 +4,16 @@
 -cp C:\blender\ArmorySDK\armory\Sources
 -cp C:\blender\ArmorySDK\iron\Sources
 -cp C:\blender\ArmorySDK\lib\haxebullet\Sources
+-cp C:\blender\ArmorySDK\lib\zui\Sources
 -cp C:/blender/ArmorySDK/armory
 -cp C:/blender/ArmorySDK/iron
 -cp C:/blender/ArmorySDK/lib/haxebullet
+-cp C:/blender/ArmorySDK/lib/zui
 -D hxcpp_smart_strings
 -D C:/blender/ArmorySDK/armory
 -D C:/blender/ArmorySDK/iron
 -D C:/blender/ArmorySDK/lib/haxebullet
+-D C:/blender/ArmorySDK/lib/zui
 -D arm_deferred
 -D arm_csm
 -D rp_hdr
@@ -29,6 +32,8 @@
 -D arm_bullet
 -D arm_noembed
 -D arm_soundcompress
+-D arm_debug
+-D arm_ui
 -D arm_skin
 -D arm_particles
 -D sys_krom
@@ -52,12 +57,23 @@
 -D kha_version=1810
 -D kha_project_name=KS1RS_BBOmount
 -js krom\krom.js.temp
+armory.trait.physics.bullet.RigidBody
+--macro keep('armory.trait.physics.bullet.RigidBody')
+arm.Spawner_UPH2
+--macro keep('arm.Spawner_UPH2')
+armory.trait.internal.Bridge
+--macro keep('armory.trait.internal.Bridge')
 arm.KS1RS_Base
 --macro keep('arm.KS1RS_Base')
+arm.Spawner_KS1RS
+--macro keep('arm.Spawner_KS1RS')
+arm.UPH2_Base
+--macro keep('arm.UPH2_Base')
+armory.trait.internal.DebugConsole
+--macro keep('armory.trait.internal.DebugConsole')
 arm.node.Kamera_Bewegung
 --macro keep('arm.node.Kamera_Bewegung')
 armory.trait.physics.bullet.PhysicsWorld
 --macro keep('armory.trait.physics.bullet.PhysicsWorld')
-armory.trait.physics.bullet.RigidBody
---macro keep('armory.trait.physics.bullet.RigidBody')
+--times
 -main Main
