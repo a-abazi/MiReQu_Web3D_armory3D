@@ -27,6 +27,7 @@ import iron.math.RayCaster;
 // TODO: COnnection to object
 // TODO: Collisions!!!
 // TODO: (When Dynamic Meshes): Strech the post to get variables heights 
+// TODO: Communicate UpdateParts to save performance, right now all components update their parts "onUpdate" of Frame
 
 
 
@@ -116,6 +117,7 @@ class UPH2_Base extends iron.Trait {
 
 	public function onInit() {
 		initProps(object);
+		var nScale: Vec4  = new Vec4(0.01,0.01,0.01,1);
 
 		//checks if spawned by "spawner object", if not, the objects are set to be invisible
 		if (object.properties["spawned"]){
@@ -416,6 +418,9 @@ class UPH2_Base extends iron.Trait {
 				comp.transform.loc.add(compCorrV);
 			}
 			rbSync(comp);
+			//callTraitFunction(comp,comp.name,"updateParts",[]);
+			//trace(comp.name);
+			
 		}
 		
 	}
@@ -643,6 +648,32 @@ class UPH2_Base extends iron.Trait {
 
 		if (hit!=null) return new Vec4().setFrom(hit.pos);
 		else return null;
+	}
+
+	function callTraitFunction(object:Object, traitNamePropertyString:String, funName: String, funArguments:Array <Dynamic>):Dynamic{
+		var result: Dynamic;
+		// (Small helper) This function combines some dynamic haxe functions (especially Reflect) to call 
+		//  correct instance of the trait of the object. In the beginning the traitname and such are calles
+
+
+		// Call correct Trait of correct Object
+		var traitname: String = object.properties.get(traitNamePropertyString);
+		var cname: Class<iron.Trait> = null; // call class name (trait), includes path and more
+		if (cname == null) cname = cast Type.resolveClass(Main.projectPackage + "." + traitname);
+		if (cname == null) cname = cast Type.resolveClass(Main.projectPackage + ".node." + traitname);
+		var trait: Dynamic = object.getTrait(cname);
+		// Call function of the correct instance of the trait, get new Direction
+		var func = Reflect.field(trait, funName);
+
+		if (func != null) {
+			result = Reflect.callMethod(trait, func, funArguments);
+		}
+		else{
+			trace("Error: dynamic function resulted in null value, Error in trait or function name");
+			result = null;
+		}
+
+		return result;
 	}
 
 }	
