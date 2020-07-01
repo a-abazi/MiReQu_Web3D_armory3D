@@ -15,6 +15,8 @@ import iron.math.Vec4;
 import iron.math.Mat4;
 import iron.math.RayCaster;
 
+import armory.system.Event;
+
 // Important!! For the movement to work, a plane object xyPlane is required as a rigidbody in group 3 (Blender: Physicsproperties/RigidBody/collections/ Blue Square in top Row and thirs cell ( left block))
 // Data of UPH and Post
 // 	UPH (Base+Top) has a height of 50mm(real) here 0.5m(500m)
@@ -225,8 +227,11 @@ class UPH2_Base extends iron.Trait {
 		if (object.properties["componentObjectName"] != null ){
 
 			comp = spawnObject(object.properties["componentObjectName"],true);
+			
+			// not used yet
 			if (object.properties["Component_map"]!= null){
 				initProps(comp);
+				trace("tests");
 				comp.properties = object.properties["Component_map"];
 			}
 			
@@ -239,7 +244,6 @@ class UPH2_Base extends iron.Trait {
 				var compCorrV = object.properties["Component_corrV"];
 				comp.transform.loc.add(compCorrV);
 			}
-				
 			rbSync(comp);
 		}
 
@@ -252,7 +256,6 @@ class UPH2_Base extends iron.Trait {
 	// TODO: add a Boolean when screw should be locked, BUG: Snapping to other hole when in state 1, when fast mouse movement 
 	function onUpdate(){
 		if (!defaultControls) {
-			
 			return;
 		}
 		
@@ -261,6 +264,7 @@ class UPH2_Base extends iron.Trait {
 		var mouse = Input.getMouse();
 		var keyboard = Input.getKeyboard();
 		var rb = null;
+
 
 		// By left click a rigid body is chosen by raytracing(part of .pickClosest) to be movingObjeckt
 		// if a screw is clicked the state is switched
@@ -418,9 +422,7 @@ class UPH2_Base extends iron.Trait {
 				comp.transform.loc.add(compCorrV);
 			}
 			rbSync(comp);
-			//callTraitFunction(comp,comp.name,"updateParts",[]);
-			//trace(comp.name);
-			
+			sendEvent(comp,"updateParts");
 		}
 		
 	}
@@ -650,17 +652,16 @@ class UPH2_Base extends iron.Trait {
 		else return null;
 	}
 
-	function callTraitFunction(object:Object, traitNamePropertyString:String, funName: String, funArguments:Array <Dynamic>):Dynamic{
+	function callTraitFunction(object:Object, traitName:String, funName: String, funArguments:Array <Dynamic>):Dynamic{
 		var result: Dynamic;
 		// (Small helper) This function combines some dynamic haxe functions (especially Reflect) to call 
 		//  correct instance of the trait of the object. In the beginning the traitname and such are calles
 
 
 		// Call correct Trait of correct Object
-		var traitname: String = object.properties.get(traitNamePropertyString);
 		var cname: Class<iron.Trait> = null; // call class name (trait), includes path and more
-		if (cname == null) cname = cast Type.resolveClass(Main.projectPackage + "." + traitname);
-		if (cname == null) cname = cast Type.resolveClass(Main.projectPackage + ".node." + traitname);
+		if (cname == null) cname = cast Type.resolveClass(Main.projectPackage + "." + traitName);
+		if (cname == null) cname = cast Type.resolveClass(Main.projectPackage + ".node." + traitName);
 		var trait: Dynamic = object.getTrait(cname);
 		// Call function of the correct instance of the trait, get new Direction
 		var func = Reflect.field(trait, funName);
@@ -670,10 +671,31 @@ class UPH2_Base extends iron.Trait {
 		}
 		else{
 			trace("Error: dynamic function resulted in null value, Error in trait or function name");
+			trace("funName: "+Std.string(funName));
+			trace("traitname: "+Std.string(traitName));
+			trace("cname: "+Std.string(cname));
+			trace("trait: "+Std.string(trait));
+			trace(Main.projectPackage + "." + traitName);
 			result = null;
 		}
 
 		return result;
+	}
+
+	function sendEvent(object,name){
+		var entries: Array<TEvent> = null;
+
+		if (object == null) return;
+		
+		var all = Event.get(name);
+		if (all != null) {
+			entries = [];
+			for (e in all) if (e.mask == object.uid) entries.push(e);
+			
+		}
+		if (entries == null) return;
+		
+		for (e in entries) e.onEvent();
 	}
 
 }	

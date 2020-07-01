@@ -13,7 +13,8 @@ import iron.Trait;
 import iron.math.Vec4;
 
 import iron.math.Mat4;
-
+import armory.system.Event;
+ 
 class KM100_Base extends iron.Trait {
 
 	@prop 
@@ -43,7 +44,6 @@ class KM100_Base extends iron.Trait {
 		
 		notifyOnInit(onInit);
 		notifyOnUpdate(onUpdate);
-
 	};
 
 	function onInit() {
@@ -87,37 +87,18 @@ class KM100_Base extends iron.Trait {
 		screwNegLim = (children[2].transform.world.getLoc().distanceTo( children[6].transform.world.getLoc()));
 		screwTravelDist = Math.abs(screwPosLim) + Math.abs(screwNegLim);
 
+		//unused 
+		//object.properties.set("objRdy", true);
+		
+		// Event added with object id as a mask, the postholder trait UPH2_Base will send this event to its componente object when moved
+		Event.add("updateParts",updateParts,object.uid);
 	}
 	
 			
 	function onUpdate(){
-		updateParts();
 		var keyboard = Input.getKeyboard();
 		var mouse = Input.getMouse();
 
-		//var vec = new Vec4(0.1,0,0,1);
-		//var vec_B = new Vec4(-0.1,0,0,1);
-
-		//if (keyboard.down("w")){
-		//	object.transform.loc.add(vec);
-		//	object.transform.buildMatrix();
-		//	
-		//	var rigidBody = object.getTrait(RigidBody);
-		//	if (rigidBody != null) rigidBody.syncTransform();
-		//	updateParts();
-
-		//}
-		//if (keyboard.down("s")){
-		//	object.transform.loc.add(vec_B);
-		//	object.transform.buildMatrix();
-
-		//	var rigidBody = object.getTrait(RigidBody);
-		//	if (rigidBody != null) rigidBody.syncTransform();
-		//	updateParts();
-		//}
-
-		if (keyboard.started("space")) trace(object.properties);
-		
 		if (mouse.down("left")){
 			var mouse_c = iron.system.Input.getMouse();
 			var coords = new Vec4(mouse_c.x, mouse_c.y,0,1);
@@ -158,12 +139,9 @@ class KM100_Base extends iron.Trait {
 			}
 		}
 
-			// notifyOnRemove(function() {
-			// });
 	}
 
 	function updateParts() {
-
 		scale = new Vec4(0.01,0.01,0.01,1);
 
 		// update top screw 
@@ -223,6 +201,8 @@ class KM100_Base extends iron.Trait {
 		mirror.transform.setMatrix(mM);
 		mirror.transform.scale = scale;
 		rbSync(mirror);
+
+		Event.send("Calc_Beams"); // Event of the scene trait calc beams, makes a new calculation of the Beams
 	}
 	
 	function spawnObject(objectName: String, visible: Bool):Object {

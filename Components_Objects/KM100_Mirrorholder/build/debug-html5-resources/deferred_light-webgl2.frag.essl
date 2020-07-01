@@ -154,7 +154,7 @@ highp float shadowTestCascade(highp sampler2DShadow shadowMap_1, highp vec3 eye_
     }
     else
     {
-        _462 = nextSplit - casData[16][casi - 1];
+        _462 = nextSplit - (casData[16][casi - 1]);
     }
     highp float splitSize = _462;
     highp float splitDist = (nextSplit - d) / splitSize;

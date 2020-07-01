@@ -15,26 +15,26 @@
     <output url="file://$MODULE_DIR$/../debug-html5" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../..">
-      <sourceFolder url="file://C:\blender\ArmorySDK\Kha\Sources" isTestSource="false" />
-      <sourceFolder url="file://C:\blender\ArmorySDK\Kha\Backends\HTML5" isTestSource="false" />
-      <sourceFolder url="file://c:\MiReQu_Web3D\Components_Objects\KM100_Mirrorholder\Sources" isTestSource="false" />
-      <sourceFolder url="file://C:\blender\ArmorySDK\armory\Sources" isTestSource="false" />
-      <sourceFolder url="file://C:\blender\ArmorySDK\iron\Sources" isTestSource="false" />
-      <sourceFolder url="file://c:\MiReQu_Web3D\Components_Objects\KM100_Mirrorholder\Libraries\mynodes\Sources" isTestSource="false" />
-      <sourceFolder url="file://C:\blender\ArmorySDK\lib\haxebullet\Sources" isTestSource="false" />
+      <sourceFolder url="file://c:\Users\Abazi\.vscode\extensions\kodetech.kha-20.4.0\Kha\Sources" isTestSource="false" />
+      <sourceFolder url="file://c:\Users\Abazi\.vscode\extensions\kodetech.kha-20.4.0\Kha\Backends\HTML5" isTestSource="false" />
+      <sourceFolder url="file://c:\MiReQu-Git\Components_Objects\KM100_Mirrorholder\Sources" isTestSource="false" />
+      <sourceFolder url="file://C:\ArmorySDK\armory\Sources" isTestSource="false" />
+      <sourceFolder url="file://C:\ArmorySDK\iron\Sources" isTestSource="false" />
+      <sourceFolder url="file://c:\MiReQu-Git\Components_Objects\KM100_Mirrorholder\Libraries\mynodes\Sources" isTestSource="false" />
+      <sourceFolder url="file://C:\ArmorySDK\lib\haxebullet\Sources" isTestSource="false" />
 
     </content>
-    <content url="file://C:/blender/ArmorySDK/armory">
-      <sourceFolder url="file://C:/blender/ArmorySDK/armory" isTestSource="false" />
+    <content url="file://C:/ArmorySDK/armory">
+      <sourceFolder url="file://C:/ArmorySDK/armory" isTestSource="false" />
     </content>
-    <content url="file://C:/blender/ArmorySDK/iron">
-      <sourceFolder url="file://C:/blender/ArmorySDK/iron" isTestSource="false" />
+    <content url="file://C:/ArmorySDK/iron">
+      <sourceFolder url="file://C:/ArmorySDK/iron" isTestSource="false" />
     </content>
     <content url="file://Libraries/mynodes">
-      <sourceFolder url="file://c:\MiReQu_Web3D\Components_Objects\KM100_Mirrorholder\Libraries\mynodes" isTestSource="false" />
+      <sourceFolder url="file://c:\MiReQu-Git\Components_Objects\KM100_Mirrorholder\Libraries\mynodes" isTestSource="false" />
     </content>
-    <content url="file://C:/blender/ArmorySDK/lib/haxebullet">
-      <sourceFolder url="file://C:/blender/ArmorySDK/lib/haxebullet" isTestSource="false" />
+    <content url="file://C:/ArmorySDK/lib/haxebullet">
+      <sourceFolder url="file://C:/ArmorySDK/lib/haxebullet" isTestSource="false" />
     </content>
     
     <orderEntry type="jdk" jdkName="Haxe 3.2.0" jdkType="Haxe toolkit" />

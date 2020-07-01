@@ -90,7 +90,7 @@ class Beam_Control_v6 extends iron.Trait {
 	var main_Array_sor:   Array <Dynamic> = [[]];
 	var main_Array_pos:   Array <Dynamic> = [[]];
 	var main_Array_dir:   Array <Dynamic> = [[]];
-	var main_All_arrows: Array <Dynamic> = [[]];
+	var main_All_arrows: Array <Dynamic>  = [[]];
 
 	var calculation_on_sleep: Bool = false;
 	var time = 0.0;
@@ -110,6 +110,7 @@ class Beam_Control_v6 extends iron.Trait {
 	}	
 
 	function onInit() {
+		
 		var beamNumber: Int = 25;
 		var updateTime:  Float = 0.025;
 		var object: Object = iron.Scene.global;
@@ -121,10 +122,10 @@ class Beam_Control_v6 extends iron.Trait {
 		if (object == null) return;
 		if (object.properties == null) object.properties = new Map();
 		object.properties.set("Laser_on",laser_on);
-		object.properties.set("Pol_on",pol_on);
+		object.properties.set("Pol_on",  pol_on);
 
-		object.properties.set("beamNumber",beamNumber);
-		object.properties.set("updateTime",updateTime);
+		object.properties.set("beamNumber", beamNumber);
+		object.properties.set("updateTime", updateTime);
 		
 		Event.add(calc_event,onEventCB);
 		if (!directSpawn){
@@ -132,6 +133,7 @@ class Beam_Control_v6 extends iron.Trait {
 		}
 	}
 	
+
 	var once: Bool = true;
 	var delay: Float = 1;
 	function onUpdate(){
@@ -181,7 +183,7 @@ class Beam_Control_v6 extends iron.Trait {
 			calculation_on_sleep = true;
 			time = 0.0;
 		}
-
+		
 		if (!laser_on) {
 			var i=0;
 			for (beam_array in main_Array_beams){

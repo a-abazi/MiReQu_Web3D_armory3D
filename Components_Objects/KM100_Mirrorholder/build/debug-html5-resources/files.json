@@ -3,6 +3,7 @@
 		{
 			"name": "KM100_Base_001_mesh_frag",
 			"files": [
+				"KM100_Base_001_mesh.frag.essl",
 				"KM100_Base_001_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -116,6 +117,7 @@
 		{
 			"name": "KM100_Screw_mesh_frag",
 			"files": [
+				"KM100_Screw_mesh.frag.essl",
 				"KM100_Screw_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -149,6 +151,7 @@
 		{
 			"name": "KM100_Top_mesh_frag",
 			"files": [
+				"KM100_Top_mesh.frag.essl",
 				"KM100_Top_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -182,6 +185,7 @@
 		{
 			"name": "Material_mesh_frag",
 			"files": [
+				"Material_mesh.frag.essl",
 				"Material_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -206,6 +210,7 @@
 		{
 			"name": "Platte_001_mesh_frag",
 			"files": [
+				"Platte_001_mesh.frag.essl",
 				"Platte_001_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -239,6 +244,7 @@
 		{
 			"name": "Post_mesh_frag",
 			"files": [
+				"Post_mesh.frag.essl",
 				"Post_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -272,6 +278,7 @@
 		{
 			"name": "Schraube_mesh_frag",
 			"files": [
+				"Schraube_mesh.frag.essl",
 				"Schraube_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -305,6 +312,7 @@
 		{
 			"name": "UPH_Base_mesh_frag",
 			"files": [
+				"UPH_Base_mesh.frag.essl",
 				"UPH_Base_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -338,6 +346,7 @@
 		{
 			"name": "UPH_Top_mesh_frag",
 			"files": [
+				"UPH_Top_mesh.frag.essl",
 				"UPH_Top_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -371,6 +380,7 @@
 		{
 			"name": "armdefault_mesh_frag",
 			"files": [
+				"armdefault_mesh.frag.essl",
 				"armdefault_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -656,6 +666,7 @@
 		{
 			"name": "deferred_light_frag",
 			"files": [
+				"deferred_light.frag.essl",
 				"deferred_light-webgl2.frag.essl"
 			],
 			"file_sizes": [
