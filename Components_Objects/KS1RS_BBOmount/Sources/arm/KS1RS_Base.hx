@@ -16,6 +16,7 @@ import iron.math.Vec4;
 
 import iron.math.Mat4;
 import iron.math.RayCaster;
+import armory.system.Event;
 
 class KS1RS_Base extends iron.Trait {
 
@@ -75,21 +76,21 @@ class KS1RS_Base extends iron.Trait {
 		
 
 		screwTop = spawnObject(screwName,false);
-		var mST = object.getChild("C_Screw_Top_Zero").transform.world;
+		var mST = object.getChild("C_Screw_Top_Zero_KS1RS_Base").transform.world;
 		screwTop.transform.setMatrix(mST);
 		screwTop.transform.scale = nScale;
 		screwTop.visible = visib;
 		rbSync(screwTop);
 
 		screwBot = spawnObject(screwName,false);
-		var mSB = object.getChild("C_Screw_Bottom_Zero").transform.world;
+		var mSB = object.getChild("C_Screw_Bottom_Zero_KS1RS_Base").transform.world;
 		screwBot.transform.setMatrix(mSB);
 		screwBot.transform.scale = nScale;
 		screwBot.visible = visib;
 		rbSync(screwBot);
 
 		screwMid = spawnObject(screwName,false);
-		var mSM = object.getChild("C_Screw_Middle_Zero").transform.world;
+		var mSM = object.getChild("C_Screw_Middle_Zero_KS1RS_Base").transform.world;
 		screwMid.transform.setMatrix(mSM);
 		screwMid.transform.scale = nScale;
 		screwMid.visible = visib;
@@ -121,16 +122,18 @@ class KS1RS_Base extends iron.Trait {
 		bbo.visible = visib;
 		rbSync(bbo);
 
-		screwPosLim = (object.getChild("C_Screw_Bottom_Limit").transform.world.getLoc().distanceTo( screwBot.getChildren()[0].transform.world.getLoc()));
-		screwNegLim = (object.getChild("C_Screw_Bottom_Zero").transform.world.getLoc().distanceTo(object.getChild("C_Screw_Bottom_Limit_z").transform.world.getLoc()));
+		screwPosLim = (object.getChild("C_Screw_Bottom_Limit_KS1RS_Base").transform.world.getLoc().distanceTo( screwBot.getChildren()[0].transform.world.getLoc()));
+		screwNegLim = (object.getChild("C_Screw_Bottom_Zero_KS1RS_Base").transform.world.getLoc().distanceTo(object.getChild("C_Screw_Bottom_Limit_z_KS1RS_Base").transform.world.getLoc()));
 		screwTravelDist = Math.abs(screwPosLim) + Math.abs(screwNegLim);
 
 		updateParts();
+		
+		// Event added with object id as a mask, the postholder trait UPH2_Base will send this event to its componente object when moved
+		Event.add("updateParts",updateParts,object.uid);
 	}
 	
 			
 	function onUpdate(){
-		updateParts();
 		
 		var keyboard = Input.getKeyboard();
 		var mouse = Input.getMouse();		
@@ -157,7 +160,7 @@ class KS1RS_Base extends iron.Trait {
 		if (mouse.down("left") && movingObj == ring){
 			if (hitVec == null){
 				hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<0);
-				if (hitVec!=null) xyPlane = spawnXZPlane(front.getChild("C_Ring").transform.world.getLoc(), new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
+				if (hitVec!=null) xyPlane = spawnXZPlane(front.getChild("C_Ring_KS1RS_Front").transform.world.getLoc(), new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
 				hitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 			}
 			var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
@@ -165,16 +168,16 @@ class KS1RS_Base extends iron.Trait {
 				var angleNew:Float;
 				var angle: Float;
 
-				var dirVec = new Vec4().setFrom(hitVec).sub(front.getChild("C_Ring").transform.world.getLoc());
+				var dirVec = new Vec4().setFrom(hitVec).sub(front.getChild("C_Ring_KS1RS_Front").transform.world.getLoc());
 				dirVec.normalize();
-				var upAngle = angle3d(dirVec, front.getChild("C_Ring").transform.up().normalize());
-				var rAngle = angle3d(dirVec, front.getChild("C_Ring").transform.right().normalize());
+				var upAngle = angle3d(dirVec, front.getChild("C_Ring_KS1RS_Front").transform.up().normalize());
+				var rAngle = angle3d(dirVec, front.getChild("C_Ring_KS1RS_Front").transform.right().normalize());
 
 
-				var dirVecNew = new Vec4().setFrom(newHitVec).sub(front.getChild("C_Ring").transform.world.getLoc());
+				var dirVecNew = new Vec4().setFrom(newHitVec).sub(front.getChild("C_Ring_KS1RS_Front").transform.world.getLoc());
 				dirVecNew.normalize();
-				var upAngleNew = angle3d(dirVecNew, front.getChild("C_Ring").transform.up().normalize());
-				var rAngleNew = angle3d(dirVecNew, front.getChild("C_Ring").transform.right().normalize());
+				var upAngleNew = angle3d(dirVecNew, front.getChild("C_Ring_KS1RS_Front").transform.up().normalize());
+				var rAngleNew = angle3d(dirVecNew, front.getChild("C_Ring_KS1RS_Front").transform.right().normalize());
 
 
 				if (rAngleNew< Math.PI/2) angleNew = upAngleNew;
@@ -192,27 +195,6 @@ class KS1RS_Base extends iron.Trait {
 			else trace("xyPlane not detected by rayCastmethod");
 		}
 		
-
-		//var vec = new Vec4(0.1,0,0,1);
-		//var vec_B = new Vec4(-0.1,0,0,1);
-
-		//if (keyboard.down("w")){
-		//	object.transform.loc.add(vec);
-		//	object.transform.buildMatrix();
-		//	
-		//	var rigidBody = object.getTrait(RigidBody);
-		//	if (rigidBody != null) rigidBody.syncTransform();
-		//	updateParts();
-
-		//}
-		//if (keyboard.down("s")){
-		//	object.transform.loc.add(vec_B);
-		//	object.transform.buildMatrix();
-
-		//	var rigidBody = object.getTrait(RigidBody);
-		//	if (rigidBody != null) rigidBody.syncTransform();
-		//	updateParts();
-		//}
 
 		if (mouse.down("left")){
 			var mouse_c = iron.system.Input.getMouse();
@@ -285,21 +267,21 @@ class KS1RS_Base extends iron.Trait {
 		
 
 		var numberRevolutions = 10;
-		var mST = object.getChild("C_Screw_Top_Zero").transform.world;
+		var mST = object.getChild("C_Screw_Top_Zero_KS1RS_Base").transform.world;
 		screwTop.transform.setMatrix(mST);
 		screwTop.transform.move(screwTop.transform.look().normalize(), screwTopDist);
 		screwTop.transform.rotate(screwTop.transform.look().normalize(), screwTopDist/screwTravelDist * numberRevolutions * 2* Math.PI);
 		screwTop.transform.scale = nScale;
 		rbSync(screwTop);
 
-		var mSB = object.getChild("C_Screw_Bottom_Zero").transform.world;
+		var mSB = object.getChild("C_Screw_Bottom_Zero_KS1RS_Base").transform.world;
 		screwBot.transform.setMatrix(mSB);
 		screwBot.transform.move(screwBot.transform.look().normalize(),screwBotDist);
 		screwBot.transform.rotate(screwBot.transform.look().normalize(), screwBotDist/screwTravelDist * numberRevolutions * 2 * Math.PI);
 		screwBot.transform.scale = nScale;
 		rbSync(screwBot);
 
-		var mSM = object.getChild("C_Screw_Middle_Zero").transform.world;
+		var mSM = object.getChild("C_Screw_Middle_Zero_KS1RS_Base").transform.world;
 		screwMid.transform.setMatrix(mSM);
 		screwMid.transform.move(screwMid.transform.look().normalize(), screwMidDist);
 		screwMid.transform.rotate(screwMid.transform.look().normalize(), screwMidDist/screwTravelDist * numberRevolutions * 2 * Math.PI);
@@ -325,7 +307,7 @@ class KS1RS_Base extends iron.Trait {
 		var angB = Math.acos(rotVecB.dot(vR))*sgnB;
 		
 		// update transform matrix
-		var mSM = object.getChild("C_Screw_Middle_Zero").transform.world;
+		var mSM = object.getChild("C_Screw_Middle_Zero_KS1RS_Base").transform.world;
 		front.transform.setMatrix(mSM);
 		front.transform.scale = nScale;
 		front.transform.move(screwMid.transform.look().normalize(), screwMidDist);
@@ -343,9 +325,6 @@ class KS1RS_Base extends iron.Trait {
 		} 
 		front.transform.buildMatrix();
 		
-		//trace("loc: "+ Std.string(front.transform.loc));
-		//trace("scale: "+ Std.string(front.transform.scale));
-		//trace("rot: "+ Std.string(front.transform.rot));
 		rbSync(front);
 
 
@@ -360,6 +339,8 @@ class KS1RS_Base extends iron.Trait {
 		bbo.transform.setMatrix(mB);
 		bbo.transform.scale = nScale;
 		rbSync(bbo);
+		
+		Event.send("Calc_Beams"); // Event of the scene trait calc beams, makes a new calculation of the Beams
 	}
 	
 	function spawnObject(objectName: String, visible: Bool):Object {

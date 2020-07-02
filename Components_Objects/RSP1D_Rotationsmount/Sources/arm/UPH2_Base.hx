@@ -15,6 +15,8 @@ import iron.math.Vec4;
 import iron.math.Mat4;
 import iron.math.RayCaster;
 
+import armory.system.Event;
+
 // Important!! For the movement to work, a plane object xyPlane is required as a rigidbody in group 3 (Blender: Physicsproperties/RigidBody/collections/ Blue Square in top Row and thirs cell ( left block))
 // Data of UPH and Post
 // 	UPH (Base+Top) has a height of 50mm(real) here 0.5m(500m)
@@ -24,10 +26,8 @@ import iron.math.RayCaster;
 // TODO: find out how to give an object an rigid body, and how to generate an object (so xyPlane is not needed in Blender as separate object)
 // TODO: when stage is ready, stage needs to be recognized as base not platte
 // TODO: multiple platten
-// TODO: COnnection to object
 // TODO: Collisions!!!
 // TODO: (When Dynamic Meshes): Strech the post to get variables heights 
-// TODO: Communicate UpdateParts to save performance, right now all components update their parts "onUpdate" of Frame
 
 
 
@@ -135,7 +135,7 @@ class UPH2_Base extends iron.Trait {
 		baseY = plate.getChildren()[1].transform.world.getLoc().sub(zero);
 
 		// set the object to correct z stage and to the baseAngle Value(outcommented)
-		object.transform.translate(0,0,zero.z -  object.getChild("C_Platte").transform.world.getLoc().z);
+		object.transform.translate(0,0,zero.z -  object.getChild("C_Platte_UPH2_Base").transform.world.getLoc().z);
 		object.transform.rot.fromAxisAngle(object.transform.up().normalize(), baseAngle);
 		object.transform.buildMatrix();
 		rbSync(object);
@@ -143,7 +143,7 @@ class UPH2_Base extends iron.Trait {
 
 		//spawn the screw and setup location
 		mScrew = spawnObject(mScrewName,false);
-		var mST = object.getChild("C_Screw_Pos").transform.world;
+		var mST = object.getChild("C_Screw_Pos_UPH2_Base").transform.world;
 		mScrew.transform.setMatrix(mST);
 		mScrew.transform.scale = nScale;
 		mScrew.visible = visib;
@@ -160,22 +160,22 @@ class UPH2_Base extends iron.Trait {
 
 		// spawn "Top" on the base, corrVTop is the correction vector concerning the location
 		top = spawnObject(topName,false);
-		var mT = object.getChild("C_UPH").transform.world;
+		var mT = object.getChild("C_UPH_UPH2_Base").transform.world;
 		top.transform.setMatrix(mT);
 		top.transform.scale = nScale;
 		rbSync(top);
-		corrVTop = new Vec4().setFrom(top.getChild("C_Bottom").transform.world.getLoc()).sub(top.transform.loc);
+		corrVTop = new Vec4().setFrom(top.getChild("C_Bottom_UPH2_Top").transform.world.getLoc()).sub(top.transform.loc);
 		top.transform.loc.sub(corrVTop);
 		top.visible = visib;
 		rbSync(top);
 
 		// spawn the hex screw on the top part, see above  for corrScrew
 		screw = spawnObject(screwName,false);
-		var mS = top.getChild("C_Screw").transform.world;
+		var mS = top.getChild("C_Screw_UPH2_Top").transform.world;
 		screw.transform.setMatrix(mS);
 		screw.transform.scale = nScale;
 		rbSync(screw);
-		corrScrew = new Vec4().setFrom(screw.getChild("C").transform.world.getLoc()).sub(screw.transform.loc);
+		corrScrew = new Vec4().setFrom(screw.getChild("C_UPH2_Screw").transform.world.getLoc()).sub(screw.transform.loc);
 		if (sState == 0)
 			corrScrew.mult(0.5);
 
@@ -185,7 +185,7 @@ class UPH2_Base extends iron.Trait {
 
 		// spawn the post inside the top, with specified postDist and angle
 		post = spawnObject(postName,false);
-		var mP = top.getChild("C_Top").transform.world;
+		var mP = top.getChild("C_Top_UPH2_Top").transform.world;
 		post.transform.setMatrix(mP);
 		post.transform.scale = nScale;
 		post.visible = visib;
@@ -193,13 +193,13 @@ class UPH2_Base extends iron.Trait {
 		rbSync(post);
 
 		// measure limits from the empty child objects, limits for postTravel
-		postPosLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Top").transform.world.getLoc())) + 0.01;
-		postNegLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Bottom").transform.world.getLoc())+0.13); // the Float value results from the base
+		postPosLim = (post.getChild("C_PostBottom_UPH2_Post").transform.world.getLoc().distanceTo( top.getChild("C_Top_UPH2_Top").transform.world.getLoc())) + 0.01;
+		postNegLim = (post.getChild("C_PostBottom_UPH2_Post").transform.world.getLoc().distanceTo( top.getChild("C_Bottom_UPH2_Top").transform.world.getLoc())+0.13); // the Float value results from the base
 		postTravelDist = Math.abs(postPosLim) + Math.abs(postNegLim);
 		// limits for basetravel
 		// Important!! C_screw_Pos is not static and is moved around, these limits are only valid initially TODO: fix it
-		basePosLim = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos").transform.world.getLoc()));
-		baseNegLim = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg").transform.world.getLoc())); // the Float value results from the base
+		basePosLim = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos_UPH2_Base").transform.world.getLoc()));
+		baseNegLim = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg_UPH2_Base").transform.world.getLoc())); // the Float value results from the base
 		baseTravelDist = Math.abs(basePosLim) + Math.abs(baseNegLim);
 
 		// check if supplied postDist is within limits
@@ -225,6 +225,8 @@ class UPH2_Base extends iron.Trait {
 		if (object.properties["componentObjectName"] != null ){
 
 			comp = spawnObject(object.properties["componentObjectName"],true);
+			
+			// not used yet
 			if (object.properties["Component_map"]!= null){
 				initProps(comp);
 				comp.properties = object.properties["Component_map"];
@@ -232,14 +234,13 @@ class UPH2_Base extends iron.Trait {
 			
 
 
-			var mCC = post.getChild("C_Component").transform.world;
+			var mCC = post.getChild("C_Component_UPH2_Post").transform.world;
 			comp.transform.setMatrix(mCC);
 			comp.transform.scale = nScale;
 			if (object.properties["Component_corrV"] != null) {
 				var compCorrV = object.properties["Component_corrV"];
 				comp.transform.loc.add(compCorrV);
 			}
-				
 			rbSync(comp);
 		}
 
@@ -252,7 +253,6 @@ class UPH2_Base extends iron.Trait {
 	// TODO: add a Boolean when screw should be locked, BUG: Snapping to other hole when in state 1, when fast mouse movement 
 	function onUpdate(){
 		if (!defaultControls) {
-			
 			return;
 		}
 		
@@ -261,6 +261,7 @@ class UPH2_Base extends iron.Trait {
 		var mouse = Input.getMouse();
 		var keyboard = Input.getKeyboard();
 		var rb = null;
+
 
 		// By left click a rigid body is chosen by raytracing(part of .pickClosest) to be movingObjeckt
 		// if a screw is clicked the state is switched
@@ -314,12 +315,12 @@ class UPH2_Base extends iron.Trait {
 				}
 				var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 				if (newHitVec!= null ) {
-					var dirVecNew = new Vec4().setFrom(newHitVec).sub(object.getChild("C_Screw_Pos").transform.world.getLoc());
+					var dirVecNew = new Vec4().setFrom(newHitVec).sub(object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc());
 					var newAngle = Math.atan2(dirVecNew.y,dirVecNew.x)-Math.atan2(1,0);
 					rotBaseTo(newAngle);
 					
-					var distold = object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo(hitVec);
-					var distnew = object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo(newHitVec);
+					var distold = object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo(hitVec);
+					var distnew = object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo(newHitVec);
 					transBaseBy(distold-distnew);
 					hitVec = newHitVec;
 				}
@@ -357,7 +358,7 @@ class UPH2_Base extends iron.Trait {
 		nScale = new Vec4(0.01,0.01,0.01,1); // scale parameter to change the scale of objects
 
 		// screw (mScrew contact with plate) is updated according to C_point (Childobject )of the base
-		var mST = object.getChild("C_Screw_Pos").transform.world;
+		var mST = object.getChild("C_Screw_Pos_UPH2_Base").transform.world;
 		mScrew.transform.setMatrix(mST);
 		mScrew.transform.scale = nScale;
 		rbSync(mScrew);
@@ -374,32 +375,32 @@ class UPH2_Base extends iron.Trait {
 	
 			object.transform.rot.fromAxisAngle(object.transform.up().normalize(), baseAngle);
 			rbSync(object);
-			var corrVrot = new Vec4().setFrom(object.getChild("C_Screw_Pos").transform.world.getLoc());
+			var corrVrot = new Vec4().setFrom(object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc());
 			corrVrot.sub(mScrew.transform.loc);
 			object.transform.translate(-1*corrVrot.x , -1*corrVrot.y , 0);
 			rbSync(object);
 		}
 
 		// sync the top to the base 
-		var mT = object.getChild("C_UPH").transform.world;
+		var mT = object.getChild("C_UPH_UPH2_Base").transform.world;
 		top.transform.setMatrix(mT);
 		top.transform.scale = nScale;
 		top.transform.loc.sub(corrVTop);
 		rbSync(top);
 
 		// sync the hexScrew to the top part, correctional vector depends on state of screw
-		var mS = top.getChild("C_Screw").transform.world;
+		var mS = top.getChild("C_Screw_UPH2_Top").transform.world;
 		screw.transform.setMatrix(mS);
 		screw.transform.scale = nScale;
 		rbSync(screw);
-		corrScrew = new Vec4().setFrom(screw.getChild("C").transform.world.getLoc()).sub(screw.transform.loc);
+		corrScrew = new Vec4().setFrom(screw.getChild("C_UPH2_Screw").transform.world.getLoc()).sub(screw.transform.loc);
 		if (sState == 0)
 			corrScrew.mult(0.5);
 		screw.transform.loc.sub(corrScrew);
 		rbSync(screw);
 
 		// sync the post and translate/rotate it according to the properties
-		var mP = top.getChild("C_Top").transform.world;
+		var mP = top.getChild("C_Top_UPH2_Top").transform.world;
 		post.transform.setMatrix(mP);
 		post.transform.scale = nScale;
 		post.transform.move(post.transform.up(),postDist);
@@ -410,7 +411,7 @@ class UPH2_Base extends iron.Trait {
 
 		
 		if (comp!= null){
-			var mCC = post.getChild("C_Component").transform.world;
+			var mCC = post.getChild("C_Component_UPH2_Post").transform.world;
 			comp.transform.setMatrix(mCC);
 			comp.transform.scale = nScale;
 			if (object.properties["Component_corrV"] != null) {
@@ -418,9 +419,7 @@ class UPH2_Base extends iron.Trait {
 				comp.transform.loc.add(compCorrV);
 			}
 			rbSync(comp);
-			//callTraitFunction(comp,comp.name,"updateParts",[]);
-			//trace(comp.name);
-			
+			sendEvent(comp,"updateParts"); // sends Event to component on top, if it exists. This Event triggers the updateParts() method 
 		}
 		
 	}
@@ -449,19 +448,19 @@ class UPH2_Base extends iron.Trait {
 			multiplier = multiplier*-1;
 			var scalefactor = 0.01; // factor which results due to scaling, needs to be adjusted for other scales
 			if (multiplier<0){
-				var baseDist = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg").transform.world.getLoc()));
+				var baseDist = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg_UPH2_Base").transform.world.getLoc()));
 				if (baseDist + multiplier*baseTrans*scalefactor>0){
 					trace(baseDist);
 					trace(multiplier*baseTrans);
-					object.getChild("C_Screw_Pos").transform.translate(0,multiplier*baseTrans,0);
+					object.getChild("C_Screw_Pos_UPH2_Base").transform.translate(0,multiplier*baseTrans,0);
 					rbSync(object);
 				}
 			}
 			else if(multiplier>0){			
-				var baseDist = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos").transform.world.getLoc())); 
+				var baseDist = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos_UPH2_Base").transform.world.getLoc())); 
 				if (baseDist - multiplier*baseTrans*scalefactor >0){
 					trace(baseDist);
-					object.getChild("C_Screw_Pos").transform.translate(0,multiplier*baseTrans,0);
+					object.getChild("C_Screw_Pos_UPH2_Base").transform.translate(0,multiplier*baseTrans,0);
 					rbSync(object);
 				}
 			}
@@ -475,13 +474,13 @@ class UPH2_Base extends iron.Trait {
 			var scalefactor = 100; // factor which results due to scaling, needs to be adjusted for other scales#
 			var baseDist = 0.;
 			if (dist<0){
-				baseDist = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg").transform.world.getLoc()));
+				baseDist = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg_UPH2_Base").transform.world.getLoc()));
 			}
 			else if(dist>0){			
-				baseDist = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos").transform.world.getLoc())); 	
+				baseDist = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos_UPH2_Base").transform.world.getLoc())); 	
 			}
 			if (baseDist - Math.abs(dist)>0){
-				object.getChild("C_Screw_Pos").transform.translate(0,dist*scalefactor,0);
+				object.getChild("C_Screw_Pos_UPH2_Base").transform.translate(0,dist*scalefactor,0);
 				(object);
 			}	
 		allVariablesToProbs(object);
@@ -650,17 +649,16 @@ class UPH2_Base extends iron.Trait {
 		else return null;
 	}
 
-	function callTraitFunction(object:Object, traitNamePropertyString:String, funName: String, funArguments:Array <Dynamic>):Dynamic{
+	function callTraitFunction(object:Object, traitName:String, funName: String, funArguments:Array <Dynamic>):Dynamic{
 		var result: Dynamic;
 		// (Small helper) This function combines some dynamic haxe functions (especially Reflect) to call 
 		//  correct instance of the trait of the object. In the beginning the traitname and such are calles
 
 
 		// Call correct Trait of correct Object
-		var traitname: String = object.properties.get(traitNamePropertyString);
 		var cname: Class<iron.Trait> = null; // call class name (trait), includes path and more
-		if (cname == null) cname = cast Type.resolveClass(Main.projectPackage + "." + traitname);
-		if (cname == null) cname = cast Type.resolveClass(Main.projectPackage + ".node." + traitname);
+		if (cname == null) cname = cast Type.resolveClass(Main.projectPackage + "." + traitName);
+		if (cname == null) cname = cast Type.resolveClass(Main.projectPackage + ".node." + traitName);
 		var trait: Dynamic = object.getTrait(cname);
 		// Call function of the correct instance of the trait, get new Direction
 		var func = Reflect.field(trait, funName);
@@ -670,10 +668,31 @@ class UPH2_Base extends iron.Trait {
 		}
 		else{
 			trace("Error: dynamic function resulted in null value, Error in trait or function name");
+			trace("funName: "+Std.string(funName));
+			trace("traitname: "+Std.string(traitName));
+			trace("cname: "+Std.string(cname));
+			trace("trait: "+Std.string(trait));
+			trace(Main.projectPackage + "." + traitName);
 			result = null;
 		}
 
 		return result;
+	}
+
+	function sendEvent(object,name){
+		var entries: Array<TEvent> = null;
+
+		if (object == null) return;
+		
+		var all = Event.get(name);
+		if (all != null) {
+			entries = [];
+			for (e in all) if (e.mask == object.uid) entries.push(e);
+			
+		}
+		if (entries == null) return;
+		
+		for (e in entries) e.onEvent();
 	}
 
 }	

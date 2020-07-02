@@ -2979,8 +2979,8 @@ arm_NewUI.prototype = $extend(iron_Trait.prototype,{
 	,render2D: function(g) {
 		g.end();
 		this.ui.begin(g);
-		if(this.ui.window(zui_Handle.global.nest(0,null),this.pos_x,this.pos_y,this.width,this.height,false)) {
-			if(this.ui.panel(zui_Handle.global.nest(1,{ selected : true}),"Laser Control")) {
+		if(this.ui.window(zui_Handle.global.nest(34,null),this.pos_x,this.pos_y,this.width,this.height,false)) {
+			if(this.ui.panel(zui_Handle.global.nest(35,{ selected : true}),"Laser Control")) {
 				this.ui.indent();
 				this.ui.row([0.5,0.5]);
 				if(this.ui.button("Laser On/Off")) {
@@ -3018,18 +3018,18 @@ arm_NewUI.prototype = $extend(iron_Trait.prototype,{
 					this.onEventCB();
 				}
 				this.ui.text("Max Beam segments");
-				var beamNumber = this.ui.slider(zui_Handle.global.nest(2,{ value : 25}),"X",0,100,true);
+				var beamNumber = this.ui.slider(zui_Handle.global.nest(36,{ value : 25}),"X",0,100,true);
 				this.ui.text("Update Interval (ms)");
-				var updateTime = this.ui.slider(zui_Handle.global.nest(3,{ value : 20}),"X",0,1000,true);
+				var updateTime = this.ui.slider(zui_Handle.global.nest(37,{ value : 20}),"X",0,1000,true);
 				this.ui.unindent();
 				iron_Scene.global.properties.set("beamNumber",Std.int(beamNumber));
 				iron_Scene.global.properties.set("updateTime",updateTime / 1000.);
 			}
-			if(this.ui.panel(zui_Handle.global.nest(4,{ selected : true}),"Object Control")) {
+			if(this.ui.panel(zui_Handle.global.nest(38,{ selected : true}),"Object Control")) {
 				this.ui.row([0.5,0.5]);
 				this.ui.text("Active Object");
 				this.ui.text(this.objName);
-				var angleInput = this.ui.textInput(zui_Handle.global.nest(5,{ text : "5"}),"Rotation Angle (deg)");
+				var angleInput = this.ui.textInput(zui_Handle.global.nest(39,{ text : "5"}),"Rotation Angle (deg)");
 				this.rotValue = Std.parseFloat(angleInput) * Math.PI / 180.0;
 				this.ui.row([0.6,0.2,0.2]);
 				this.ui.text("Rotate Z");
@@ -5724,9 +5724,8 @@ var armory_system_Starter = function() { };
 $hxClasses["armory.system.Starter"] = armory_system_Starter;
 armory_system_Starter.__name__ = "armory.system.Starter";
 armory_system_Starter.main = function(scene,mode,resize,min,max,w,h,msaa,vsync,getRenderPath) {
-	var tasks;
 	var start = function() {
-		if(tasks > 0) {
+		if(armory_system_Starter.tasks > 0) {
 			return;
 		}
 		if(armory_data_Config.raw == null) {
@@ -5782,20 +5781,28 @@ armory_system_Starter.main = function(scene,mode,resize,min,max,w,h,msaa,vsync,g
 	};
 	var loadLibAmmo = function(name) {
 		kha_Assets.loadBlobFromPath(name,function(b) {
-			(1,eval)(b.toString());
-			Ammo({print:function(s){haxe.Log.trace(s);},instantiateWasm:function(imports,successCallback) {
-					var wasmbin = Krom.loadBlob('ammo.wasm.wasm');
-					var module = new WebAssembly.Module(wasmbin);
-					var inst = new WebAssembly.Instance(module,imports);
-					successCallback(inst);
-					return inst.exports;
-				}}).then(function(){ tasks--; start();});
+			var print = function(s) {
+				haxe_Log.trace(s,{ fileName : "Sources/armory/system/Starter.hx", lineNumber : 79, className : "armory.system.Starter", methodName : "main"});
+			};
+			var loaded = function() {
+				armory_system_Starter.tasks--;
+				start();
+			};
+			(1, eval)(b.toString());
+			var instantiateWasm = function(imports,successCallback) {
+				var wasmbin = Krom.loadBlob("ammo.wasm.wasm");
+				var module = new WebAssembly.Module(wasmbin);
+				var inst = new WebAssembly.Instance(module,imports);
+				successCallback(inst);
+				return inst.exports;
+			};
+			Ammo({print:print, instantiateWasm:instantiateWasm}).then(loaded);
 		},null,{ fileName : "Sources/armory/system/Starter.hx", lineNumber : 78, className : "armory.system.Starter", methodName : "main"});
 	};
-	tasks = 1;
-	tasks += 1;
+	armory_system_Starter.tasks = 1;
+	armory_system_Starter.tasks++;
 	loadLibAmmo("ammo.wasm.js");
-	tasks -= 1;
+	armory_system_Starter.tasks--;
 	start();
 };
 var armory_trait_WalkNavigation = function() {
@@ -8034,10 +8041,10 @@ $hxClasses["iron.system.Time"] = iron_system_Time;
 iron_system_Time.__name__ = "iron.system.Time";
 iron_system_Time.__properties__ = {get_delta:"get_delta",get_step:"get_step"};
 iron_system_Time.get_step = function() {
-	return 1 / iron_system_Time.frequency;
+	return 0.016666666666666666;
 };
 iron_system_Time.get_delta = function() {
-	return 1 / iron_system_Time.frequency * iron_system_Time.scale;
+	return 0.016666666666666666 * iron_system_Time.scale;
 };
 iron_system_Time.time = function() {
 	return kha_Scheduler.time();
@@ -8046,7 +8053,6 @@ iron_system_Time.realTime = function() {
 	return kha_Scheduler.realTime();
 };
 iron_system_Time.update = function() {
-	iron_system_Time.frequency = kha_Display.get_primary() != null ? kha_Display.get_primary().get_frequency() : 60;
 	iron_system_Time.realDelta = iron_system_Time.realTime() - iron_system_Time.last;
 	iron_system_Time.last = iron_system_Time.realTime();
 };
@@ -8326,8 +8332,8 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 		if(!this.visible) {
 			return;
 		}
-		var hwin = zui_Handle.global.nest(6,null);
-		var htab = zui_Handle.global.nest(7,{ position : 0});
+		var hwin = zui_Handle.global.nest(0,null);
+		var htab = zui_Handle.global.nest(1,{ position : 0});
 		var ww = Std.int(280 * this.scaleFactor);
 		var wx = iron_App.w() - ww;
 		var wy = 0;
@@ -8340,7 +8346,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 		if(this.ui.window(hwin,wx,wy,ww,wh,true)) {
 			var tmp = this.ui.tab(htab,"");
 			if(this.ui.tab(htab,"Scene")) {
-				if(this.ui.panel(zui_Handle.global.nest(8,{ selected : true}),"Outliner")) {
+				if(this.ui.panel(zui_Handle.global.nest(2,{ selected : true}),"Outliner")) {
 					this.ui.indent();
 					var lineCounter = 0;
 					var drawList = null;
@@ -8397,7 +8403,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					while(_g2 < _g11.length) {
 						var c = _g11[_g2];
 						++_g2;
-						var tmp1 = zui_Handle.global.nest(9,null);
+						var tmp1 = zui_Handle.global.nest(3,null);
 						drawList(tmp1,c);
 					}
 					this.ui.unindent();
@@ -8405,10 +8411,10 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 				if(this.selectedObject == null) {
 					this.selectedType = "";
 				}
-				if(this.ui.panel(zui_Handle.global.nest(10,{ selected : true}),"Properties " + this.selectedType)) {
+				if(this.ui.panel(zui_Handle.global.nest(4,{ selected : true}),"Properties " + this.selectedType)) {
 					this.ui.indent();
 					if(this.selectedObject != null) {
-						var h = zui_Handle.global.nest(11,null);
+						var h = zui_Handle.global.nest(5,null);
 						h.selected = this.selectedObject.visible;
 						this.selectedObject.visible = this.ui.check(h,"Visible");
 						var localPos = this.selectedObject.transform.loc;
@@ -8423,31 +8429,31 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("World Loc");
 						this.ui.enabled = false;
-						h = zui_Handle.global.nest(12,null);
+						h = zui_Handle.global.nest(6,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos.x) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"X"));
-						h = zui_Handle.global.nest(13,null);
+						h = zui_Handle.global.nest(7,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos.y) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"Y"));
-						h = zui_Handle.global.nest(14,null);
+						h = zui_Handle.global.nest(8,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos.z) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"Z"));
 						this.ui.enabled = true;
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Local Loc");
-						h = zui_Handle.global.nest(15,null);
+						h = zui_Handle.global.nest(9,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.x) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"X"));
 						if(this.ui.changed) {
 							localPos.x = f;
 						}
-						h = zui_Handle.global.nest(16,null);
+						h = zui_Handle.global.nest(10,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.y) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							localPos.y = f;
 						}
-						h = zui_Handle.global.nest(17,null);
+						h = zui_Handle.global.nest(11,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.z) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -8455,7 +8461,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Rotation");
-						h = zui_Handle.global.nest(18,null);
+						h = zui_Handle.global.nest(12,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot.x) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"X"));
 						var changed = false;
@@ -8463,14 +8469,14 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 							changed = true;
 							rot.x = f;
 						}
-						h = zui_Handle.global.nest(19,null);
+						h = zui_Handle.global.nest(13,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot.y) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							changed = true;
 							rot.y = f;
 						}
-						h = zui_Handle.global.nest(20,null);
+						h = zui_Handle.global.nest(14,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot.z) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -8488,19 +8494,19 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Scale");
-						h = zui_Handle.global.nest(21,null);
+						h = zui_Handle.global.nest(15,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.x) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"X"));
 						if(this.ui.changed) {
 							scale.x = f;
 						}
-						h = zui_Handle.global.nest(22,null);
+						h = zui_Handle.global.nest(16,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.y) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							scale.y = f;
 						}
-						h = zui_Handle.global.nest(23,null);
+						h = zui_Handle.global.nest(17,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.z) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -8508,19 +8514,19 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Dimensions");
-						h = zui_Handle.global.nest(24,null);
+						h = zui_Handle.global.nest(18,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.x) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"X"));
 						if(this.ui.changed) {
 							dim.x = f;
 						}
-						h = zui_Handle.global.nest(25,null);
+						h = zui_Handle.global.nest(19,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.y) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							dim.y = f;
 						}
-						h = zui_Handle.global.nest(26,null);
+						h = zui_Handle.global.nest(20,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.z) + "";
 						f = Std.parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -8551,7 +8557,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 							if(iron_Scene.active.world != null) {
 								var p = iron_Scene.active.world.probe;
 								var tmp2 = this.ui;
-								var tmp3 = zui_Handle.global.nest(27,{ value : p.raw.strength});
+								var tmp3 = zui_Handle.global.nest(21,{ value : p.raw.strength});
 								p.raw.strength = tmp2.slider(tmp3,"Env Strength",0.0,5.0,true);
 							} else {
 								this.ui.text("This scene has no world data to edit.");
@@ -8559,14 +8565,14 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						} else if(((this.selectedObject) instanceof iron_object_LightObject)) {
 							this.selectedType = "(Light)";
 							var light = js_Boot.__cast(this.selectedObject , iron_object_LightObject);
-							var lightHandle = zui_Handle.global.nest(28,null);
+							var lightHandle = zui_Handle.global.nest(22,null);
 							lightHandle.value = light.data.raw.strength / 10;
 							var tmp4 = this.ui.slider(lightHandle,"Strength",0.0,5.0,true);
 							light.data.raw.strength = tmp4 * 10;
 						} else if(((this.selectedObject) instanceof iron_object_CameraObject)) {
 							this.selectedType = "(Camera)";
 							var cam = js_Boot.__cast(this.selectedObject , iron_object_CameraObject);
-							var fovHandle = zui_Handle.global.nest(29,null);
+							var fovHandle = zui_Handle.global.nest(23,null);
 							fovHandle.value = Std.int(cam.data.raw.fov * 100) / 100;
 							cam.data.raw.fov = this.ui.slider(fovHandle,"Field of View",0.3,2.0,true);
 							if(this.ui.changed) {
@@ -8582,7 +8588,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			var avg = Math.round(this.frameTimeAvg * 10000) / 10;
 			var fpsAvg = avg > 0 ? Math.round(1000 / avg) : 0;
 			if(this.ui.tab(htab,"" + avg + " ms")) {
-				if(this.ui.panel(zui_Handle.global.nest(30,{ selected : true}),"Performance")) {
+				if(this.ui.panel(zui_Handle.global.nest(24,{ selected : true}),"Performance")) {
 					if(this.graph != null) {
 						this.ui.image(this.graph);
 					}
@@ -8604,7 +8610,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					this.ui.text(Math.round(this.physTimeAvg * 10000) / 10 + " ms",2);
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(31,{ selected : false}),"Draw")) {
+				if(this.ui.panel(zui_Handle.global.nest(25,{ selected : false}),"Draw")) {
 					this.ui.indent();
 					this.ui.row(armory_trait_internal_DebugConsole.lrow);
 					var numMeshes = iron_Scene.active.meshes.length;
@@ -8624,7 +8630,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					this.ui.text(iron_RenderPath.culled + " / " + numMeshes * 2,2);
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(32,{ selected : false}),"Render Targets")) {
+				if(this.ui.panel(zui_Handle.global.nest(26,{ selected : false}),"Render Targets")) {
 					this.ui.indent();
 					var rt = iron_RenderPath.active.renderTargets.iterator();
 					while(rt.hasNext()) {
@@ -8636,7 +8642,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					}
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(33,{ selected : false}),"Cached Materials")) {
+				if(this.ui.panel(zui_Handle.global.nest(27,{ selected : false}),"Cached Materials")) {
 					this.ui.indent();
 					var c1 = iron_data_Data.cachedMaterials.iterator();
 					while(c1.hasNext()) {
@@ -8645,7 +8651,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					}
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(34,{ selected : false}),"Cached Shaders")) {
+				if(this.ui.panel(zui_Handle.global.nest(28,{ selected : false}),"Cached Shaders")) {
 					this.ui.indent();
 					var c3 = iron_data_Data.cachedShaders.iterator();
 					while(c3.hasNext()) {
@@ -8656,9 +8662,9 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 				}
 			}
 			if(this.ui.tab(htab,armory_trait_internal_DebugConsole.lastTraces[0] == "" ? "Console" : HxOverrides.substr(armory_trait_internal_DebugConsole.lastTraces[0],0,20))) {
-				if(this.ui.panel(zui_Handle.global.nest(35,{ selected : false}),"Script")) {
+				if(this.ui.panel(zui_Handle.global.nest(29,{ selected : false}),"Script")) {
 					this.ui.indent();
-					var t1 = this.ui.textInput(zui_Handle.global.nest(36,null));
+					var t1 = this.ui.textInput(zui_Handle.global.nest(30,null));
 					if(this.ui.button("Run")) {
 						try {
 							haxe_Log.trace("> " + t1,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 512, className : "armory.trait.internal.DebugConsole", methodName : "render2D"});
@@ -8669,7 +8675,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					}
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(37,{ selected : true}),"Log")) {
+				if(this.ui.panel(zui_Handle.global.nest(31,{ selected : true}),"Log")) {
 					this.ui.indent();
 					if(this.ui.button("Clear")) {
 						armory_trait_internal_DebugConsole.lastTraces[0] = "";
@@ -8696,7 +8702,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			}
 			this.ui.separator();
 		}
-		var handleWinTrait = zui_Handle.global.nest(38,null);
+		var handleWinTrait = zui_Handle.global.nest(32,null);
 		var _g6 = 0;
 		var _g15 = this.selectedTraits;
 		while(_g6 < _g15.length) {
@@ -8724,7 +8730,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			this.ui.text("Object:");
 			this.ui.text(trait.object.name,2);
 			this.ui.separator();
-			if(this.ui.panel(zui_Handle.global.nest(39,null).nest(objectID).nest(traitIndex),"Attributes")) {
+			if(this.ui.panel(zui_Handle.global.nest(33,null).nest(objectID).nest(traitIndex),"Attributes")) {
 				this.ui.indent();
 				var _g7 = 0;
 				var _g16 = Reflect.fields(trait);
@@ -17140,7 +17146,6 @@ iron_object_SpeakerObject.prototype = $extend(iron_object_Object.prototype,{
 		}
 	}
 	,remove: function() {
-		this.stop();
 		if(iron_Scene.active != null) {
 			HxOverrides.remove(iron_Scene.active.speakers,this);
 		}
@@ -21342,270 +21347,265 @@ kha_Shaders.init = function() {
 	blobs16.push(kha_internal_BytesBlob.fromBytes(bytes16));
 	kha_Shaders.Material_003_mesh_frag = new kha_graphics4_FragmentShader(blobs16,["Material_003_mesh.frag.d3d11"]);
 	var blobs17 = [];
-	var data17 = Reflect.field(kha_Shaders,"Material_006_mesh_fragData" + 0);
+	var data17 = Reflect.field(kha_Shaders,"Material_mesh_fragData" + 0);
 	var bytes17 = haxe_Unserializer.run(data17);
 	blobs17.push(kha_internal_BytesBlob.fromBytes(bytes17));
-	kha_Shaders.Material_006_mesh_frag = new kha_graphics4_FragmentShader(blobs17,["Material_006_mesh.frag.d3d11"]);
+	kha_Shaders.Material_mesh_frag = new kha_graphics4_FragmentShader(blobs17,["Material_mesh.frag.d3d11"]);
 	var blobs18 = [];
-	var data18 = Reflect.field(kha_Shaders,"Material_mesh_fragData" + 0);
+	var data18 = Reflect.field(kha_Shaders,"Metal_PBS_002_mesh_fragData" + 0);
 	var bytes18 = haxe_Unserializer.run(data18);
 	blobs18.push(kha_internal_BytesBlob.fromBytes(bytes18));
-	kha_Shaders.Material_mesh_frag = new kha_graphics4_FragmentShader(blobs18,["Material_mesh.frag.d3d11"]);
+	kha_Shaders.Metal_PBS_002_mesh_frag = new kha_graphics4_FragmentShader(blobs18,["Metal_PBS_002_mesh.frag.d3d11"]);
 	var blobs19 = [];
-	var data19 = Reflect.field(kha_Shaders,"Metal_PBS_002_mesh_fragData" + 0);
+	var data19 = Reflect.field(kha_Shaders,"Platte_001_mesh_fragData" + 0);
 	var bytes19 = haxe_Unserializer.run(data19);
 	blobs19.push(kha_internal_BytesBlob.fromBytes(bytes19));
-	kha_Shaders.Metal_PBS_002_mesh_frag = new kha_graphics4_FragmentShader(blobs19,["Metal_PBS_002_mesh.frag.d3d11"]);
+	kha_Shaders.Platte_001_mesh_frag = new kha_graphics4_FragmentShader(blobs19,["Platte_001_mesh.frag.d3d11"]);
 	var blobs20 = [];
-	var data20 = Reflect.field(kha_Shaders,"Platte_001_mesh_fragData" + 0);
+	var data20 = Reflect.field(kha_Shaders,"Post_002_mesh_fragData" + 0);
 	var bytes20 = haxe_Unserializer.run(data20);
 	blobs20.push(kha_internal_BytesBlob.fromBytes(bytes20));
-	kha_Shaders.Platte_001_mesh_frag = new kha_graphics4_FragmentShader(blobs20,["Platte_001_mesh.frag.d3d11"]);
+	kha_Shaders.Post_002_mesh_frag = new kha_graphics4_FragmentShader(blobs20,["Post_002_mesh.frag.d3d11"]);
 	var blobs21 = [];
-	var data21 = Reflect.field(kha_Shaders,"Post_002_mesh_fragData" + 0);
+	var data21 = Reflect.field(kha_Shaders,"Post_mesh_fragData" + 0);
 	var bytes21 = haxe_Unserializer.run(data21);
 	blobs21.push(kha_internal_BytesBlob.fromBytes(bytes21));
-	kha_Shaders.Post_002_mesh_frag = new kha_graphics4_FragmentShader(blobs21,["Post_002_mesh.frag.d3d11"]);
+	kha_Shaders.Post_mesh_frag = new kha_graphics4_FragmentShader(blobs21,["Post_mesh.frag.d3d11"]);
 	var blobs22 = [];
-	var data22 = Reflect.field(kha_Shaders,"Post_mesh_fragData" + 0);
+	var data22 = Reflect.field(kha_Shaders,"Schraube_002_mesh_fragData" + 0);
 	var bytes22 = haxe_Unserializer.run(data22);
 	blobs22.push(kha_internal_BytesBlob.fromBytes(bytes22));
-	kha_Shaders.Post_mesh_frag = new kha_graphics4_FragmentShader(blobs22,["Post_mesh.frag.d3d11"]);
+	kha_Shaders.Schraube_002_mesh_frag = new kha_graphics4_FragmentShader(blobs22,["Schraube_002_mesh.frag.d3d11"]);
 	var blobs23 = [];
-	var data23 = Reflect.field(kha_Shaders,"Schraube_002_mesh_fragData" + 0);
+	var data23 = Reflect.field(kha_Shaders,"Schraube_mesh_fragData" + 0);
 	var bytes23 = haxe_Unserializer.run(data23);
 	blobs23.push(kha_internal_BytesBlob.fromBytes(bytes23));
-	kha_Shaders.Schraube_002_mesh_frag = new kha_graphics4_FragmentShader(blobs23,["Schraube_002_mesh.frag.d3d11"]);
+	kha_Shaders.Schraube_mesh_frag = new kha_graphics4_FragmentShader(blobs23,["Schraube_mesh.frag.d3d11"]);
 	var blobs24 = [];
-	var data24 = Reflect.field(kha_Shaders,"Schraube_mesh_fragData" + 0);
+	var data24 = Reflect.field(kha_Shaders,"UPH_Base_mesh_fragData" + 0);
 	var bytes24 = haxe_Unserializer.run(data24);
 	blobs24.push(kha_internal_BytesBlob.fromBytes(bytes24));
-	kha_Shaders.Schraube_mesh_frag = new kha_graphics4_FragmentShader(blobs24,["Schraube_mesh.frag.d3d11"]);
+	kha_Shaders.UPH_Base_mesh_frag = new kha_graphics4_FragmentShader(blobs24,["UPH_Base_mesh.frag.d3d11"]);
 	var blobs25 = [];
-	var data25 = Reflect.field(kha_Shaders,"UPH_Base_mesh_fragData" + 0);
+	var data25 = Reflect.field(kha_Shaders,"UPH_Top_002_mesh_fragData" + 0);
 	var bytes25 = haxe_Unserializer.run(data25);
 	blobs25.push(kha_internal_BytesBlob.fromBytes(bytes25));
-	kha_Shaders.UPH_Base_mesh_frag = new kha_graphics4_FragmentShader(blobs25,["UPH_Base_mesh.frag.d3d11"]);
+	kha_Shaders.UPH_Top_002_mesh_frag = new kha_graphics4_FragmentShader(blobs25,["UPH_Top_002_mesh.frag.d3d11"]);
 	var blobs26 = [];
-	var data26 = Reflect.field(kha_Shaders,"UPH_Top_002_mesh_fragData" + 0);
+	var data26 = Reflect.field(kha_Shaders,"UPH_Top_mesh_fragData" + 0);
 	var bytes26 = haxe_Unserializer.run(data26);
 	blobs26.push(kha_internal_BytesBlob.fromBytes(bytes26));
-	kha_Shaders.UPH_Top_002_mesh_frag = new kha_graphics4_FragmentShader(blobs26,["UPH_Top_002_mesh.frag.d3d11"]);
+	kha_Shaders.UPH_Top_mesh_frag = new kha_graphics4_FragmentShader(blobs26,["UPH_Top_mesh.frag.d3d11"]);
 	var blobs27 = [];
-	var data27 = Reflect.field(kha_Shaders,"UPH_Top_mesh_fragData" + 0);
+	var data27 = Reflect.field(kha_Shaders,"armdefault_mesh_fragData" + 0);
 	var bytes27 = haxe_Unserializer.run(data27);
 	blobs27.push(kha_internal_BytesBlob.fromBytes(bytes27));
-	kha_Shaders.UPH_Top_mesh_frag = new kha_graphics4_FragmentShader(blobs27,["UPH_Top_mesh.frag.d3d11"]);
+	kha_Shaders.armdefault_mesh_frag = new kha_graphics4_FragmentShader(blobs27,["armdefault_mesh.frag.d3d11"]);
 	var blobs28 = [];
-	var data28 = Reflect.field(kha_Shaders,"armdefault_mesh_fragData" + 0);
+	var data28 = Reflect.field(kha_Shaders,"armdefault_mesh_vertData" + 0);
 	var bytes28 = haxe_Unserializer.run(data28);
 	blobs28.push(kha_internal_BytesBlob.fromBytes(bytes28));
-	kha_Shaders.armdefault_mesh_frag = new kha_graphics4_FragmentShader(blobs28,["armdefault_mesh.frag.d3d11"]);
+	kha_Shaders.armdefault_mesh_vert = new kha_graphics4_VertexShader(blobs28,["armdefault_mesh.vert.d3d11"]);
 	var blobs29 = [];
-	var data29 = Reflect.field(kha_Shaders,"armdefault_mesh_vertData" + 0);
+	var data29 = Reflect.field(kha_Shaders,"blur_edge_pass_fragData" + 0);
 	var bytes29 = haxe_Unserializer.run(data29);
 	blobs29.push(kha_internal_BytesBlob.fromBytes(bytes29));
-	kha_Shaders.armdefault_mesh_vert = new kha_graphics4_VertexShader(blobs29,["armdefault_mesh.vert.d3d11"]);
+	kha_Shaders.blur_edge_pass_frag = new kha_graphics4_FragmentShader(blobs29,["blur_edge_pass.frag.d3d11"]);
 	var blobs30 = [];
-	var data30 = Reflect.field(kha_Shaders,"blur_edge_pass_fragData" + 0);
+	var data30 = Reflect.field(kha_Shaders,"compositor_pass_fragData" + 0);
 	var bytes30 = haxe_Unserializer.run(data30);
 	blobs30.push(kha_internal_BytesBlob.fromBytes(bytes30));
-	kha_Shaders.blur_edge_pass_frag = new kha_graphics4_FragmentShader(blobs30,["blur_edge_pass.frag.d3d11"]);
+	kha_Shaders.compositor_pass_frag = new kha_graphics4_FragmentShader(blobs30,["compositor_pass.frag.d3d11"]);
 	var blobs31 = [];
-	var data31 = Reflect.field(kha_Shaders,"compositor_pass_fragData" + 0);
+	var data31 = Reflect.field(kha_Shaders,"compositor_pass_vertData" + 0);
 	var bytes31 = haxe_Unserializer.run(data31);
 	blobs31.push(kha_internal_BytesBlob.fromBytes(bytes31));
-	kha_Shaders.compositor_pass_frag = new kha_graphics4_FragmentShader(blobs31,["compositor_pass.frag.d3d11"]);
+	kha_Shaders.compositor_pass_vert = new kha_graphics4_VertexShader(blobs31,["compositor_pass.vert.d3d11"]);
 	var blobs32 = [];
-	var data32 = Reflect.field(kha_Shaders,"compositor_pass_vertData" + 0);
+	var data32 = Reflect.field(kha_Shaders,"deferred_light_fragData" + 0);
 	var bytes32 = haxe_Unserializer.run(data32);
 	blobs32.push(kha_internal_BytesBlob.fromBytes(bytes32));
-	kha_Shaders.compositor_pass_vert = new kha_graphics4_VertexShader(blobs32,["compositor_pass.vert.d3d11"]);
+	kha_Shaders.deferred_light_frag = new kha_graphics4_FragmentShader(blobs32,["deferred_light.frag.d3d11"]);
 	var blobs33 = [];
-	var data33 = Reflect.field(kha_Shaders,"deferred_light_fragData" + 0);
+	var data33 = Reflect.field(kha_Shaders,"lambert307SG_mesh_fragData" + 0);
 	var bytes33 = haxe_Unserializer.run(data33);
 	blobs33.push(kha_internal_BytesBlob.fromBytes(bytes33));
-	kha_Shaders.deferred_light_frag = new kha_graphics4_FragmentShader(blobs33,["deferred_light.frag.d3d11"]);
+	kha_Shaders.lambert307SG_mesh_frag = new kha_graphics4_FragmentShader(blobs33,["lambert307SG_mesh.frag.d3d11"]);
 	var blobs34 = [];
-	var data34 = Reflect.field(kha_Shaders,"lambert307SG_mesh_fragData" + 0);
+	var data34 = Reflect.field(kha_Shaders,"lambert312SG_001_mesh_fragData" + 0);
 	var bytes34 = haxe_Unserializer.run(data34);
 	blobs34.push(kha_internal_BytesBlob.fromBytes(bytes34));
-	kha_Shaders.lambert307SG_mesh_frag = new kha_graphics4_FragmentShader(blobs34,["lambert307SG_mesh.frag.d3d11"]);
+	kha_Shaders.lambert312SG_001_mesh_frag = new kha_graphics4_FragmentShader(blobs34,["lambert312SG_001_mesh.frag.d3d11"]);
 	var blobs35 = [];
-	var data35 = Reflect.field(kha_Shaders,"lambert312SG_001_mesh_fragData" + 0);
+	var data35 = Reflect.field(kha_Shaders,"lambert316SG_002_mesh_fragData" + 0);
 	var bytes35 = haxe_Unserializer.run(data35);
 	blobs35.push(kha_internal_BytesBlob.fromBytes(bytes35));
-	kha_Shaders.lambert312SG_001_mesh_frag = new kha_graphics4_FragmentShader(blobs35,["lambert312SG_001_mesh.frag.d3d11"]);
+	kha_Shaders.lambert316SG_002_mesh_frag = new kha_graphics4_FragmentShader(blobs35,["lambert316SG_002_mesh.frag.d3d11"]);
 	var blobs36 = [];
-	var data36 = Reflect.field(kha_Shaders,"lambert316SG_002_mesh_fragData" + 0);
+	var data36 = Reflect.field(kha_Shaders,"lambert316SG_003_mesh_fragData" + 0);
 	var bytes36 = haxe_Unserializer.run(data36);
 	blobs36.push(kha_internal_BytesBlob.fromBytes(bytes36));
-	kha_Shaders.lambert316SG_002_mesh_frag = new kha_graphics4_FragmentShader(blobs36,["lambert316SG_002_mesh.frag.d3d11"]);
+	kha_Shaders.lambert316SG_003_mesh_frag = new kha_graphics4_FragmentShader(blobs36,["lambert316SG_003_mesh.frag.d3d11"]);
 	var blobs37 = [];
-	var data37 = Reflect.field(kha_Shaders,"lambert316SG_003_mesh_fragData" + 0);
+	var data37 = Reflect.field(kha_Shaders,"lambert369SG_002_mesh_fragData" + 0);
 	var bytes37 = haxe_Unserializer.run(data37);
 	blobs37.push(kha_internal_BytesBlob.fromBytes(bytes37));
-	kha_Shaders.lambert316SG_003_mesh_frag = new kha_graphics4_FragmentShader(blobs37,["lambert316SG_003_mesh.frag.d3d11"]);
+	kha_Shaders.lambert369SG_002_mesh_frag = new kha_graphics4_FragmentShader(blobs37,["lambert369SG_002_mesh.frag.d3d11"]);
 	var blobs38 = [];
-	var data38 = Reflect.field(kha_Shaders,"lambert369SG_002_mesh_fragData" + 0);
+	var data38 = Reflect.field(kha_Shaders,"lambert381SG_mesh_fragData" + 0);
 	var bytes38 = haxe_Unserializer.run(data38);
 	blobs38.push(kha_internal_BytesBlob.fromBytes(bytes38));
-	kha_Shaders.lambert369SG_002_mesh_frag = new kha_graphics4_FragmentShader(blobs38,["lambert369SG_002_mesh.frag.d3d11"]);
+	kha_Shaders.lambert381SG_mesh_frag = new kha_graphics4_FragmentShader(blobs38,["lambert381SG_mesh.frag.d3d11"]);
 	var blobs39 = [];
-	var data39 = Reflect.field(kha_Shaders,"lambert381SG_mesh_fragData" + 0);
+	var data39 = Reflect.field(kha_Shaders,"lambert393SG_mesh_fragData" + 0);
 	var bytes39 = haxe_Unserializer.run(data39);
 	blobs39.push(kha_internal_BytesBlob.fromBytes(bytes39));
-	kha_Shaders.lambert381SG_mesh_frag = new kha_graphics4_FragmentShader(blobs39,["lambert381SG_mesh.frag.d3d11"]);
+	kha_Shaders.lambert393SG_mesh_frag = new kha_graphics4_FragmentShader(blobs39,["lambert393SG_mesh.frag.d3d11"]);
 	var blobs40 = [];
-	var data40 = Reflect.field(kha_Shaders,"lambert393SG_mesh_fragData" + 0);
+	var data40 = Reflect.field(kha_Shaders,"lambert402SG_001_mesh_fragData" + 0);
 	var bytes40 = haxe_Unserializer.run(data40);
 	blobs40.push(kha_internal_BytesBlob.fromBytes(bytes40));
-	kha_Shaders.lambert393SG_mesh_frag = new kha_graphics4_FragmentShader(blobs40,["lambert393SG_mesh.frag.d3d11"]);
+	kha_Shaders.lambert402SG_001_mesh_frag = new kha_graphics4_FragmentShader(blobs40,["lambert402SG_001_mesh.frag.d3d11"]);
 	var blobs41 = [];
-	var data41 = Reflect.field(kha_Shaders,"lambert402SG_001_mesh_fragData" + 0);
+	var data41 = Reflect.field(kha_Shaders,"lambert402SG_mesh_fragData" + 0);
 	var bytes41 = haxe_Unserializer.run(data41);
 	blobs41.push(kha_internal_BytesBlob.fromBytes(bytes41));
-	kha_Shaders.lambert402SG_001_mesh_frag = new kha_graphics4_FragmentShader(blobs41,["lambert402SG_001_mesh.frag.d3d11"]);
+	kha_Shaders.lambert402SG_mesh_frag = new kha_graphics4_FragmentShader(blobs41,["lambert402SG_mesh.frag.d3d11"]);
 	var blobs42 = [];
-	var data42 = Reflect.field(kha_Shaders,"lambert402SG_mesh_fragData" + 0);
+	var data42 = Reflect.field(kha_Shaders,"lambert418SG_001_mesh_fragData" + 0);
 	var bytes42 = haxe_Unserializer.run(data42);
 	blobs42.push(kha_internal_BytesBlob.fromBytes(bytes42));
-	kha_Shaders.lambert402SG_mesh_frag = new kha_graphics4_FragmentShader(blobs42,["lambert402SG_mesh.frag.d3d11"]);
+	kha_Shaders.lambert418SG_001_mesh_frag = new kha_graphics4_FragmentShader(blobs42,["lambert418SG_001_mesh.frag.d3d11"]);
 	var blobs43 = [];
-	var data43 = Reflect.field(kha_Shaders,"lambert418SG_001_mesh_fragData" + 0);
+	var data43 = Reflect.field(kha_Shaders,"lambert423SG_001_mesh_fragData" + 0);
 	var bytes43 = haxe_Unserializer.run(data43);
 	blobs43.push(kha_internal_BytesBlob.fromBytes(bytes43));
-	kha_Shaders.lambert418SG_001_mesh_frag = new kha_graphics4_FragmentShader(blobs43,["lambert418SG_001_mesh.frag.d3d11"]);
+	kha_Shaders.lambert423SG_001_mesh_frag = new kha_graphics4_FragmentShader(blobs43,["lambert423SG_001_mesh.frag.d3d11"]);
 	var blobs44 = [];
-	var data44 = Reflect.field(kha_Shaders,"lambert423SG_001_mesh_fragData" + 0);
+	var data44 = Reflect.field(kha_Shaders,"lambert424SG_001_mesh_fragData" + 0);
 	var bytes44 = haxe_Unserializer.run(data44);
 	blobs44.push(kha_internal_BytesBlob.fromBytes(bytes44));
-	kha_Shaders.lambert423SG_001_mesh_frag = new kha_graphics4_FragmentShader(blobs44,["lambert423SG_001_mesh.frag.d3d11"]);
+	kha_Shaders.lambert424SG_001_mesh_frag = new kha_graphics4_FragmentShader(blobs44,["lambert424SG_001_mesh.frag.d3d11"]);
 	var blobs45 = [];
-	var data45 = Reflect.field(kha_Shaders,"lambert424SG_001_mesh_fragData" + 0);
+	var data45 = Reflect.field(kha_Shaders,"lambert424SG_003_mesh_fragData" + 0);
 	var bytes45 = haxe_Unserializer.run(data45);
 	blobs45.push(kha_internal_BytesBlob.fromBytes(bytes45));
-	kha_Shaders.lambert424SG_001_mesh_frag = new kha_graphics4_FragmentShader(blobs45,["lambert424SG_001_mesh.frag.d3d11"]);
+	kha_Shaders.lambert424SG_003_mesh_frag = new kha_graphics4_FragmentShader(blobs45,["lambert424SG_003_mesh.frag.d3d11"]);
 	var blobs46 = [];
-	var data46 = Reflect.field(kha_Shaders,"lambert424SG_003_mesh_fragData" + 0);
+	var data46 = Reflect.field(kha_Shaders,"line_deferred_fragData" + 0);
 	var bytes46 = haxe_Unserializer.run(data46);
 	blobs46.push(kha_internal_BytesBlob.fromBytes(bytes46));
-	kha_Shaders.lambert424SG_003_mesh_frag = new kha_graphics4_FragmentShader(blobs46,["lambert424SG_003_mesh.frag.d3d11"]);
+	kha_Shaders.line_deferred_frag = new kha_graphics4_FragmentShader(blobs46,["line_deferred.frag.d3d11"]);
 	var blobs47 = [];
-	var data47 = Reflect.field(kha_Shaders,"line_deferred_fragData" + 0);
+	var data47 = Reflect.field(kha_Shaders,"line_fragData" + 0);
 	var bytes47 = haxe_Unserializer.run(data47);
 	blobs47.push(kha_internal_BytesBlob.fromBytes(bytes47));
-	kha_Shaders.line_deferred_frag = new kha_graphics4_FragmentShader(blobs47,["line_deferred.frag.d3d11"]);
+	kha_Shaders.line_frag = new kha_graphics4_FragmentShader(blobs47,["line.frag.d3d11"]);
 	var blobs48 = [];
-	var data48 = Reflect.field(kha_Shaders,"line_fragData" + 0);
+	var data48 = Reflect.field(kha_Shaders,"line_vertData" + 0);
 	var bytes48 = haxe_Unserializer.run(data48);
 	blobs48.push(kha_internal_BytesBlob.fromBytes(bytes48));
-	kha_Shaders.line_frag = new kha_graphics4_FragmentShader(blobs48,["line.frag.d3d11"]);
+	kha_Shaders.line_vert = new kha_graphics4_VertexShader(blobs48,["line.vert.d3d11"]);
 	var blobs49 = [];
-	var data49 = Reflect.field(kha_Shaders,"line_vertData" + 0);
+	var data49 = Reflect.field(kha_Shaders,"painter_colored_fragData" + 0);
 	var bytes49 = haxe_Unserializer.run(data49);
 	blobs49.push(kha_internal_BytesBlob.fromBytes(bytes49));
-	kha_Shaders.line_vert = new kha_graphics4_VertexShader(blobs49,["line.vert.d3d11"]);
+	kha_Shaders.painter_colored_frag = new kha_graphics4_FragmentShader(blobs49,["painter-colored.frag.d3d11"]);
 	var blobs50 = [];
-	var data50 = Reflect.field(kha_Shaders,"painter_colored_fragData" + 0);
+	var data50 = Reflect.field(kha_Shaders,"painter_colored_vertData" + 0);
 	var bytes50 = haxe_Unserializer.run(data50);
 	blobs50.push(kha_internal_BytesBlob.fromBytes(bytes50));
-	kha_Shaders.painter_colored_frag = new kha_graphics4_FragmentShader(blobs50,["painter-colored.frag.d3d11"]);
+	kha_Shaders.painter_colored_vert = new kha_graphics4_VertexShader(blobs50,["painter-colored.vert.d3d11"]);
 	var blobs51 = [];
-	var data51 = Reflect.field(kha_Shaders,"painter_colored_vertData" + 0);
+	var data51 = Reflect.field(kha_Shaders,"painter_image_fragData" + 0);
 	var bytes51 = haxe_Unserializer.run(data51);
 	blobs51.push(kha_internal_BytesBlob.fromBytes(bytes51));
-	kha_Shaders.painter_colored_vert = new kha_graphics4_VertexShader(blobs51,["painter-colored.vert.d3d11"]);
+	kha_Shaders.painter_image_frag = new kha_graphics4_FragmentShader(blobs51,["painter-image.frag.d3d11"]);
 	var blobs52 = [];
-	var data52 = Reflect.field(kha_Shaders,"painter_image_fragData" + 0);
+	var data52 = Reflect.field(kha_Shaders,"painter_image_vertData" + 0);
 	var bytes52 = haxe_Unserializer.run(data52);
 	blobs52.push(kha_internal_BytesBlob.fromBytes(bytes52));
-	kha_Shaders.painter_image_frag = new kha_graphics4_FragmentShader(blobs52,["painter-image.frag.d3d11"]);
+	kha_Shaders.painter_image_vert = new kha_graphics4_VertexShader(blobs52,["painter-image.vert.d3d11"]);
 	var blobs53 = [];
-	var data53 = Reflect.field(kha_Shaders,"painter_image_vertData" + 0);
+	var data53 = Reflect.field(kha_Shaders,"painter_text_fragData" + 0);
 	var bytes53 = haxe_Unserializer.run(data53);
 	blobs53.push(kha_internal_BytesBlob.fromBytes(bytes53));
-	kha_Shaders.painter_image_vert = new kha_graphics4_VertexShader(blobs53,["painter-image.vert.d3d11"]);
+	kha_Shaders.painter_text_frag = new kha_graphics4_FragmentShader(blobs53,["painter-text.frag.d3d11"]);
 	var blobs54 = [];
-	var data54 = Reflect.field(kha_Shaders,"painter_text_fragData" + 0);
+	var data54 = Reflect.field(kha_Shaders,"painter_text_vertData" + 0);
 	var bytes54 = haxe_Unserializer.run(data54);
 	blobs54.push(kha_internal_BytesBlob.fromBytes(bytes54));
-	kha_Shaders.painter_text_frag = new kha_graphics4_FragmentShader(blobs54,["painter-text.frag.d3d11"]);
+	kha_Shaders.painter_text_vert = new kha_graphics4_VertexShader(blobs54,["painter-text.vert.d3d11"]);
 	var blobs55 = [];
-	var data55 = Reflect.field(kha_Shaders,"painter_text_vertData" + 0);
+	var data55 = Reflect.field(kha_Shaders,"painter_video_fragData" + 0);
 	var bytes55 = haxe_Unserializer.run(data55);
 	blobs55.push(kha_internal_BytesBlob.fromBytes(bytes55));
-	kha_Shaders.painter_text_vert = new kha_graphics4_VertexShader(blobs55,["painter-text.vert.d3d11"]);
+	kha_Shaders.painter_video_frag = new kha_graphics4_FragmentShader(blobs55,["painter-video.frag.d3d11"]);
 	var blobs56 = [];
-	var data56 = Reflect.field(kha_Shaders,"painter_video_fragData" + 0);
+	var data56 = Reflect.field(kha_Shaders,"painter_video_vertData" + 0);
 	var bytes56 = haxe_Unserializer.run(data56);
 	blobs56.push(kha_internal_BytesBlob.fromBytes(bytes56));
-	kha_Shaders.painter_video_frag = new kha_graphics4_FragmentShader(blobs56,["painter-video.frag.d3d11"]);
+	kha_Shaders.painter_video_vert = new kha_graphics4_VertexShader(blobs56,["painter-video.vert.d3d11"]);
 	var blobs57 = [];
-	var data57 = Reflect.field(kha_Shaders,"painter_video_vertData" + 0);
+	var data57 = Reflect.field(kha_Shaders,"pass_vertData" + 0);
 	var bytes57 = haxe_Unserializer.run(data57);
 	blobs57.push(kha_internal_BytesBlob.fromBytes(bytes57));
-	kha_Shaders.painter_video_vert = new kha_graphics4_VertexShader(blobs57,["painter-video.vert.d3d11"]);
+	kha_Shaders.pass_vert = new kha_graphics4_VertexShader(blobs57,["pass.vert.d3d11"]);
 	var blobs58 = [];
-	var data58 = Reflect.field(kha_Shaders,"pass_vertData" + 0);
+	var data58 = Reflect.field(kha_Shaders,"pass_viewray_vertData" + 0);
 	var bytes58 = haxe_Unserializer.run(data58);
 	blobs58.push(kha_internal_BytesBlob.fromBytes(bytes58));
-	kha_Shaders.pass_vert = new kha_graphics4_VertexShader(blobs58,["pass.vert.d3d11"]);
+	kha_Shaders.pass_viewray_vert = new kha_graphics4_VertexShader(blobs58,["pass_viewray.vert.d3d11"]);
 	var blobs59 = [];
-	var data59 = Reflect.field(kha_Shaders,"pass_viewray_vertData" + 0);
+	var data59 = Reflect.field(kha_Shaders,"smaa_blend_weight_fragData" + 0);
 	var bytes59 = haxe_Unserializer.run(data59);
 	blobs59.push(kha_internal_BytesBlob.fromBytes(bytes59));
-	kha_Shaders.pass_viewray_vert = new kha_graphics4_VertexShader(blobs59,["pass_viewray.vert.d3d11"]);
+	kha_Shaders.smaa_blend_weight_frag = new kha_graphics4_FragmentShader(blobs59,["smaa_blend_weight.frag.d3d11"]);
 	var blobs60 = [];
-	var data60 = Reflect.field(kha_Shaders,"smaa_blend_weight_fragData" + 0);
+	var data60 = Reflect.field(kha_Shaders,"smaa_blend_weight_vertData" + 0);
 	var bytes60 = haxe_Unserializer.run(data60);
 	blobs60.push(kha_internal_BytesBlob.fromBytes(bytes60));
-	kha_Shaders.smaa_blend_weight_frag = new kha_graphics4_FragmentShader(blobs60,["smaa_blend_weight.frag.d3d11"]);
+	kha_Shaders.smaa_blend_weight_vert = new kha_graphics4_VertexShader(blobs60,["smaa_blend_weight.vert.d3d11"]);
 	var blobs61 = [];
-	var data61 = Reflect.field(kha_Shaders,"smaa_blend_weight_vertData" + 0);
+	var data61 = Reflect.field(kha_Shaders,"smaa_edge_detect_fragData" + 0);
 	var bytes61 = haxe_Unserializer.run(data61);
 	blobs61.push(kha_internal_BytesBlob.fromBytes(bytes61));
-	kha_Shaders.smaa_blend_weight_vert = new kha_graphics4_VertexShader(blobs61,["smaa_blend_weight.vert.d3d11"]);
+	kha_Shaders.smaa_edge_detect_frag = new kha_graphics4_FragmentShader(blobs61,["smaa_edge_detect.frag.d3d11"]);
 	var blobs62 = [];
-	var data62 = Reflect.field(kha_Shaders,"smaa_edge_detect_fragData" + 0);
+	var data62 = Reflect.field(kha_Shaders,"smaa_edge_detect_vertData" + 0);
 	var bytes62 = haxe_Unserializer.run(data62);
 	blobs62.push(kha_internal_BytesBlob.fromBytes(bytes62));
-	kha_Shaders.smaa_edge_detect_frag = new kha_graphics4_FragmentShader(blobs62,["smaa_edge_detect.frag.d3d11"]);
+	kha_Shaders.smaa_edge_detect_vert = new kha_graphics4_VertexShader(blobs62,["smaa_edge_detect.vert.d3d11"]);
 	var blobs63 = [];
-	var data63 = Reflect.field(kha_Shaders,"smaa_edge_detect_vertData" + 0);
+	var data63 = Reflect.field(kha_Shaders,"smaa_neighborhood_blend_fragData" + 0);
 	var bytes63 = haxe_Unserializer.run(data63);
 	blobs63.push(kha_internal_BytesBlob.fromBytes(bytes63));
-	kha_Shaders.smaa_edge_detect_vert = new kha_graphics4_VertexShader(blobs63,["smaa_edge_detect.vert.d3d11"]);
+	kha_Shaders.smaa_neighborhood_blend_frag = new kha_graphics4_FragmentShader(blobs63,["smaa_neighborhood_blend.frag.d3d11"]);
 	var blobs64 = [];
-	var data64 = Reflect.field(kha_Shaders,"smaa_neighborhood_blend_fragData" + 0);
+	var data64 = Reflect.field(kha_Shaders,"smaa_neighborhood_blend_vertData" + 0);
 	var bytes64 = haxe_Unserializer.run(data64);
 	blobs64.push(kha_internal_BytesBlob.fromBytes(bytes64));
-	kha_Shaders.smaa_neighborhood_blend_frag = new kha_graphics4_FragmentShader(blobs64,["smaa_neighborhood_blend.frag.d3d11"]);
+	kha_Shaders.smaa_neighborhood_blend_vert = new kha_graphics4_VertexShader(blobs64,["smaa_neighborhood_blend.vert.d3d11"]);
 	var blobs65 = [];
-	var data65 = Reflect.field(kha_Shaders,"smaa_neighborhood_blend_vertData" + 0);
+	var data65 = Reflect.field(kha_Shaders,"ssao_pass_fragData" + 0);
 	var bytes65 = haxe_Unserializer.run(data65);
 	blobs65.push(kha_internal_BytesBlob.fromBytes(bytes65));
-	kha_Shaders.smaa_neighborhood_blend_vert = new kha_graphics4_VertexShader(blobs65,["smaa_neighborhood_blend.vert.d3d11"]);
+	kha_Shaders.ssao_pass_frag = new kha_graphics4_FragmentShader(blobs65,["ssao_pass.frag.d3d11"]);
 	var blobs66 = [];
-	var data66 = Reflect.field(kha_Shaders,"ssao_pass_fragData" + 0);
+	var data66 = Reflect.field(kha_Shaders,"translucent_resolve_fragData" + 0);
 	var bytes66 = haxe_Unserializer.run(data66);
 	blobs66.push(kha_internal_BytesBlob.fromBytes(bytes66));
-	kha_Shaders.ssao_pass_frag = new kha_graphics4_FragmentShader(blobs66,["ssao_pass.frag.d3d11"]);
+	kha_Shaders.translucent_resolve_frag = new kha_graphics4_FragmentShader(blobs66,["translucent_resolve.frag.d3d11"]);
 	var blobs67 = [];
-	var data67 = Reflect.field(kha_Shaders,"translucent_resolve_fragData" + 0);
+	var data67 = Reflect.field(kha_Shaders,"world_pass_fragData" + 0);
 	var bytes67 = haxe_Unserializer.run(data67);
 	blobs67.push(kha_internal_BytesBlob.fromBytes(bytes67));
-	kha_Shaders.translucent_resolve_frag = new kha_graphics4_FragmentShader(blobs67,["translucent_resolve.frag.d3d11"]);
+	kha_Shaders.world_pass_frag = new kha_graphics4_FragmentShader(blobs67,["world_pass.frag.d3d11"]);
 	var blobs68 = [];
-	var data68 = Reflect.field(kha_Shaders,"world_pass_fragData" + 0);
+	var data68 = Reflect.field(kha_Shaders,"world_pass_vertData" + 0);
 	var bytes68 = haxe_Unserializer.run(data68);
 	blobs68.push(kha_internal_BytesBlob.fromBytes(bytes68));
-	kha_Shaders.world_pass_frag = new kha_graphics4_FragmentShader(blobs68,["world_pass.frag.d3d11"]);
-	var blobs69 = [];
-	var data69 = Reflect.field(kha_Shaders,"world_pass_vertData" + 0);
-	var bytes69 = haxe_Unserializer.run(data69);
-	blobs69.push(kha_internal_BytesBlob.fromBytes(bytes69));
-	kha_Shaders.world_pass_vert = new kha_graphics4_VertexShader(blobs69,["world_pass.vert.d3d11"]);
+	kha_Shaders.world_pass_vert = new kha_graphics4_VertexShader(blobs68,["world_pass.vert.d3d11"]);
 };
 var kha_Sound = function() {
 	this.sampleRate = 0;
@@ -35835,7 +35835,6 @@ iron_Scene.framePassed = true;
 iron_system_Time.scale = 1.0;
 iron_system_Time.last = 0.0;
 iron_system_Time.realDelta = 0.0;
-iron_system_Time.frequency = 60;
 armory_trait_internal_Bridge.App = iron_App;
 armory_trait_internal_Bridge.Scene = iron_Scene;
 armory_trait_internal_Bridge.Time = iron_system_Time;
@@ -36004,7 +36003,6 @@ kha_Shaders.Material_002_mesh_fragData0 = "s1204:AAAARFhCQ096uEAtX:1yPzJNZMD4pwE
 kha_Shaders.Material_002_translucent_fragData0 = "s4683:AAEkR2xvYmFscwAABnNoaXJyAAAAAABwAAAABAFiYWNrZ3JvdW5kQ29sAHAAAAAMAAAAAwFlbnZtYXBTdHJlbmd0aAB8AAAABAAAAAEBc3VuRGlyAIAAAAAMAAAAAwFzdW5Db2wAkAAAAAwAAAADAXJlY2VpdmVTaGFkb3cAnAAAAAQAAAABAURYQkMEMm29EsCEuLema6pI5FkbAQAAADANAAAFAAAANAAAANgBAABIAgAAlAIAALQMAABSREVGnAEAAAEAAABIAAAAAQAAABwAAAAABP::AAEAAHQBAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAACRHbG9iYWxzAKurqzwAAAAGAAAAYAAAAKAAAAAAAAAAAAAAAPAAAAAAAAAAcAAAAAIAAAD4AAAAAAAAAAgBAABwAAAADAAAAAIAAAAYAQAAAAAAACgBAAB8AAAABAAAAAIAAAA4AQAAAAAAAEgBAACAAAAADAAAAAIAAAAYAQAAAAAAAE8BAACQAAAADAAAAAIAAAAYAQAAAAAAAFYBAACcAAAABAAAAAAAAABkAQAAAAAAAHNoaXJyAKurAQADAAEABAAHAAAAAAAAAGJhY2tncm91bmRDb2wAq6sBAAMAAQADAAAAAAAAAAAAZW52bWFwU3RyZW5ndGgAqwAAAwABAAEAAAAAAAAAAABzdW5EaXIAc3VuQ29sAHJlY2VpdmVTaGFkb3cAAAABAAEAAQAAAAAAAAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOaAAAAAMAAAAIAAAAUAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAUAAAAAEAAAAAAAAAAwAAAAEAAAAHBwAAWQAAAAAAAAABAAAAAwAAAAIAAAAPBAAAVEVYQ09PUkQAU1ZfUG9zaXRpb24Aq6urT1NHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAADwAAADgAAAABAAAAAAAAAAMAAAABAAAADwAAAFNWX1RhcmdldACrq1NIRFIYCgAAQAAAAIYCAABZAAAERo4gAAAAAAAKAAAAYhAAA3IQEAAAAAAAYhAAA3IQEAABAAAAZCAABEIQEAACAAAAAQAAAGUAAAPyIBAAAAAAAGUAAAPyIBAAAQAAAGgAAAIEAAAANgAABjIAEAAAAAAA5oogAAAAAAAEAAAANgAABkIAEAAAAAAACoAgAAAAAAAFAAAAOAAAC3IAEAABAAAARoIgAAAAAAAGAAAAAkAAAIar2z6Gq9s%hqvbPgAAAAAQAAAHggAQAAAAAABGEhAAAQAAAEYSEAABAAAARAAABYIAEAAAAAAAOgAQAAAAAAA4AAAHcgAQAAIAAAD2DxAAAAAAAEYSEAABAAAAOAAABzIAEAADAAAAJgoQAAIAAAAmChAAAgAAADgAAAfiABAAAwAAAAYJEAAAAAAAVgUQAAMAAAAyAAAKggAQAAAAAAAaABAAAgAAABoAEAACAAAACgAQgEEAAAADAAAAOAAACnIAEAADAAAAlgcQAAMAAAACQAAAcT0%P3E9Pj9xPT4:AAAAADIAAAlyABAAAQAAAEYCEAABAAAA9g8QAAAAAABGAhAAAwAAADIAAA1yABAAAQAAAEaCIAAAAAAAAAAAAAJAAADG32I:xt9iP8bfYj8AAAAARgIQAAEAAAAyAAANcgAQAAAAAABGAhCAQQAAAAAAAAACQAAAKqd9PiqnfT4qp30%AAAAAEYCEAABAAAAOAAACHIAEAABAAAAVgUQAAIAAABGgiAAAAAAAAMAAAA4AAAKcgAQAAEAAABGAhAAAQAAAAJAAACGq1s:hqtbP4arWz8AAAAAMgAACnIAEAAAAAAARgIQAAEAAACmChCAQQAAAAIAAABGAhAAAAAAADgAAAhyABAAAQAAAFYFEAACAAAAlocgAAAAAAAFAAAAOAAAB3IAEAABAAAABgAQAAIAAABGAhAAAQAAADIAAAxyABAAAAAAAEYCEAABAAAAAkAAAIarWz%Gq1s:hqtbPwAAAABGAhAAAAAAADgAAAkSABAAAQAAACoAEIBBAAAAAgAAADqAIAAAAAAAAwAAADgAAAliABAAAQAAAKYKEIBBAAAAAgAAAAaBIAAAAAAABAAAADgAAAdyABAAAQAAAAYAEAACAAAARgIQAAEAAAAyAAAMcgAQAAAAAABGAhAAAQAAAAJAAACGq1s:hqtbP4arWz8AAAAARgIQAAAAAAA4AAAIcgAQAAEAAABWBRAAAgAAAJaHIAAAAAAAAgAAADIAAAxyABAAAAAAAEYCEAABAAAAAkAAAGn8gj9p:II:afyCPwAAAABGAhAAAAAAADgAAAkSABAAAQAAACoAEIBBAAAAAgAAADqAIAAAAAAAAAAAADgAAAliABAAAQAAAKYKEIBBAAAAAgAAAAaBIAAAAAAAAQAAADIAAAxyABAAAAAAAEYCEAABAAAAAkAAAGn8gj9p:II:afyCPwAAAABGAhAAAAAAADgAAAgyABAAAQAAAAYAEAACAAAA5oogAAAAAAABAAAAOAAACEIAEAABAAAACgAQAAIAAAAKgCAAAAAAAAIAAAAyAAAMcgAQAAAAAABGAhAAAQAAAAJAAABp:II:afyCP2n8gj8AAAAARgIQAAAAAAA4AAALcgAQAAEAAABGgiAAAAAAAAcAAAACQAAACtcjPQrXIz0K1yM9AAAAADIAAAxyABAAAAAAAEYCEAAAAAAAAkAAAM3MTD:NzEw:zcxMPwAAAABGAhAAAQAAADgAAAhyABAAAAAAAEYCEAAAAAAA9o8gAAAAAAAHAAAAEAAAB4IAEAAAAAAARhIQAAAAAABGEhAAAAAAAEQAAAWCABAAAAAAADoAEAAAAAAAOAAAB3IAEAABAAAA9g8QAAAAAABGEhAAAAAAADIAAApyABAAAwAAAEYSEAAAAAAA9g8QAAAAAABGgiAAAAAAAAgAAAAQAAAHggAQAAAAAABGAhAAAgAAAEYCEAABAAAANAAAB4IAEAAAAAAAOgAQAAAAAAABQAAAAAAAADIAAAmCABAAAAAAADoAEAAAAAAAAUAAAGmMaj8BQAAAtpyrPRAAAAiCABAAAQAAAEYCEAACAAAARoIgAAAAAAAIAAAAMgAACYIAEAACAAAAOgAQAAEAAAABQAAAaYxqPwFAAAC2nKs9NAAAB4IAEAABAAAAOgAQAAEAAAABQAAAAAAAADgAAAeCABAAAAAAADoAEAAAAAAAOgAQAAIAAAAOAAAKggAQAAAAAAACQAAAAACAPwAAgD8AAIA:AACAPzoAEAAAAAAANiAABYIAEAAAAAAAOgAQAAAAAAAQAAAHggAQAAIAAABGAhAAAwAAAEYCEAADAAAARAAABYIAEAACAAAAOgAQAAIAAAA4AAAHcgAQAAMAAAD2DxAAAgAAAEYCEAADAAAAEAAABxIAEAACAAAARgIQAAIAAABGAhAAAwAAABAAAAcSABAAAQAAAEYCEAABAAAARgIQAAMAAAA4AAAHIgAQAAEAAAAKABAAAgAAAAoAEAACAAAAMgAACSIAEAABAAAAGgAQAAEAAAABQAAA1TN%vwFAAAAAAIA:OAAAByIAEAABAAAAGgAQAAEAAAAaABAAAQAAAA4AAAciABAAAQAAAAFAAADVeRI7GgAQAAEAAAA4AAAHggAQAAAAAAA6ABAAAAAAABoAEAABAAAAMgAACSIAEAABAAAACgAQAAEAAAABQAAAWcCxwAFAAAAMdt:AOAAABxIAEAABAAAACgAQAAEAAAAaABAAAQAAABkAAAUSABAAAQAAAAoAEAABAAAAMgAACRIAEAABAAAACgAQAAEAAAABQAAAj8J1PwFAAAAK1yM9OAAAB4IAEAAAAAAAOgAQAAAAAAAKABAAAQAAADgAAAryABAAAAAAAEYOEAAAAAAAAkAAAAAAAD8AAAA:AAAAPwAAgD4yAAAJggAQAAAAAAA6ABAAAQAAAAFAAADNzEw:OgAQAAAAAAAyAAAKcgAQAAAAAAD2DxAAAAAAAEaCIAAAAAAACQAAAEYCEAAAAAAAMgAACoIAEAAAAAAAKhAQgEEAAAACAAAAAUAAAGZmZj8BQAAAAACAPzgAAAcSABAAAQAAADoAEAAAAAAAOgAQAAAAAAA4AAAHggAQAAAAAAA6ABAAAAAAAAoAEAABAAAAOAAACvIAEAAAAAAARg4QAAAAAAACQAAAVFYqP1RWKj9UVio:qoPETDQAAAeCABAAAAAAADoAEAAAAAAAAUAAAArXIzwzAAAHggAQAAAAAAA6ABAAAAAAAAFAAAAAgDtFOAAAB3IgEAAAAAAA9g8QAAAAAABGAhAAAAAAADgAAAcSIBAAAQAAADoAEAAAAAAAAUAAAFRWKj82AAAFgiAQAAAAAAABQAAAVFYqPzYAAAjiIBAAAQAAAAJAAAAAAAAAAAAAAAAAAAAAAIA:PgAAAVNUQVR0AAAATAAAAAQAAAAAAAAABQAAAEYAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.Material_002_translucent_vertData0 = "s1919:Am5vcgAAcG9zAAEBJEdsb2JhbHMAAARXAAAAAABAAAAABAROAEAAAAAsAAAAAwNXVlAAcAAAAEAAAAAEBGV5ZQCwAAAADAAAAAMBRFhCQ3RrbqDP61YYZ9ifdrRlyK4BAAAAVAUAAAUAAAA0AAAAZAEAALABAAAgAgAA2AQAAFJERUYoAQAAAQAAAEgAAAABAAAAHAAAAAAE:v8AAQAAAAEAADwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAJEdsb2JhbHMAq6urPAAAAAQAAABgAAAAwAAAAAAAAAAAAAAAwAAAAAAAAABAAAAAAgAAAMQAAAAAAAAA1AAAAEAAAAAsAAAAAgAAANgAAAAAAAAA6AAAAHAAAABAAAAAAgAAAMQAAAAAAAAA7AAAALAAAAAMAAAAAgAAAPAAAAAAAAAAVwCrqwMAAwAEAAQAAAAAAAAAAABOAKurAwADAAMAAwAAAAAAAAAAAFdWUABleWUAAQADAAEAAwAAAAAAAAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAADAwAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPDwAAVEVYQ09PUkQAq6urT1NHTmgAAAADAAAACAAAAFAAAAAAAAAAAAAAAAMAAAAAAAAABwgAAFAAAAABAAAAAAAAAAMAAAABAAAABwgAAFkAAAAAAAAAAQAAAAMAAAACAAAADwAAAFRFWENPT1JEAFNWX1Bvc2l0aW9uAKurq1NIRFKwAgAAQAABAKwAAABZAAAERo4gAAAAAAAMAAAAXwAAAzIQEAAAAAAAXwAAA:IQEAABAAAAZQAAA3IgEAAAAAAAZQAAA3IgEAABAAAAZwAABPIgEAACAAAAAQAAAGgAAAIDAAAANgAABXIAEAAAAAAARhIQAAEAAAA2AAAFggAQAAAAAAABQAAAAACAPxEAAAgSABAAAQAAAEYOEAAAAAAARo4gAAAAAAAAAAAAEQAACCIAEAABAAAARg4QAAAAAABGjiAAAAAAAAEAAAARAAAIQgAQAAEAAABGDhAAAAAAAEaOIAAAAAAAAgAAAAAAAAlyIBAAAAAAAEYCEIBBAAAAAQAAAEaCIAAAAAAACwAAADYAAAUyABAAAQAAAEYQEAAAAAAANgAABUIAEAABAAAAOhAQAAEAAAAQAAAIEgAQAAIAAABGAhAAAQAAAEaCIAAAAAAABAAAABAAAAgiABAAAgAAAEYCEAABAAAARoIgAAAAAAAFAAAAEAAACEIAEAACAAAARgIQAAEAAABGgiAAAAAAAAYAAAAQAAAHEgAQAAEAAABGAhAAAgAAAEYCEAACAAAARAAABRIAEAABAAAACgAQAAEAAAA4AAAHciAQAAEAAAAGABAAAQAAAEYCEAACAAAAEQAACBIAEAABAAAARg4QAAAAAABGjiAAAAAAAAkAAAARAAAIIgAQAAEAAABGDhAAAAAAAEaOIAAAAAAACgAAAAAAAAcSABAAAQAAABoAEAABAAAACgAQAAEAAAA2AAAFgiAQAAIAAAAaABAAAQAAADgAAAdCIBAAAgAAAAoAEAABAAAAAUAAAAAAAD8RAAAIEiAQAAIAAABGDhAAAAAAAEaOIAAAAAAABwAAABEAAAgiIBAAAgAAAEYOEAAAAAAARo4gAAAAAAAIAAAAPgAAAVNUQVR0AAAAFgAAAAMAAAAAAAAABQAAABAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.Material_003_mesh_fragData0 = "s1188:AAAARFhCQxD41:xYoJkPAF9to5HLRIwBAAAAeAMAAAUAAAA0AAAAgAAAALQAAAAAAQAA:AIAAFJERUZEAAAAAAAAAAAAAAAAAAAAHAAAAAAE::8AAQAAHAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAVEVYQ09PUkQAq6urT1NHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAADwAAADgAAAABAAAAAAAAAAMAAAABAAAADwAAAFNWX1RhcmdldACrq1NIRFL0AQAAQAAAAH0AAABiEAADchAQAAAAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAAAAAAARhIQAAAAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAAAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwDxfz02AAAI8iAQAAEAAAACQAAARbddPkW3XT5Ft10%cf1:Qz4AAAFTVEFUdAAAAA4AAAADAAAAAAAAAAMAAAAJAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-kha_Shaders.Material_006_mesh_fragData0 = "s1188:AAAARFhCQxYYbybNc%G4xtPPKcV8jJsBAAAAeAMAAAUAAAA0AAAAgAAAALQAAAAAAQAA:AIAAFJERUZEAAAAAAAAAAAAAAAAAAAAHAAAAAAE::8AAQAAHAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAVEVYQ09PUkQAq6urT1NHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAADwAAADgAAAABAAAAAAAAAAMAAAABAAAADwAAAFNWX1RhcmdldACrq1NIRFL0AQAAQAAAAH0AAABiEAADchAQAAAAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAAAAAAARhIQAAAAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAAAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAAAAPwAAAAA2AAAI8iAQAAEAAAACQAAAAAAAAAAAAAAAAAAAAAB:Qz4AAAFTVEFUdAAAAA4AAAADAAAAAAAAAAMAAAAJAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.Material_mesh_fragData0 = "s1188:AAAARFhCQ5Byg7OWhiGgGqhyx6E20roBAAAAeAMAAAUAAAA0AAAAgAAAALQAAAAAAQAA:AIAAFJERUZEAAAAAAAAAAAAAAAAAAAAHAAAAAAE::8AAQAAHAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAVEVYQ09PUkQAq6urT1NHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAADwAAADgAAAABAAAAAAAAAAMAAAABAAAADwAAAFNWX1RhcmdldACrq1NIRFL0AQAAQAAAAH0AAABiEAADchAQAAAAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAAAAAAARhIQAAAAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAAAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAzczMPgAAAAA2AAAI8iAQAAEAAAACQAAAzcxMP83MTD:NzEw:AIB:Qz4AAAFTVEFUdAAAAA4AAAADAAAAAAAAAAMAAAAJAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.Metal_PBS_002_mesh_fragData0 = "s1188:AAAARFhCQzzmWPDQajcTcM89zCV4zhwBAAAAeAMAAAUAAAA0AAAAgAAAALQAAAAAAQAA:AIAAFJERUZEAAAAAAAAAAAAAAAAAAAAHAAAAAAE::8AAQAAHAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAVEVYQ09PUkQAq6urT1NHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAADwAAADgAAAABAAAAAAAAAAMAAAABAAAADwAAAFNWX1RhcmdldACrq1NIRFL0AQAAQAAAAH0AAABiEAADchAQAAAAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAAAAAAARhIQAAAAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAAAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAA8MeaPQDxfz02AAAI8iAQAAEAAAACQAAAAACAPwAAgD8AAIA:cf1:Qz4AAAFTVEFUdAAAAA4AAAADAAAAAAAAAAMAAAAJAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.Platte_001_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";

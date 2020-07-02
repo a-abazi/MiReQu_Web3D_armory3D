@@ -16,6 +16,8 @@ import iron.math.Vec4;
 import iron.math.Mat4;
 import iron.math.RayCaster;
 
+import armory.system.Event;
+
 //TODO: let it add a trait to the waveplate 
 //TODO: Bug with the "XZ plane", does not despawn sometimes
 
@@ -55,7 +57,7 @@ class RSP1D_Base extends iron.Trait {
 		if (ringAngle == null) ringAngle = 0;
 		
 		var mCR = object.transform.world;
-		var mCW = object.getChild("C_wph").transform.world;
+		var mCW = object.getChild("C_wph_RSP1D_Base").transform.world;
 
 		ring = spawnObject(ringName,false);
 		ring.transform.setMatrix(mCR);
@@ -72,12 +74,13 @@ class RSP1D_Base extends iron.Trait {
 		rbSync(wph);
 
 		
+		// Event added with object id as a mask, the postholder trait UPH2_Base will send this event to its componente object when moved
+		Event.add("updateParts",updateParts,object.uid);
 
 	}
 	
 			
 	function onUpdate(){
-		updateParts();
 
 		var mouse = Input.getMouse();
 		var keyboard = Input.getKeyboard();
@@ -148,7 +151,7 @@ class RSP1D_Base extends iron.Trait {
 		allPropsToVariables(object);
 
 		var mCR = object.transform.world;
-		var mCW = object.getChild("C_wph").transform.world;
+		var mCW = object.getChild("C_wph_RSP1D_Base").transform.world;
 
 		ring.transform.setMatrix(mCR);
 		ring.transform.scale = scale;
@@ -159,6 +162,8 @@ class RSP1D_Base extends iron.Trait {
 		wph.transform.scale = scale;
 		wph.transform.rotate(ring.transform.look().normalize(), ringAngle);
 		rbSync(wph);
+
+		Event.send("Calc_Beams"); // Event of the scene trait calc beams, makes a new calculation of the Beams
 	}
 	
 	function spawnObject(objectName: String, visible: Bool):Object {

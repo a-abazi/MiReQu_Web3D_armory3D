@@ -26,9 +26,7 @@ import iron.math.RayCaster;
 // TODO: multiple platten
 // TODO: COnnection to object
 // TODO: Collisions!!!
-// TODO: (When Dynamic Meshes): Strech the post to get variables heights 
-// TODO: Communicate UpdateParts to save performance, right now all components update their parts "onUpdate" of Frame
-// TODO: Add Spawner
+// TODO: Add Spawner ?
 // TODO: fix translation of screws, now 
 
 
@@ -142,7 +140,7 @@ class LDM56_Base extends iron.Trait {
 		baseY = plate.getChildren()[1].transform.world.getLoc().sub(zero);
 
 		// set the object to correct z stage and to the baseAngle Value(outcommented)
-		object.transform.translate(0,0,zero.z -  object.getChild("C_Platte_BA2").transform.world.getLoc().z);
+		object.transform.translate(0,0,zero.z -  object.getChild("C_Platte_BA2_LDM56_Base").transform.world.getLoc().z);
 		object.transform.rot.fromAxisAngle(object.transform.up().normalize(), baseAngle);
 		object.transform.buildMatrix();
 		rbSync(object);
@@ -150,7 +148,7 @@ class LDM56_Base extends iron.Trait {
 
 		//spawn the screws and setup location
 		mScrewF = spawnObject(mScrewName,false);
-		var mST = object.getChild("C_mScrew_Front").transform.world;
+		var mST = object.getChild("C_mScrew_Front_LDM56_Base").transform.world;
 		mScrewF.transform.setMatrix(mST);
 		mScrewF.transform.scale = nScale;
 		mScrewF.visible = visib;
@@ -168,7 +166,7 @@ class LDM56_Base extends iron.Trait {
 
 		//spawn the second screw and setup location
 		mScrewB = spawnObject(mScrewName,false);
-		var mST = object.getChild("C_mScrew_Back").transform.world;
+		var mST = object.getChild("C_mScrew_Back_LDM56_Base").transform.world;
 		mScrewB.transform.setMatrix(mST);
 		mScrewB.transform.scale = nScale;
 		mScrewB.visible = visib;
@@ -177,7 +175,7 @@ class LDM56_Base extends iron.Trait {
 
 		// spawn "Top" on the base, corrVTop is the correction vector concerning the location
 		topL = spawnObject(topName,false);
-		var mT = object.getChild("C_UPH_Left").transform.world;
+		var mT = object.getChild("C_UPH_Left_LDM56_Base").transform.world;
 		topL.transform.setMatrix(mT);
 		topL.transform.scale = nScale;
 		rbSync(topL);
@@ -187,7 +185,7 @@ class LDM56_Base extends iron.Trait {
 		rbSync(topL);
 		// spawn "Top" Right counterpart
 		topR = spawnObject(topName,false);
-		var mT = object.getChild("C_UPH_Right").transform.world;
+		var mT = object.getChild("C_UPH_Right_LDM56_Base").transform.world;
 		topR.transform.setMatrix(mT);
 		topR.transform.scale = nScale;
 		rbSync(topR);
@@ -247,8 +245,8 @@ class LDM56_Base extends iron.Trait {
 		postTravelDist = Math.abs(postPosLim) + Math.abs(postNegLim);
 		// limits for basetravel
 		// Important!! C_screw_Pos is not static and is moved around, these limits are only valid initially TODO: fix it
-		basePosLim = (object.getChild("C_mScrew_Front").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimPos").transform.world.getLoc()));
-		baseNegLim = (object.getChild("C_mScrew_Front").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimNeg").transform.world.getLoc())); // the Float value results from the base
+		basePosLim = (object.getChild("C_mScrew_Front_LDM56_Base").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimPos_LDM56_Base").transform.world.getLoc()));
+		baseNegLim = (object.getChild("C_mScrew_Front_LDM56_Base").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimNeg_LDM56_Base").transform.world.getLoc())); // the Float value results from the base
 		baseTravelDist = Math.abs(basePosLim) + Math.abs(baseNegLim);
 
 		// check if supplied postDist is within limits
@@ -271,7 +269,7 @@ class LDM56_Base extends iron.Trait {
 		laser.transform.setMatrix(mL);
 		laser.transform.scale = nScale;
 		rbSync(laser);		
-		corrLaser = new Vec4().setFrom(laser.getChild("C_Post_Left").transform.world.getLoc()).sub(laser.transform.loc);
+		corrLaser = new Vec4().setFrom(laser.getChild("C_Post_Left_LDM56_Laser").transform.world.getLoc()).sub(laser.transform.loc);
 		laser.transform.loc.sub(corrLaser);
 		laser.visible = visib;
 		rbSync(laser);
@@ -377,12 +375,9 @@ class LDM56_Base extends iron.Trait {
 				}
 				var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 				if (newHitVec!= null ) {
-					//var dirVecNew = new Vec4().setFrom(newHitVec).sub(object.getChild("C_Screw_Pos").transform.world.getLoc());
-					//var newAngle = Math.atan2(dirVecNew.y,dirVecNew.x)-Math.atan2(1,0);
-					//rotBaseTo(newAngle);
 					
-					var distold = object.getChild("C_mScrew_Front").transform.world.getLoc().sub(hitVec).length();
-					var distnew = object.getChild("C_mScrew_Front").transform.world.getLoc().sub(newHitVec).length();
+					var distold = object.getChild("C_mScrew_Front_LDM56_Base").transform.world.getLoc().sub(hitVec).length();
+					var distnew = object.getChild("C_mScrew_Front_LDM56_Base").transform.world.getLoc().sub(newHitVec).length();
 					transBaseBy(distold-distnew);
 					hitVec = newHitVec;
 				}
@@ -412,15 +407,13 @@ class LDM56_Base extends iron.Trait {
 	}
 
 	function updateParts() {
-		// general function that is called to update all the rigid bodys belongig to the base
-		// TODO: include call to componenent on Post (e.g. Mirror), Is it needed however??
 		
 		allPropsToVariables(object);
 
 		nScale = new Vec4(0.01,0.01,0.01,1); // scale parameter to change the scale of objects
 
 		// screw (mScrew contact with plate) is updated according to C_point (Childobject )of the base
-		var mST = object.getChild("C_mScrew_Front").transform.world;
+		var mST = object.getChild("C_mScrew_Front_LDM56_Base").transform.world;
 		mScrewF.transform.setMatrix(mST);
 		mScrewF.transform.scale = nScale;
 		rbSync(mScrewF);
@@ -437,7 +430,7 @@ class LDM56_Base extends iron.Trait {
 	
 			//object.transform.rot.fromAxisAngle(object.transform.up().normalize(), baseAngle);
 			rbSync(object);
-			var corrVrot = new Vec4().setFrom(object.getChild("C_mScrew_Front").transform.world.getLoc());
+			var corrVrot = new Vec4().setFrom(object.getChild("C_mScrew_Front_LDM56_Base").transform.world.getLoc());
 			corrVrot.sub(mScrewF.transform.loc);
 			object.transform.translate(-1*corrVrot.x , -1*corrVrot.y , 0);
 			rbSync(object);
@@ -448,7 +441,7 @@ class LDM56_Base extends iron.Trait {
 			rbSync(object);
 		}
 
-		var mST = object.getChild("C_mScrew_Back").transform.world;
+		var mST = object.getChild("C_mScrew_Back_LDM56_Base").transform.world;
 		mScrewB.transform.setMatrix(mST);
 		mScrewB.transform.scale = nScale;
 		rbSync(mScrewB);
@@ -457,14 +450,14 @@ class LDM56_Base extends iron.Trait {
 		
 
 		// sync the top to the base 
-		var mT = object.getChild("C_UPH_Left").transform.world;
+		var mT = object.getChild("C_UPH_Left_LDM56_Base").transform.world;
 		topL.transform.setMatrix(mT);
 		topL.transform.scale = nScale;
 		topL.transform.loc.sub(corrVTop);
 		rbSync(topL);
 
 		// sync the top to the base 
-		var mT = object.getChild("C_UPH_Right").transform.world;
+		var mT = object.getChild("C_UPH_Right_LDM56_Base").transform.world;
 		topR.transform.setMatrix(mT);
 		topR.transform.scale = nScale;
 		topR.transform.loc.sub(corrVTop);
@@ -514,7 +507,7 @@ class LDM56_Base extends iron.Trait {
 		laser.transform.setMatrix(mL);
 		laser.transform.scale = nScale;
 		rbSync(laser);
-		corrLaser = new Vec4().setFrom(laser.getChild("C_Post_Left").transform.world.getLoc()).sub(laser.transform.loc);
+		corrLaser = new Vec4().setFrom(laser.getChild("C_Post_Left_LDM56_Laser").transform.world.getLoc()).sub(laser.transform.loc);
 		laser.transform.loc.sub(corrLaser);
 		rbSync(laser);
 
@@ -547,21 +540,21 @@ class LDM56_Base extends iron.Trait {
 			multiplier = multiplier*-1;
 			var scalefactor = 0.01; // factor which results due to scaling, needs to be adjusted for other scales
 			if (multiplier<0){
-				var baseDist = (object.getChild("C_mScrew_Front").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimNeg").transform.world.getLoc()));
+				var baseDist = (object.getChild("C_mScrew_Front_LDM56_Base").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimNeg_LDM56_Base").transform.world.getLoc()));
 				if (baseDist + multiplier*baseTrans*scalefactor>0){
 					trace(baseDist);
 					trace(multiplier*baseTrans);
-					object.getChild("C_mScrew_Front").transform.translate(multiplier*baseTrans,0,0);
-					object.getChild("C_mScrew_Back").transform.translate(multiplier*baseTrans,0,0);
+					object.getChild("C_mScrew_Front_LDM56_Base").transform.translate(multiplier*baseTrans,0,0);
+					object.getChild("C_mScrew_Back_LDM56_Base").transform.translate(multiplier*baseTrans,0,0);
 					rbSync(object);
 				}
 			}
 			else if(multiplier>0){			
-				var baseDist = (object.getChild("C_mScrew_Front").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimPos").transform.world.getLoc())); 
+				var baseDist = (object.getChild("C_mScrew_Front_LDM56_Base").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimPos_LDM56_Base").transform.world.getLoc())); 
 				if (baseDist - multiplier*baseTrans*scalefactor >0){
 					trace(baseDist);
-					object.getChild("C_mScrew_Front").transform.translate(multiplier*baseTrans,0,0);
-					object.getChild("C_mScrew_Back").transform.translate(multiplier*baseTrans,0,0);
+					object.getChild("C_mScrew_Front_LDM56_Base").transform.translate(multiplier*baseTrans,0,0);
+					object.getChild("C_mScrew_Back_LDM56_Base").transform.translate(multiplier*baseTrans,0,0);
 					rbSync(object);
 				}
 			}
@@ -575,14 +568,14 @@ class LDM56_Base extends iron.Trait {
 			var scalefactor = 100; // factor which results due to scaling, needs to be adjusted for other scales#
 			var baseDist = 0.;
 			if (dist<0){
-				baseDist = (object.getChild("C_mScrew_Front").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimNeg").transform.world.getLoc()));
+				baseDist = (object.getChild("C_mScrew_Front_LDM56_Base").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimNeg_LDM56_Base").transform.world.getLoc()));
 			}
 			else if(dist>0){			
-				baseDist = (object.getChild("C_mScrew_Front").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimPos").transform.world.getLoc())); 	
+				baseDist = (object.getChild("C_mScrew_Front_LDM56_Base").transform.world.getLoc().distanceTo( object.getChild("C_mScrew_Front_LimPos_LDM56_Base").transform.world.getLoc())); 	
 			}
 			if (baseDist - Math.abs(dist)>0){
-				object.getChild("C_mScrew_Front").transform.translate(dist*scalefactor,0,0);
-				object.getChild("C_mScrew_Back").transform.translate(dist*scalefactor,0,0);
+				object.getChild("C_mScrew_Front_LDM56_Base").transform.translate(dist*scalefactor,0,0);
+				object.getChild("C_mScrew_Back_LDM56_Base").transform.translate(dist*scalefactor,0,0);
 				(object);
 			}	
 		allVariablesToProbs(object);
