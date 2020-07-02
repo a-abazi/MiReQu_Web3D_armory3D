@@ -231,7 +231,6 @@ class UPH2_Base extends iron.Trait {
 			// not used yet
 			if (object.properties["Component_map"]!= null){
 				initProps(comp);
-				trace("tests");
 				comp.properties = object.properties["Component_map"];
 			}
 			
@@ -422,7 +421,7 @@ class UPH2_Base extends iron.Trait {
 				comp.transform.loc.add(compCorrV);
 			}
 			rbSync(comp);
-			sendEvent(comp,"updateParts");
+			sendEvent(comp,"updateParts"); // sends Event to component on top, if it exists. This Event triggers the updateParts() method 
 		}
 		
 	}

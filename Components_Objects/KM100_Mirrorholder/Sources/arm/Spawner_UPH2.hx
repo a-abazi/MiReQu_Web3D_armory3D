@@ -78,7 +78,7 @@ class Spawner_UPH2 extends iron.Trait {
 
 	private function convertPropsToVars() {
 		// convert property inputs to correct variable values
-		baseAngle = baseAngleDegree * Math.PI / 180.;
+		baseAngle = (baseAngleDegree ) * Math.PI / 180.;
 		postAngle = postAngleDegree * Math.PI / 180.;
 		baseDist = -1 * (basePosition - std_basePosition);
 		postDist = postHeight - std_postHeight;
