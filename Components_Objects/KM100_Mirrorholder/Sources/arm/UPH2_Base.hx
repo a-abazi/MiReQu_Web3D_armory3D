@@ -26,10 +26,8 @@ import armory.system.Event;
 // TODO: find out how to give an object an rigid body, and how to generate an object (so xyPlane is not needed in Blender as separate object)
 // TODO: when stage is ready, stage needs to be recognized as base not platte
 // TODO: multiple platten
-// TODO: COnnection to object
 // TODO: Collisions!!!
 // TODO: (When Dynamic Meshes): Strech the post to get variables heights 
-// TODO: Communicate UpdateParts to save performance, right now all components update their parts "onUpdate" of Frame
 
 
 
@@ -137,7 +135,7 @@ class UPH2_Base extends iron.Trait {
 		baseY = plate.getChildren()[1].transform.world.getLoc().sub(zero);
 
 		// set the object to correct z stage and to the baseAngle Value(outcommented)
-		object.transform.translate(0,0,zero.z -  object.getChild("C_Platte").transform.world.getLoc().z);
+		object.transform.translate(0,0,zero.z -  object.getChild("C_Platte_UPH2_Base").transform.world.getLoc().z);
 		object.transform.rot.fromAxisAngle(object.transform.up().normalize(), baseAngle);
 		object.transform.buildMatrix();
 		rbSync(object);
@@ -145,7 +143,7 @@ class UPH2_Base extends iron.Trait {
 
 		//spawn the screw and setup location
 		mScrew = spawnObject(mScrewName,false);
-		var mST = object.getChild("C_Screw_Pos").transform.world;
+		var mST = object.getChild("C_Screw_Pos_UPH2_Base").transform.world;
 		mScrew.transform.setMatrix(mST);
 		mScrew.transform.scale = nScale;
 		mScrew.visible = visib;
@@ -162,22 +160,22 @@ class UPH2_Base extends iron.Trait {
 
 		// spawn "Top" on the base, corrVTop is the correction vector concerning the location
 		top = spawnObject(topName,false);
-		var mT = object.getChild("C_UPH").transform.world;
+		var mT = object.getChild("C_UPH_UPH2_Base").transform.world;
 		top.transform.setMatrix(mT);
 		top.transform.scale = nScale;
 		rbSync(top);
-		corrVTop = new Vec4().setFrom(top.getChild("C_Bottom").transform.world.getLoc()).sub(top.transform.loc);
+		corrVTop = new Vec4().setFrom(top.getChild("C_Bottom_UPH2_Top").transform.world.getLoc()).sub(top.transform.loc);
 		top.transform.loc.sub(corrVTop);
 		top.visible = visib;
 		rbSync(top);
 
 		// spawn the hex screw on the top part, see above  for corrScrew
 		screw = spawnObject(screwName,false);
-		var mS = top.getChild("C_Screw").transform.world;
+		var mS = top.getChild("C_Screw_UPH2_Top").transform.world;
 		screw.transform.setMatrix(mS);
 		screw.transform.scale = nScale;
 		rbSync(screw);
-		corrScrew = new Vec4().setFrom(screw.getChild("C").transform.world.getLoc()).sub(screw.transform.loc);
+		corrScrew = new Vec4().setFrom(screw.getChild("C_UPH2_Screw").transform.world.getLoc()).sub(screw.transform.loc);
 		if (sState == 0)
 			corrScrew.mult(0.5);
 
@@ -187,7 +185,7 @@ class UPH2_Base extends iron.Trait {
 
 		// spawn the post inside the top, with specified postDist and angle
 		post = spawnObject(postName,false);
-		var mP = top.getChild("C_Top").transform.world;
+		var mP = top.getChild("C_Top_UPH2_Top").transform.world;
 		post.transform.setMatrix(mP);
 		post.transform.scale = nScale;
 		post.visible = visib;
@@ -195,13 +193,13 @@ class UPH2_Base extends iron.Trait {
 		rbSync(post);
 
 		// measure limits from the empty child objects, limits for postTravel
-		postPosLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Top").transform.world.getLoc())) + 0.01;
-		postNegLim = (post.getChild("C_PostBottom").transform.world.getLoc().distanceTo( top.getChild("C_Bottom").transform.world.getLoc())+0.13); // the Float value results from the base
+		postPosLim = (post.getChild("C_PostBottom_UPH2_Post").transform.world.getLoc().distanceTo( top.getChild("C_Top_UPH2_Top").transform.world.getLoc())) + 0.01;
+		postNegLim = (post.getChild("C_PostBottom_UPH2_Post").transform.world.getLoc().distanceTo( top.getChild("C_Bottom_UPH2_Top").transform.world.getLoc())+0.13); // the Float value results from the base
 		postTravelDist = Math.abs(postPosLim) + Math.abs(postNegLim);
 		// limits for basetravel
 		// Important!! C_screw_Pos is not static and is moved around, these limits are only valid initially TODO: fix it
-		basePosLim = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos").transform.world.getLoc()));
-		baseNegLim = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg").transform.world.getLoc())); // the Float value results from the base
+		basePosLim = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos_UPH2_Base").transform.world.getLoc()));
+		baseNegLim = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg_UPH2_Base").transform.world.getLoc())); // the Float value results from the base
 		baseTravelDist = Math.abs(basePosLim) + Math.abs(baseNegLim);
 
 		// check if supplied postDist is within limits
@@ -236,7 +234,7 @@ class UPH2_Base extends iron.Trait {
 			
 
 
-			var mCC = post.getChild("C_Component").transform.world;
+			var mCC = post.getChild("C_Component_UPH2_Post").transform.world;
 			comp.transform.setMatrix(mCC);
 			comp.transform.scale = nScale;
 			if (object.properties["Component_corrV"] != null) {
@@ -317,12 +315,12 @@ class UPH2_Base extends iron.Trait {
 				}
 				var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 				if (newHitVec!= null ) {
-					var dirVecNew = new Vec4().setFrom(newHitVec).sub(object.getChild("C_Screw_Pos").transform.world.getLoc());
+					var dirVecNew = new Vec4().setFrom(newHitVec).sub(object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc());
 					var newAngle = Math.atan2(dirVecNew.y,dirVecNew.x)-Math.atan2(1,0);
 					rotBaseTo(newAngle);
 					
-					var distold = object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo(hitVec);
-					var distnew = object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo(newHitVec);
+					var distold = object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo(hitVec);
+					var distnew = object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo(newHitVec);
 					transBaseBy(distold-distnew);
 					hitVec = newHitVec;
 				}
@@ -360,7 +358,7 @@ class UPH2_Base extends iron.Trait {
 		nScale = new Vec4(0.01,0.01,0.01,1); // scale parameter to change the scale of objects
 
 		// screw (mScrew contact with plate) is updated according to C_point (Childobject )of the base
-		var mST = object.getChild("C_Screw_Pos").transform.world;
+		var mST = object.getChild("C_Screw_Pos_UPH2_Base").transform.world;
 		mScrew.transform.setMatrix(mST);
 		mScrew.transform.scale = nScale;
 		rbSync(mScrew);
@@ -377,32 +375,32 @@ class UPH2_Base extends iron.Trait {
 	
 			object.transform.rot.fromAxisAngle(object.transform.up().normalize(), baseAngle);
 			rbSync(object);
-			var corrVrot = new Vec4().setFrom(object.getChild("C_Screw_Pos").transform.world.getLoc());
+			var corrVrot = new Vec4().setFrom(object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc());
 			corrVrot.sub(mScrew.transform.loc);
 			object.transform.translate(-1*corrVrot.x , -1*corrVrot.y , 0);
 			rbSync(object);
 		}
 
 		// sync the top to the base 
-		var mT = object.getChild("C_UPH").transform.world;
+		var mT = object.getChild("C_UPH_UPH2_Base").transform.world;
 		top.transform.setMatrix(mT);
 		top.transform.scale = nScale;
 		top.transform.loc.sub(corrVTop);
 		rbSync(top);
 
 		// sync the hexScrew to the top part, correctional vector depends on state of screw
-		var mS = top.getChild("C_Screw").transform.world;
+		var mS = top.getChild("C_Screw_UPH2_Top").transform.world;
 		screw.transform.setMatrix(mS);
 		screw.transform.scale = nScale;
 		rbSync(screw);
-		corrScrew = new Vec4().setFrom(screw.getChild("C").transform.world.getLoc()).sub(screw.transform.loc);
+		corrScrew = new Vec4().setFrom(screw.getChild("C_UPH2_Screw").transform.world.getLoc()).sub(screw.transform.loc);
 		if (sState == 0)
 			corrScrew.mult(0.5);
 		screw.transform.loc.sub(corrScrew);
 		rbSync(screw);
 
 		// sync the post and translate/rotate it according to the properties
-		var mP = top.getChild("C_Top").transform.world;
+		var mP = top.getChild("C_Top_UPH2_Top").transform.world;
 		post.transform.setMatrix(mP);
 		post.transform.scale = nScale;
 		post.transform.move(post.transform.up(),postDist);
@@ -413,7 +411,7 @@ class UPH2_Base extends iron.Trait {
 
 		
 		if (comp!= null){
-			var mCC = post.getChild("C_Component").transform.world;
+			var mCC = post.getChild("C_Component_UPH2_Post").transform.world;
 			comp.transform.setMatrix(mCC);
 			comp.transform.scale = nScale;
 			if (object.properties["Component_corrV"] != null) {
@@ -450,19 +448,19 @@ class UPH2_Base extends iron.Trait {
 			multiplier = multiplier*-1;
 			var scalefactor = 0.01; // factor which results due to scaling, needs to be adjusted for other scales
 			if (multiplier<0){
-				var baseDist = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg").transform.world.getLoc()));
+				var baseDist = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg_UPH2_Base").transform.world.getLoc()));
 				if (baseDist + multiplier*baseTrans*scalefactor>0){
 					trace(baseDist);
 					trace(multiplier*baseTrans);
-					object.getChild("C_Screw_Pos").transform.translate(0,multiplier*baseTrans,0);
+					object.getChild("C_Screw_Pos_UPH2_Base").transform.translate(0,multiplier*baseTrans,0);
 					rbSync(object);
 				}
 			}
 			else if(multiplier>0){			
-				var baseDist = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos").transform.world.getLoc())); 
+				var baseDist = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos_UPH2_Base").transform.world.getLoc())); 
 				if (baseDist - multiplier*baseTrans*scalefactor >0){
 					trace(baseDist);
-					object.getChild("C_Screw_Pos").transform.translate(0,multiplier*baseTrans,0);
+					object.getChild("C_Screw_Pos_UPH2_Base").transform.translate(0,multiplier*baseTrans,0);
 					rbSync(object);
 				}
 			}
@@ -476,13 +474,13 @@ class UPH2_Base extends iron.Trait {
 			var scalefactor = 100; // factor which results due to scaling, needs to be adjusted for other scales#
 			var baseDist = 0.;
 			if (dist<0){
-				baseDist = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg").transform.world.getLoc()));
+				baseDist = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimNeg_UPH2_Base").transform.world.getLoc()));
 			}
 			else if(dist>0){			
-				baseDist = (object.getChild("C_Screw_Pos").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos").transform.world.getLoc())); 	
+				baseDist = (object.getChild("C_Screw_Pos_UPH2_Base").transform.world.getLoc().distanceTo( object.getChild("C_Screw_LimPos_UPH2_Base").transform.world.getLoc())); 	
 			}
 			if (baseDist - Math.abs(dist)>0){
-				object.getChild("C_Screw_Pos").transform.translate(0,dist*scalefactor,0);
+				object.getChild("C_Screw_Pos_UPH2_Base").transform.translate(0,dist*scalefactor,0);
 				(object);
 			}	
 		allVariablesToProbs(object);

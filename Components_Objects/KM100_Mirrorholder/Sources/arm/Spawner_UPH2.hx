@@ -9,13 +9,13 @@ import armory.trait.physics.RigidBody;
 
 
 class Spawner_UPH2 extends iron.Trait {
-	@prop // angle of the base rotation, relative to the x-axis? counter clockwise? :TODO: Findout!
+	@prop // angle of the base rotation, relative to the x-axis, counter clockwise
 	var baseAngleDegree: Float = 90;
 	
 	@prop // Distance from position for post from Screw, default should me 0.025m(base distance of holes)
 	var basePosition: Float = 0.25;
 
-	@prop //  angle of the post rotation, relative to the x-axis? counter clockwise? :TODO: Findout! 
+	@prop //  angle of the post rotation, relative to the x-axis, counter clockwise, and importantly additive to the baseAngle 
 	var postAngleDegree: Float = 90;
 
 	@prop // height of the post
@@ -78,7 +78,7 @@ class Spawner_UPH2 extends iron.Trait {
 
 	private function convertPropsToVars() {
 		// convert property inputs to correct variable values
-		baseAngle = (baseAngleDegree ) * Math.PI / 180.;
+		baseAngle = (baseAngleDegree - 90 )* Math.PI / 180.;
 		postAngle = postAngleDegree * Math.PI / 180.;
 		baseDist = -1 * (basePosition - std_basePosition);
 		postDist = postHeight - std_postHeight;
