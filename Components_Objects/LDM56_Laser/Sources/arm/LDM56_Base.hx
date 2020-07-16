@@ -620,8 +620,6 @@ class LDM56_Base extends iron.Trait {
 		}
 	}
 
-	
-
  
 	function transPost(multiplier: Float){
 		// translates post by increments adjusted with multiplier
