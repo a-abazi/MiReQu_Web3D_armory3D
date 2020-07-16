@@ -105,6 +105,10 @@ class UPH2_Base extends iron.Trait {
 	var planegroup: Int = 2; //third square in Blender 2^(n); n=2 (first square is n=0)
 
 	var visib: Bool =  false;
+	
+	var mouseRel: Bool = true;
+	
+	var objList: Array<Object> = [];
 
 	public function new() {
 		super();
@@ -114,6 +118,15 @@ class UPH2_Base extends iron.Trait {
 
 	};
 
+	public function pauseUpdate():Bool{
+		removeUpdate(onUpdate);
+		return true;
+	}
+
+	public function resumeUpdate():Bool{
+		notifyOnUpdate(onUpdate);
+		return true;
+	}
 
 	public function onInit() {
 		initProps(object);
@@ -246,12 +259,28 @@ class UPH2_Base extends iron.Trait {
 
 		updateParts();
 
+		objList.push(object);
+		objList.push(mScrew);
+		objList.push(screw);
+		objList.push(post);
+		objList.push(top);
+
+
+		for (obj in objList){
+			initProps(obj);
+			if (obj != object) obj.properties.set("TraitObj",object);
+			else obj.properties.set("TraitObj","self");
+			obj.properties.set("TraitName","UPH2_Base");
+			obj.properties.set("PauseResume",true);
+		}
+		pauseUpdate();
 		
 		
 	}
 
 	// TODO: add a Boolean when screw should be locked, BUG: Snapping to other hole when in state 1, when fast mouse movement 
 	function onUpdate(){
+		
 		if (!defaultControls) {
 			return;
 		}
@@ -259,13 +288,13 @@ class UPH2_Base extends iron.Trait {
 
 		// Movement of the parts is defined by this function, as well as called functions
 		var mouse = Input.getMouse();
-		var keyboard = Input.getKeyboard();
+		//var keyboard = Input.getKeyboard();
 		var rb = null;
 
 
 		// By left click a rigid body is chosen by raytracing(part of .pickClosest) to be movingObjeckt
 		// if a screw is clicked the state is switched
-		if (mouse.started("left")){
+		if (mouse.down("left") && mouseRel){
 			var physics = armory.trait.physics.PhysicsWorld.active;	
 
 			rb = physics.pickClosest(mouse.x, mouse.y);
@@ -279,14 +308,19 @@ class UPH2_Base extends iron.Trait {
 					switchStateScrew();
 				}
 			}
+			mouseRel = false;
 		}
+
+
 		
 		// if mouse is released, variables are beeing resetted and the helping plane xyPlane is removed
-		if (mouse.released("left")) {
+		if (mouse.released("left")||mouse.released("right")){
 			movingObj = null;
 			if (xyPlane != null) xyPlane.remove();
 			hitVec = null;
+			mouseRel = true;
 			updateParts();
+			pauseUpdate();
 		}
 
 
@@ -418,6 +452,7 @@ class UPH2_Base extends iron.Trait {
 				var compCorrV = object.properties["Component_corrV"];
 				comp.transform.loc.add(compCorrV);
 			}
+			// TODO: Activate the Trait of the component
 			rbSync(comp);
 			sendEvent(comp,"updateParts"); // sends Event to component on top, if it exists. This Event triggers the updateParts() method 
 		}

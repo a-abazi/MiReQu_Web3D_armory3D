@@ -56,6 +56,9 @@ class KS1RS_Base extends iron.Trait {
 	var planegroup: Int = 2; //third square in Blender 2^(n); n=2 (first square is n=0)
 	var visib: Bool =  false;
 
+	var objList: Array<Object> = [];
+	var mouseRel: Bool = true;
+
 	public function new() {
 		super();
 		
@@ -63,6 +66,16 @@ class KS1RS_Base extends iron.Trait {
 		notifyOnUpdate(onUpdate);
 
 	};
+
+	public function pauseUpdate():Bool{
+		removeUpdate(onUpdate);
+		return true;
+	}
+
+	public function resumeUpdate():Bool{
+		notifyOnUpdate(onUpdate);
+		return true;
+	}
 
 	function onInit() {
 		initProps(object);
@@ -130,36 +143,60 @@ class KS1RS_Base extends iron.Trait {
 		
 		// Event added with object id as a mask, the postholder trait UPH2_Base will send this event to its componente object when moved
 		Event.add("updateParts",updateParts,object.uid);
+
+				
+
+		objList.push(object);
+		objList.push(ring);
+		objList.push(screwBot);
+		objList.push(screwTop);
+		objList.push(screwMid);
+		objList.push(front);
+		objList.push(bbo);
+
+
+		for (obj in objList){
+			initProps(obj);
+			if (obj != object) obj.properties.set("TraitObj",object);
+			else obj.properties.set("TraitObj","self");
+			obj.properties.set("TraitName","KS1RS"+"_Base");
+			obj.properties.set("PauseResume",true);
+		}
+		pauseUpdate();
 	}
 	
 			
 	function onUpdate(){
-		
-		var keyboard = Input.getKeyboard();
+		//trace(Std.string(object.name) +Std.string(object.uid)+"_Active");
+		//var keyboard = Input.getKeyboard();
 		var mouse = Input.getMouse();		
 		var rb = null;
-		var physics = armory.trait.physics.PhysicsWorld.active;	
 
-		if (mouse.started("left")){
+		if (mouse.down("left") && mouseRel){
+			var physics = armory.trait.physics.PhysicsWorld.active;	
 
 			rb = physics.pickClosest(mouse.x, mouse.y);
 			if (rb !=null) {
 				movingObj = rb.object;
 				if (movingObj.name == "xyPlane") movingObj.remove();
 			}
+			mouseRel = false;
 			
 		}
 
-		if (mouse.released("left")) {
+		if (mouse.released("left")||mouse.released("right")) {
 			movingObj = null;
 			if (xyPlane != null) xyPlane.remove();
 			hitVec = null;
+			mouseRel = true;
 			updateParts();
 			if (Scene.active.getChild("xyPlane") != null ) Scene.active.getChild("xyPlane").remove;
+			pauseUpdate();
 		}
+
 		if (mouse.down("left") && movingObj == ring){
 			if (hitVec == null){
-				hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<0);
+				hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<1);
 				if (hitVec!=null) xyPlane = spawnXZPlane(front.getChild("C_Ring_KS1RS_Front").transform.world.getLoc(), new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
 				hitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 			}
@@ -205,21 +242,21 @@ class KS1RS_Base extends iron.Trait {
 			if (rb != null && rb.object == screwBot){
 				if (screwBotDist < screwPosLim + screwTrans){
 					screwBotDist = screwBotDist + screwTrans;
-					trace(screwBotDist);
+					//trace(screwBotDist);
 				}
 				updateParts();
 			}
 			else if (rb != null && rb.object == screwTop){
 				if (screwTopDist < screwPosLim + screwTrans){
 					screwTopDist = screwTopDist + screwTrans;
-					trace(screwTopDist);
+					//trace(screwTopDist);
 				}
 				updateParts();
 			}
 			else if (rb != null && rb.object == screwMid){
 				if (screwMidDist < screwPosLim + screwTrans){
 					screwMidDist = screwMidDist + screwTrans;
-					trace(screwMidDist);
+					//trace(screwMidDist);
 				}
 				updateParts();
 			}
@@ -234,21 +271,21 @@ class KS1RS_Base extends iron.Trait {
 			if (rb != null && rb.object == screwBot){
 				if (-1*screwNegLim < screwBotDist - screwTrans){
 					screwBotDist = screwBotDist - screwTrans;
-					trace(screwBotDist);
+					//trace(screwBotDist);
 				}
 				updateParts();
 			}
 			else if (rb != null && rb.object == screwTop){
 				if (-1*screwNegLim < screwTopDist - screwTrans){
 					screwTopDist = screwTopDist - screwTrans;
-					trace(screwTopDist);
+					//trace(screwTopDist);
 				}
 				updateParts();
 			}
 			else if (rb != null && rb.object == screwMid){
 				if (-1*screwNegLim < screwMidDist - screwTrans){
 					screwMidDist = screwMidDist - screwTrans;
-					trace(screwMidDist);
+					//trace(screwMidDist);
 				}
 				updateParts();
 			}

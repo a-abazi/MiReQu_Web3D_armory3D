@@ -39,6 +39,11 @@ class RSP1D_Base extends iron.Trait {
 	var xyPlane: Object = null;
 	var hitVec: Vec4 = null;
 	var planegroup: Int = 2; //third square in Blender 2^(n); n=2 (first square is n=0)
+	var objectGroup: Int = 1;
+
+	
+	var mouseRel: Bool = true;
+	var objList: Array<Object> = [];
 
 	public function new() {
 		super();
@@ -77,16 +82,44 @@ class RSP1D_Base extends iron.Trait {
 		// Event added with object id as a mask, the postholder trait UPH2_Base will send this event to its componente object when moved
 		Event.add("updateParts",updateParts,object.uid);
 
+		if (Scene.active.getChild("xyPlane") != null ) Scene.active.getChild("xyPlane").remove;
+
+		
+
+		objList.push(object);
+		objList.push(ring);
+		objList.push(wph);
+
+
+		for (obj in objList){
+			initProps(obj);
+			if (obj != object) obj.properties.set("TraitObj",object);
+			else obj.properties.set("TraitObj","self");
+			obj.properties.set("TraitName","RSP1D"+"_Base");
+			obj.properties.set("PauseResume",true);
+		}
+		pauseUpdate();
+		
 	}
-	
+
+	public function pauseUpdate():Bool{
+		removeUpdate(onUpdate);
+		return true;
+	}
+
+	public function resumeUpdate():Bool{
+		notifyOnUpdate(onUpdate);
+		return true;
+	}
+
 			
 	function onUpdate(){
-
+		//trace(Std.string(object.name) +Std.string(object.uid)+"_Active");
 		var mouse = Input.getMouse();
-		var keyboard = Input.getKeyboard();
+		//var keyboard = Input.getKeyboard();
 		var rb = null;
 
-		if (mouse.started("left")){
+		if (mouse.down("left") && mouseRel){
 			var physics = armory.trait.physics.PhysicsWorld.active;	
 
 			rb = physics.pickClosest(mouse.x, mouse.y);
@@ -94,20 +127,24 @@ class RSP1D_Base extends iron.Trait {
 				movingObj = rb.object;
 				if (movingObj.name == "xyPlane") movingObj.remove();
 			}
-			
+			mouseRel = false;
 		}
+
 
 		if (mouse.released("left")) {
 			movingObj = null;
 			if (xyPlane != null) xyPlane.remove();
 			hitVec = null;
+			mouseRel = true;
 			updateParts();
 			if (Scene.active.getChild("xyPlane") != null ) Scene.active.getChild("xyPlane").remove;
+			pauseUpdate();
 		}
 
 		if (mouse.down("left") && movingObj == ring){
+			
 			if (hitVec == null){
-				hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<0);
+				hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<objectGroup);
 				if (hitVec!=null) xyPlane = spawnXZPlane(ring.transform.loc, new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
 				hitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 			}
