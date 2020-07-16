@@ -44,7 +44,9 @@ class LDM56_Base extends iron.Trait {
 	@prop 
 	var topName: String = "LDM56_UPH2_Top";
 	@prop
-	var laserName: String = "LDM56_Laser";
+	var laserName: String = "LDM56_Laser";	
+	@prop
+	var outputName: String = "Laser_Output_LDM56_Laser";
 
 	@prop
 	var defaultControls: Bool = true;
@@ -92,6 +94,8 @@ class LDM56_Base extends iron.Trait {
 	var topR: Object;
 	var laser: Object;
 
+	var objList: Array<Object> = [];
+
 
 	var zero: Vec4;
 	var baseX: Vec4;
@@ -108,7 +112,7 @@ class LDM56_Base extends iron.Trait {
 
 	var visib: Bool =  false;
 	var mouseXmove: Float = 0;
-
+	var mouseRel: Bool = true;
 
 	public function new() {
 		super();
@@ -121,6 +125,7 @@ class LDM56_Base extends iron.Trait {
 
 	public function onInit() {
 		initProps(object);
+		objList.push(object);
 		var nScale: Vec4  = new Vec4(0.01,0.01,0.01,1);
 
 		//checks if spawned by "spawner object", if not, the objects are set to be invisible
@@ -153,6 +158,7 @@ class LDM56_Base extends iron.Trait {
 		mScrewF.transform.scale = nScale;
 		mScrewF.visible = visib;
 		rbSync(mScrewF);
+		objList.push(mScrewF);
 
 		//  snap the screw to correct place and base, too
 		var corrVxy: Vec4 = xySnapToBasis(object,mScrewF,zero,baseX,baseY);
@@ -171,7 +177,7 @@ class LDM56_Base extends iron.Trait {
 		mScrewB.transform.scale = nScale;
 		mScrewB.visible = visib;
 		rbSync(mScrewB);
-
+		objList.push(mScrewB);
 
 		// spawn "Top" on the base, corrVTop is the correction vector concerning the location
 		topL = spawnObject(topName,false);
@@ -192,6 +198,9 @@ class LDM56_Base extends iron.Trait {
 		topR.transform.loc.sub(corrVTop);
 		topR.visible = visib;
 		rbSync(topR);
+
+		objList.push(topL);
+		objList.push(topR);
 
 		// spawn the hex screw on the top part, see above  for corrScrew
 		screwL = spawnObject(screwName,false);
@@ -221,6 +230,9 @@ class LDM56_Base extends iron.Trait {
 		screwR.visible = visib;
 		rbSync(screwR);
 
+		objList.push(screwL);
+		objList.push(screwR);
+
 
 		// spawn the post inside the top, with specified postDist and angle
 		postL = spawnObject(postName,false);
@@ -237,6 +249,9 @@ class LDM56_Base extends iron.Trait {
 		postR.transform.scale = nScale;
 		postR.visible = visib;
 		rbSync(postR);
+
+		objList.push(postL);
+		objList.push(postR);
 
 
 		// measure limits from the empty child objects, limits for postTravel
@@ -274,6 +289,8 @@ class LDM56_Base extends iron.Trait {
 		laser.visible = visib;
 		rbSync(laser);
 
+		objList.push(laser);
+
 		// check if supplied baseDist is within limits
 		if (-1*baseNegLim < baseDist && baseDist < basePosLim){
 			transBaseBy(baseDist, true);
@@ -283,32 +300,47 @@ class LDM56_Base extends iron.Trait {
 		}
 
 
-
-
-
-
+		object.properties["LaserSource"] = laser.getChild(outputName);
 		updateParts();
 
-		
+		for (obj in objList){
+			initProps(obj);
+			if (obj != object) obj.properties.set("TraitObj",object);
+			else obj.properties.set("TraitObj","self");
+			obj.properties.set("TraitName","LDM56_Base");
+			obj.properties.set("PauseResume",true);
+		}
+		pauseUpdate();
 		
 	}
 
 	// TODO: add a Boolean when screw should be locked, BUG: Snapping to other hole when in state 1, when fast mouse movement 
 	function onUpdate(){
 		if (!defaultControls) {
-			
 			return;
 		}
 		
-
 		// Movement of the parts is defined by this function, as well as called functions
 		var mouse = Input.getMouse();
-		var keyboard = Input.getKeyboard();
+		//var keyboard = Input.getKeyboard();
 		var rb = null;
+
+		
+		// if mouse is released, variables are beeing resetted and the helping plane xyPlane is removed
+		if (mouse.released("left")) {
+			movingObj = null;
+			if (xyPlane != null) xyPlane.remove();
+			hitVec = null;
+			mouseRel = true;
+			updateParts();
+			pauseUpdate();
+		}
+
+
 
 		// By left click a rigid body is chosen by raytracing(part of .pickClosest) to be movingObjeckt
 		// if a screw is clicked the state is switched
-		if (mouse.started("left")){
+		if (mouse.down("left") && mouseRel){
 			var physics = armory.trait.physics.PhysicsWorld.active;	
 
 			rb = physics.pickClosest(mouse.x, mouse.y);
@@ -317,21 +349,16 @@ class LDM56_Base extends iron.Trait {
 
 				if (rb.object == mScrewF || rb.object == mScrewB  ){
 					switchStateMScrew();
+					
 				}
 				else if (rb.object == screwL|| rb.object == screwR){
 					switchStateScrew();
+					
 				}
+				
 			}
+			mouseRel = false;
 		}
-		
-		// if mouse is released, variables are beeing resetted and the helping plane xyPlane is removed
-		if (mouse.released("left")) {
-			movingObj = null;
-			if (xyPlane != null) xyPlane.remove();
-			hitVec = null;
-			updateParts();
-		}
-
 
 		// while mouse is held actions are performed for different cases of movingObj
 		if (mouse.down("left") && movingObj != null ){
@@ -346,7 +373,7 @@ class LDM56_Base extends iron.Trait {
 			if ((movingObj == postL|| movingObj == postR|| movingObj == laser) && mState ==2) {
 				var multip = 100;
 				mouseXmove = mouseXmove + mouse.movementX;
-				trace(mouseXmove);
+				
 				if (mouseXmove > 1 * multip){
 					baseAngle = (baseAngle +  Math.PI/2 );
 					mouseXmove = 0;
@@ -406,7 +433,17 @@ class LDM56_Base extends iron.Trait {
 
 	}
 
-	function updateParts() {
+	public function pauseUpdate():Bool{
+		removeUpdate(onUpdate);
+		return true;
+	}
+
+	public function resumeUpdate():Bool{
+		notifyOnUpdate(onUpdate);
+		return true;
+	}
+
+	function updateParts(){
 		
 		allPropsToVariables(object);
 

@@ -47,6 +47,8 @@ class LDM56_Base extends iron.Trait {
 	var topName: String = "LDM56_UPH2_Top";
 	@prop
 	var laserName: String = "LDM56_Laser";
+	@prop
+	var outputName: String = "Laser_Output_LDM56_Laser";
 
 	@prop
 	var defaultControls: Bool = true;
@@ -286,7 +288,7 @@ class LDM56_Base extends iron.Trait {
 		}
 
 
-		object.properties["LaserSource"] = laser.getChild("Laser_Output");
+		object.properties["LaserSource"] = laser.getChild(outputName);
 		updateParts();
 
 	}

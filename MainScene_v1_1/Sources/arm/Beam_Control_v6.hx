@@ -137,13 +137,14 @@ class Beam_Control_v6 extends iron.Trait {
 	var once: Bool = true;
 	var delay: Float = 1;
 	function onUpdate(){
+		
 		// do something after init but a little time later (variable "delay")
 		// without the delay, not alle objects are initialized and an error is given when these properties are called
-		if (pump_laser_parent.properties != null && !directSpawn){
+		if (pump_laser_parent.properties["LaserSource"] != null && !directSpawn){
 			
 			pump_laser = pump_laser_parent.properties["LaserSource"];
 		}
-
+		
 
 		if (once){
 			time += iron.system.Time.delta;
@@ -168,6 +169,8 @@ class Beam_Control_v6 extends iron.Trait {
 				onEventCB();
 			}
 		}
+		
+		trace(main_Array_beams.length);
 		
 	}
 
@@ -200,7 +203,7 @@ class Beam_Control_v6 extends iron.Trait {
 		main_Array_pos = [[]];
 		main_Array_dir = [[]];
 		//main_All_arrows: Array <Dynamic> = [[]]; //ToDo: check if this needs to be resetted when implementing sub beams
-
+		
 		main_Array_pos[0] = []; //Reset Array
 		main_Array_pos[0].push(pump_laser.transform.world.getLoc());//add first position
 		main_Array_dir[0] = [];
@@ -272,6 +275,7 @@ class Beam_Control_v6 extends iron.Trait {
 			}
 			//trace(main_All_arrows.length);
 		}
+		
 	}
 
 
