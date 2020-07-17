@@ -4,7 +4,6 @@ precision highp int;
 
 uniform highp vec4 casData[20];
 uniform highp vec4 shirr[7];
-uniform highp vec3 backgroundCol;
 uniform highp float envmapStrength;
 uniform highp vec3 sunDir;
 uniform bool receiveShadow;
@@ -167,7 +166,6 @@ void main()
     highp vec3 f0 = surfaceF0(basecol, metallic);
     highp vec3 indirect = shIrradiance(n, shirr);
     indirect *= albedo;
-    indirect += (backgroundCol * f0);
     indirect *= occlusion;
     indirect *= envmapStrength;
     highp vec3 direct = vec3(0.0);

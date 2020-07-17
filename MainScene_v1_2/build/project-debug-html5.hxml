@@ -65,75 +65,75 @@
 -D kha_version=1810
 -D kha_project_name=MainScene
 -js debug-html5\kha.js
-arm.LDM56_Base
---macro keep('arm.LDM56_Base')
 arm.node.Genral_Object_properties_blocking_004
 --macro keep('arm.node.Genral_Object_properties_blocking_004')
-arm.Spawner_KM100CP
---macro keep('arm.Spawner_KM100CP')
-arm.node.Genral_Object_properties_blocking
---macro keep('arm.node.Genral_Object_properties_blocking')
-arm.Mirror_v4
---macro keep('arm.Mirror_v4')
-arm.ResumeTraitSelector
---macro keep('arm.ResumeTraitSelector')
-armory.trait.internal.DebugConsole
---macro keep('armory.trait.internal.DebugConsole')
 arm.Spawner_KM100PM
 --macro keep('arm.Spawner_KM100PM')
-arm.BeamSplitter_v1
---macro keep('arm.BeamSplitter_v1')
-arm.node.Genral_Object_properties_blocking_007
---macro keep('arm.node.Genral_Object_properties_blocking_007')
-arm.node.Kamera_Bewegung
---macro keep('arm.node.Kamera_Bewegung')
-arm.KM100PM_Base
---macro keep('arm.KM100PM_Base')
-arm.node.Genral_Object_properties_blocking_003
---macro keep('arm.node.Genral_Object_properties_blocking_003')
-arm.node.Genral_Object_properties_blocking_006
---macro keep('arm.node.Genral_Object_properties_blocking_006')
-arm.KM100_Base
---macro keep('arm.KM100_Base')
-arm.PumpLaser
---macro keep('arm.PumpLaser')
-arm.BBO_v1
---macro keep('arm.BBO_v1')
-arm.UPH2_Base
---macro keep('arm.UPH2_Base')
-arm.Color_trait
---macro keep('arm.Color_trait')
-armory.trait.physics.bullet.RigidBody
---macro keep('armory.trait.physics.bullet.RigidBody')
-armory.trait.physics.bullet.PhysicsWorld
---macro keep('armory.trait.physics.bullet.PhysicsWorld')
-arm.node.Genral_Object_properties_blocking_002
---macro keep('arm.node.Genral_Object_properties_blocking_002')
-armory.trait.internal.Bridge
---macro keep('armory.trait.internal.Bridge')
-arm.Spawner_BTC30
---macro keep('arm.Spawner_BTC30')
-arm.Waveplate_half_v2
---macro keep('arm.Waveplate_half_v2')
 arm.Spawner_RSP1D
 --macro keep('arm.Spawner_RSP1D')
-arm.KS1RS_Base
---macro keep('arm.KS1RS_Base')
-arm.NewUI
---macro keep('arm.NewUI')
-arm.KM100CP_Base
---macro keep('arm.KM100CP_Base')
-arm.node.Genral_Object_properties_blocking_001
---macro keep('arm.node.Genral_Object_properties_blocking_001')
-arm.Spawner_KM100
---macro keep('arm.Spawner_KM100')
-arm.Beam_Control_v6
---macro keep('arm.Beam_Control_v6')
-arm.Spawner_KS1RS
---macro keep('arm.Spawner_KS1RS')
-arm.node.Genral_Object_properties_blocking_005
---macro keep('arm.node.Genral_Object_properties_blocking_005')
 arm.RSP1D_Base
 --macro keep('arm.RSP1D_Base')
+arm.LDM56_Base
+--macro keep('arm.LDM56_Base')
+arm.Color_trait
+--macro keep('arm.Color_trait')
+arm.node.Genral_Object_properties_blocking_007
+--macro keep('arm.node.Genral_Object_properties_blocking_007')
+arm.node.Genral_Object_properties_blocking_003
+--macro keep('arm.node.Genral_Object_properties_blocking_003')
+arm.node.Genral_Object_properties_blocking_001
+--macro keep('arm.node.Genral_Object_properties_blocking_001')
+arm.NewUI
+--macro keep('arm.NewUI')
+arm.Mirror_v4
+--macro keep('arm.Mirror_v4')
+arm.BeamSplitter_v1
+--macro keep('arm.BeamSplitter_v1')
+arm.Spawner_KM100CP
+--macro keep('arm.Spawner_KM100CP')
+arm.KM100PM_Base
+--macro keep('arm.KM100PM_Base')
+arm.PumpLaser
+--macro keep('arm.PumpLaser')
+arm.Waveplate_half_v2
+--macro keep('arm.Waveplate_half_v2')
+arm.ResumeTraitSelector
+--macro keep('arm.ResumeTraitSelector')
+armory.trait.internal.Bridge
+--macro keep('armory.trait.internal.Bridge')
+arm.node.Genral_Object_properties_blocking_002
+--macro keep('arm.node.Genral_Object_properties_blocking_002')
+arm.node.Kamera_Bewegung
+--macro keep('arm.node.Kamera_Bewegung')
+arm.KM100CP_Base
+--macro keep('arm.KM100CP_Base')
+armory.trait.physics.bullet.RigidBody
+--macro keep('armory.trait.physics.bullet.RigidBody')
+arm.Beam_Control_v6
+--macro keep('arm.Beam_Control_v6')
+arm.node.Genral_Object_properties_blocking_005
+--macro keep('arm.node.Genral_Object_properties_blocking_005')
+arm.Spawner_KM100
+--macro keep('arm.Spawner_KM100')
+arm.BBO_v1
+--macro keep('arm.BBO_v1')
+armory.trait.internal.DebugConsole
+--macro keep('armory.trait.internal.DebugConsole')
+arm.KS1RS_Base
+--macro keep('arm.KS1RS_Base')
+arm.Spawner_BTC30
+--macro keep('arm.Spawner_BTC30')
+arm.Spawner_KS1RS
+--macro keep('arm.Spawner_KS1RS')
+armory.trait.physics.bullet.PhysicsWorld
+--macro keep('armory.trait.physics.bullet.PhysicsWorld')
+arm.KM100_Base
+--macro keep('arm.KM100_Base')
+arm.node.Genral_Object_properties_blocking
+--macro keep('arm.node.Genral_Object_properties_blocking')
+arm.UPH2_Base
+--macro keep('arm.UPH2_Base')
+arm.node.Genral_Object_properties_blocking_006
+--macro keep('arm.node.Genral_Object_properties_blocking_006')
 -debug
 -main Main

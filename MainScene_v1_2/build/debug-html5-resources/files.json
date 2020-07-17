@@ -535,10 +535,6 @@
 					"type": "vec4[]"
 				},
 				{
-					"name": "backgroundCol",
-					"type": "vec3"
-				},
-				{
 					"name": "envmapStrength",
 					"type": "float"
 				},
@@ -976,6 +972,100 @@
 			"types": []
 		},
 		{
+			"name": "World_World_frag",
+			"files": [
+				"World_World.frag.essl",
+				"World_World-webgl2.frag.essl"
+			],
+			"file_sizes": [
+				1
+			],
+			"type": "shader",
+			"inputs": [
+				{
+					"name": "normal",
+					"type": "vec3"
+				}
+			],
+			"outputs": [
+				{
+					"name": "fragColor",
+					"type": "vec4"
+				}
+			],
+			"uniforms": [
+				{
+					"name": "backgroundCol",
+					"type": "vec3"
+				}
+			],
+			"types": []
+		},
+		{
+			"name": "World_World_vert",
+			"files": [
+				"World_World.vert.essl",
+				"World_World-webgl2.vert.essl"
+			],
+			"file_sizes": [
+				1
+			],
+			"type": "shader",
+			"inputs": [
+				{
+					"name": "nor",
+					"type": "vec3"
+				},
+				{
+					"name": "pos",
+					"type": "vec3"
+				},
+				{
+					"name": "gl_VertexID",
+					"type": "int"
+				},
+				{
+					"name": "gl_InstanceID",
+					"type": "int"
+				}
+			],
+			"outputs": [
+				{
+					"name": "normal",
+					"type": "vec3"
+				}
+			],
+			"uniforms": [
+				{
+					"name": "SMVP",
+					"type": "mat4"
+				}
+			],
+			"types": [
+				{
+					"name": "gl_PerVertex",
+					"members": [
+						{
+							"type": "vec4",
+							"name": "gl_Position"
+						},
+						{
+							"type": "float",
+							"name": "gl_PointSize"
+						},
+						{
+							"type": "float[]",
+							"name": "gl_ClipDistance"
+						},
+						{
+							"type": "float[]",
+							"name": "gl_CullDistance"
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "armdefault_mesh_frag",
 			"files": [
 				"armdefault_mesh.frag.essl",
@@ -1319,10 +1409,6 @@
 				{
 					"name": "shirr",
 					"type": "vec4[]"
-				},
-				{
-					"name": "backgroundCol",
-					"type": "vec3"
 				},
 				{
 					"name": "envmapStrength",
@@ -2911,100 +2997,6 @@
 				}
 			],
 			"types": []
-		},
-		{
-			"name": "world_pass_frag",
-			"files": [
-				"world_pass.frag.essl",
-				"world_pass-webgl2.frag.essl"
-			],
-			"file_sizes": [
-				1
-			],
-			"type": "shader",
-			"inputs": [
-				{
-					"name": "normal",
-					"type": "vec3"
-				}
-			],
-			"outputs": [
-				{
-					"name": "fragColor",
-					"type": "vec4"
-				}
-			],
-			"uniforms": [
-				{
-					"name": "backgroundCol",
-					"type": "vec3"
-				}
-			],
-			"types": []
-		},
-		{
-			"name": "world_pass_vert",
-			"files": [
-				"world_pass.vert.essl",
-				"world_pass-webgl2.vert.essl"
-			],
-			"file_sizes": [
-				1
-			],
-			"type": "shader",
-			"inputs": [
-				{
-					"name": "nor",
-					"type": "vec3"
-				},
-				{
-					"name": "pos",
-					"type": "vec3"
-				},
-				{
-					"name": "gl_VertexID",
-					"type": "int"
-				},
-				{
-					"name": "gl_InstanceID",
-					"type": "int"
-				}
-			],
-			"outputs": [
-				{
-					"name": "normal",
-					"type": "vec3"
-				}
-			],
-			"uniforms": [
-				{
-					"name": "SMVP",
-					"type": "mat4"
-				}
-			],
-			"types": [
-				{
-					"name": "gl_PerVertex",
-					"members": [
-						{
-							"type": "vec4",
-							"name": "gl_Position"
-						},
-						{
-							"type": "float",
-							"name": "gl_PointSize"
-						},
-						{
-							"type": "float[]",
-							"name": "gl_ClipDistance"
-						},
-						{
-							"type": "float[]",
-							"name": "gl_CullDistance"
-						}
-					]
-				}
-			]
 		}
 	]
 }

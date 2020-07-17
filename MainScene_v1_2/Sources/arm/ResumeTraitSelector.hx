@@ -17,9 +17,9 @@ class ResumeTraitSelector extends iron.Trait {
 
 	function onUpdate(){
 		var mouse = Input.getMouse();
-		var physics = armory.trait.physics.PhysicsWorld.active;	
-		var rb = physics.pickClosest(mouse.x, mouse.y);
-		if (rb!=null)trace(rb.object.name);
+		//var physics = armory.trait.physics.PhysicsWorld.active;	
+		//var rb = physics.pickClosest(mouse.x, mouse.y);
+		//if (rb!=null)trace(rb.object.name);
 
 		if (mouse.started("left")||mouse.started("right")){
 			
@@ -42,6 +42,10 @@ class ResumeTraitSelector extends iron.Trait {
 					}
 				}
 			} 
+
+		if (mouse.released("left")||mouse.released("right")){
+			if (Scene.active.getChild("xyPlane") != null) Scene.active.getChild("xyPlane").remove();
+			}
 	}
 
 	function callTraitFunction(object:Object, traitName:String, funName: String, funArguments:Array <Dynamic>):Dynamic{

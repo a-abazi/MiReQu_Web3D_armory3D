@@ -18,9 +18,10 @@ import iron.math.RayCaster;
 
 import armory.system.Event;
 
-//TODO: let it add a trait to the waveplate 
-//TODO: Bug with the "XZ plane", does not despawn sometimes
-
+/*TODO: let it add a trait to the waveplate 
+  TODO: Bug with the "XZ plane", does not despawn sometimes, Quick fix by despawning it with other Trait
+ 		For some reason the trait is not able to remove it, Same for KS1RS_Base.hx
+*/	
 class RSP1D_Base extends iron.Trait {
 
 	@prop 
@@ -39,12 +40,12 @@ class RSP1D_Base extends iron.Trait {
 	var xyPlane: Object = null;
 	var hitVec: Vec4 = null;
 	var planegroup: Int = 2; //third square in Blender 2^(n); n=2 (first square is n=0)
+	var visib: Bool =  false;
 	var objectGroup: Int = 1;
 
-	
-	var mouseRel: Bool = true;
 	var objList: Array<Object> = [];
-
+	var mouseRel: Bool = true;
+	
 	public function new() {
 		super();
 		
@@ -82,7 +83,7 @@ class RSP1D_Base extends iron.Trait {
 		// Event added with object id as a mask, the postholder trait UPH2_Base will send this event to its componente object when moved
 		Event.add("updateParts",updateParts,object.uid);
 
-		if (Scene.active.getChild("xyPlane") != null ) Scene.active.getChild("xyPlane").remove;
+		//if (Scene.active.getChild("xyPlane") != null ) Scene.active.getChild("xyPlane").remove;
 
 		
 
@@ -116,9 +117,7 @@ class RSP1D_Base extends iron.Trait {
 	function onUpdate(){
 		//trace(Std.string(object.name) +Std.string(object.uid)+"_Active");
 		var mouse = Input.getMouse();
-		//var keyboard = Input.getKeyboard();
 		var rb = null;
-
 		if (mouse.down("left") && mouseRel){
 			var physics = armory.trait.physics.PhysicsWorld.active;	
 
@@ -130,8 +129,7 @@ class RSP1D_Base extends iron.Trait {
 			mouseRel = false;
 		}
 
-
-		if (mouse.released("left")) {
+		if (mouse.released("left")||mouse.released("right")) {
 			movingObj = null;
 			if (xyPlane != null) xyPlane.remove();
 			hitVec = null;
@@ -145,10 +143,10 @@ class RSP1D_Base extends iron.Trait {
 			
 			if (hitVec == null){
 				hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<objectGroup);
-				if (hitVec!=null) xyPlane = spawnXZPlane(ring.transform.loc, new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
+				if (hitVec!=null||xyPlane == null ) xyPlane = spawnXZPlane(ring.transform.loc, new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
+				else xyPlane.remove();
 				hitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 			}
-
 			var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 			if (newHitVec!= null ) {
 				var angleNew:Float;
@@ -233,8 +231,16 @@ class RSP1D_Base extends iron.Trait {
 		if (object == null) return;
 		if (object.properties == null) object.properties = new Map();
 	}
-	
 
+	inline function allPropsToVariables(object:Object){
+		ringAngle   = object.properties["ringAngle"];
+	}
+	
+	inline function allVariablesToProbs(object:Object){
+		object.properties["ringAngle"] 	= ringAngle  ;
+	}
+
+	
 	function spawnXZPlane(loc: Vec4, rot: Quat):Object{
 		// helping function to spawn invisible plane in XY
 		// used to project mouse from the screen coordinates to the world
@@ -246,7 +252,6 @@ class RSP1D_Base extends iron.Trait {
 			object = o;
 			if (matrix != null) {
 				object.transform.setMatrix(matrix);
-			
 				var rigidBody = object.getTrait(RigidBody);
 				if (rigidBody != null) {
 					object.transform.buildMatrix();
@@ -289,13 +294,5 @@ class RSP1D_Base extends iron.Trait {
 		var angle = Math.atan2(arg1.length(), arg2.dot(vec2));
 		return angle;
 	}
-	
-	inline function allPropsToVariables(object:Object){
-		ringAngle   = object.properties["ringAngle"];
-	}
-	
-	inline function allVariablesToProbs(object:Object){
-		object.properties["ringAngle"] 	= ringAngle  ;
-	}
+
 }
-	

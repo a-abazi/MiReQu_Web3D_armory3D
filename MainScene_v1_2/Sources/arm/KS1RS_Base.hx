@@ -18,6 +18,10 @@ import iron.math.Mat4;
 import iron.math.RayCaster;
 import armory.system.Event;
 
+
+/*TODO: Bug with the "XZ plane", does not despawn sometimes, Quick fix by despawning it with other Trait
+For some reason the trait is not able to remove it, Same for KS1RS_Base.hx */
+
 class KS1RS_Base extends iron.Trait {
 
 	@prop 
@@ -55,6 +59,7 @@ class KS1RS_Base extends iron.Trait {
 	var hitVec: Vec4 = null;
 	var planegroup: Int = 2; //third square in Blender 2^(n); n=2 (first square is n=0)
 	var visib: Bool =  false;
+	var objectGroup: Int = 1;
 
 	var objList: Array<Object> = [];
 	var mouseRel: Bool = true;
@@ -168,7 +173,6 @@ class KS1RS_Base extends iron.Trait {
 			
 	function onUpdate(){
 		//trace(Std.string(object.name) +Std.string(object.uid)+"_Active");
-		//var keyboard = Input.getKeyboard();
 		var mouse = Input.getMouse();		
 		var rb = null;
 
@@ -195,9 +199,11 @@ class KS1RS_Base extends iron.Trait {
 		}
 
 		if (mouse.down("left") && movingObj == ring){
+
 			if (hitVec == null){
-				hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<1);
-				if (hitVec!=null) xyPlane = spawnXZPlane(front.getChild("C_Ring_KS1RS_Front").transform.world.getLoc(), new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
+				hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<objectGroup);
+				if (hitVec!=null||xyPlane == null ) spawnXZPlane(front.getChild("C_Ring_KS1RS_Front").transform.world.getLoc(), new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
+					else xyPlane.remove(); 
 				hitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 			}
 			var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
@@ -475,7 +481,4 @@ class KS1RS_Base extends iron.Trait {
 		return angle;
 	}
 
-}
-	
-
-	
+}		

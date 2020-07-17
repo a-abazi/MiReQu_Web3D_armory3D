@@ -10,7 +10,6 @@ uniform highp vec3 eye;
 uniform highp vec3 eyeLook;
 uniform highp vec2 cameraProj;
 uniform highp vec4 shirr[7];
-uniform highp vec3 backgroundCol;
 uniform highp float envmapStrength;
 uniform highp sampler2D ssaotex;
 uniform highp vec3 sunDir;
@@ -208,11 +207,10 @@ void main()
     highp float dotNV = max(dot(n, v), 0.0);
     highp vec3 envl = shIrradiance(n, shirr);
     envl *= albedo;
-    envl += (backgroundCol * surfaceF0(g1.xyz, metallic));
     envl *= (envmapStrength * occspec.x);
     fragColor = vec4(envl.x, envl.y, envl.z, fragColor.w);
-    highp vec3 _824 = fragColor.xyz * textureLod(ssaotex, texCoord, 0.0).x;
-    fragColor = vec4(_824.x, _824.y, _824.z, fragColor.w);
+    highp vec3 _815 = fragColor.xyz * textureLod(ssaotex, texCoord, 0.0).x;
+    fragColor = vec4(_815.x, _815.y, _815.z, fragColor.w);
     highp vec3 sh = normalize(v + sunDir);
     highp float sdotNH = dot(n, sh);
     highp float sdotVH = dot(v, sh);
@@ -220,8 +218,8 @@ void main()
     highp float svisibility = 1.0;
     highp vec3 sdirect = lambertDiffuseBRDF(albedo, sdotNL) + (specularBRDF(f0, roughness, sdotNL, sdotNH, dotNV, sdotVH) * occspec.y);
     svisibility = shadowTestCascade(shadowMap, eye, p + ((n * shadowsBias) * 10.0), shadowsBias);
-    highp vec3 _881 = fragColor.xyz + ((sdirect * svisibility) * sunCol);
-    fragColor = vec4(_881.x, _881.y, _881.z, fragColor.w);
+    highp vec3 _872 = fragColor.xyz + ((sdirect * svisibility) * sunCol);
+    fragColor = vec4(_872.x, _872.y, _872.z, fragColor.w);
     fragColor.w = 1.0;
 }
 

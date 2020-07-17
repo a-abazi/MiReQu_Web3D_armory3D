@@ -90,6 +90,7 @@ class KM100_Base extends iron.Trait {
 		screwNegLim = (children[2].transform.world.getLoc().distanceTo( children[6].transform.world.getLoc()));
 		screwTravelDist = Math.abs(screwPosLim) + Math.abs(screwNegLim);
 
+		updateParts();
 		//unused 
 		//object.properties.set("objRdy", true);
 		
@@ -238,7 +239,7 @@ class KM100_Base extends iron.Trait {
 		mirror.transform.scale = scale;
 		rbSync(mirror);
 
-		Event.send("Calc_Beams"); // Event of the scene trait calc beams, makes a new calculation of the Beams
+		//Event.send("Calc_Beams"); // Event of the scene trait calc beams, makes a new calculation of the Beams
 	}
 	
 	function spawnObject(objectName: String, visible: Bool):Object {

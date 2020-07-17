@@ -51,6 +51,9 @@ class LDM56_Base extends iron.Trait {
 	@prop
 	var defaultControls: Bool = true;
 
+	@prop // height of the post
+	var postHeight: Float = 0.75;
+
 	//var children: Array <Object>;
 	var nScale: Vec4  = new Vec4(0.01,0.01,0.01,1);
 
@@ -113,6 +116,8 @@ class LDM56_Base extends iron.Trait {
 	var visib: Bool =  false;
 	var mouseXmove: Float = 0;
 	var mouseRel: Bool = true;
+	
+	var std_postHeight = 0.75;
 
 	public function new() {
 		super();
@@ -124,7 +129,9 @@ class LDM56_Base extends iron.Trait {
 
 
 	public function onInit() {
+		postDist = postHeight - std_postHeight;
 		initProps(object);
+
 		objList.push(object);
 		var nScale: Vec4  = new Vec4(0.01,0.01,0.01,1);
 
