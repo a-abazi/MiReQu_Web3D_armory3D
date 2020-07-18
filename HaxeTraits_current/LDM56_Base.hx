@@ -51,6 +51,9 @@ class LDM56_Base extends iron.Trait {
 	@prop
 	var defaultControls: Bool = true;
 
+	@prop // height of the post
+	var postHeight: Float = 0.75;
+
 	//var children: Array <Object>;
 	var nScale: Vec4  = new Vec4(0.01,0.01,0.01,1);
 
@@ -113,6 +116,8 @@ class LDM56_Base extends iron.Trait {
 	var visib: Bool =  false;
 	var mouseXmove: Float = 0;
 	var mouseRel: Bool = true;
+	
+	var std_postHeight = 0.75;
 
 	public function new() {
 		super();
@@ -124,7 +129,9 @@ class LDM56_Base extends iron.Trait {
 
 
 	public function onInit() {
+		postDist = postHeight - std_postHeight;
 		initProps(object);
+
 		objList.push(object);
 		var nScale: Vec4  = new Vec4(0.01,0.01,0.01,1);
 
@@ -705,7 +712,8 @@ class LDM56_Base extends iron.Trait {
 		// helping function to spawn invisible plane in XY
 		// used to project mouse from the screen coordinates to the world
 		var object: Object;
-		var matrix = null;
+		var matrix = Mat4.identity();
+		matrix.setLoc(loc);
 		var spawnChildren = false;
 
 		iron.Scene.active.spawnObject("xyPlane", null, function(o: Object) {
@@ -722,11 +730,6 @@ class LDM56_Base extends iron.Trait {
 			}
 			object.visible = false;
 		}, spawnChildren);
-		//object.visible = true;
-		object.transform.loc = loc;
-		//trace(loc);
-		//trace(object.getTrait(RigidBody).group);
-		rbSync(object);
 		return object;
 	}
 

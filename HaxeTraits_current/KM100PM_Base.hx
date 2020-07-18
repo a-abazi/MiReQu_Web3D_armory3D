@@ -140,6 +140,7 @@ class KM100PM_Base extends iron.Trait {
 			obj.properties.set("PauseResume",true);
 		}
 		pauseUpdate();
+		updateParts();
 	}
 	
 			
