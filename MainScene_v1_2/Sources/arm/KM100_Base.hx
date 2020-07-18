@@ -29,7 +29,7 @@ class KM100_Base extends iron.Trait {
 
 	var screwTopDist: Float = 0.0;
 	var screwBotDist: Float = 0.0;
-	var screwTrans: Float = 0.0005;
+	var screwTrans: Float = 0.00005;
 	var screwPosLim: Float;
 	var screwNegLim: Float;
 	var screwTravelDist: Float;
