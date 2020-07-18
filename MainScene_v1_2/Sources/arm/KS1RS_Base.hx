@@ -202,8 +202,12 @@ class KS1RS_Base extends iron.Trait {
 
 			if (hitVec == null){
 				hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<objectGroup);
-				if (hitVec!=null||xyPlane == null ) spawnXZPlane(front.getChild("C_Ring_KS1RS_Front").transform.world.getLoc(), new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
+				if (hitVec!=null||xyPlane == null ){
+					spawnXZPlane(front.getChild("C_Ring_KS1RS_Front").transform.world.getLoc(), new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
+					//rbSync(xyPlane);
+				} 
 					else xyPlane.remove(); 
+				
 				hitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 			}
 			var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
@@ -236,6 +240,7 @@ class KS1RS_Base extends iron.Trait {
 				updateParts();
 			}
 			else trace("xyPlane not detected by rayCastmethod");
+			
 		}
 		
 
@@ -430,14 +435,14 @@ class KS1RS_Base extends iron.Trait {
 		// helping function to spawn invisible plane in XY
 		// used to project mouse from the screen coordinates to the world
 		var object: Object;
-		var matrix = null;
+		var matrix = Mat4.identity();
+		matrix.compose(loc,rot,new Vec4(1,1,1,1));
 		var spawnChildren = false;
 
 		iron.Scene.active.spawnObject("xyPlane", null, function(o: Object) {
 			object = o;
 			if (matrix != null) {
 				object.transform.setMatrix(matrix);
-			
 				var rigidBody = object.getTrait(RigidBody);
 				if (rigidBody != null) {
 					object.transform.buildMatrix();
@@ -447,12 +452,7 @@ class KS1RS_Base extends iron.Trait {
 			}
 			object.visible = false;
 		}, spawnChildren);
-		//object.visible = true;
-		object.transform.loc = loc;
-		object.transform.rot = rot;
-		//trace(loc);
-		//trace(object.getTrait(RigidBody).group);
-		rbSync(object);
+		//rbSync(object);
 		return object;
 	}
 

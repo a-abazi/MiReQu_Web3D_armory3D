@@ -617,7 +617,8 @@ class UPH2_Base extends iron.Trait {
 		// helping function to spawn invisible plane in XY
 		// used to project mouse from the screen coordinates to the world
 		var object: Object;
-		var matrix = null;
+		var matrix = Mat4.identity();
+		matrix.setLoc(loc);
 		var spawnChildren = false;
 
 		iron.Scene.active.spawnObject("xyPlane", null, function(o: Object) {
@@ -634,11 +635,6 @@ class UPH2_Base extends iron.Trait {
 			}
 			object.visible = false;
 		}, spawnChildren);
-		//object.visible = true;
-		object.transform.loc = loc;
-		//trace(loc);
-		//trace(object.getTrait(RigidBody).group);
-		rbSync(object);
 		return object;
 	}
 

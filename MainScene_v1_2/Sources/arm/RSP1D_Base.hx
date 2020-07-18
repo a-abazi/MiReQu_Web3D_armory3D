@@ -1,6 +1,7 @@
 package arm;
 
 
+import js.html.CompositionEvent;
 import iron.Scene;
 import kha.graphics4.hxsl.Types.Vec;
 import iron.math.Quat;
@@ -143,8 +144,12 @@ class RSP1D_Base extends iron.Trait {
 			
 			if (hitVec == null){
 				hitVec = mouseToPlaneHit(mouse.x,mouse.y,1,1<<objectGroup);
-				if (hitVec!=null||xyPlane == null ) xyPlane = spawnXZPlane(ring.transform.loc, new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
+				if (hitVec!=null||xyPlane == null ){
+					xyPlane = spawnXZPlane(ring.transform.loc, new Quat().fromTo(new Vec4(0,0,1,1), ring.transform.look().normalize()) );
+					//rbSync(xyPlane);
+				}
 				else xyPlane.remove();
+				
 				hitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
 			}
 			var newHitVec = mouseToPlaneHit(mouse.x,mouse.y,planegroup+1,1<<planegroup);
@@ -245,7 +250,8 @@ class RSP1D_Base extends iron.Trait {
 		// helping function to spawn invisible plane in XY
 		// used to project mouse from the screen coordinates to the world
 		var object: Object;
-		var matrix = null;
+		var matrix =   Mat4.identity();
+		matrix.compose(loc,rot,new Vec4(1,1,1,1));
 		var spawnChildren = false;
 
 		iron.Scene.active.spawnObject("xyPlane", null, function(o: Object) {
@@ -259,14 +265,12 @@ class RSP1D_Base extends iron.Trait {
 					rigidBody.group = planegroup;
 				}
 			}
-			object.visible = true;
+			object.visible = false;
 		}, spawnChildren);
-		//object.visible = true;
-		object.transform.loc = loc;
-		object.transform.rot = rot;
-		//trace(loc);
-		//trace(object.getTrait(RigidBody).group);
-		rbSync(object);
+		
+		//rbSync(object);
+
+		
 		return object;
 	}
 
