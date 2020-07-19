@@ -347,12 +347,8 @@ class KS1RS_Base extends iron.Trait {
 
 		// calculate angles
 		var vU = new Vec4().setFrom(object.transform.up()).normalize();
-		var sgnU = Std.int((screwTopDist - screwMidDist)/Math.abs(screwTopDist - screwMidDist));
-		var angU = Math.acos(rotVecT.dot(vU))*sgnU;
 
 		var vR = new Vec4().setFrom(object.transform.right()).normalize();
-		var sgnB = Std.int((screwBotDist - screwMidDist)/Math.abs(screwBotDist - screwMidDist));
-		var angB = Math.acos(rotVecB.dot(vR))*sgnB;
 		
 		// update transform matrix
 		var mSM = object.getChild("C_Screw_Middle_Zero_KS1RS_Base").transform.world;
@@ -360,9 +356,10 @@ class KS1RS_Base extends iron.Trait {
 		front.transform.scale = nScale;
 		front.transform.move(screwMid.transform.look().normalize(), screwMidDist);
 
-		//calculate quaternions from angles, and calculate new total quaterion for rotation in new transfrom matrix
-		var q1 = new Quat().fromAxisAngle(new Vec4().setFrom(object.transform.right()).normalize(), angU*-1);
-		var q2 = new Quat().fromAxisAngle(new Vec4().setFrom(object.transform.up()).normalize(), angB);
+		//calculate quaternions from vectors, and calculate new total quaterion for rotation in new transfrom matrix
+		var q1 = quatFromV1toV2(vU,rotVecT);
+		var q2 = quatFromV1toV2(vR,rotVecB);
+
 		var rotF = new Quat();
 		rotF.mult(q1);
 		rotF.mult(q2);
@@ -390,6 +387,22 @@ class KS1RS_Base extends iron.Trait {
 		
 		Event.send("Calc_Beams"); // Event of the scene trait calc beams, makes a new calculation of the Beams
 	}
+
+	function quatFromV1toV2(v1:Vec4,v2: Vec4): Quat {
+		/* This Function calculates the quaternion to obtain a rotation from one vector to another
+		detailed description on https://stackoverflow.com/questions/1171849/finding-quaternion-representing-the-rotation-from-one-vector-to-another
+		*/
+		var q = new Quat();
+		var a = new Vec4().crossvecs(v1,v2);
+		q.x = a.x;
+		q.y = a.y;
+		q.z = a.z;
+		q.w = Math.sqrt( v1.length() * v1.length() * v2.length() * v2.length() ) +  new Vec4().setFrom(v1).dot(v2);
+		q.normalize();
+
+		return q;
+	}
+
 	
 	function spawnObject(objectName: String, visible: Bool):Object {
 		var object: Object;

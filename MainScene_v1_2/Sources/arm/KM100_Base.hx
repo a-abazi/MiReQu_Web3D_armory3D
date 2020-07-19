@@ -85,6 +85,8 @@ class KM100_Base extends iron.Trait {
 		mirror.transform.scale = scale;
 		mirror.visible = true;
 		rbSync(mirror);
+		
+		trace(Std.string(screwTopDist)+", _________"+Std.string(mirror.transform.rot));
 
 		screwPosLim = (children[1].transform.world.getLoc().distanceTo( screwBot.getChildren()[0].transform.world.getLoc()));
 		screwNegLim = (children[2].transform.world.getLoc().distanceTo( children[6].transform.world.getLoc()));
@@ -166,6 +168,8 @@ class KM100_Base extends iron.Trait {
 				updateParts();
 			}
 		}
+		//trace("ScrewTop: "+ Std.string(screwTopDist));
+		//trace("ScrewBot: "+ Std.string(screwBotDist));
 
 	}
 
@@ -178,6 +182,7 @@ class KM100_Base extends iron.Trait {
 		notifyOnUpdate(onUpdate);
 		return true;
 	}
+
 	function updateParts() {
 		scale = new Vec4(0.01,0.01,0.01,1);
 
@@ -200,7 +205,7 @@ class KM100_Base extends iron.Trait {
 		rbSync(screwBot);
 
 
-		// calculate correct rotation of mirror
+		// calculate correct rotation of mirror, by calculating vectors
 		var loc_cF = children[0].transform.world.getLoc();
 		var loc_ST = screwTop.transform.world.getLoc();
 		var loc_SB = screwBot.transform.world.getLoc();
@@ -208,27 +213,22 @@ class KM100_Base extends iron.Trait {
 		var rotVecT = new Vec4().setFrom(loc_ST).sub(loc_cF).normalize();
 		var rotVecB = new Vec4().setFrom(loc_SB).sub(loc_cF).normalize();
 
-		// calculate angles
 		var vU = new Vec4().setFrom(object.transform.up()).normalize();
-		var sgnU = Std.int(screwTopDist/Math.abs(screwTopDist));
-		var angU = Math.acos(rotVecT.dot(vU))*sgnU;
-
 		var vR = new Vec4().setFrom(object.transform.right()).normalize().mult(-1);
-		var sgnB = Std.int(screwBotDist/Math.abs(screwBotDist));
-		var angB = Math.acos(rotVecB.dot(vR))*sgnB;
-		
+
+		//calculate quaternions from vectors, and calculate new total quaterion for rotation in new transfrom matrix
+		var q1 = quatFromV1toV2(vU,rotVecT);
+		var q2 = quatFromV1toV2(vR,rotVecB);
+
+		var rotF = new Quat();
+		rotF.mult(q2);
+		rotF.mult(q1);
+		rotF.mult(object.transform.rot);
+
 		// update transform matrix
 		var mF = children[0].transform.world;
 		front.transform.setMatrix(mF);
 		front.transform.scale = scale;
-
-		//calculate quaternions from angles, and calculate new total quaterion for rotation in new transfrom matrix
-		var q1 = new Quat().fromAxisAngle(new Vec4().setFrom(object.transform.right()).normalize(), angU);
-		var q2 = new Quat().fromAxisAngle(new Vec4().setFrom(object.transform.up()).normalize(), angB);
-		var rotF = new Quat();
-		rotF.mult(q1);
-		rotF.mult(q2);
-		rotF.mult(object.transform.rot);
 		front.transform.rot = rotF;
 		front.transform.buildMatrix();
 		rbSync(front);
@@ -238,10 +238,25 @@ class KM100_Base extends iron.Trait {
 		mirror.transform.setMatrix(mM);
 		mirror.transform.scale = scale;
 		rbSync(mirror);
-
 		//Event.send("Calc_Beams"); // Event of the scene trait calc beams, makes a new calculation of the Beams
 	}
 	
+
+	function quatFromV1toV2(v1:Vec4,v2: Vec4): Quat {
+		/* This Function calculates the quaternion to obtain a rotation from one vector to another
+		detailed description on https://stackoverflow.com/questions/1171849/finding-quaternion-representing-the-rotation-from-one-vector-to-another
+		*/
+		var q = new Quat();
+		var a = new Vec4().crossvecs(v1,v2);
+		q.x = a.x;
+		q.y = a.y;
+		q.z = a.z;
+		q.w = Math.sqrt( v1.length() * v1.length() * v2.length() * v2.length() ) +  new Vec4().setFrom(v1).dot(v2);
+		q.normalize();
+
+		return q;
+	}
+
 	function spawnObject(objectName: String, visible: Bool):Object {
 		var object: Object;
 		var matrix = null;

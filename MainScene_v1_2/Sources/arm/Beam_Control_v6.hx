@@ -136,6 +136,7 @@ class Beam_Control_v6 extends iron.Trait {
 
 	var once: Bool = true;
 	var delay: Float = 1;
+	
 	function onUpdate(){
 		// do something after init but a little time later (variable "delay")
 		// without the delay, not alle objects are initialized and an error is given when these properties are called
@@ -684,7 +685,8 @@ class Beam_Control_v6 extends iron.Trait {
 
                         if (object == null) return return_bool;
                         if (object.properties == null) object.properties = new Map();
-                        object.properties.set("parent",beam);
+						object.properties.set("parent",beam);
+						object.properties.set("wl",beam.properties.get("wl"));
                         arr_all_arrows.push(object);
                         arrayofBeam.push(object);
 					}
@@ -710,7 +712,8 @@ class Beam_Control_v6 extends iron.Trait {
 
                         if (object == null) return return_bool;
                         if (object.properties == null) object.properties = new Map();
-                        object.properties.set("parent",beam);
+						object.properties.set("parent",beam);
+						object.properties.set("wl",beam.properties.get("wl"));
                         arr_all_arrows.push(object);
                         arrayofBeam.push(object);
 
