@@ -1,0 +1,260 @@
+#version 300 es
+precision mediump float;
+precision highp int;
+
+uniform highp mat4 LWVPSpot0;
+uniform highp sampler2DShadow shadowMapSpot[4];
+uniform highp mat4 LWVPSpot1;
+uniform highp mat4 LWVPSpot2;
+uniform highp mat4 LWVPSpot3;
+uniform highp sampler2D ImageTexture;
+uniform highp vec3 sunDir;
+uniform highp sampler2DShadow shadowMap;
+uniform highp float shadowsBias;
+uniform highp vec3 sunCol;
+uniform highp vec2 cameraProj;
+uniform highp vec2 cameraPlane;
+uniform highp sampler2D clustersData;
+uniform highp vec4 lightsArray[32];
+uniform highp vec4 lightsArraySpot[16];
+uniform highp vec4 shirr[7];
+uniform highp float envmapStrength;
+uniform highp samplerCubeShadow shadowMapPoint[4];
+uniform highp vec2 lightProj;
+
+in highp vec3 wnormal;
+in highp vec3 eyeDir;
+in highp vec2 texCoord;
+in highp vec4 lightPosition;
+in highp vec4 wvpposition;
+in highp vec3 wposition;
+out highp vec4 fragColor;
+
+highp vec3 surfaceF0(highp vec3 baseColor, highp float metalness)
+{
+    return mix(vec3(0.039999999105930328369140625), baseColor, vec3(metalness));
+}
+
+highp float linearize(highp float depth, highp vec2 cameraProj_1)
+{
+    return cameraProj_1.y / (depth - cameraProj_1.x);
+}
+
+int getClusterI(highp vec2 tc, highp float viewz, highp vec2 cameraPlane_1)
+{
+    int sliceZ = 0;
+    highp float cnear = 3.0 + cameraPlane_1.x;
+    if (viewz >= cnear)
+    {
+        highp float z = log((viewz - cnear) + 1.0) / log((cameraPlane_1.y - cnear) + 1.0);
+        sliceZ = int(z * 15.0) + 1;
+    }
+    return (int(tc.x * 16.0) + int(float(int(tc.y * 16.0)) * 16.0)) + int((float(sliceZ) * 16.0) * 16.0);
+}
+
+highp float d_ggx(highp float nh, highp float a)
+{
+    highp float a2 = a * a;
+    highp float denom = pow(((nh * nh) * (a2 - 1.0)) + 1.0, 2.0);
+    return (a2 * 0.3183098733425140380859375) / denom;
+}
+
+highp float v_smithschlick(highp float nl, highp float nv, highp float a)
+{
+    return 1.0 / (((nl * (1.0 - a)) + a) * ((nv * (1.0 - a)) + a));
+}
+
+highp vec3 f_schlick(highp vec3 f0, highp float vh)
+{
+    return f0 + ((vec3(1.0) - f0) * exp2((((-5.554729938507080078125) * vh) - 6.9831600189208984375) * vh));
+}
+
+highp vec3 specularBRDF(highp vec3 f0, highp float roughness, highp float nl, highp float nh, highp float nv, highp float vh)
+{
+    highp float a = roughness * roughness;
+    return (f_schlick(f0, vh) * (d_ggx(nh, a) * clamp(v_smithschlick(nl, nv, a), 0.0, 1.0))) / vec3(4.0);
+}
+
+highp float attenuate(highp float dist)
+{
+    return 1.0 / (dist * dist);
+}
+
+highp float PCF(highp sampler2DShadow shadowMap_1, highp vec2 uv, highp float compare, highp vec2 smSize)
+{
+    highp vec3 _188 = vec3(uv + (vec2(-1.0) / smSize), compare);
+    highp float result = texture(shadowMap_1, vec3(_188.xy, _188.z));
+    highp vec3 _197 = vec3(uv + (vec2(-1.0, 0.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_197.xy, _197.z));
+    highp vec3 _208 = vec3(uv + (vec2(-1.0, 1.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_208.xy, _208.z));
+    highp vec3 _219 = vec3(uv + (vec2(0.0, -1.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_219.xy, _219.z));
+    highp vec3 _227 = vec3(uv, compare);
+    result += texture(shadowMap_1, vec3(_227.xy, _227.z));
+    highp vec3 _238 = vec3(uv + (vec2(0.0, 1.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_238.xy, _238.z));
+    highp vec3 _249 = vec3(uv + (vec2(1.0, -1.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_249.xy, _249.z));
+    highp vec3 _260 = vec3(uv + (vec2(1.0, 0.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_260.xy, _260.z));
+    highp vec3 _271 = vec3(uv + (vec2(1.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_271.xy, _271.z));
+    return result / 9.0;
+}
+
+highp float shadowTest(highp sampler2DShadow shadowMap_1, highp vec3 lPos, highp float shadowsBias_1)
+{
+    bool _282 = lPos.x < 0.0;
+    bool _288;
+    if (!_282)
+    {
+        _288 = lPos.y < 0.0;
+    }
+    else
+    {
+        _288 = _282;
+    }
+    bool _294;
+    if (!_288)
+    {
+        _294 = lPos.x > 1.0;
+    }
+    else
+    {
+        _294 = _288;
+    }
+    bool _300;
+    if (!_294)
+    {
+        _300 = lPos.y > 1.0;
+    }
+    else
+    {
+        _300 = _294;
+    }
+    if (_300)
+    {
+        return 1.0;
+    }
+    return PCF(shadowMap_1, lPos.xy, lPos.z - shadowsBias_1, vec2(1024.0));
+}
+
+highp vec3 sampleLight(highp vec3 p, highp vec3 n, highp vec3 v, highp float dotNV, highp vec3 lp, highp vec3 lightCol, highp vec3 albedo, highp float rough, highp float spec, highp vec3 f0, int index, highp float bias, bool isSpot, highp float spotA, highp float spotB, highp vec3 spotDir)
+{
+    highp vec3 ld = lp - p;
+    highp vec3 l = normalize(ld);
+    highp vec3 h = normalize(v + l);
+    highp float dotNH = dot(n, h);
+    highp float dotVH = dot(v, h);
+    highp float dotNL = dot(n, l);
+    highp vec3 direct = (albedo * max(dotNL, 0.0)) + (specularBRDF(f0, rough, dotNL, dotNH, dotNV, dotVH) * spec);
+    direct *= lightCol;
+    direct *= attenuate(distance(p, lp));
+    if (isSpot)
+    {
+        highp float spotEffect = dot(spotDir, l);
+        if (spotEffect < spotA)
+        {
+            direct *= smoothstep(spotB, spotA, spotEffect);
+        }
+        if (index == 0)
+        {
+            highp vec4 lPos = LWVPSpot0 * vec4(p + ((n * bias) * 10.0), 1.0);
+            direct *= shadowTest(shadowMapSpot[0], lPos.xyz / vec3(lPos.w), bias);
+        }
+        else
+        {
+            if (index == 1)
+            {
+                highp vec4 lPos_1 = LWVPSpot1 * vec4(p + ((n * bias) * 10.0), 1.0);
+                direct *= shadowTest(shadowMapSpot[1], lPos_1.xyz / vec3(lPos_1.w), bias);
+            }
+            else
+            {
+                if (index == 2)
+                {
+                    highp vec4 lPos_2 = LWVPSpot2 * vec4(p + ((n * bias) * 10.0), 1.0);
+                    direct *= shadowTest(shadowMapSpot[2], lPos_2.xyz / vec3(lPos_2.w), bias);
+                }
+                else
+                {
+                    if (index == 3)
+                    {
+                        highp vec4 lPos_3 = LWVPSpot3 * vec4(p + ((n * bias) * 10.0), 1.0);
+                        direct *= shadowTest(shadowMapSpot[3], lPos_3.xyz / vec3(lPos_3.w), bias);
+                    }
+                }
+            }
+        }
+        return direct;
+    }
+    return direct;
+}
+
+highp vec3 shIrradiance(highp vec3 nor, highp vec4 shirr_1[7])
+{
+    highp vec3 cl00 = vec3(shirr_1[0].x, shirr_1[0].y, shirr_1[0].z);
+    highp vec3 cl1m1 = vec3(shirr_1[0].w, shirr_1[1].x, shirr_1[1].y);
+    highp vec3 cl10 = vec3(shirr_1[1].z, shirr_1[1].w, shirr_1[2].x);
+    highp vec3 cl11 = vec3(shirr_1[2].y, shirr_1[2].z, shirr_1[2].w);
+    highp vec3 cl2m2 = vec3(shirr_1[3].x, shirr_1[3].y, shirr_1[3].z);
+    highp vec3 cl2m1 = vec3(shirr_1[3].w, shirr_1[4].x, shirr_1[4].y);
+    highp vec3 cl20 = vec3(shirr_1[4].z, shirr_1[4].w, shirr_1[5].x);
+    highp vec3 cl21 = vec3(shirr_1[5].y, shirr_1[5].z, shirr_1[5].w);
+    highp vec3 cl22 = vec3(shirr_1[6].x, shirr_1[6].y, shirr_1[6].z);
+    return ((((((((((cl22 * 0.429042994976043701171875) * ((nor.y * nor.y) - ((-nor.z) * (-nor.z)))) + (((cl20 * 0.743125021457672119140625) * nor.x) * nor.x)) + (cl00 * 0.88622701168060302734375)) - (cl20 * 0.2477079927921295166015625)) + (((cl2m2 * 0.85808598995208740234375) * nor.y) * (-nor.z))) + (((cl21 * 0.85808598995208740234375) * nor.y) * nor.x)) + (((cl2m1 * 0.85808598995208740234375) * (-nor.z)) * nor.x)) + ((cl11 * 1.02332794666290283203125) * nor.y)) + ((cl1m1 * 1.02332794666290283203125) * (-nor.z))) + ((cl10 * 1.02332794666290283203125) * nor.x);
+}
+
+void main()
+{
+    highp vec3 n = normalize(wnormal);
+    highp vec3 vVec = normalize(eyeDir);
+    highp vec4 ImageTexture_texread_store = texture(ImageTexture, texCoord);
+    highp vec3 _687 = pow(ImageTexture_texread_store.xyz, vec3(2.2000000476837158203125));
+    ImageTexture_texread_store = vec4(_687.x, _687.y, _687.z, ImageTexture_texread_store.w);
+    highp float dotNV = max(dot(n, vVec), 0.0);
+    highp vec3 ImageTexture_Color_res = ImageTexture_texread_store.xyz;
+    highp vec3 basecol = ImageTexture_Color_res;
+    highp float roughness = 1.0;
+    highp float metallic = 0.0;
+    highp float occlusion = 1.0;
+    highp float specular = 1.0;
+    highp float emission = 0.0;
+    highp vec3 direct = vec3(0.0);
+    highp float svisibility = 1.0;
+    highp float sdotNL = max(dot(n, sunDir), 0.0);
+    if (lightPosition.w > 0.0)
+    {
+        highp vec3 lPos = lightPosition.xyz / vec3(lightPosition.w);
+        highp vec3 _742 = vec3(lPos.xy, lPos.z - shadowsBias);
+        svisibility = texture(shadowMap, vec3(_742.xy, _742.z));
+    }
+    direct += (((basecol * sdotNL) * sunCol) * svisibility);
+    highp vec3 albedo = basecol;
+    highp vec3 f0 = surfaceF0(basecol, metallic);
+    highp vec2 param = cameraProj;
+    highp float viewz = linearize(gl_FragCoord.z, param);
+    highp vec2 param_1 = ((wvpposition.xy / vec2(wvpposition.w)) * 0.5) + vec2(0.5);
+    highp float param_2 = viewz;
+    highp vec2 param_3 = cameraPlane;
+    int clusterI = getClusterI(param_1, param_2, param_3);
+    int numLights = int(texelFetch(clustersData, ivec2(clusterI, 0), 0).x * 255.0);
+    int numSpots = int(texelFetch(clustersData, ivec2(clusterI, 5), 0).x * 255.0);
+    int numPoints = numLights - numSpots;
+    for (int i = 0; i < min(numLights, 4); i++)
+    {
+        int li = int(texelFetch(clustersData, ivec2(clusterI, i + 1), 0).x * 255.0);
+        int param_4 = li;
+        highp float param_5 = lightsArray[li * 2].w;
+        bool param_6 = li > (numPoints - 1);
+        highp float param_7 = lightsArray[(li * 2) + 1].w;
+        highp float param_8 = lightsArraySpot[li].w;
+        highp vec3 param_9 = lightsArraySpot[li].xyz;
+        direct += sampleLight(wposition, n, vVec, dotNV, lightsArray[li * 2].xyz, lightsArray[(li * 2) + 1].xyz, albedo, roughness, specular, f0, param_4, param_5, param_6, param_7, param_8, param_9);
+    }
+    fragColor = vec4(direct + ((basecol * shIrradiance(n, shirr)) * envmapStrength), 1.0);
+    highp vec3 _918 = pow(fragColor.xyz, vec3(0.4545454680919647216796875));
+    fragColor = vec4(_918.x, _918.y, _918.z, fragColor.w);
+}
+
