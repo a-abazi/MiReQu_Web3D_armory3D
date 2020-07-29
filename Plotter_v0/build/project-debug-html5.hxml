@@ -28,6 +28,7 @@
 -D arm_audio
 -D arm_noembed
 -D arm_soundcompress
+-D arm_debug
 -D arm_ui
 -D arm_skin
 -D arm_particles
@@ -61,5 +62,10 @@
 -js debug-html5\kha.js
 arm.Plotter
 --macro keep('arm.Plotter')
+armory.trait.internal.Bridge
+--macro keep('armory.trait.internal.Bridge')
+armory.trait.internal.DebugConsole
+--macro keep('armory.trait.internal.DebugConsole')
+--times
 -debug
 -main Main

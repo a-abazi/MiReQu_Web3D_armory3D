@@ -12,11 +12,14 @@ class Plotter extends iron.Trait {
 
     public var pos_x = 20;
     public var pos_y = 20;
-    public var width = 400;
+    public var width = 650;
     public var height = 1200;
 
-
-
+    var time:Float;
+    var timedicretization = 0.1;
+    var maxPoints = 200;
+    var xVals: Array<Float>;
+    var yVals: Array<Float>;
 
     //var canvas: CanvasScript;
 
@@ -31,7 +34,10 @@ class Plotter extends iron.Trait {
     }
 
     function sceneInit() {
-        
+        time = 0.; 
+        xVals = [0.];
+        yVals = [];
+        yVals.push(Math.sin(xVals[xVals.length-1]));
 		// Store references to cube and plane objects
 		notifyOnRender2D(render2D);
 		
@@ -40,18 +46,30 @@ class Plotter extends iron.Trait {
 
     function render2D(g:kha.graphics2.Graphics) {
         g.end();
+        ui.begin(g);
+        var hwin = Id.handle();
+
+        time += iron.system.Time.delta;
+        if (time > timedicretization) {
+            time = 0;
+            hwin.redraws = 1;
+            xVals.push(xVals[xVals.length-1] + timedicretization);
+            yVals.push(Math.sin(xVals[xVals.length-1]));
+            if (xVals.length>maxPoints){
+                xVals.splice(0,1);
+                yVals.splice(0,1);
+            }
+        }
+        else hwin.redraws = 0;
 
         // Start with UI
-        ui.begin(g);
         // Make window
-        if (ui.window(Id.handle(), pos_x, pos_y, width, height, false)) {
-            // Make panel in this window
-            ui.text("Coordinate System");
-            //ui.rect(10,10,50,50,Color.Black,2);
-            
-            ui.coordinateSystem(300,300,2);
+        if (ui.window(hwin, pos_x, pos_y, width, height, false)) {
+            ui.coordinateSystem(xVals,yVals,600,600,2);
         }
         ui.end();
+
+
 
         g.begin(false);
     }

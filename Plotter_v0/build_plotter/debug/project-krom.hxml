@@ -28,6 +28,7 @@
 -D arm_audio
 -D arm_noembed
 -D arm_soundcompress
+-D arm_debug
 -D arm_ui
 -D arm_skin
 -D arm_particles
@@ -54,4 +55,9 @@
 -js krom\krom.js.temp
 arm.Plotter
 --macro keep('arm.Plotter')
+armory.trait.internal.Bridge
+--macro keep('armory.trait.internal.Bridge')
+armory.trait.internal.DebugConsole
+--macro keep('armory.trait.internal.DebugConsole')
+--times
 -main Main
