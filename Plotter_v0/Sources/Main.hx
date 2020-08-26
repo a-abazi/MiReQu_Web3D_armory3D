@@ -1,7 +1,7 @@
 // Auto-generated
 package ;
 class Main {
-    public static inline var projectName = 'plotter';
+    public static inline var projectName = 'plotter2';
     public static inline var projectVersion = '1.0';
     public static inline var projectPackage = 'arm';
     public static function main() {
