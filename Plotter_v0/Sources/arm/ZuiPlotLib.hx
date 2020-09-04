@@ -30,8 +30,8 @@ class ZuiPlotLib extends Zui {
         var x0 = 80.* SCALE();
         var y0 = 40.* SCALE();
 
-        var xl = width * SCALE() - x0;
-        var yl = height * SCALE() - y0;
+        var xl = (width-x0) * SCALE() ;
+        var yl = (height-y0) * SCALE() ;
 
         var fontSize = 30;
 

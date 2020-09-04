@@ -36,10 +36,8 @@ class Plotter extends iron.Trait {
     var n_values = 200;
 
     
-    var currData:CCJson;
+    var currDataTimeTagger:CCJson;
 
-
-    //var canvas: CanvasScript;
 
     public function new() {
         super();
@@ -68,9 +66,6 @@ class Plotter extends iron.Trait {
     function onUpdate() {
         var keyboard = iron.system.Input.getKeyboard();
 
-        if (keyboard.started("space")){
-            getCurrData();
-        }
     }
 
     function render2D(g:kha.graphics2.Graphics) {
@@ -82,10 +77,10 @@ class Plotter extends iron.Trait {
         if (time > timediscretization/2) {
             time = 0;
             hwin.redraws = 1;
-            getCurrData();
-            if (currData!=null){
-                yValsList = [currData.C1,currData.C2 ];
-                yCCList = [currData.CC12];
+            getCurrTimetagger();
+            if (currDataTimeTagger!=null){
+                yValsList = [currDataTimeTagger.C1,currDataTimeTagger.C2 ];
+                yCCList = [currDataTimeTagger.CC12];
             }
             
         }
@@ -94,7 +89,7 @@ class Plotter extends iron.Trait {
         // Start with UI
         // Make window
         if (ui.window(hwin, pos_x, pos_y, width, height, false)) {
-            if (currData!=null && yValsList!= null){
+            if (currDataTimeTagger!=null && yValsList!= null){
                 ui.coordinateSystem(xVals,yValsList,600,300,3);
                 ui.coordinateSystem(xVals,yCCList,600,300,3);
                 //trace(yVals[1]);
@@ -110,22 +105,20 @@ class Plotter extends iron.Trait {
 
 
 
-    public function getCurrData():Void {
-        urlCallBack(function(response){
-            currData = haxe.Json.parse(response);
+    private function getCurrTimetagger():Void {
+        urlCallBack("http://127.0.0.1:5000/datagettimetagger",function(response){
+            currDataTimeTagger = haxe.Json.parse(response);
         });
     }
 
-    function urlCallBack(callback:String->Void):Void {
-        var url = "http://127.0.0.1:5000/dataget";
+
+    function urlCallBack(url,callback:String->Void):Void {
         var http = new haxe.Http(url);
         http.onData = function (data:String) {
         callback(data);
         }
         http.request();
     }
-
-
 
 
 }

@@ -10,12 +10,12 @@ class Main {
         iron.object.LightObject.cascadeSplitFactor = 0.800000011920929;
         armory.system.Starter.main(
             'Scene',
-            0,
+            1,
             false,
             true,
             false,
-            1200,
-            820,
+            1920,
+            1080,
             1,
             true,
             armory.renderpath.RenderPathCreator.get
