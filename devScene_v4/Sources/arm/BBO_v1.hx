@@ -78,21 +78,32 @@ class BBO_v1 extends iron.Trait {
     public function GetNewChildProperties(parBeam:Object, beamNumber:Int){
         var spawnsRays: Int = object.properties.get("spawnsRays");
 		var emptyArray: Array <Object> = new Array();
-		
+		var up_vec: Vec4 = object.transform.world.up().normalize();
+		//TODO: here switched, depends on model in blender 
+		var right_vec: Vec4 = object.transform.world.look().normalize(); 
+		var normal_vec: Vec4 = object.transform.world.right().normalize();
+
         if (beamNumber>=spawnsRays){
             trace("Error: tried to spawn more Beams from source than possible");
             return null;
         }
-        var propMap = new  Map<String,Dynamic>();
-
+		var propMap = new  Map<String,Dynamic>();
+		
+        // calculate the angle of the fast axis (up vec)
+        var vcross = new Vec4(0,0,1,1).cross(right_vec);
+        var vb = new Vec4().setFrom(right_vec);
+        var va = new Vec4(0,0,1,1);
+        var theta = Math.atan2(vcross.dot(normal_vec),va.dot(vb));
+        if (normal_vec.dot(parBeam.transform.world.right())<0) theta*=-1;
         
 		if (parBeam == null) return null;
         if (parBeam.properties == null) parBeam.properties = new Map();
 		propMap = parBeam.properties.copy();
 		
 		propMap["wl"] = 810;
-		if (beamNumber == 0) propMap["stokes_psi"] = 0;
-		if (beamNumber == 1) propMap["stokes_psi"] = Math.PI/2;
+		propMap["stokes_psi"] = 0;
+		propMap["stokes_p"] = 0;
+		propMap["stokes_I"]*= Math.pow(Math.cos(theta-parBeam.properties.get("stokes_psi")),2);
 
 
 		propMap.set("arr_sub_objects",emptyArray);

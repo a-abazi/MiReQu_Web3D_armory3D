@@ -69,6 +69,7 @@ class Waveplate_quarter_v2 extends iron.Trait {
         var vb = new Vec4().setFrom(up_vec);
         var va = new Vec4(0,0,1,1);
         var theta = Math.atan2(vcross.dot(normal_vec),va.dot(vb));
+        if (normal_vec.dot(parBeam.transform.world.right())<0) theta*=-1;
         
         var ct = Math.cos(2*theta);
         var st = Math.sin(2*theta);

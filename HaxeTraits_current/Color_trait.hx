@@ -27,7 +27,7 @@ class Color_trait extends iron.Trait {
 		// link - material node name
 		
 		if (object == null ) return null;
-		if (link == "RGB" && object.name == "Beam"  || link == "RGB" && object.name == "Stern_01") {
+		if (link == "RGB" && object.name == "Beam" ) {
 			var t = Time.time();
 			
 			if (object == null) return null;

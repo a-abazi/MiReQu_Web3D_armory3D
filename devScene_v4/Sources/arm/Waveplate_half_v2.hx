@@ -66,6 +66,7 @@ class Waveplate_half_v2 extends iron.Trait {
         var vb = new Vec4().setFrom(up_vec);
         var va = new Vec4(0,0,1,1);
         var theta = Math.atan2(vcross.dot(normal_vec),va.dot(vb));
+        if (normal_vec.dot(parBeam.transform.world.right())<0) theta*=-1;
         
 
         var ct = Math.cos(2*theta);
@@ -88,8 +89,6 @@ class Waveplate_half_v2 extends iron.Trait {
         new_childprops["stokes_psi"] = 1./2.*Math.atan2(stokes_vec.z,stokes_vec.y)-Math.atan2(0,1);
         new_childprops["stokes_chi"] = 1./2.*Math.atan2(stokes_vec.w,Math.sqrt(Math.pow(stokes_vec.z,2)+Math.pow(stokes_vec.y,2)))-Math.atan2(0,1);
 
-        //trace(new_childprops["stokes_chi"]);
-        //trace(stokes_vec);
         return  new_childprops;
     }
 

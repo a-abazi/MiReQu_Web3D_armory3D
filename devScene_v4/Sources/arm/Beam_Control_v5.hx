@@ -9,7 +9,7 @@ import iron.object.Object;
 import armory.trait.physics.RigidBody;
 import armory.system.Event;
 
-
+// NEW THRESHHolds for Stokes I and p 16.09.2020
 class Beam_Control_v5 extends iron.Trait {
 
 	@prop 
@@ -227,11 +227,11 @@ class Beam_Control_v5 extends iron.Trait {
 					if (source_object.properties.get("spawnsRays") != null){
 						var spawnsRays: Int = source_object.properties.get("spawnsRays");
 						for (j in 0...spawnsRays){
-							var parBeam: Object = curr_beams[parent_index];
+							var parBeam: Object = curr_beams[parent_index-1];
 							
 							var beam_props = callTraitFunction(source_object,Proptraitname,funName_NBP,[parBeam,j]);
 
-							var new_dir: Vec4 = callTraitFunction(source_object,Proptraitname,funName_NDir,[curr_dirs[parent_index],j] );
+							var new_dir: Vec4 = callTraitFunction(source_object,Proptraitname,funName_NDir,[curr_dirs[parent_index-1],j] );
 							var new_Beam = spawnEmptyBeam(false);
 							
 							new_Beam.properties = beam_props;
@@ -499,6 +499,11 @@ class Beam_Control_v5 extends iron.Trait {
 				curr_beam.properties[key] = childprops[key];
 			}
 
+			if (curr_beam.properties["stokes_I"]<0.005){
+				// curr_beam.remove();
+				curr_beam.visible = false;
+				//break;
+			}
 			
 			
 
@@ -585,7 +590,8 @@ class Beam_Control_v5 extends iron.Trait {
                 numArrows = (beam_length/arrow_dist < max_arrows) ? Std.int(beam_length/arrow_dist) : max_arrows;
 
 				// Check if is state is polarized
-				if (stokes_p< 0.95) continue;
+				if (stokes_p< 0.95 || stokes_I <0.005) continue;
+				
 
 				var scale: Vec4;
 				var flip = false;
@@ -606,13 +612,13 @@ class Beam_Control_v5 extends iron.Trait {
 					var B: Float = Math.sqrt(1./2.*(Ip-absL));
 					var V: Float = stokes_vec.w;
 
-					scale = new Vec4(arrow_diameter,arrow_length*A,arrow_length*B,1);
+					scale = new Vec4(arrow_diameter,arrow_length*A* stokes_I,arrow_length*B* stokes_I,1);
 					
 					if (V<0) flip = true;
 				} 
 				else{
 					objectName = pol_arrow_name;
-					scale = new Vec4(arrow_diameter,arrow_diameter,arrow_length,1);
+					scale = new Vec4(arrow_diameter,arrow_length * stokes_I,arrow_diameter ,1);
 				}
                 // Define Transform for Array
                 
