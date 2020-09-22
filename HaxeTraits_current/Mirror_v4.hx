@@ -36,15 +36,9 @@ class Mirror_v4 extends iron.Trait {
 	}
 	
 	public function GetBeamDirection(in_dir:Vec4){
-		var out_dir = new Vec4();
-		var axis: Vec4 = object.transform.world.look();
+		var axis: Vec4 = object.transform.world.look().normalize();
 		if (in_dir == null || axis == null) return null;
-		var inv_in_dir: Vec4 = new Vec4().setFrom(in_dir);
-		inv_in_dir.mult(-1);
-
-		// see https://en.wikipedia.org/wiki/Reflection_(mathematics) for details
-		out_dir.subvecs(axis.mult(1.0/(axis.length()*axis.length())*2*inv_in_dir.dot(axis)),inv_in_dir); 
-		out_dir.normalize(); 
+		var out_dir = new Vec4().setFrom(in_dir).reflect(axis);
 		
 		return out_dir;
 	}

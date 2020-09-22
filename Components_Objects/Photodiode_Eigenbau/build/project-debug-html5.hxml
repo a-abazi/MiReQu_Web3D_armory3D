@@ -1,0 +1,106 @@
+-cp c:\Users\Abazi\.vscode\extensions\kodetech.kha-20.4.0\Kha\Sources
+-cp c:\Users\Abazi\.vscode\extensions\kodetech.kha-20.4.0\Kha\Backends\HTML5
+-cp c:\MiReGit\Components_Objects\Photodiode_Eigenbau\Sources
+-cp C:\ArmorySDK\armory\Sources
+-cp C:\ArmorySDK\iron\Sources
+-cp C:\ArmorySDK\lib\haxebullet\Sources
+-cp C:\ArmorySDK\lib\zui\Sources
+-cp C:/ArmorySDK/armory
+-cp C:/ArmorySDK/iron
+-cp C:/ArmorySDK/lib/haxebullet
+-cp C:/ArmorySDK/lib/zui
+-D hxcpp_smart_strings
+-D C:/ArmorySDK/armory
+-D C:/ArmorySDK/iron
+-D C:/ArmorySDK/lib/haxebullet
+-D C:/ArmorySDK/lib/zui
+-D arm_deferred
+-D arm_csm
+-D rp_hdr
+-D rp_renderer=Deferred
+-D rp_shadowmap
+-D rp_shadowmap_cascade=1024
+-D rp_shadowmap_cube=512
+-D rp_background=World
+-D rp_render_to_texture
+-D rp_compositornodes
+-D rp_antialiasing=SMAA
+-D rp_supersampling=1
+-D rp_ssgi=SSAO
+-D rp_translucency
+-D arm_audio
+-D arm_physics
+-D arm_bullet
+-D arm_noembed
+-D arm_soundcompress
+-D arm_ui
+-D arm_skin
+-D arm_particles
+-D sys_g1
+-D sys_g2
+-D sys_g3
+-D sys_a1
+-D sys_a2
+-D kha_js
+-D kha_g1
+-D kha_g2
+-D kha_g3
+-D kha_a1
+-D kha_a2
+-D canvas_id=khanvas
+-D script_name=kha
+-D sys_g4
+-D kha_g4
+-D kha_webgl
+-D sys_debug-html5
+-D kha_debug-html5
+-D kha_debug-html5_js
+-D sys_html5
+-D kha_html5
+-D kha_html5_js
+-D sys_debug_html5
+-D kha_debug_html5
+-D kha
+-D kha_version=1810
+-D kha_project_name=CPS532-C2_Laser
+-js debug-html5\kha.js
+arm.ResumeTraitSelector
+--macro keep('arm.ResumeTraitSelector')
+arm.PumpLaser
+--macro keep('arm.PumpLaser')
+armory.trait.physics.bullet.PhysicsWorld
+--macro keep('armory.trait.physics.bullet.PhysicsWorld')
+arm.Spawner_KM100_Base_CPS532_C2_Laser
+--macro keep('arm.Spawner_KM100_Base_CPS532_C2_Laser')
+arm.UPH2_Base
+--macro keep('arm.UPH2_Base')
+arm.Color_trait
+--macro keep('arm.Color_trait')
+arm.KM100_Base_CPS532_C2_Laser
+--macro keep('arm.KM100_Base_CPS532_C2_Laser')
+arm.node.Genral_Object_properties_blocking_001
+--macro keep('arm.node.Genral_Object_properties_blocking_001')
+arm.NewUI
+--macro keep('arm.NewUI')
+armory.trait.physics.bullet.RigidBody
+--macro keep('armory.trait.physics.bullet.RigidBody')
+arm.Spawner_UPH2
+--macro keep('arm.Spawner_UPH2')
+arm.node.Kamera_Bewegung
+--macro keep('arm.node.Kamera_Bewegung')
+arm.Beam_Control_v7
+--macro keep('arm.Beam_Control_v7')
+arm.Mirror_v4
+--macro keep('arm.Mirror_v4')
+arm.node.Genral_Object_properties_blocking
+--macro keep('arm.node.Genral_Object_properties_blocking')
+arm.node.Genral_Object_properties_blocking_002
+--macro keep('arm.node.Genral_Object_properties_blocking_002')
+arm.LDM56_Base
+--macro keep('arm.LDM56_Base')
+arm.KM100_Base
+--macro keep('arm.KM100_Base')
+arm.Spawner_KM100
+--macro keep('arm.Spawner_KM100')
+-debug
+-main Main
