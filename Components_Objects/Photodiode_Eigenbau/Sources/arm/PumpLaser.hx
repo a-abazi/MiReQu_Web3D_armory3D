@@ -67,6 +67,8 @@ class PumpLaser extends iron.Trait {
 			childprops.set("stokes_p"  ,stokes_p  );
 			childprops.set("stokes_psi",stokes_psi/180. * Math.PI);
 			childprops.set("stokes_chi",stokes_chi/180. * Math.PI);
+			childprops.set("beamsize_x",beamsize_x);
+			childprops.set("beamsize_y",beamsize_y);
 
 
 		 });

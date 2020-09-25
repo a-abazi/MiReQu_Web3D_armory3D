@@ -64,8 +64,6 @@ class Beam_Control_v7 extends iron.Trait {
 	@prop 
 	var arrow_dist: Float = 0.75; 
 
-	
-	
 
 	var funName_BP: String = "GetChildProperties";
 
@@ -95,7 +93,7 @@ class Beam_Control_v7 extends iron.Trait {
 	var main_Array_sor:   Array <Dynamic> = [[]];
 	var main_Array_pos:   Array <Dynamic> = [[]];
 	var main_Array_dir:   Array <Dynamic> = [[]];
-	var main_All_arrows: Array <Dynamic>  = [[]];
+	var main_All_arrows: Array <Dynamic> = [[]];
 
 	var calculation_on_sleep: Bool = false;
 	var time = 0.0;
@@ -133,10 +131,8 @@ class Beam_Control_v7 extends iron.Trait {
 		}
 
 		Event.add(calc_event,onEventCB);
-
 	}
 	
-
 	var once: Bool = true;
 	var delay: Float = 1;
 	function onUpdate(){
@@ -164,7 +160,6 @@ class Beam_Control_v7 extends iron.Trait {
 			var updateTime: Float = object.properties.get("updateTime");
 			time += iron.system.Time.delta;
 			if (time >= updateTime){
-				
 				calculation_on_sleep = false;
 				time = 0.0;
 				onEventCB();
@@ -189,8 +184,6 @@ class Beam_Control_v7 extends iron.Trait {
 		}
 		else return;
 			
-			
-		
 		if (timer_on){
 			if (calculation_on_sleep) return;
 			calculation_on_sleep = true;
@@ -204,6 +197,9 @@ class Beam_Control_v7 extends iron.Trait {
 				despawnBeams(beam_array);
 				i++;
 			}
+			//reset Array of detectable Beams
+			arrayDetectableBeams = [new Map()];
+			object.properties.set(nameArrayDetectableBeams,arrayDetectableBeams);
 			return;
 		}
 
@@ -254,7 +250,6 @@ class Beam_Control_v7 extends iron.Trait {
 				blocked = calc_pos_dir(main_Array);
 				blocked = spawnBeams(main_Array, blocked);
 				blocked = polControl(main_Array, array_Pols); //ToDO: Manage properties of subsources so this works again, now the subRays have no properties
-				
 				getDetectableBeams(main_Array,i);
 
 				var curr_beams: Array<Object> = main_Array_beams[i];
@@ -262,7 +257,6 @@ class Beam_Control_v7 extends iron.Trait {
 				var curr_poss: Array<Vec4> = main_Array_pos[i];
 				var curr_dirs: Array<Vec4> = main_Array_dir[i];
 
-				
 				// search the source objects for a new Ray spawning source e.g. Beamsplitter
 				for (parent_index in 1...curr_sources.length){ // skip the first entry as it already spawns the array
 					var source_object = curr_sources[parent_index];
@@ -273,11 +267,11 @@ class Beam_Control_v7 extends iron.Trait {
 					if (source_object.properties.get("spawnsRays") != null){
 						var spawnsRays: Int = source_object.properties.get("spawnsRays");
 						for (j in 0...spawnsRays){
-							var parBeam: Object = curr_beams[parent_index];
+							var parBeam: Object = curr_beams[parent_index-1];
 							
 							var beam_props = callTraitFunction(source_object,Proptraitname,funName_NBP,[parBeam,j]);
 
-							var new_dir: Vec4 = callTraitFunction(source_object,Proptraitname,funName_NDir,[curr_dirs[parent_index],j] );
+							var new_dir: Vec4 = callTraitFunction(source_object,Proptraitname,funName_NDir,[curr_dirs[parent_index-1],j] );
 							var new_Beam = spawnEmptyBeam(false);
 							
 							new_Beam.properties = beam_props;
@@ -295,8 +289,6 @@ class Beam_Control_v7 extends iron.Trait {
 						}
 					}
 				}
-				
-
 			}
 		}
 		// overwrite property of all beams that should be detectable, i.e. last beam objects in the array
@@ -309,7 +301,7 @@ class Beam_Control_v7 extends iron.Trait {
 		var arr_pos: Array<Vec4> = arrays[2];
 		var arr_dir: Array<Vec4> = arrays[3];
 
-		if (arrayDetectableBeams[rayNumber] == null) arrayDetectableBeams[rayNumber] == new Map();
+		if (arrayDetectableBeams[rayNumber] == null) arrayDetectableBeams[rayNumber] = new Map();
 		var currentMap = arrayDetectableBeams[rayNumber];
 		currentMap.set("object",arr_beams[arr_beams.length-1]);
 		currentMap.set("pos",arr_pos[arr_pos.length-1]);
@@ -382,7 +374,7 @@ class Beam_Control_v7 extends iron.Trait {
                 }
                 curr_beam.remove();
             }
-        }    
+		}
 	}
 
 	function despawnSubobjects(arr_obj:Array <Object>){
@@ -462,7 +454,6 @@ class Beam_Control_v7 extends iron.Trait {
 
         // loop all previosly calculated position entries and spawn beams with correct properties
         for (i in 0...arr_pos.length) {
-			
             var matrix: Mat4 = Mat4.identity(); 
             var spawnChildren: Bool = false;
             var loc = arr_pos[i].clone();
@@ -471,7 +462,6 @@ class Beam_Control_v7 extends iron.Trait {
 			var x = new Vec4(1,0,0,1);
 			var y = new Vec4(0,1,0,1);
 			var z = new Vec4(0,0,1,1);
-			
 
             // setup transformation Matrix
             if (i==0){ // Special case for first Beam
@@ -494,7 +484,7 @@ class Beam_Control_v7 extends iron.Trait {
                 vec.setFrom(arr_pos[i]);
                 scale.x = vec.distanceTo(arr_pos[i+1]);
             }
-			
+
 			// Calculate two angles psi theta from the dir vector, relative to y and z axis
             var rot = arr_dir[i].clone().normalize();
 			var psi = Math.atan2(rot.y,rot.x);
@@ -504,8 +494,7 @@ class Beam_Control_v7 extends iron.Trait {
 
 			// compose transform matrix from position loc, rotation q, and scale 
 			matrix.compose(loc, q, scale);
-			
-			
+
 			// Spawning or Updating the actual Beam Objects
             if (arr_beams[i] == null ){ // Beam needs to be Spawned
                 var object: Object;
@@ -528,18 +517,16 @@ class Beam_Control_v7 extends iron.Trait {
 			    if (object.properties == null) object.properties = new Map();
                 object.properties.set(arrName_subobjects,arr_subobjects);
 
-                arr_beams.push(object);
+				arr_beams.push(object);
             }
             else { // Beam needs to be transformed
                 var object: Object = arr_beams[i];
                 object.transform.setMatrix(matrix);
 				object.visible = true;
                 var rigidBody = object.getTrait(RigidBody);
-				if (rigidBody != null) rigidBody.syncTransform();                
-            }
-
+				if (rigidBody != null) rigidBody.syncTransform();
+			}
 			
-
 			//Assigning correct properties to the Beams
             // write new properties to new Beam
 			var curr_beam = arr_beams[i];
@@ -577,6 +564,11 @@ class Beam_Control_v7 extends iron.Trait {
 				curr_beam.properties[key] = childprops[key];
 			}
 
+			if (curr_beam.properties["stokes_I"]<0.005 ){
+				//curr_beam.remove();
+				curr_beam.visible = false;
+				//break;
+			}
 			
 			
 
@@ -622,16 +614,16 @@ class Beam_Control_v7 extends iron.Trait {
                 if (parent.properties == null) parent.properties = new Map();
                 var arrayofBeam: Array<Object> = parent.properties.get(arrName_subobjects);
                 arrayofBeam.remove(arrow);
-                arrow.remove();
+				arrow.remove();
             }
             return return_bool;
 		}
         else{
             // loop all previosly calculated position entries and spawn beams with correct properties
             for (i in 0...arr_pos.length) {
-                //if (i>=arr_beams.length && blocked) break;
+				//if (i>=arr_beams.length && blocked) break;
                 var beam: Object = arr_beams[i];
-								
+				
 				var beam_length: Float;
 				var numArrows: Int;
 				
@@ -663,7 +655,8 @@ class Beam_Control_v7 extends iron.Trait {
                 numArrows = (beam_length/arrow_dist < max_arrows) ? Std.int(beam_length/arrow_dist) : max_arrows;
 
 				// Check if is state is polarized
-				if (stokes_p< 0.95) continue;
+				if (stokes_p< 0.95 ) continue;
+
 
 				var scale: Vec4;
 				var flip = false;
@@ -684,13 +677,13 @@ class Beam_Control_v7 extends iron.Trait {
 					var B: Float = Math.sqrt(1./2.*(Ip-absL));
 					var V: Float = stokes_vec.w;
 
-					scale = new Vec4(arrow_diameter,arrow_length*A,arrow_length*B,1);
+					scale = new Vec4(arrow_diameter,arrow_length*A* stokes_I,arrow_length*B* stokes_I,1);
 					
 					if (V<0) flip = true;
 				} 
 				else{
 					objectName = pol_arrow_name;
-					scale = new Vec4(arrow_diameter,arrow_diameter,arrow_length,1);
+					scale = new Vec4(arrow_diameter,arrow_length * stokes_I,arrow_diameter ,1);
 				}
                 // Define Transform for Array
                 
@@ -700,14 +693,6 @@ class Beam_Control_v7 extends iron.Trait {
 				var y = new Vec4(0,1,0,1);
                 var z = new Vec4(0,0,1,1);
 				var beam_dir = new Vec4().setFrom(arr_dir[i]);
-
-				var cor1 = 0.;
-				var sgn = -1.;
-				if (beam_dir.x<0){
-					cor1 = Math.PI;
-					sgn *=-1.;
-				}
-
 				
 				var psi = Math.atan2(beam_dir.y,beam_dir.x);
 				var theta = Math.asin(-beam_dir.z);
@@ -715,7 +700,6 @@ class Beam_Control_v7 extends iron.Trait {
 				q2.fromTo(y,pol_dir);
 				q.multquats(q,q2);
 				
-
 				if (flip) q.mult(new Quat(pol_dir.x,pol_dir.y,pol_dir.z,0));
 
                 for (k in 0...(arrayofBeam.length-numArrows)) {
@@ -748,7 +732,7 @@ class Beam_Control_v7 extends iron.Trait {
                                     rigidBody.syncTransform();
                                 }
                             }
-                            object.visible = true;
+                            object.visible = beam.visible;
                         }, spawnChildren);
 
                         if (object == null) return return_bool;
@@ -774,7 +758,7 @@ class Beam_Control_v7 extends iron.Trait {
                                     rigidBody.syncTransform();
                                 }
                             }
-                            object.visible = true;
+                            object.visible = beam.visible;
                         }, spawnChildren);
 
                         if (object == null) return return_bool;
@@ -786,7 +770,8 @@ class Beam_Control_v7 extends iron.Trait {
 					}
                     else{
                         var object: Object = arrayofBeam[j];
-                        object.transform.setMatrix(matrix);
+						object.transform.setMatrix(matrix);
+						object.visible = beam.visible;
 
                         var rigidBody = object.getTrait(RigidBody);
                         if (rigidBody != null){rigidBody.syncTransform();

@@ -39,6 +39,7 @@ class KM100_Base extends iron.Trait {
 	var front: Object;
 	var mirror: Object;
 
+	var visib: Bool =  false;
 	
 	var objList: Array<Object> = [];
 
@@ -52,27 +53,36 @@ class KM100_Base extends iron.Trait {
 	function onInit() {
 		initProps(object);
 
+		//checks if spawned by "spawner object", if not, the objects are set to be invisible
+		if (object.properties["spawned"]){
+			visib = true;
+			}
+		else{
+			object.remove();
+			return;
+		}
+
 		children = object.getChildren();
 
 		screwTop = spawnObject(screwName,false);
 		var mST = children[4].transform.world;
 		screwTop.transform.setMatrix(mST);
 		screwTop.transform.scale = scale;
-		screwTop.visible = true;
+		screwTop.visible = visib;
 		rbSync(screwTop);
 
 		screwBot = spawnObject(screwName,false);
 		var mSB = children[2].transform.world;
 		screwBot.transform.setMatrix(mSB);
 		screwBot.transform.scale = scale;
-		screwBot.visible = true;
+		screwBot.visible = visib;
 		rbSync(screwBot);
 
 		front = spawnObject(frontName,false);
 		var mF = children[0].transform.world;
 		front.transform.setMatrix(mF);
 		front.transform.scale = scale;
-		front.visible = true;
+		front.visible = visib;
 		rbSync(front);
 
 		for (child in front.getChildren()){
@@ -83,7 +93,7 @@ class KM100_Base extends iron.Trait {
 		var mM = front.getChildren()[0].transform.world;
 		mirror.transform.setMatrix(mM);
 		mirror.transform.scale = scale;
-		mirror.visible = true;
+		mirror.visible = visib;
 		rbSync(mirror);
 		
 		trace(Std.string(screwTopDist)+", _________"+Std.string(mirror.transform.rot));

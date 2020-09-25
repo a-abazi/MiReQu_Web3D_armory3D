@@ -9,6 +9,23 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var EReg = function(r,opt) {
+	this.r = new RegExp(r,opt.split("u").join(""));
+};
+$hxClasses["EReg"] = EReg;
+EReg.__name__ = "EReg";
+EReg.prototype = {
+	r: null
+	,match: function(s) {
+		if(this.r.global) {
+			this.r.lastIndex = 0;
+		}
+		this.r.m = this.r.exec(s);
+		this.r.s = s;
+		return this.r.m != null;
+	}
+	,__class__: EReg
+};
 var HxOverrides = function() { };
 $hxClasses["HxOverrides"] = HxOverrides;
 HxOverrides.__name__ = "HxOverrides";
@@ -80,6 +97,16 @@ Lambda.array = function(it) {
 	}
 	return a;
 };
+Lambda.exists = function(it,f) {
+	var x = $getIterator(it);
+	while(x.hasNext()) {
+		var x1 = x.next();
+		if(f(x1)) {
+			return true;
+		}
+	}
+	return false;
+};
 var Main = function() { };
 $hxClasses["Main"] = Main;
 Main.__name__ = "Main";
@@ -131,6 +158,19 @@ Reflect.fields = function(o) {
 Reflect.isFunction = function(f) {
 	if(typeof(f) == "function") {
 		return !(f.__name__ || f.__ename__);
+	} else {
+		return false;
+	}
+};
+Reflect.compareMethods = function(f1,f2) {
+	if(f1 == f2) {
+		return true;
+	}
+	if(!Reflect.isFunction(f1) || !Reflect.isFunction(f2)) {
+		return false;
+	}
+	if(f1.scope == f2.scope && f1.method == f2.method) {
+		return f1.method != null;
 	} else {
 		return false;
 	}
@@ -403,6 +443,7 @@ var arm_Beam_$Control_$v7 = function() {
 	this.main_Array_beams = [[]];
 	this.laserArray = [];
 	this.arrayDetectableBeams = [new haxe_ds_StringMap()];
+	this.nameArrayDetectableBeams = "ArrayDetBeams";
 	this.arrName_subobjects = "arr_sub_objects";
 	this.Proptraitname = "String_Beam_Ray_Traits";
 	this.calc_event = "Calc_Beams";
@@ -411,7 +452,6 @@ var arm_Beam_$Control_$v7 = function() {
 	this.funName_BP_Names = "GetChildPropertyNames";
 	this.funName_NBP = "GetNewChildProperties";
 	this.funName_BP = "GetChildProperties";
-	this.nameArrayDetectableBeams = "ArrayDetBeams";
 	this.arrow_dist = 0.75;
 	this.arrow_length = 0.5;
 	this.arrow_diameter = 0.5;
@@ -454,7 +494,6 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 	,arrow_diameter: null
 	,arrow_length: null
 	,arrow_dist: null
-	,nameArrayDetectableBeams: null
 	,funName_BP: null
 	,funName_NBP: null
 	,funName_BP_Names: null
@@ -463,6 +502,7 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 	,calc_event: null
 	,Proptraitname: null
 	,arrName_subobjects: null
+	,nameArrayDetectableBeams: null
 	,arrayDetectableBeams: null
 	,laserArray: null
 	,main_Array_beams: null
@@ -586,7 +626,7 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 		var laser_on = __map_reserved["Laser_on"] != null ? _this.getReserved("Laser_on") : _this.h["Laser_on"];
 		if(this.laserArray != null) {
 			if(this.laserArray.length < 1) {
-				haxe_Log.trace("no laser not defined",{ fileName : "arm/Beam_Control_v7.hx", lineNumber : 185, className : "arm.Beam_Control_v7", methodName : "onEventCB"});
+				haxe_Log.trace("no laser not defined",{ fileName : "arm/Beam_Control_v7.hx", lineNumber : 181, className : "arm.Beam_Control_v7", methodName : "onEventCB"});
 				return;
 			}
 		} else {
@@ -610,6 +650,15 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 				this.despawnBeams(beam_array);
 				++i;
 			}
+			this.arrayDetectableBeams = [new haxe_ds_StringMap()];
+			var key = this.nameArrayDetectableBeams;
+			var _this1 = object.properties;
+			var value = this.arrayDetectableBeams;
+			if(__map_reserved[key] != null) {
+				_this1.setReserved(key,value);
+			} else {
+				_this1.h[key] = value;
+			}
 			return;
 		}
 		var blocked;
@@ -623,11 +672,11 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 			var laser = _g11[_g2];
 			++_g2;
 			this.main_Array_pos[indx] = [];
-			var _this1 = laser.transform.world;
-			this.main_Array_pos[indx].push(new iron_math_Vec4(_this1.self._30,_this1.self._31,_this1.self._32,_this1.self._33));
-			this.main_Array_dir[indx] = [];
 			var _this2 = laser.transform.world;
-			this.main_Array_dir[indx].push(new iron_math_Vec4(_this2.self._10,_this2.self._11,_this2.self._12));
+			this.main_Array_pos[indx].push(new iron_math_Vec4(_this2.self._30,_this2.self._31,_this2.self._32,_this2.self._33));
+			this.main_Array_dir[indx] = [];
+			var _this3 = laser.transform.world;
+			this.main_Array_dir[indx].push(new iron_math_Vec4(_this3.self._10,_this3.self._11,_this3.self._12));
 			this.main_Array_sor[indx] = [];
 			this.main_Array_sor[indx].push(laser);
 			++indx;
@@ -673,17 +722,17 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 					if(source_object.properties == null) {
 						source_object.properties = new haxe_ds_StringMap();
 					}
-					var _this3 = source_object.properties;
-					if((__map_reserved["spawnsRays"] != null ? _this3.getReserved("spawnsRays") : _this3.h["spawnsRays"]) != null) {
-						var _this4 = source_object.properties;
-						var spawnsRays = __map_reserved["spawnsRays"] != null ? _this4.getReserved("spawnsRays") : _this4.h["spawnsRays"];
+					var _this4 = source_object.properties;
+					if((__map_reserved["spawnsRays"] != null ? _this4.getReserved("spawnsRays") : _this4.h["spawnsRays"]) != null) {
+						var _this5 = source_object.properties;
+						var spawnsRays = __map_reserved["spawnsRays"] != null ? _this5.getReserved("spawnsRays") : _this5.h["spawnsRays"];
 						var _g23 = 0;
 						var _g32 = spawnsRays;
 						while(_g23 < _g32) {
 							var j = _g23++;
-							var parBeam = curr_beams[parent_index];
+							var parBeam = curr_beams[parent_index - 1];
 							var beam_props = this.callTraitFunction(source_object,this.Proptraitname,this.funName_NBP,[parBeam,j]);
-							var new_dir = this.callTraitFunction(source_object,this.Proptraitname,this.funName_NDir,[curr_dirs[parent_index],j]);
+							var new_dir = this.callTraitFunction(source_object,this.Proptraitname,this.funName_NDir,[curr_dirs[parent_index - 1],j]);
 							var new_Beam = this.spawnEmptyBeam(false);
 							new_Beam.properties = beam_props;
 							var new_Beam_array = [new_Beam];
@@ -700,13 +749,13 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 				}
 			}
 		}
-		var key = this.nameArrayDetectableBeams;
-		var _this5 = object.properties;
-		var value = this.arrayDetectableBeams;
-		if(__map_reserved[key] != null) {
-			_this5.setReserved(key,value);
+		var key1 = this.nameArrayDetectableBeams;
+		var _this6 = object.properties;
+		var value1 = this.arrayDetectableBeams;
+		if(__map_reserved[key1] != null) {
+			_this6.setReserved(key1,value1);
 		} else {
-			_this5.h[key] = value;
+			_this6.h[key1] = value1;
 		}
 	}
 	,getDetectableBeams: function(arrays,rayNumber) {
@@ -715,7 +764,7 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 		var arr_pos = arrays[2];
 		var arr_dir = arrays[3];
 		if(this.arrayDetectableBeams[rayNumber] == null) {
-			new haxe_ds_StringMap();
+			this.arrayDetectableBeams[rayNumber] = new haxe_ds_StringMap();
 		}
 		var currentMap = this.arrayDetectableBeams[rayNumber];
 		var value = arr_beams[arr_beams.length - 1];
@@ -783,7 +832,7 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 		if(func != null) {
 			result = func.apply(trait,funArguments);
 		} else {
-			haxe_Log.trace("Error: dynamic function resulted in null value, Error in trait or function name",{ fileName : "arm/Beam_Control_v7.hx", lineNumber : 367, className : "arm.Beam_Control_v7", methodName : "callTraitFunction"});
+			haxe_Log.trace("Error: dynamic function resulted in null value, Error in trait or function name",{ fileName : "arm/Beam_Control_v7.hx", lineNumber : 360, className : "arm.Beam_Control_v7", methodName : "callTraitFunction"});
 			result = null;
 		}
 		return result;
@@ -1278,21 +1327,25 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 					_this4.h[key2] = value;
 				}
 			}
+			var _this5 = curr_beam.properties;
+			if((__map_reserved["stokes_I"] != null ? _this5.getReserved("stokes_I") : _this5.h["stokes_I"]) < 0.005) {
+				curr_beam.visible = false;
+			}
 		}
 		while(arr_pos.length < arr_beams.length) {
 			var curr_beam1 = arr_beams.pop();
 			var tmp1;
 			if(curr_beam1.properties != null) {
 				var key3 = this.arrName_subobjects;
-				var _this5 = curr_beam1.properties;
-				tmp1 = __map_reserved[key3] != null ? _this5.getReserved(key3) : _this5.h[key3];
+				var _this6 = curr_beam1.properties;
+				tmp1 = __map_reserved[key3] != null ? _this6.getReserved(key3) : _this6.h[key3];
 			} else {
 				tmp1 = false;
 			}
 			if(tmp1) {
 				var key4 = this.arrName_subobjects;
-				var _this6 = curr_beam1.properties;
-				var arr_subobjects1 = __map_reserved[key4] != null ? _this6.getReserved(key4) : _this6.h[key4];
+				var _this7 = curr_beam1.properties;
+				var arr_subobjects1 = __map_reserved[key4] != null ? _this7.getReserved(key4) : _this7.h[key4];
 				while(arr_subobjects1.length > 0) arr_subobjects1.pop().remove();
 			}
 			curr_beam1.remove();
@@ -1338,24 +1391,24 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 			var _g1 = arr_pos.length;
 			while(_g < _g1) {
 				var i = _g++;
-				var beam = arr_beams[i];
+				var beam = [arr_beams[i]];
 				var beam_length;
-				if(beam == null) {
+				if(beam[0] == null) {
 					continue;
 				}
-				if(beam.properties == null) {
-					beam.properties = new haxe_ds_StringMap();
+				if(beam[0].properties == null) {
+					beam[0].properties = new haxe_ds_StringMap();
 				}
 				var key1 = this.arrName_subobjects;
-				var _this4 = beam.properties;
+				var _this4 = beam[0].properties;
 				var arrayofBeam1 = __map_reserved[key1] != null ? _this4.getReserved(key1) : _this4.h[key1];
-				var _this5 = beam.properties;
+				var _this5 = beam[0].properties;
 				var stokes_I = __map_reserved["stokes_I"] != null ? _this5.getReserved("stokes_I") : _this5.h["stokes_I"];
-				var _this6 = beam.properties;
+				var _this6 = beam[0].properties;
 				var stokes_p = __map_reserved["stokes_p"] != null ? _this6.getReserved("stokes_p") : _this6.h["stokes_p"];
-				var _this7 = beam.properties;
+				var _this7 = beam[0].properties;
 				var stokes_psi = __map_reserved["stokes_psi"] != null ? _this7.getReserved("stokes_psi") : _this7.h["stokes_psi"];
-				var _this8 = beam.properties;
+				var _this8 = beam[0].properties;
 				var stokes_chi = __map_reserved["stokes_chi"] != null ? _this8.getReserved("stokes_chi") : _this8.h["stokes_chi"];
 				var x = 0;
 				var y = Math.cos(stokes_psi);
@@ -1441,13 +1494,13 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 					var A = Math.sqrt(0.5 * (Ip + absL));
 					var B = Math.sqrt(0.5 * (Ip - absL));
 					var V = stokes_vec_w;
-					scale = new iron_math_Vec4(this.arrow_diameter,this.arrow_length * A,this.arrow_length * B,1);
+					scale = new iron_math_Vec4(this.arrow_diameter,this.arrow_length * A * stokes_I,this.arrow_length * B * stokes_I,1);
 					if(V < 0) {
 						flip = true;
 					}
 				} else {
 					objectName = this.pol_arrow_name;
-					scale = new iron_math_Vec4(this.arrow_diameter,this.arrow_diameter,this.arrow_length,1);
+					scale = new iron_math_Vec4(this.arrow_diameter,this.arrow_length * stokes_I,this.arrow_diameter,1);
 				}
 				var q = new iron_math_Quat();
 				var q2 = new iron_math_Quat();
@@ -1520,12 +1573,6 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 				beam_dir_y = v2.y;
 				beam_dir_z = v2.z;
 				beam_dir_w = v2.w;
-				var cor1 = 0.;
-				var sgn = -1.;
-				if(beam_dir_x < 0) {
-					cor1 = Math.PI;
-					sgn *= -1.;
-				}
 				var psi = Math.atan2(beam_dir_y,beam_dir_x);
 				var theta = Math.asin(-beam_dir_z);
 				var s = Math.sin(psi * 0.5);
@@ -1803,7 +1850,7 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 					matrix[0].self._32 = loc_z;
 					if(arrayofBeam1[j] == null) {
 						var object = [];
-						iron_Scene.active.spawnObject(objectName,null,(function(object1,matrix1) {
+						iron_Scene.active.spawnObject(objectName,null,(function(object1,matrix1,beam1) {
 							return function(o) {
 								object1[0] = o;
 								if(matrix1[0] != null) {
@@ -1814,9 +1861,9 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 										rigidBody.syncTransform();
 									}
 								}
-								object1[0].visible = true;
+								object1[0].visible = beam1[0].visible;
 							};
-						})(object,matrix),spawnChildren);
+						})(object,matrix,beam),spawnChildren);
 						if(object[0] == null) {
 							return return_bool;
 						}
@@ -1825,9 +1872,9 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 						}
 						var _this10 = object[0].properties;
 						if(__map_reserved["parent"] != null) {
-							_this10.setReserved("parent",beam);
+							_this10.setReserved("parent",beam[0]);
 						} else {
-							_this10.h["parent"] = beam;
+							_this10.h["parent"] = beam[0];
 						}
 						arr_all_arrows.push(object[0]);
 						arrayofBeam1.push(object[0]);
@@ -1836,7 +1883,7 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 						HxOverrides.remove(arrayofBeam1,remObject);
 						remObject.remove();
 						var object2 = [];
-						iron_Scene.active.spawnObject(objectName,null,(function(object3,matrix2) {
+						iron_Scene.active.spawnObject(objectName,null,(function(object3,matrix2,beam2) {
 							return function(o1) {
 								object3[0] = o1;
 								if(matrix2[0] != null) {
@@ -1847,9 +1894,9 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 										rigidBody1.syncTransform();
 									}
 								}
-								object3[0].visible = true;
+								object3[0].visible = beam2[0].visible;
 							};
-						})(object2,matrix),spawnChildren);
+						})(object2,matrix,beam),spawnChildren);
 						if(object2[0] == null) {
 							return return_bool;
 						}
@@ -1858,15 +1905,16 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 						}
 						var _this11 = object2[0].properties;
 						if(__map_reserved["parent"] != null) {
-							_this11.setReserved("parent",beam);
+							_this11.setReserved("parent",beam[0]);
 						} else {
-							_this11.h["parent"] = beam;
+							_this11.h["parent"] = beam[0];
 						}
 						arr_all_arrows.push(object2[0]);
 						arrayofBeam1.push(object2[0]);
 					} else {
 						var object4 = arrayofBeam1[j];
 						object4.transform.setMatrix(matrix[0]);
+						object4.visible = beam[0].visible;
 						var rigidBody2 = object4.getTrait(armory_trait_physics_bullet_RigidBody);
 						if(rigidBody2 != null) {
 							rigidBody2.syncTransform();
@@ -1874,7 +1922,7 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 					}
 				}
 				var key2 = this.arrName_subobjects;
-				var _this12 = beam.properties;
+				var _this12 = beam[0].properties;
 				if(__map_reserved[key2] != null) {
 					_this12.setReserved(key2,arrayofBeam1);
 				} else {
@@ -1966,26 +2014,30 @@ arm_Color_$trait.prototype = $extend(iron_Trait.prototype,{
 	}
 	,__class__: arm_Color_$trait
 });
-var arm_KM100_$Base = function() {
+var arm_KM100PM_$Base = function() {
 	this.objList = [];
-	this.screwTrans = 0.00005;
+	this.screwTrans = 0.0005;
 	this.screwBotDist = 0.0;
 	this.screwTopDist = 0.0;
 	this.scale = new iron_math_Vec4(0.01,0.01,0.01,1);
-	this.screwName = "KM100_Screw";
-	this.frontName = "KM100_Front";
-	this.mirrorName = "KM100_Mirror";
+	this.stageName = "KM100PM_Stage";
+	this.holderName = "KM100PM_Holder";
+	this.screwName = "KM100PM_Screw";
+	this.frontName = "KM100PM_Front";
+	this.pbsName = "KM100PM_Beamsplitter";
 	iron_Trait.call(this);
 	this.notifyOnInit($bind(this,this.onInit));
 	this.notifyOnUpdate($bind(this,this.onUpdate));
 };
-$hxClasses["arm.KM100_Base"] = arm_KM100_$Base;
-arm_KM100_$Base.__name__ = "arm.KM100_Base";
-arm_KM100_$Base.__super__ = iron_Trait;
-arm_KM100_$Base.prototype = $extend(iron_Trait.prototype,{
-	mirrorName: null
+$hxClasses["arm.KM100PM_Base"] = arm_KM100PM_$Base;
+arm_KM100PM_$Base.__name__ = "arm.KM100PM_Base";
+arm_KM100PM_$Base.__super__ = iron_Trait;
+arm_KM100PM_$Base.prototype = $extend(iron_Trait.prototype,{
+	pbsName: null
 	,frontName: null
 	,screwName: null
+	,holderName: null
+	,stageName: null
 	,children: null
 	,scale: null
 	,screwTopDist: null
@@ -1997,8 +2049,18 @@ arm_KM100_$Base.prototype = $extend(iron_Trait.prototype,{
 	,screwTop: null
 	,screwBot: null
 	,front: null
-	,mirror: null
+	,pbs: null
+	,holder: null
+	,stage: null
 	,objList: null
+	,pauseUpdate: function() {
+		this.removeUpdate($bind(this,this.onUpdate));
+		return true;
+	}
+	,resumeUpdate: function() {
+		this.notifyOnUpdate($bind(this,this.onUpdate));
+		return true;
+	}
 	,onInit: function() {
 		var object = this.object;
 		if(object != null) {
@@ -2006,21 +2068,20 @@ arm_KM100_$Base.prototype = $extend(iron_Trait.prototype,{
 				object.properties = new haxe_ds_StringMap();
 			}
 		}
-		this.children = this.object.getChildren();
 		this.screwTop = this.spawnObject(this.screwName,false);
-		var mST = this.children[4].transform.world;
+		var mST = this.object.getChild("C_KM100PM_Screw_Top_Zero").transform.world;
 		this.screwTop.transform.setMatrix(mST);
 		this.screwTop.transform.scale = this.scale;
 		this.screwTop.visible = true;
 		this.rbSync(this.screwTop);
 		this.screwBot = this.spawnObject(this.screwName,false);
-		var mSB = this.children[2].transform.world;
+		var mSB = this.object.getChild("C_KM100PM_Screw_Bottom_Zero").transform.world;
 		this.screwBot.transform.setMatrix(mSB);
 		this.screwBot.transform.scale = this.scale;
 		this.screwBot.visible = true;
 		this.rbSync(this.screwBot);
 		this.front = this.spawnObject(this.frontName,false);
-		var mF = this.children[0].transform.world;
+		var mF = this.object.getChild("C_KM100PM_Front").transform.world;
 		this.front.transform.setMatrix(mF);
 		this.front.transform.scale = this.scale;
 		this.front.visible = true;
@@ -2032,14 +2093,25 @@ arm_KM100_$Base.prototype = $extend(iron_Trait.prototype,{
 			++_g;
 			child.transform.scale = this.scale;
 		}
-		this.mirror = this.spawnObject(this.mirrorName,false);
-		var mM = this.front.getChildren()[0].transform.world;
-		this.mirror.transform.setMatrix(mM);
-		this.mirror.transform.scale = this.scale;
-		this.mirror.visible = true;
-		this.rbSync(this.mirror);
-		haxe_Log.trace(Std.string(this.screwTopDist) + ", _________" + Std.string(this.mirror.transform.rot),{ fileName : "arm/KM100_Base.hx", lineNumber : 89, className : "arm.KM100_Base", methodName : "onInit"});
-		var _this = this.children[1].transform.world;
+		this.pbs = this.spawnObject(this.pbsName,false);
+		var mM = this.front.getChildren()[1].transform.world;
+		this.pbs.transform.setMatrix(mM);
+		this.pbs.transform.scale = this.scale;
+		this.pbs.visible = true;
+		this.rbSync(this.pbs);
+		this.holder = this.spawnObject(this.holderName,false);
+		var mM1 = this.front.getChildren()[0].transform.world;
+		this.holder.transform.setMatrix(mM1);
+		this.holder.transform.scale = this.scale;
+		this.holder.visible = true;
+		this.rbSync(this.holder);
+		this.stage = this.spawnObject(this.stageName,false);
+		var mM2 = this.front.getChildren()[2].transform.world;
+		this.stage.transform.setMatrix(mM2);
+		this.stage.transform.scale = this.scale;
+		this.stage.visible = true;
+		this.rbSync(this.stage);
+		var _this = this.object.getChild("C_KM100PM_Screw_Bottom_Limit").transform.world;
 		var x = _this.self._30;
 		var y = _this.self._31;
 		var z = _this.self._32;
@@ -2082,7 +2154,7 @@ arm_KM100_$Base.prototype = $extend(iron_Trait.prototype,{
 		var p_z = z1;
 		var p_w = w1;
 		this.screwPosLim = Math.sqrt((p_x - _this_x) * (p_x - _this_x) + (p_y - _this_y) * (p_y - _this_y) + (p_z - _this_z) * (p_z - _this_z));
-		var _this2 = this.children[2].transform.world;
+		var _this2 = this.object.getChild("C_KM100PM_Screw_Bottom_Zero").transform.world;
 		var x2 = _this2.self._30;
 		var y2 = _this2.self._31;
 		var z2 = _this2.self._32;
@@ -2103,11 +2175,625 @@ arm_KM100_$Base.prototype = $extend(iron_Trait.prototype,{
 		var _this_y1 = y2;
 		var _this_z1 = z2;
 		var _this_w1 = w2;
-		var _this3 = this.children[6].transform.world;
+		var _this3 = this.object.getChild("Z_KM100PM_Screw_Bottom_LimitNeg").transform.world;
 		var x3 = _this3.self._30;
 		var y3 = _this3.self._31;
 		var z3 = _this3.self._32;
 		var w3 = _this3.self._33;
+		if(w3 == null) {
+			w3 = 1.0;
+		}
+		if(z3 == null) {
+			z3 = 0.0;
+		}
+		if(y3 == null) {
+			y3 = 0.0;
+		}
+		if(x3 == null) {
+			x3 = 0.0;
+		}
+		var p_x1 = x3;
+		var p_y1 = y3;
+		var p_z1 = z3;
+		var p_w1 = w3;
+		this.screwNegLim = Math.sqrt((p_x1 - _this_x1) * (p_x1 - _this_x1) + (p_y1 - _this_y1) * (p_y1 - _this_y1) + (p_z1 - _this_z1) * (p_z1 - _this_z1));
+		this.screwTravelDist = Math.abs(this.screwPosLim) + Math.abs(this.screwNegLim);
+		armory_system_Event.add("updateParts",$bind(this,this.updateParts),this.object.uid);
+		this.objList.push(this.object);
+		this.objList.push(this.screwBot);
+		this.objList.push(this.screwTop);
+		this.objList.push(this.front);
+		this.objList.push(this.pbs);
+		this.objList.push(this.holder);
+		this.objList.push(this.stage);
+		var _g2 = 0;
+		var _g3 = this.objList;
+		while(_g2 < _g3.length) {
+			var obj = _g3[_g2];
+			++_g2;
+			if(obj != null) {
+				if(obj.properties == null) {
+					obj.properties = new haxe_ds_StringMap();
+				}
+			}
+			if(obj != this.object) {
+				var _this4 = obj.properties;
+				var value = this.object;
+				if(__map_reserved["TraitObj"] != null) {
+					_this4.setReserved("TraitObj",value);
+				} else {
+					_this4.h["TraitObj"] = value;
+				}
+			} else {
+				var _this5 = obj.properties;
+				if(__map_reserved["TraitObj"] != null) {
+					_this5.setReserved("TraitObj","self");
+				} else {
+					_this5.h["TraitObj"] = "self";
+				}
+			}
+			var _this6 = obj.properties;
+			var value1 = "KM100PM" + "_Base";
+			if(__map_reserved["TraitName"] != null) {
+				_this6.setReserved("TraitName",value1);
+			} else {
+				_this6.h["TraitName"] = value1;
+			}
+			var _this7 = obj.properties;
+			if(__map_reserved["PauseResume"] != null) {
+				_this7.setReserved("PauseResume",true);
+			} else {
+				_this7.h["PauseResume"] = true;
+			}
+		}
+		this.pauseUpdate();
+		this.updateParts();
+	}
+	,onUpdate: function() {
+		var mouse = iron_system_Input.getMouse();
+		if(mouse.released("left") || mouse.released("right")) {
+			this.updateParts();
+			this.pauseUpdate();
+		}
+		if(mouse.down("left")) {
+			var mouse_c = iron_system_Input.getMouse();
+			var x = mouse_c.x;
+			var y = mouse_c.y;
+			var z = 0;
+			var w = 1;
+			if(w == null) {
+				w = 1.0;
+			}
+			if(z == null) {
+				z = 0.0;
+			}
+			if(y == null) {
+				y = 0.0;
+			}
+			if(x == null) {
+				x = 0.0;
+			}
+			var coords_x = x;
+			var coords_y = y;
+			var coords_z = z;
+			var coords_w = w;
+			var physics = armory_trait_physics_bullet_PhysicsWorld.active;
+			var rb = physics.pickClosest(coords_x,coords_y);
+			if(rb != null && rb.object == this.screwBot) {
+				if(this.screwBotDist < this.screwPosLim + this.screwTrans) {
+					this.screwBotDist += this.screwTrans;
+				}
+				this.updateParts();
+			} else if(rb != null && rb.object == this.screwTop) {
+				if(this.screwTopDist < this.screwPosLim + this.screwTrans) {
+					this.screwTopDist += this.screwTrans;
+				}
+				this.updateParts();
+			}
+		}
+		if(mouse.down("right")) {
+			var mouse_c1 = iron_system_Input.getMouse();
+			var x1 = mouse_c1.x;
+			var y1 = mouse_c1.y;
+			var z1 = 0;
+			var w1 = 1;
+			if(w1 == null) {
+				w1 = 1.0;
+			}
+			if(z1 == null) {
+				z1 = 0.0;
+			}
+			if(y1 == null) {
+				y1 = 0.0;
+			}
+			if(x1 == null) {
+				x1 = 0.0;
+			}
+			var coords_x1 = x1;
+			var coords_y1 = y1;
+			var coords_z1 = z1;
+			var coords_w1 = w1;
+			var physics1 = armory_trait_physics_bullet_PhysicsWorld.active;
+			var rb1 = physics1.pickClosest(coords_x1,coords_y1);
+			if(rb1 != null && rb1.object == this.screwBot) {
+				if(-1 * this.screwNegLim < this.screwBotDist - this.screwTrans) {
+					this.screwBotDist -= this.screwTrans;
+				}
+				this.updateParts();
+			} else if(rb1 != null && rb1.object == this.screwTop) {
+				if(-1 * this.screwNegLim < this.screwTopDist - this.screwTrans) {
+					this.screwTopDist -= this.screwTrans;
+				}
+				this.updateParts();
+			}
+		}
+	}
+	,updateParts: function() {
+		this.scale = new iron_math_Vec4(0.01,0.01,0.01,1);
+		var numberRevolutions = 10;
+		var mST = this.object.getChild("C_KM100PM_Screw_Top_Zero").transform.world;
+		this.screwTop.transform.setMatrix(mST);
+		var _this = this.screwTop.transform.world;
+		this.screwTop.transform.move(new iron_math_Vec4(_this.self._10,_this.self._11,_this.self._12),-1 * this.screwTopDist);
+		var _this1 = this.screwTop.transform.world;
+		this.screwTop.transform.rotate(new iron_math_Vec4(_this1.self._10,_this1.self._11,_this1.self._12),this.screwTopDist / this.screwTravelDist * numberRevolutions * 2 * Math.PI);
+		this.screwTop.transform.scale = this.scale;
+		this.rbSync(this.screwTop);
+		var mSB = this.object.getChild("C_KM100PM_Screw_Bottom_Zero").transform.world;
+		this.screwBot.transform.setMatrix(mSB);
+		var _this2 = this.screwBot.transform.world;
+		this.screwBot.transform.move(new iron_math_Vec4(_this2.self._10,_this2.self._11,_this2.self._12),-1 * this.screwBotDist);
+		var _this3 = this.screwBot.transform.world;
+		this.screwBot.transform.rotate(new iron_math_Vec4(_this3.self._10,_this3.self._11,_this3.self._12),this.screwBotDist / this.screwTravelDist * numberRevolutions * 2 * Math.PI);
+		this.screwBot.transform.scale = this.scale;
+		this.rbSync(this.screwBot);
+		var _this4 = this.object.getChild("C_KM100PM_Front").transform.world;
+		var x = _this4.self._30;
+		var y = _this4.self._31;
+		var z = _this4.self._32;
+		var w = _this4.self._33;
+		if(w == null) {
+			w = 1.0;
+		}
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var loc_cF_x = x;
+		var loc_cF_y = y;
+		var loc_cF_z = z;
+		var loc_cF_w = w;
+		var _this5 = this.screwTop.transform.world;
+		var x1 = _this5.self._30;
+		var y1 = _this5.self._31;
+		var z1 = _this5.self._32;
+		var w1 = _this5.self._33;
+		if(w1 == null) {
+			w1 = 1.0;
+		}
+		if(z1 == null) {
+			z1 = 0.0;
+		}
+		if(y1 == null) {
+			y1 = 0.0;
+		}
+		if(x1 == null) {
+			x1 = 0.0;
+		}
+		var loc_ST_x = x1;
+		var loc_ST_y = y1;
+		var loc_ST_z = z1;
+		var loc_ST_w = w1;
+		var _this6 = this.screwBot.transform.world;
+		var x2 = _this6.self._30;
+		var y2 = _this6.self._31;
+		var z2 = _this6.self._32;
+		var w2 = _this6.self._33;
+		if(w2 == null) {
+			w2 = 1.0;
+		}
+		if(z2 == null) {
+			z2 = 0.0;
+		}
+		if(y2 == null) {
+			y2 = 0.0;
+		}
+		if(x2 == null) {
+			x2 = 0.0;
+		}
+		var loc_SB_x = x2;
+		var loc_SB_y = y2;
+		var loc_SB_z = z2;
+		var loc_SB_w = w2;
+		var _this7 = new iron_math_Vec4();
+		_this7.x = loc_ST_x;
+		_this7.y = loc_ST_y;
+		_this7.z = loc_ST_z;
+		_this7.w = loc_ST_w;
+		var _this8 = _this7;
+		_this8.x -= loc_cF_x;
+		_this8.y -= loc_cF_y;
+		_this8.z -= loc_cF_z;
+		var _this9 = _this8;
+		var n = Math.sqrt(_this9.x * _this9.x + _this9.y * _this9.y + _this9.z * _this9.z);
+		if(n > 0.0) {
+			var invN = 1.0 / n;
+			_this9.x *= invN;
+			_this9.y *= invN;
+			_this9.z *= invN;
+		}
+		var rotVecT = _this9;
+		var _this10 = new iron_math_Vec4();
+		_this10.x = loc_SB_x;
+		_this10.y = loc_SB_y;
+		_this10.z = loc_SB_z;
+		_this10.w = loc_SB_w;
+		var _this11 = _this10;
+		_this11.x -= loc_cF_x;
+		_this11.y -= loc_cF_y;
+		_this11.z -= loc_cF_z;
+		var _this12 = _this11;
+		var n1 = Math.sqrt(_this12.x * _this12.x + _this12.y * _this12.y + _this12.z * _this12.z);
+		if(n1 > 0.0) {
+			var invN1 = 1.0 / n1;
+			_this12.x *= invN1;
+			_this12.y *= invN1;
+			_this12.z *= invN1;
+		}
+		var rotVecB = _this12;
+		var _this13 = new iron_math_Vec4();
+		var _this14 = this.object.transform.world;
+		var x3 = _this14.self._20;
+		var y3 = _this14.self._21;
+		var z3 = _this14.self._22;
+		if(z3 == null) {
+			z3 = 0.0;
+		}
+		if(y3 == null) {
+			y3 = 0.0;
+		}
+		if(x3 == null) {
+			x3 = 0.0;
+		}
+		var v_x = x3;
+		var v_y = y3;
+		var v_z = z3;
+		var v_w = 1.0;
+		_this13.x = v_x;
+		_this13.y = v_y;
+		_this13.z = v_z;
+		_this13.w = v_w;
+		var _this15 = _this13;
+		var n2 = Math.sqrt(_this15.x * _this15.x + _this15.y * _this15.y + _this15.z * _this15.z);
+		if(n2 > 0.0) {
+			var invN2 = 1.0 / n2;
+			_this15.x *= invN2;
+			_this15.y *= invN2;
+			_this15.z *= invN2;
+		}
+		var vU = _this15;
+		var _this16 = new iron_math_Vec4();
+		var _this17 = this.object.transform.world;
+		var x4 = _this17.self._00;
+		var y4 = _this17.self._01;
+		var z4 = _this17.self._02;
+		if(z4 == null) {
+			z4 = 0.0;
+		}
+		if(y4 == null) {
+			y4 = 0.0;
+		}
+		if(x4 == null) {
+			x4 = 0.0;
+		}
+		var v_x1 = x4;
+		var v_y1 = y4;
+		var v_z1 = z4;
+		var v_w1 = 1.0;
+		_this16.x = v_x1;
+		_this16.y = v_y1;
+		_this16.z = v_z1;
+		_this16.w = v_w1;
+		var _this18 = _this16;
+		var n3 = Math.sqrt(_this18.x * _this18.x + _this18.y * _this18.y + _this18.z * _this18.z);
+		if(n3 > 0.0) {
+			var invN3 = 1.0 / n3;
+			_this18.x *= invN3;
+			_this18.y *= invN3;
+			_this18.z *= invN3;
+		}
+		var vR = _this18;
+		var q1 = this.quatFromV1toV2(vU,rotVecT);
+		var q2 = this.quatFromV1toV2(vR,rotVecB);
+		var rotF = new iron_math_Quat();
+		var q1x = rotF.x;
+		var q1y = rotF.y;
+		var q1z = rotF.z;
+		var q1w = rotF.w;
+		var q2x = q2.x;
+		var q2y = q2.y;
+		var q2z = q2.z;
+		var q2w = q2.w;
+		rotF.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
+		rotF.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
+		rotF.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
+		rotF.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
+		var q1x1 = rotF.x;
+		var q1y1 = rotF.y;
+		var q1z1 = rotF.z;
+		var q1w1 = rotF.w;
+		var q2x1 = q1.x;
+		var q2y1 = q1.y;
+		var q2z1 = q1.z;
+		var q2w1 = q1.w;
+		rotF.x = q1x1 * q2w1 + q1w1 * q2x1 + q1y1 * q2z1 - q1z1 * q2y1;
+		rotF.y = q1w1 * q2y1 - q1x1 * q2z1 + q1y1 * q2w1 + q1z1 * q2x1;
+		rotF.z = q1w1 * q2z1 + q1x1 * q2y1 - q1y1 * q2x1 + q1z1 * q2w1;
+		rotF.w = q1w1 * q2w1 - q1x1 * q2x1 - q1y1 * q2y1 - q1z1 * q2z1;
+		var q = this.object.transform.rot;
+		var q1x2 = rotF.x;
+		var q1y2 = rotF.y;
+		var q1z2 = rotF.z;
+		var q1w2 = rotF.w;
+		var q2x2 = q.x;
+		var q2y2 = q.y;
+		var q2z2 = q.z;
+		var q2w2 = q.w;
+		rotF.x = q1x2 * q2w2 + q1w2 * q2x2 + q1y2 * q2z2 - q1z2 * q2y2;
+		rotF.y = q1w2 * q2y2 - q1x2 * q2z2 + q1y2 * q2w2 + q1z2 * q2x2;
+		rotF.z = q1w2 * q2z2 + q1x2 * q2y2 - q1y2 * q2x2 + q1z2 * q2w2;
+		rotF.w = q1w2 * q2w2 - q1x2 * q2x2 - q1y2 * q2y2 - q1z2 * q2z2;
+		var mF = this.object.getChild("C_KM100PM_Front").transform.world;
+		this.front.transform.setMatrix(mF);
+		this.front.transform.scale = this.scale;
+		this.front.transform.rot = rotF;
+		this.front.transform.buildMatrix();
+		this.rbSync(this.front);
+		var mM = this.front.getChildren()[1].transform.world;
+		this.pbs.transform.setMatrix(mM);
+		this.pbs.transform.scale = this.scale;
+		this.rbSync(this.pbs);
+		var mM1 = this.front.getChildren()[0].transform.world;
+		this.holder.transform.setMatrix(mM1);
+		this.holder.transform.scale = this.scale;
+		this.rbSync(this.holder);
+		var mM2 = this.front.getChildren()[2].transform.world;
+		this.stage.transform.setMatrix(mM2);
+		this.stage.transform.scale = this.scale;
+		this.rbSync(this.stage);
+	}
+	,quatFromV1toV2: function(v1,v2) {
+		var q = new iron_math_Quat();
+		var a_x = 0.0;
+		var a_y = 0.0;
+		var a_z = 0.0;
+		var a_w = 1.0;
+		var ax = v1.x;
+		var ay = v1.y;
+		var az = v1.z;
+		var bx = v2.x;
+		var by = v2.y;
+		var bz = v2.z;
+		a_x = ay * bz - az * by;
+		a_y = az * bx - ax * bz;
+		a_z = ax * by - ay * bx;
+		q.x = a_x;
+		q.y = a_y;
+		q.z = a_z;
+		var _this_x = 0.0;
+		var _this_y = 0.0;
+		var _this_z = 0.0;
+		var _this_w = 1.0;
+		_this_x = v1.x;
+		_this_y = v1.y;
+		_this_z = v1.z;
+		_this_w = v1.w;
+		q.w = Math.sqrt(Math.sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z) * Math.sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z) * Math.sqrt(v2.x * v2.x + v2.y * v2.y + v2.z * v2.z) * Math.sqrt(v2.x * v2.x + v2.y * v2.y + v2.z * v2.z)) + (_this_x * v2.x + _this_y * v2.y + _this_z * v2.z);
+		var l = Math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
+		if(l == 0.0) {
+			q.x = 0;
+			q.y = 0;
+			q.z = 0;
+			q.w = 0;
+		} else {
+			l = 1.0 / l;
+			q.x *= l;
+			q.y *= l;
+			q.z *= l;
+			q.w *= l;
+		}
+		return q;
+	}
+	,spawnObject: function(objectName,visible) {
+		var object;
+		var matrix = null;
+		var spawnChildren = true;
+		iron_Scene.active.spawnObject(objectName,null,function(o) {
+			object = o;
+			if(matrix != null) {
+				object.transform.setMatrix(matrix);
+				var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
+				if(rigidBody != null) {
+					object.transform.buildMatrix();
+					rigidBody.syncTransform();
+				}
+			}
+			object.visible = visible;
+		},spawnChildren);
+		return object;
+	}
+	,rbSync: function(object) {
+		var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
+		if(rigidBody != null) {
+			rigidBody.syncTransform();
+		}
+	}
+	,initProps: function(object) {
+		if(object == null) {
+			return;
+		}
+		if(object.properties == null) {
+			object.properties = new haxe_ds_StringMap();
+		}
+	}
+	,__class__: arm_KM100PM_$Base
+});
+var arm_KM100_$Base = function() {
+	this.objList = [];
+	this.visib = false;
+	this.screwTrans = 0.00005;
+	this.screwBotDist = 0.0;
+	this.screwTopDist = 0.0;
+	this.scale = new iron_math_Vec4(0.01,0.01,0.01,1);
+	this.screwName = "KM100_Screw";
+	this.frontName = "KM100_Front";
+	this.mirrorName = "KM100_Mirror";
+	iron_Trait.call(this);
+	this.notifyOnInit($bind(this,this.onInit));
+	this.notifyOnUpdate($bind(this,this.onUpdate));
+};
+$hxClasses["arm.KM100_Base"] = arm_KM100_$Base;
+arm_KM100_$Base.__name__ = "arm.KM100_Base";
+arm_KM100_$Base.__super__ = iron_Trait;
+arm_KM100_$Base.prototype = $extend(iron_Trait.prototype,{
+	mirrorName: null
+	,frontName: null
+	,screwName: null
+	,children: null
+	,scale: null
+	,screwTopDist: null
+	,screwBotDist: null
+	,screwTrans: null
+	,screwPosLim: null
+	,screwNegLim: null
+	,screwTravelDist: null
+	,screwTop: null
+	,screwBot: null
+	,front: null
+	,mirror: null
+	,visib: null
+	,objList: null
+	,onInit: function() {
+		var object = this.object;
+		if(object != null) {
+			if(object.properties == null) {
+				object.properties = new haxe_ds_StringMap();
+			}
+		}
+		var _this = this.object.properties;
+		if(__map_reserved["spawned"] != null ? _this.getReserved("spawned") : _this.h["spawned"]) {
+			this.visib = true;
+		} else {
+			this.object.remove();
+			return;
+		}
+		this.children = this.object.getChildren();
+		this.screwTop = this.spawnObject(this.screwName,false);
+		var mST = this.children[4].transform.world;
+		this.screwTop.transform.setMatrix(mST);
+		this.screwTop.transform.scale = this.scale;
+		this.screwTop.visible = this.visib;
+		this.rbSync(this.screwTop);
+		this.screwBot = this.spawnObject(this.screwName,false);
+		var mSB = this.children[2].transform.world;
+		this.screwBot.transform.setMatrix(mSB);
+		this.screwBot.transform.scale = this.scale;
+		this.screwBot.visible = this.visib;
+		this.rbSync(this.screwBot);
+		this.front = this.spawnObject(this.frontName,false);
+		var mF = this.children[0].transform.world;
+		this.front.transform.setMatrix(mF);
+		this.front.transform.scale = this.scale;
+		this.front.visible = this.visib;
+		this.rbSync(this.front);
+		var _g = 0;
+		var _g1 = this.front.getChildren();
+		while(_g < _g1.length) {
+			var child = _g1[_g];
+			++_g;
+			child.transform.scale = this.scale;
+		}
+		this.mirror = this.spawnObject(this.mirrorName,false);
+		var mM = this.front.getChildren()[0].transform.world;
+		this.mirror.transform.setMatrix(mM);
+		this.mirror.transform.scale = this.scale;
+		this.mirror.visible = this.visib;
+		this.rbSync(this.mirror);
+		haxe_Log.trace(Std.string(this.screwTopDist) + ", _________" + Std.string(this.mirror.transform.rot),{ fileName : "arm/KM100_Base.hx", lineNumber : 99, className : "arm.KM100_Base", methodName : "onInit"});
+		var _this1 = this.children[1].transform.world;
+		var x = _this1.self._30;
+		var y = _this1.self._31;
+		var z = _this1.self._32;
+		var w = _this1.self._33;
+		if(w == null) {
+			w = 1.0;
+		}
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var _this_x = x;
+		var _this_y = y;
+		var _this_z = z;
+		var _this_w = w;
+		var _this2 = this.screwBot.getChildren()[0].transform.world;
+		var x1 = _this2.self._30;
+		var y1 = _this2.self._31;
+		var z1 = _this2.self._32;
+		var w1 = _this2.self._33;
+		if(w1 == null) {
+			w1 = 1.0;
+		}
+		if(z1 == null) {
+			z1 = 0.0;
+		}
+		if(y1 == null) {
+			y1 = 0.0;
+		}
+		if(x1 == null) {
+			x1 = 0.0;
+		}
+		var p_x = x1;
+		var p_y = y1;
+		var p_z = z1;
+		var p_w = w1;
+		this.screwPosLim = Math.sqrt((p_x - _this_x) * (p_x - _this_x) + (p_y - _this_y) * (p_y - _this_y) + (p_z - _this_z) * (p_z - _this_z));
+		var _this3 = this.children[2].transform.world;
+		var x2 = _this3.self._30;
+		var y2 = _this3.self._31;
+		var z2 = _this3.self._32;
+		var w2 = _this3.self._33;
+		if(w2 == null) {
+			w2 = 1.0;
+		}
+		if(z2 == null) {
+			z2 = 0.0;
+		}
+		if(y2 == null) {
+			y2 = 0.0;
+		}
+		if(x2 == null) {
+			x2 = 0.0;
+		}
+		var _this_x1 = x2;
+		var _this_y1 = y2;
+		var _this_z1 = z2;
+		var _this_w1 = w2;
+		var _this4 = this.children[6].transform.world;
+		var x3 = _this4.self._30;
+		var y3 = _this4.self._31;
+		var z3 = _this4.self._32;
+		var w3 = _this4.self._33;
 		if(w3 == null) {
 			w3 = 1.0;
 		}
@@ -2144,33 +2830,33 @@ arm_KM100_$Base.prototype = $extend(iron_Trait.prototype,{
 				}
 			}
 			if(obj != this.object) {
-				var _this4 = obj.properties;
+				var _this5 = obj.properties;
 				var value = this.object;
 				if(__map_reserved["TraitObj"] != null) {
-					_this4.setReserved("TraitObj",value);
+					_this5.setReserved("TraitObj",value);
 				} else {
-					_this4.h["TraitObj"] = value;
+					_this5.h["TraitObj"] = value;
 				}
 			} else {
-				var _this5 = obj.properties;
+				var _this6 = obj.properties;
 				if(__map_reserved["TraitObj"] != null) {
-					_this5.setReserved("TraitObj","self");
+					_this6.setReserved("TraitObj","self");
 				} else {
-					_this5.h["TraitObj"] = "self";
+					_this6.h["TraitObj"] = "self";
 				}
-			}
-			var _this6 = obj.properties;
-			var value1 = "KM100" + "_Base";
-			if(__map_reserved["TraitName"] != null) {
-				_this6.setReserved("TraitName",value1);
-			} else {
-				_this6.h["TraitName"] = value1;
 			}
 			var _this7 = obj.properties;
-			if(__map_reserved["PauseResume"] != null) {
-				_this7.setReserved("PauseResume",true);
+			var value1 = "KM100" + "_Base";
+			if(__map_reserved["TraitName"] != null) {
+				_this7.setReserved("TraitName",value1);
 			} else {
-				_this7.h["PauseResume"] = true;
+				_this7.h["TraitName"] = value1;
+			}
+			var _this8 = obj.properties;
+			if(__map_reserved["PauseResume"] != null) {
+				_this8.setReserved("PauseResume",true);
+			} else {
+				_this8.h["PauseResume"] = true;
 			}
 		}
 		this.pauseUpdate();
@@ -4792,6 +5478,688 @@ arm_LDM56_$Base.prototype = $extend(iron_Trait.prototype,{
 	}
 	,__class__: arm_LDM56_$Base
 });
+var arm_LinearPolarizer = function() {
+	var _gthis = this;
+	iron_Trait.call(this);
+	var String_Beam_Ray_Traits = "LinearPolarizer";
+	var changes_prop = true;
+	var blocksBeam = false;
+	var transmission = 0.85;
+	this.notifyOnInit(function() {
+		if(_gthis.object == null) {
+			return;
+		}
+		if(_gthis.object.properties == null) {
+			_gthis.object.properties = new haxe_ds_StringMap();
+		}
+		var _this = _gthis.object.properties;
+		if(__map_reserved["String_Beam_Ray_Traits"] != null) {
+			_this.setReserved("String_Beam_Ray_Traits",String_Beam_Ray_Traits);
+		} else {
+			_this.h["String_Beam_Ray_Traits"] = String_Beam_Ray_Traits;
+		}
+		var _this1 = _gthis.object.properties;
+		if(__map_reserved["changes_prop"] != null) {
+			_this1.setReserved("changes_prop",changes_prop);
+		} else {
+			_this1.h["changes_prop"] = changes_prop;
+		}
+		var _this2 = _gthis.object.properties;
+		if(__map_reserved["blocksBeam"] != null) {
+			_this2.setReserved("blocksBeam",blocksBeam);
+		} else {
+			_this2.h["blocksBeam"] = blocksBeam;
+		}
+		var _this3 = _gthis.object.properties;
+		if(__map_reserved["transmission"] != null) {
+			_this3.setReserved("transmission",transmission);
+		} else {
+			_this3.h["transmission"] = transmission;
+		}
+	});
+};
+$hxClasses["arm.LinearPolarizer"] = arm_LinearPolarizer;
+arm_LinearPolarizer.__name__ = "arm.LinearPolarizer";
+arm_LinearPolarizer.__super__ = iron_Trait;
+arm_LinearPolarizer.prototype = $extend(iron_Trait.prototype,{
+	GetChildProperties: function(parBeam,pos,dir) {
+		var new_childprops = parBeam.properties.copy();
+		var _this = this.object.transform.world;
+		var x = _this.self._10;
+		var y = _this.self._11;
+		var z = _this.self._12;
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var normal_vec_x = x;
+		var normal_vec_y = y;
+		var normal_vec_z = z;
+		var normal_vec_w = 1.0;
+		var n = Math.sqrt(normal_vec_x * normal_vec_x + normal_vec_y * normal_vec_y + normal_vec_z * normal_vec_z);
+		if(n > 0.0) {
+			var invN = 1.0 / n;
+			normal_vec_x *= invN;
+			normal_vec_y *= invN;
+			normal_vec_z *= invN;
+		}
+		var _this1 = this.object.transform.world;
+		var x1 = _this1.self._20;
+		var y1 = _this1.self._21;
+		var z1 = _this1.self._22;
+		if(z1 == null) {
+			z1 = 0.0;
+		}
+		if(y1 == null) {
+			y1 = 0.0;
+		}
+		if(x1 == null) {
+			x1 = 0.0;
+		}
+		var up_vec_x = x1;
+		var up_vec_y = y1;
+		var up_vec_z = z1;
+		var up_vec_w = 1.0;
+		var n1 = Math.sqrt(up_vec_x * up_vec_x + up_vec_y * up_vec_y + up_vec_z * up_vec_z);
+		if(n1 > 0.0) {
+			var invN1 = 1.0 / n1;
+			up_vec_x *= invN1;
+			up_vec_y *= invN1;
+			up_vec_z *= invN1;
+		}
+		var _this2 = this.object.transform.world;
+		var x2 = _this2.self._00;
+		var y2 = _this2.self._01;
+		var z2 = _this2.self._02;
+		if(z2 == null) {
+			z2 = 0.0;
+		}
+		if(y2 == null) {
+			y2 = 0.0;
+		}
+		if(x2 == null) {
+			x2 = 0.0;
+		}
+		var right_vec_x = x2;
+		var right_vec_y = y2;
+		var right_vec_z = z2;
+		var right_vec_w = 1.0;
+		var n2 = Math.sqrt(right_vec_x * right_vec_x + right_vec_y * right_vec_y + right_vec_z * right_vec_z);
+		if(n2 > 0.0) {
+			var invN2 = 1.0 / n2;
+			right_vec_x *= invN2;
+			right_vec_y *= invN2;
+			right_vec_z *= invN2;
+		}
+		var I = __map_reserved["stokes_I"] != null ? new_childprops.getReserved("stokes_I") : new_childprops.h["stokes_I"];
+		var p = __map_reserved["stokes_p"] != null ? new_childprops.getReserved("stokes_p") : new_childprops.h["stokes_p"];
+		var psi2 = 2 * (__map_reserved["stokes_psi"] != null ? new_childprops.getReserved("stokes_psi") : new_childprops.h["stokes_psi"]);
+		var chi2 = 2 * (__map_reserved["stokes_chi"] != null ? new_childprops.getReserved("stokes_chi") : new_childprops.h["stokes_chi"]);
+		var x3 = I;
+		var y3 = I * p * Math.cos(psi2) * Math.cos(chi2);
+		var z3 = I * p * Math.sin(psi2) * Math.cos(chi2);
+		var w = I * p * Math.sin(chi2);
+		if(w == null) {
+			w = 1.0;
+		}
+		if(z3 == null) {
+			z3 = 0.0;
+		}
+		if(y3 == null) {
+			y3 = 0.0;
+		}
+		if(x3 == null) {
+			x3 = 0.0;
+		}
+		var stokes_vec_x = x3;
+		var stokes_vec_y = y3;
+		var stokes_vec_z = z3;
+		var stokes_vec_w = w;
+		var x4 = 0;
+		var y4 = 0;
+		var z4 = 1;
+		var w1 = 1;
+		if(w1 == null) {
+			w1 = 1.0;
+		}
+		if(z4 == null) {
+			z4 = 0.0;
+		}
+		if(y4 == null) {
+			y4 = 0.0;
+		}
+		if(x4 == null) {
+			x4 = 0.0;
+		}
+		var vcross_x = x4;
+		var vcross_y = y4;
+		var vcross_z = z4;
+		var vcross_w = w1;
+		var ax = vcross_x;
+		var ay = vcross_y;
+		var az = vcross_z;
+		var vx = right_vec_x;
+		var vy = right_vec_y;
+		var vz = right_vec_z;
+		vcross_x = ay * vz - az * vy;
+		vcross_y = az * vx - ax * vz;
+		vcross_z = ax * vy - ay * vx;
+		var vb_x = 0.0;
+		var vb_y = 0.0;
+		var vb_z = 0.0;
+		var vb_w = 1.0;
+		vb_x = right_vec_x;
+		vb_y = right_vec_y;
+		vb_z = right_vec_z;
+		vb_w = right_vec_w;
+		var x5 = 0;
+		var y5 = 0;
+		var z5 = 1;
+		var w2 = 1;
+		if(w2 == null) {
+			w2 = 1.0;
+		}
+		if(z5 == null) {
+			z5 = 0.0;
+		}
+		if(y5 == null) {
+			y5 = 0.0;
+		}
+		if(x5 == null) {
+			x5 = 0.0;
+		}
+		var va_x = x5;
+		var va_y = y5;
+		var va_z = z5;
+		var va_w = w2;
+		var theta = Math.atan2(vcross_x * normal_vec_x + vcross_y * normal_vec_y + vcross_z * normal_vec_z,va_x * vb_x + va_y * vb_y + va_z * vb_z);
+		var _this3 = parBeam.transform.world;
+		var x6 = _this3.self._00;
+		var y6 = _this3.self._01;
+		var z6 = _this3.self._02;
+		if(z6 == null) {
+			z6 = 0.0;
+		}
+		if(y6 == null) {
+			y6 = 0.0;
+		}
+		if(x6 == null) {
+			x6 = 0.0;
+		}
+		var v_x = x6;
+		var v_y = y6;
+		var v_z = z6;
+		var v_w = 1.0;
+		if(normal_vec_x * v_x + normal_vec_y * v_y + normal_vec_z * v_z < 0) {
+			theta *= -1;
+		}
+		var _this4 = this.object.properties;
+		var transmission = __map_reserved["transmission"] != null ? _this4.getReserved("transmission") : _this4.h["transmission"];
+		var ct = Math.cos(2 * theta);
+		var st = Math.sin(2 * theta);
+		var m1_self__00 = 1;
+		var m1_self__10 = 0;
+		var m1_self__20 = 0;
+		var m1_self__30 = 0;
+		var m1_self__01 = 0;
+		var m1_self__11 = ct;
+		var m1_self__21 = -1 * st;
+		var m1_self__31 = 0;
+		var m1_self__02 = 0;
+		var m1_self__12 = st;
+		var m1_self__22 = ct;
+		var m1_self__32 = 0;
+		var m1_self__03 = 0;
+		var m1_self__13 = 0;
+		var m1_self__23 = 0;
+		var m1_self__33 = 1;
+		var m2_self__00 = 1;
+		var m2_self__10 = 1;
+		var m2_self__20 = 0;
+		var m2_self__30 = 0;
+		var m2_self__01 = 1;
+		var m2_self__11 = 1;
+		var m2_self__21 = 0;
+		var m2_self__31 = 0;
+		var m2_self__02 = 0;
+		var m2_self__12 = 0;
+		var m2_self__22 = 0;
+		var m2_self__32 = 0;
+		var m2_self__03 = 0;
+		var m2_self__13 = 0;
+		var m2_self__23 = 0;
+		var m2_self__33 = 0;
+		var m3_self__00 = 1;
+		var m3_self__10 = 0;
+		var m3_self__20 = 0;
+		var m3_self__30 = 0;
+		var m3_self__01 = 0;
+		var m3_self__11 = ct;
+		var m3_self__21 = st;
+		var m3_self__31 = 0;
+		var m3_self__02 = 0;
+		var m3_self__12 = -1 * st;
+		var m3_self__22 = ct;
+		var m3_self__32 = 0;
+		var m3_self__03 = 0;
+		var m3_self__13 = 0;
+		var m3_self__23 = 0;
+		var m3_self__33 = 1;
+		var a00 = m3_self__00;
+		var a01 = m3_self__01;
+		var a02 = m3_self__02;
+		var a03 = m3_self__03;
+		var a10 = m3_self__10;
+		var a11 = m3_self__11;
+		var a12 = m3_self__12;
+		var a13 = m3_self__13;
+		var a20 = m3_self__20;
+		var a21 = m3_self__21;
+		var a22 = m3_self__22;
+		var a23 = m3_self__23;
+		var a30 = m3_self__30;
+		var a31 = m3_self__31;
+		var a32 = m3_self__32;
+		var a33 = m3_self__33;
+		var b0 = m2_self__00;
+		var b1 = m2_self__10;
+		var b2 = m2_self__20;
+		var b3 = m2_self__30;
+		m3_self__00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		b0 = m2_self__01;
+		b1 = m2_self__11;
+		b2 = m2_self__21;
+		b3 = m2_self__31;
+		m3_self__01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		b0 = m2_self__02;
+		b1 = m2_self__12;
+		b2 = m2_self__22;
+		b3 = m2_self__32;
+		m3_self__02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		b0 = m2_self__03;
+		b1 = m2_self__13;
+		b2 = m2_self__23;
+		b3 = m2_self__33;
+		m3_self__03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		var a001 = m3_self__00;
+		var a011 = m3_self__01;
+		var a021 = m3_self__02;
+		var a031 = m3_self__03;
+		var a101 = m3_self__10;
+		var a111 = m3_self__11;
+		var a121 = m3_self__12;
+		var a131 = m3_self__13;
+		var a201 = m3_self__20;
+		var a211 = m3_self__21;
+		var a221 = m3_self__22;
+		var a231 = m3_self__23;
+		var a301 = m3_self__30;
+		var a311 = m3_self__31;
+		var a321 = m3_self__32;
+		var a331 = m3_self__33;
+		var b01 = m1_self__00;
+		var b11 = m1_self__10;
+		var b21 = m1_self__20;
+		var b31 = m1_self__30;
+		m3_self__00 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__10 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__20 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__30 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		b01 = m1_self__01;
+		b11 = m1_self__11;
+		b21 = m1_self__21;
+		b31 = m1_self__31;
+		m3_self__01 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__11 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__21 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__31 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		b01 = m1_self__02;
+		b11 = m1_self__12;
+		b21 = m1_self__22;
+		b31 = m1_self__32;
+		m3_self__02 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__12 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__22 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__32 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		b01 = m1_self__03;
+		b11 = m1_self__13;
+		b21 = m1_self__23;
+		b31 = m1_self__33;
+		m3_self__03 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__13 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__23 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__33 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		var s = transmission / 2.;
+		m3_self__00 *= s;
+		m3_self__10 *= s;
+		m3_self__20 *= s;
+		m3_self__30 *= s;
+		m3_self__01 *= s;
+		m3_self__11 *= s;
+		m3_self__21 *= s;
+		m3_self__31 *= s;
+		m3_self__02 *= s;
+		m3_self__12 *= s;
+		m3_self__22 *= s;
+		m3_self__32 *= s;
+		m3_self__03 *= s;
+		m3_self__13 *= s;
+		m3_self__23 *= s;
+		m3_self__33 *= s;
+		var x7 = stokes_vec_x;
+		var y7 = stokes_vec_y;
+		var z7 = stokes_vec_z;
+		var w3 = stokes_vec_w;
+		stokes_vec_x = m3_self__00 * x7 + m3_self__10 * y7 + m3_self__20 * z7 + m3_self__30 * w3;
+		stokes_vec_y = m3_self__01 * x7 + m3_self__11 * y7 + m3_self__21 * z7 + m3_self__31 * w3;
+		stokes_vec_z = m3_self__02 * x7 + m3_self__12 * y7 + m3_self__22 * z7 + m3_self__32 * w3;
+		stokes_vec_w = m3_self__03 * x7 + m3_self__13 * y7 + m3_self__23 * z7 + m3_self__33 * w3;
+		var v = stokes_vec_x;
+		var value = v;
+		if(__map_reserved["stokes_I"] != null) {
+			new_childprops.setReserved("stokes_I",value);
+		} else {
+			new_childprops.h["stokes_I"] = value;
+		}
+		var v1 = Math.sqrt(Math.pow(stokes_vec_y,2) + Math.pow(stokes_vec_z,2) + Math.pow(stokes_vec_w,2)) / stokes_vec_x;
+		var value1 = v1;
+		if(__map_reserved["stokes_p"] != null) {
+			new_childprops.setReserved("stokes_p",value1);
+		} else {
+			new_childprops.h["stokes_p"] = value1;
+		}
+		var v2 = 0.5 * Math.atan2(stokes_vec_z,stokes_vec_y) - Math.atan2(0,1);
+		var value2 = v2;
+		if(__map_reserved["stokes_psi"] != null) {
+			new_childprops.setReserved("stokes_psi",value2);
+		} else {
+			new_childprops.h["stokes_psi"] = value2;
+		}
+		var v3 = 0.5 * Math.atan2(stokes_vec_w,Math.sqrt(Math.pow(stokes_vec_z,2) + Math.pow(stokes_vec_y,2))) - Math.atan2(0,1);
+		var value3 = v3;
+		if(__map_reserved["stokes_chi"] != null) {
+			new_childprops.setReserved("stokes_chi",value3);
+		} else {
+			new_childprops.h["stokes_chi"] = value3;
+		}
+		return new_childprops;
+	}
+	,GetBeamDirection: function(in_dir) {
+		return in_dir;
+	}
+	,__class__: arm_LinearPolarizer
+});
+var arm_MeasurementPlotMain = function() {
+	this.n_values = 200;
+	this.timediscretization = 0.05;
+	this.binwidth = 0.05;
+	this.plotsIndex = 0;
+	this.height = 200;
+	this.width = 250;
+	this.pos_y = 20;
+	this.pos_x = 250;
+	this.nameMeasurementObject = "MeasurementObject";
+	this.getDatafromServer = false;
+	var _gthis = this;
+	iron_Trait.call(this);
+	iron_data_Data.getFont("font_default.ttf",function(f) {
+		_gthis.ui = new arm_ZuiPlotLib({ font : f});
+		iron_Scene.active.notifyOnInit($bind(_gthis,_gthis.sceneInit));
+	});
+};
+$hxClasses["arm.MeasurementPlotMain"] = arm_MeasurementPlotMain;
+arm_MeasurementPlotMain.__name__ = "arm.MeasurementPlotMain";
+arm_MeasurementPlotMain.__super__ = iron_Trait;
+arm_MeasurementPlotMain.prototype = $extend(iron_Trait.prototype,{
+	getDatafromServer: null
+	,nameMeasurementObject: null
+	,ui: null
+	,pos_x: null
+	,pos_y: null
+	,width: null
+	,height: null
+	,plots: null
+	,plotsIndex: null
+	,time: null
+	,time2: null
+	,xVals: null
+	,yValsList: null
+	,yCCList: null
+	,binwidth: null
+	,timediscretization: null
+	,n_values: null
+	,currData: null
+	,sceneInit: function() {
+		this.time = 0.;
+		this.time2 = 0.;
+		this.xVals = [0];
+		this.plots = [];
+		var _g = 1;
+		var _g1 = this.n_values;
+		while(_g < _g1) {
+			var i = _g++;
+			this.xVals.push(this.xVals[i - 1] + this.timediscretization);
+		}
+		var globalObj = iron_Scene.global;
+		if(globalObj.properties == null) {
+			globalObj.properties = new haxe_ds_StringMap();
+		}
+		var _this = globalObj.properties;
+		var value = this.xVals;
+		if(__map_reserved["timeArray"] != null) {
+			_this.setReserved("timeArray",value);
+		} else {
+			_this.h["timeArray"] = value;
+		}
+		this.notifyOnRender2D($bind(this,this.render2DMain));
+	}
+	,onUpdate: function() {
+		var keyboard = iron_system_Input.getKeyboard();
+		if(keyboard.started("space")) {
+			haxe_Log.trace("Space Key",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 95, className : "arm.MeasurementPlotMain", methodName : "onUpdate"});
+			this.plotsIndex += 1;
+			this.plots.push(new arm_PlotInstance(this.pos_x + this.plotsIndex * 50,this.pos_y,this.width,this.height));
+		}
+	}
+	,render2DMain: function(g) {
+		g.end();
+		this.ui.begin(g);
+		if(this.ui.window(zui_Handle.global.nest(41,null),this.pos_x,this.pos_y,this.width,this.height,false)) {
+			if(this.ui.panel(zui_Handle.global.nest(42,{ selected : true}),"New Measurement")) {
+				this.ui.indent();
+				if(this.ui.button("Add New Measurement Window")) {
+					this.plotsIndex += 1;
+					this.plots.push(new arm_PlotInstance(this.pos_x + this.plotsIndex * 50,this.pos_y,800,600));
+				}
+				if(this.ui.button("Remove all Measurements Window")) {
+					var _g = 0;
+					var _g1 = this.plots;
+					while(_g < _g1.length) {
+						var plot = _g1[_g];
+						++_g;
+						this.plots = [];
+					}
+				}
+			}
+		}
+		var _g2 = 0;
+		var _g11 = this.plots;
+		while(_g2 < _g11.length) {
+			var plot1 = _g11[_g2];
+			++_g2;
+			if(plot1.checkTime) {
+				plot1.timeUpdate();
+			}
+			plot1.plotWindow(this.ui);
+		}
+		this.ui.end();
+		g.begin(false);
+	}
+	,render2DExamplePlot: function(g) {
+		g.end();
+		this.ui.begin(g);
+		var hwin = zui_Handle.global.nest(43,null);
+		this.time += 1 / iron_system_Time.frequency * iron_system_Time.scale;
+		this.time2 += 1 / iron_system_Time.frequency * iron_system_Time.scale;
+		if(this.time > this.timediscretization / 2) {
+			this.time = 0;
+			hwin.redraws = 1;
+			if(this.getDatafromServer) {
+				this.getCurrData();
+				if(this.currData != null) {
+					this.yValsList = [this.currData.C1,this.currData.C2];
+					this.yCCList = [this.currData.CC12];
+				}
+			} else {
+				this.yValsList = [[],[]];
+				var _g = 0;
+				var _g1 = this.xVals;
+				while(_g < _g1.length) {
+					var x = _g1[_g];
+					++_g;
+					this.yValsList[0].push(Math.sin(x + this.time2) + 1.);
+					this.yValsList[1].push(Math.cos(x + this.time2) + 1.);
+				}
+			}
+		} else {
+			hwin.redraws = 0;
+		}
+		var hcombo = zui_Handle.global.nest(44,null);
+		if(this.ui.window(hwin,this.pos_x,this.pos_y + 500,800,600,true)) {
+			if(this.ui.panel(zui_Handle.global.nest(45,{ selected : true}),"Choose Data")) {
+				this.ui.row([0.5,0.5]);
+				this.ui.text("x Axis");
+				this.ui.combo(hcombo,["Item 1","item 2"]);
+				if(hcombo.changed) {
+					haxe_Log.trace("Combo value changed this frame",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 184, className : "arm.MeasurementPlotMain", methodName : "render2DExamplePlot"});
+					haxe_Log.trace(hcombo.position,{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 185, className : "arm.MeasurementPlotMain", methodName : "render2DExamplePlot"});
+				}
+			}
+			if(!this.getDatafromServer && this.yValsList != null) {
+				this.ui.coordinateSystem(this.xVals,this.yValsList,600,300,3);
+			}
+		}
+		this.ui.end();
+		g.begin(false);
+	}
+	,getCurrData: function() {
+		var _gthis = this;
+		this.urlCallBack(function(response) {
+			_gthis.currData = JSON.parse(response);
+		});
+	}
+	,urlCallBack: function(callback) {
+		var url = "http://127.0.0.1:5000/dataget";
+		var http = new haxe_http_HttpJs(url);
+		http.onData = function(data) {
+			callback(data);
+		};
+		http.request();
+	}
+	,__class__: arm_MeasurementPlotMain
+});
+var arm_PlotInstance = function(x,y,w,h) {
+	this.globalObj = iron_Scene.global;
+	this.pos_x = x;
+	this.pos_y = y;
+	this.width = w;
+	this.height = h;
+	this.handle = new zui_Handle();
+	this.comboXAxisHandle = new zui_Handle();
+	this.comboYAxisHandle = new zui_Handle();
+	this.panelHandle = new zui_Handle({ selected : true});
+	this.message = "hello world";
+	this.time = 0;
+	this.checkTime = false;
+};
+$hxClasses["arm.PlotInstance"] = arm_PlotInstance;
+arm_PlotInstance.__name__ = "arm.PlotInstance";
+arm_PlotInstance.prototype = {
+	pos_x: null
+	,pos_y: null
+	,width: null
+	,height: null
+	,handle: null
+	,comboXAxisHandle: null
+	,comboYAxisHandle: null
+	,panelHandle: null
+	,globalObj: null
+	,axisItemsObject: null
+	,axistItemsNames: null
+	,message: null
+	,time: null
+	,timeSteps: null
+	,checkTime: null
+	,timeUpdate: function() {
+		this.time += 1 / iron_system_Time.frequency * iron_system_Time.scale;
+		if(this.time > this.timeSteps) {
+			this.time = 0;
+		}
+	}
+	,plotWindow: function(ui) {
+		if(ui.window(this.handle,this.pos_x,this.pos_y,this.width,this.height,true)) {
+			ui.row([0.5,0.5]);
+			ui.text("Plot Window");
+			ui.text(this.message);
+			if(ui.panel(this.panelHandle,"Select Data")) {
+				this.axistItemsNames = this.getAxisItems();
+				ui.row([0.5,0.5]);
+				ui.text("x Axis");
+				ui.combo(this.comboXAxisHandle,this.axistItemsNames);
+				if(this.comboXAxisHandle.changed) {
+					haxe_Log.trace("Combo value X changed this frame",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 275, className : "arm.PlotInstance", methodName : "plotWindow"});
+					haxe_Log.trace(this.comboXAxisHandle.position,{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 276, className : "arm.PlotInstance", methodName : "plotWindow"});
+				}
+				ui.row([0.5,0.5]);
+				ui.text("y Axis");
+				ui.combo(this.comboYAxisHandle,this.axistItemsNames);
+				if(this.comboYAxisHandle.changed) {
+					haxe_Log.trace("Combo value Y changed this frame",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 283, className : "arm.PlotInstance", methodName : "plotWindow"});
+					haxe_Log.trace(this.comboYAxisHandle.position,{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 284, className : "arm.PlotInstance", methodName : "plotWindow"});
+				}
+			}
+		}
+	}
+	,getAxisItems: function() {
+		var items = ["time (s)"];
+		if(this.globalObj.properties != null) {
+			var _this = this.globalObj.properties;
+			if((__map_reserved["detekorObjectsArray"] != null ? _this.getReserved("detekorObjectsArray") : _this.h["detekorObjectsArray"]) != null) {
+				var _this1 = this.globalObj.properties;
+				var detObjList = __map_reserved["detekorObjectsArray"] != null ? _this1.getReserved("detekorObjectsArray") : _this1.h["detekorObjectsArray"];
+				var _g = 0;
+				while(_g < detObjList.length) {
+					var detObj = detObjList[_g];
+					++_g;
+					var _this2 = detObj.properties;
+					if((__map_reserved["nameDetektor"] != null ? _this2.getReserved("nameDetektor") : _this2.h["nameDetektor"]) != null) {
+						var _this3 = detObj.properties;
+						items.push(__map_reserved["nameDetektor"] != null ? _this3.getReserved("nameDetektor") : _this3.h["nameDetektor"]);
+					}
+				}
+			}
+		}
+		return items;
+	}
+	,__class__: arm_PlotInstance
+};
 var arm_Mirror_$v4 = function() {
 	var _gthis = this;
 	iron_Trait.call(this);
@@ -4922,8 +6290,8 @@ arm_NewUI.prototype = $extend(iron_Trait.prototype,{
 	,render2D: function(g) {
 		g.end();
 		this.ui.begin(g);
-		if(this.ui.window(zui_Handle.global.nest(35,null),this.pos_x,this.pos_y,this.width,this.height,false)) {
-			if(this.ui.panel(zui_Handle.global.nest(36,{ selected : true}),"Laser Control")) {
+		if(this.ui.window(zui_Handle.global.nest(1,null),this.pos_x,this.pos_y,this.width,this.height,false)) {
+			if(this.ui.panel(zui_Handle.global.nest(2,{ selected : true}),"Laser Control")) {
 				this.ui.indent();
 				this.ui.row([0.5,0.5]);
 				if(this.ui.button("Laser On/Off")) {
@@ -4983,9 +6351,9 @@ arm_NewUI.prototype = $extend(iron_Trait.prototype,{
 					this.onEventCB();
 				}
 				this.ui.text("Max Beam segments");
-				var beamNumber = this.ui.slider(zui_Handle.global.nest(37,{ value : 25}),"X",0,100,true);
+				var beamNumber = this.ui.slider(zui_Handle.global.nest(3,{ value : 25}),"X",0,100,true);
 				this.ui.text("Update Interval (ms)");
-				var updateTime = this.ui.slider(zui_Handle.global.nest(38,{ value : 20}),"X",0,1000,true);
+				var updateTime = this.ui.slider(zui_Handle.global.nest(4,{ value : 20}),"X",0,1000,true);
 				this.ui.unindent();
 				var _this6 = iron_Scene.global.properties;
 				var value = beamNumber | 0;
@@ -5002,11 +6370,11 @@ arm_NewUI.prototype = $extend(iron_Trait.prototype,{
 					_this7.h["updateTime"] = value1;
 				}
 			}
-			if(this.ui.panel(zui_Handle.global.nest(39,{ selected : true}),"Object Control")) {
+			if(this.ui.panel(zui_Handle.global.nest(5,{ selected : true}),"Object Control")) {
 				this.ui.row([0.5,0.5]);
 				this.ui.text("Active Object");
 				this.ui.text(this.objName);
-				var angleInput = this.ui.textInput(zui_Handle.global.nest(40,{ text : "5"}),"Rotation Angle (deg)");
+				var angleInput = this.ui.textInput(zui_Handle.global.nest(6,{ text : "5"}),"Rotation Angle (deg)");
 				this.rotValue = parseFloat(angleInput) * Math.PI / 180.0;
 				this.ui.row([0.6,0.2,0.2]);
 				this.ui.text("Rotate Z");
@@ -5088,13 +6456,233 @@ arm_NewUI.prototype = $extend(iron_Trait.prototype,{
 	}
 	,__class__: arm_NewUI
 });
-var arm_PhotoDiodeDet = function() {
+var arm_NiceScale = function(min,max) {
+	this.maxTicks = 10;
+	this.minPoint = min;
+	this.maxPoint = max;
+	this.calculate();
+};
+$hxClasses["arm.NiceScale"] = arm_NiceScale;
+arm_NiceScale.__name__ = "arm.NiceScale";
+arm_NiceScale.prototype = {
+	minPoint: null
+	,maxPoint: null
+	,maxTicks: null
+	,tickSpacing: null
+	,range: null
+	,niceMin: null
+	,niceMax: null
+	,calculate: function() {
+		this.range = this.niceNum(this.maxPoint - this.minPoint,false);
+		this.tickSpacing = this.niceNum(this.range / (this.maxTicks - 1),true);
+		this.niceMin = Math.floor(this.minPoint / this.tickSpacing) * this.tickSpacing;
+		this.niceMax = Math.ceil(this.maxPoint / this.tickSpacing) * this.tickSpacing;
+	}
+	,niceNum: function(range,round) {
+		var niceFraction;
+		var exponent = Math.floor(Math.log(range) / Math.log(10));
+		var fraction = range / Math.pow(10,exponent);
+		if(round) {
+			if(fraction < 1.5) {
+				niceFraction = 1;
+			} else if(fraction < 3) {
+				niceFraction = 2;
+			} else if(fraction < 7) {
+				niceFraction = 5;
+			} else {
+				niceFraction = 10;
+			}
+		} else if(fraction <= 1) {
+			niceFraction = 1;
+		} else if(fraction <= 2) {
+			niceFraction = 2;
+		} else if(fraction <= 5) {
+			niceFraction = 5;
+		} else {
+			niceFraction = 10;
+		}
+		return niceFraction * Math.pow(10,exponent);
+	}
+	,setMinMaxPoints: function(minPoint,maxPoint) {
+		this.minPoint = minPoint;
+		this.maxPoint = maxPoint;
+		this.calculate();
+	}
+	,setMaxTicks: function(maxTicks) {
+		this.maxTicks = maxTicks;
+		this.calculate();
+	}
+	,getTicks: function() {
+		var precision = this.precision(this.tickSpacing);
+		if(precision > 3) {
+			precision = 4;
+		}
+		var ticks = [this.niceMin];
+		var tickNum = Math.ceil((this.niceMax - this.niceMin) / this.tickSpacing);
+		var _g = 1;
+		var _g1 = tickNum + 1;
+		while(_g < _g1) {
+			var i = _g++;
+			ticks[i] = this.round2(ticks[i - 1] + this.tickSpacing,precision);
+		}
+		return ticks;
+	}
+	,round2: function(number,precision) {
+		var num = number;
+		num *= Math.pow(10,precision);
+		num = Math.round(num) / Math.pow(10,precision);
+		return num;
+	}
+	,precision: function(a) {
+		var e = 1;
+		var p = 0;
+		while(Math.round(a * e) / e != a) {
+			e *= 10;
+			++p;
+		}
+		return p;
+	}
+	,__class__: arm_NiceScale
+};
+var arm_PhotoDiode = function() {
+	this.detectorSize = 1.;
+	this.nameDetektor = "SpannungPhotodiode1Sim";
+	this.blocksBeam = true;
+	this.changes_prop = false;
+	this.String_Beam_Ray_Traits = "PhotoDiode";
+	this.detectorEfficiency = 0.85;
+	iron_Trait.call(this);
+	this.notifyOnInit($bind(this,this.onInit));
+	this.notifyOnUpdate($bind(this,this.onUpdate));
+};
+$hxClasses["arm.PhotoDiode"] = arm_PhotoDiode;
+arm_PhotoDiode.__name__ = "arm.PhotoDiode";
+arm_PhotoDiode.__super__ = iron_Trait;
+arm_PhotoDiode.prototype = $extend(iron_Trait.prototype,{
+	detectorEfficiency: null
+	,String_Beam_Ray_Traits: null
+	,changes_prop: null
+	,blocksBeam: null
+	,nameDetektor: null
+	,detectorSize: null
+	,onInit: function() {
+		var globalObj = iron_Scene.global;
+		if(this.object == null) {
+			return;
+		}
+		if(this.object.properties == null) {
+			this.object.properties = new haxe_ds_StringMap();
+		}
+		if(globalObj == null) {
+			return;
+		}
+		if(globalObj.properties == null) {
+			globalObj.properties = new haxe_ds_StringMap();
+		}
+		var _this = this.object.properties;
+		var value = this.String_Beam_Ray_Traits;
+		if(__map_reserved["String_Beam_Ray_Traits"] != null) {
+			_this.setReserved("String_Beam_Ray_Traits",value);
+		} else {
+			_this.h["String_Beam_Ray_Traits"] = value;
+		}
+		var _this1 = this.object.properties;
+		var value1 = this.changes_prop;
+		if(__map_reserved["changes_prop"] != null) {
+			_this1.setReserved("changes_prop",value1);
+		} else {
+			_this1.h["changes_prop"] = value1;
+		}
+		var _this2 = this.object.properties;
+		var value2 = this.blocksBeam;
+		if(__map_reserved["blocksBeam"] != null) {
+			_this2.setReserved("blocksBeam",value2);
+		} else {
+			_this2.h["blocksBeam"] = value2;
+		}
+		var _this3 = this.object.properties;
+		var value3 = this.nameDetektor;
+		if(__map_reserved["nameDetektor"] != null) {
+			_this3.setReserved("nameDetektor",value3);
+		} else {
+			_this3.h["nameDetektor"] = value3;
+		}
+		haxe_Log.trace(this.nameDetektor,{ fileName : "arm/PhotoDiode.hx", lineNumber : 50, className : "arm.PhotoDiode", methodName : "onInit"});
+		var _this4 = globalObj.properties;
+		if((__map_reserved["detekorObjectsArray"] != null ? _this4.getReserved("detekorObjectsArray") : _this4.h["detekorObjectsArray"]) == null) {
+			var v = [this.object];
+			var _this5 = globalObj.properties;
+			var value4 = v;
+			if(__map_reserved["detekorObjectsArray"] != null) {
+				_this5.setReserved("detekorObjectsArray",value4);
+			} else {
+				_this5.h["detekorObjectsArray"] = value4;
+			}
+		} else {
+			var _this6 = globalObj.properties;
+			(__map_reserved["detekorObjectsArray"] != null ? _this6.getReserved("detekorObjectsArray") : _this6.h["detekorObjectsArray"]).push(this.object);
+		}
+	}
+	,onUpdate: function() {
+		var keyboard = iron_system_Input.getKeyboard();
+		if(keyboard.down("space")) {
+			var globalObj = iron_Scene.global;
+			var _this = globalObj.properties;
+			haxe_Log.trace(this.measureBeams(__map_reserved["ArrayDetBeams"] != null ? _this.getReserved("ArrayDetBeams") : _this.h["ArrayDetBeams"]),{ fileName : "arm/PhotoDiode.hx", lineNumber : 66, className : "arm.PhotoDiode", methodName : "onUpdate"});
+		}
+	}
+	,measureBeams: function(arrayDetectableBeams) {
+		var signal = 0.;
+		var detectorSize = this.detectorSize;
+		var dettEff = this.detectorEfficiency;
+		var _g = 0;
+		while(_g < arrayDetectableBeams.length) {
+			var map = arrayDetectableBeams[_g];
+			++_g;
+			if((__map_reserved["pos"] != null ? map.getReserved("pos") : map.h["pos"]) != null) {
+				var beamPos = __map_reserved["pos"] != null ? map.getReserved("pos") : map.h["pos"];
+				var _this = this.object.getChildren()[0].transform.world;
+				var x = _this.self._30;
+				var y = _this.self._31;
+				var z = _this.self._32;
+				var w = _this.self._33;
+				if(w == null) {
+					w = 1.0;
+				}
+				if(z == null) {
+					z = 0.0;
+				}
+				if(y == null) {
+					y = 0.0;
+				}
+				if(x == null) {
+					x = 0.0;
+				}
+				var detPos_x = x;
+				var detPos_y = y;
+				var detPos_z = z;
+				var detPos_w = w;
+				var beamDist = Math.sqrt((detPos_x - beamPos.x) * (detPos_x - beamPos.x) + (detPos_y - beamPos.y) * (detPos_y - beamPos.y) + (detPos_z - beamPos.z) * (detPos_z - beamPos.z)) * 100;
+				var beamObject = __map_reserved["object"] != null ? map.getReserved("object") : map.h["object"];
+				var _this1 = beamObject.properties;
+				var beamIntensity = __map_reserved["stokes_I"] != null ? _this1.getReserved("stokes_I") : _this1.h["stokes_I"];
+				var _this2 = beamObject.properties;
+				var beamSize = __map_reserved["beamsize_x"] != null ? _this2.getReserved("beamsize_x") : _this2.h["beamsize_x"];
+				var sigmaGaus = beamSize * beamSize + detectorSize * detectorSize;
+				signal += beamIntensity * dettEff / (Math.sqrt(2 * Math.PI) * Math.sqrt(sigmaGaus)) * Math.exp(-1 * beamDist * beamDist / (2 * sigmaGaus));
+			}
+		}
+		return signal;
+	}
+	,__class__: arm_PhotoDiode
+});
+var arm_PolBeamSplitter_$v1 = function() {
 	var _gthis = this;
 	iron_Trait.call(this);
-	var String_Beam_Ray_Traits = "PhotoDiodeDet";
-	var changes_prop = false;
-	var blocksBeam = true;
-	var spawnsRays = 0;
+	var String_Beam_Ray_Traits = "PolBeamSplitter_v1";
+	var changes_prop = true;
+	var blocksBeam = false;
+	var spawnsRays = 1;
 	this.notifyOnInit(function() {
 		if(_gthis.object == null) {
 			return;
@@ -5120,51 +6708,840 @@ var arm_PhotoDiodeDet = function() {
 		} else {
 			_this2.h["blocksBeam"] = blocksBeam;
 		}
-	});
-	this.notifyOnUpdate(function() {
-		var globalObj = iron_Scene.global;
-		var _this3 = globalObj.properties;
-		var tmp = __map_reserved["ArrayDetBeams"] != null ? _this3.getReserved("ArrayDetBeams") : _this3.h["ArrayDetBeams"];
-		_gthis.measureBeams(tmp);
+		var _this3 = _gthis.object.properties;
+		if(__map_reserved["spawnsRays"] != null) {
+			_this3.setReserved("spawnsRays",spawnsRays);
+		} else {
+			_this3.h["spawnsRays"] = spawnsRays;
+		}
 	});
 };
-$hxClasses["arm.PhotoDiodeDet"] = arm_PhotoDiodeDet;
-arm_PhotoDiodeDet.__name__ = "arm.PhotoDiodeDet";
-arm_PhotoDiodeDet.__super__ = iron_Trait;
-arm_PhotoDiodeDet.prototype = $extend(iron_Trait.prototype,{
-	measureBeams: function(arrayDetectableBeams) {
-		var _g = 0;
-		while(_g < arrayDetectableBeams.length) {
-			var map = arrayDetectableBeams[_g];
-			++_g;
-			if((__map_reserved["pos"] != null ? map.getReserved("pos") : map.h["pos"]) != null) {
-				var beamPos = __map_reserved["pos"] != null ? map.getReserved("pos") : map.h["pos"];
-				var _this = this.object.getChild("detektor_Photodiode").transform.world;
-				var x = _this.self._30;
-				var y = _this.self._31;
-				var z = _this.self._32;
-				var w = _this.self._33;
-				if(w == null) {
-					w = 1.0;
-				}
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var detPos_x = x;
-				var detPos_y = y;
-				var detPos_z = z;
-				var detPos_w = w;
-				haxe_Log.trace(Math.sqrt((detPos_x - beamPos.x) * (detPos_x - beamPos.x) + (detPos_y - beamPos.y) * (detPos_y - beamPos.y) + (detPos_z - beamPos.z) * (detPos_z - beamPos.z)),{ fileName : "arm/PhotoDiodeDet.hx", lineNumber : 46, className : "arm.PhotoDiodeDet", methodName : "measureBeams"});
-			}
-		}
+$hxClasses["arm.PolBeamSplitter_v1"] = arm_PolBeamSplitter_$v1;
+arm_PolBeamSplitter_$v1.__name__ = "arm.PolBeamSplitter_v1";
+arm_PolBeamSplitter_$v1.__super__ = iron_Trait;
+arm_PolBeamSplitter_$v1.prototype = $extend(iron_Trait.prototype,{
+	GetBeamDirection: function(in_dir) {
+		return in_dir;
 	}
-	,__class__: arm_PhotoDiodeDet
+	,GetNewBeamDirection: function(in_dir,beamNumber) {
+		var _this = this.object.properties;
+		var spawnsRays = __map_reserved["spawnsRays"] != null ? _this.getReserved("spawnsRays") : _this.h["spawnsRays"];
+		if(beamNumber >= spawnsRays) {
+			haxe_Log.trace("Error: tried to spawn more Beams from source than possible",{ fileName : "arm/PolBeamSplitter_v1.hx", lineNumber : 50, className : "arm.PolBeamSplitter_v1", methodName : "GetNewBeamDirection"});
+			return null;
+		}
+		var out_dir = new iron_math_Vec4();
+		var _this1 = this.object.transform.world;
+		var axis = new iron_math_Vec4(_this1.self._10,_this1.self._11,_this1.self._12);
+		if(in_dir == null || axis == null) {
+			return null;
+		}
+		var inv_in_dir_x = 0.0;
+		var inv_in_dir_y = 0.0;
+		var inv_in_dir_z = 0.0;
+		var inv_in_dir_w = 1.0;
+		inv_in_dir_x = in_dir.x;
+		inv_in_dir_y = in_dir.y;
+		inv_in_dir_z = in_dir.z;
+		inv_in_dir_w = in_dir.w;
+		inv_in_dir_x *= -1;
+		inv_in_dir_y *= -1;
+		inv_in_dir_z *= -1;
+		var f = 1.0 / (Math.sqrt(axis.x * axis.x + axis.y * axis.y + axis.z * axis.z) * Math.sqrt(axis.x * axis.x + axis.y * axis.y + axis.z * axis.z)) * 2 * (inv_in_dir_x * axis.x + inv_in_dir_y * axis.y + inv_in_dir_z * axis.z);
+		axis.x *= f;
+		axis.y *= f;
+		axis.z *= f;
+		var a = axis;
+		out_dir.x = a.x - inv_in_dir_x;
+		out_dir.y = a.y - inv_in_dir_y;
+		out_dir.z = a.z - inv_in_dir_z;
+		var n = Math.sqrt(out_dir.x * out_dir.x + out_dir.y * out_dir.y + out_dir.z * out_dir.z);
+		if(n > 0.0) {
+			var invN = 1.0 / n;
+			out_dir.x *= invN;
+			out_dir.y *= invN;
+			out_dir.z *= invN;
+		}
+		return out_dir;
+	}
+	,GetChildProperties: function(parBeam,pos,dir) {
+		var new_childprops = parBeam.properties.copy();
+		var _this = this.object.transform.world;
+		var x = _this.self._10;
+		var y = _this.self._11;
+		var z = _this.self._12;
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var normal_vec_x = x;
+		var normal_vec_y = y;
+		var normal_vec_z = z;
+		var normal_vec_w = 1.0;
+		var n = Math.sqrt(normal_vec_x * normal_vec_x + normal_vec_y * normal_vec_y + normal_vec_z * normal_vec_z);
+		if(n > 0.0) {
+			var invN = 1.0 / n;
+			normal_vec_x *= invN;
+			normal_vec_y *= invN;
+			normal_vec_z *= invN;
+		}
+		var _this1 = this.object.transform.world;
+		var x1 = _this1.self._20;
+		var y1 = _this1.self._21;
+		var z1 = _this1.self._22;
+		if(z1 == null) {
+			z1 = 0.0;
+		}
+		if(y1 == null) {
+			y1 = 0.0;
+		}
+		if(x1 == null) {
+			x1 = 0.0;
+		}
+		var up_vec_x = x1;
+		var up_vec_y = y1;
+		var up_vec_z = z1;
+		var up_vec_w = 1.0;
+		var n1 = Math.sqrt(up_vec_x * up_vec_x + up_vec_y * up_vec_y + up_vec_z * up_vec_z);
+		if(n1 > 0.0) {
+			var invN1 = 1.0 / n1;
+			up_vec_x *= invN1;
+			up_vec_y *= invN1;
+			up_vec_z *= invN1;
+		}
+		var _this2 = this.object.transform.world;
+		var x2 = _this2.self._00;
+		var y2 = _this2.self._01;
+		var z2 = _this2.self._02;
+		if(z2 == null) {
+			z2 = 0.0;
+		}
+		if(y2 == null) {
+			y2 = 0.0;
+		}
+		if(x2 == null) {
+			x2 = 0.0;
+		}
+		var right_vec_x = x2;
+		var right_vec_y = y2;
+		var right_vec_z = z2;
+		var right_vec_w = 1.0;
+		var n2 = Math.sqrt(right_vec_x * right_vec_x + right_vec_y * right_vec_y + right_vec_z * right_vec_z);
+		if(n2 > 0.0) {
+			var invN2 = 1.0 / n2;
+			right_vec_x *= invN2;
+			right_vec_y *= invN2;
+			right_vec_z *= invN2;
+		}
+		var I = __map_reserved["stokes_I"] != null ? new_childprops.getReserved("stokes_I") : new_childprops.h["stokes_I"];
+		var p = __map_reserved["stokes_p"] != null ? new_childprops.getReserved("stokes_p") : new_childprops.h["stokes_p"];
+		var psi2 = 2 * (__map_reserved["stokes_psi"] != null ? new_childprops.getReserved("stokes_psi") : new_childprops.h["stokes_psi"]);
+		var chi2 = 2 * (__map_reserved["stokes_chi"] != null ? new_childprops.getReserved("stokes_chi") : new_childprops.h["stokes_chi"]);
+		if((__map_reserved["stokes_I"] != null ? new_childprops.getReserved("stokes_I") : new_childprops.h["stokes_I"]) == 0) {
+			return new_childprops;
+		}
+		var x3 = I;
+		var y3 = I * p * Math.cos(psi2) * Math.cos(chi2);
+		var z3 = I * p * Math.sin(psi2) * Math.cos(chi2);
+		var w = I * p * Math.sin(chi2);
+		if(w == null) {
+			w = 1.0;
+		}
+		if(z3 == null) {
+			z3 = 0.0;
+		}
+		if(y3 == null) {
+			y3 = 0.0;
+		}
+		if(x3 == null) {
+			x3 = 0.0;
+		}
+		var stokes_vec_x = x3;
+		var stokes_vec_y = y3;
+		var stokes_vec_z = z3;
+		var stokes_vec_w = w;
+		var x4 = 0;
+		var y4 = 0;
+		var z4 = 1;
+		var w1 = 1;
+		if(w1 == null) {
+			w1 = 1.0;
+		}
+		if(z4 == null) {
+			z4 = 0.0;
+		}
+		if(y4 == null) {
+			y4 = 0.0;
+		}
+		if(x4 == null) {
+			x4 = 0.0;
+		}
+		var vcross_x = x4;
+		var vcross_y = y4;
+		var vcross_z = z4;
+		var vcross_w = w1;
+		var ax = vcross_x;
+		var ay = vcross_y;
+		var az = vcross_z;
+		var vx = up_vec_x;
+		var vy = up_vec_y;
+		var vz = up_vec_z;
+		vcross_x = ay * vz - az * vy;
+		vcross_y = az * vx - ax * vz;
+		vcross_z = ax * vy - ay * vx;
+		var vb_x = 0.0;
+		var vb_y = 0.0;
+		var vb_z = 0.0;
+		var vb_w = 1.0;
+		vb_x = up_vec_x;
+		vb_y = up_vec_y;
+		vb_z = up_vec_z;
+		vb_w = up_vec_w;
+		var x5 = 0;
+		var y5 = 0;
+		var z5 = 1;
+		var w2 = 1;
+		if(w2 == null) {
+			w2 = 1.0;
+		}
+		if(z5 == null) {
+			z5 = 0.0;
+		}
+		if(y5 == null) {
+			y5 = 0.0;
+		}
+		if(x5 == null) {
+			x5 = 0.0;
+		}
+		var va_x = x5;
+		var va_y = y5;
+		var va_z = z5;
+		var va_w = w2;
+		var theta = Math.atan2(vcross_x * normal_vec_x + vcross_y * normal_vec_y + vcross_z * normal_vec_z,va_x * vb_x + va_y * vb_y + va_z * vb_z);
+		var _this3 = parBeam.transform.world;
+		var x6 = _this3.self._00;
+		var y6 = _this3.self._01;
+		var z6 = _this3.self._02;
+		if(z6 == null) {
+			z6 = 0.0;
+		}
+		if(y6 == null) {
+			y6 = 0.0;
+		}
+		if(x6 == null) {
+			x6 = 0.0;
+		}
+		var v_x = x6;
+		var v_y = y6;
+		var v_z = z6;
+		var v_w = 1.0;
+		if(normal_vec_x * v_x + normal_vec_y * v_y + normal_vec_z * v_z < 0) {
+			theta *= -1;
+		}
+		var ct = Math.cos(2 * theta);
+		var st = Math.sin(2 * theta);
+		var m1_self__00 = 1;
+		var m1_self__10 = 0;
+		var m1_self__20 = 0;
+		var m1_self__30 = 0;
+		var m1_self__01 = 0;
+		var m1_self__11 = ct;
+		var m1_self__21 = -1 * st;
+		var m1_self__31 = 0;
+		var m1_self__02 = 0;
+		var m1_self__12 = st;
+		var m1_self__22 = ct;
+		var m1_self__32 = 0;
+		var m1_self__03 = 0;
+		var m1_self__13 = 0;
+		var m1_self__23 = 0;
+		var m1_self__33 = 1;
+		var m2_self__00 = 1;
+		var m2_self__10 = 1;
+		var m2_self__20 = 0;
+		var m2_self__30 = 0;
+		var m2_self__01 = 1;
+		var m2_self__11 = 1;
+		var m2_self__21 = 0;
+		var m2_self__31 = 0;
+		var m2_self__02 = 0;
+		var m2_self__12 = 0;
+		var m2_self__22 = 0;
+		var m2_self__32 = 0;
+		var m2_self__03 = 0;
+		var m2_self__13 = 0;
+		var m2_self__23 = 0;
+		var m2_self__33 = 0;
+		var m3_self__00 = 1;
+		var m3_self__10 = 0;
+		var m3_self__20 = 0;
+		var m3_self__30 = 0;
+		var m3_self__01 = 0;
+		var m3_self__11 = ct;
+		var m3_self__21 = st;
+		var m3_self__31 = 0;
+		var m3_self__02 = 0;
+		var m3_self__12 = -1 * st;
+		var m3_self__22 = ct;
+		var m3_self__32 = 0;
+		var m3_self__03 = 0;
+		var m3_self__13 = 0;
+		var m3_self__23 = 0;
+		var m3_self__33 = 1;
+		var a00 = m3_self__00;
+		var a01 = m3_self__01;
+		var a02 = m3_self__02;
+		var a03 = m3_self__03;
+		var a10 = m3_self__10;
+		var a11 = m3_self__11;
+		var a12 = m3_self__12;
+		var a13 = m3_self__13;
+		var a20 = m3_self__20;
+		var a21 = m3_self__21;
+		var a22 = m3_self__22;
+		var a23 = m3_self__23;
+		var a30 = m3_self__30;
+		var a31 = m3_self__31;
+		var a32 = m3_self__32;
+		var a33 = m3_self__33;
+		var b0 = m2_self__00;
+		var b1 = m2_self__10;
+		var b2 = m2_self__20;
+		var b3 = m2_self__30;
+		m3_self__00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		b0 = m2_self__01;
+		b1 = m2_self__11;
+		b2 = m2_self__21;
+		b3 = m2_self__31;
+		m3_self__01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		b0 = m2_self__02;
+		b1 = m2_self__12;
+		b2 = m2_self__22;
+		b3 = m2_self__32;
+		m3_self__02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		b0 = m2_self__03;
+		b1 = m2_self__13;
+		b2 = m2_self__23;
+		b3 = m2_self__33;
+		m3_self__03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		var a001 = m3_self__00;
+		var a011 = m3_self__01;
+		var a021 = m3_self__02;
+		var a031 = m3_self__03;
+		var a101 = m3_self__10;
+		var a111 = m3_self__11;
+		var a121 = m3_self__12;
+		var a131 = m3_self__13;
+		var a201 = m3_self__20;
+		var a211 = m3_self__21;
+		var a221 = m3_self__22;
+		var a231 = m3_self__23;
+		var a301 = m3_self__30;
+		var a311 = m3_self__31;
+		var a321 = m3_self__32;
+		var a331 = m3_self__33;
+		var b01 = m1_self__00;
+		var b11 = m1_self__10;
+		var b21 = m1_self__20;
+		var b31 = m1_self__30;
+		m3_self__00 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__10 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__20 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__30 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		b01 = m1_self__01;
+		b11 = m1_self__11;
+		b21 = m1_self__21;
+		b31 = m1_self__31;
+		m3_self__01 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__11 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__21 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__31 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		b01 = m1_self__02;
+		b11 = m1_self__12;
+		b21 = m1_self__22;
+		b31 = m1_self__32;
+		m3_self__02 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__12 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__22 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__32 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		b01 = m1_self__03;
+		b11 = m1_self__13;
+		b21 = m1_self__23;
+		b31 = m1_self__33;
+		m3_self__03 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__13 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__23 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__33 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		m3_self__00 *= 0.5;
+		m3_self__10 *= 0.5;
+		m3_self__20 *= 0.5;
+		m3_self__30 *= 0.5;
+		m3_self__01 *= 0.5;
+		m3_self__11 *= 0.5;
+		m3_self__21 *= 0.5;
+		m3_self__31 *= 0.5;
+		m3_self__02 *= 0.5;
+		m3_self__12 *= 0.5;
+		m3_self__22 *= 0.5;
+		m3_self__32 *= 0.5;
+		m3_self__03 *= 0.5;
+		m3_self__13 *= 0.5;
+		m3_self__23 *= 0.5;
+		m3_self__33 *= 0.5;
+		var x7 = stokes_vec_x;
+		var y7 = stokes_vec_y;
+		var z7 = stokes_vec_z;
+		var w3 = stokes_vec_w;
+		stokes_vec_x = m3_self__00 * x7 + m3_self__10 * y7 + m3_self__20 * z7 + m3_self__30 * w3;
+		stokes_vec_y = m3_self__01 * x7 + m3_self__11 * y7 + m3_self__21 * z7 + m3_self__31 * w3;
+		stokes_vec_z = m3_self__02 * x7 + m3_self__12 * y7 + m3_self__22 * z7 + m3_self__32 * w3;
+		stokes_vec_w = m3_self__03 * x7 + m3_self__13 * y7 + m3_self__23 * z7 + m3_self__33 * w3;
+		var v = stokes_vec_x;
+		var value = v;
+		if(__map_reserved["stokes_I"] != null) {
+			new_childprops.setReserved("stokes_I",value);
+		} else {
+			new_childprops.h["stokes_I"] = value;
+		}
+		var v1 = Math.sqrt(Math.pow(stokes_vec_y,2) + Math.pow(stokes_vec_z,2) + Math.pow(stokes_vec_w,2)) / stokes_vec_x;
+		var value1 = v1;
+		if(__map_reserved["stokes_p"] != null) {
+			new_childprops.setReserved("stokes_p",value1);
+		} else {
+			new_childprops.h["stokes_p"] = value1;
+		}
+		var v2 = 0.5 * Math.atan2(stokes_vec_z,stokes_vec_y) - Math.atan2(0,1);
+		var value2 = v2;
+		if(__map_reserved["stokes_psi"] != null) {
+			new_childprops.setReserved("stokes_psi",value2);
+		} else {
+			new_childprops.h["stokes_psi"] = value2;
+		}
+		var v3 = 0.5 * Math.atan2(stokes_vec_w,Math.sqrt(Math.pow(stokes_vec_z,2) + Math.pow(stokes_vec_y,2))) - Math.atan2(0,1);
+		var value3 = v3;
+		if(__map_reserved["stokes_chi"] != null) {
+			new_childprops.setReserved("stokes_chi",value3);
+		} else {
+			new_childprops.h["stokes_chi"] = value3;
+		}
+		return new_childprops;
+	}
+	,GetNewChildProperties: function(parBeam,beamNumber) {
+		var _this = this.object.properties;
+		var spawnsRays = __map_reserved["spawnsRays"] != null ? _this.getReserved("spawnsRays") : _this.h["spawnsRays"];
+		var _this1 = this.object.transform.world;
+		var x = _this1.self._10;
+		var y = _this1.self._11;
+		var z = _this1.self._12;
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var normal_vec_x = x;
+		var normal_vec_y = y;
+		var normal_vec_z = z;
+		var normal_vec_w = 1.0;
+		var n = Math.sqrt(normal_vec_x * normal_vec_x + normal_vec_y * normal_vec_y + normal_vec_z * normal_vec_z);
+		if(n > 0.0) {
+			var invN = 1.0 / n;
+			normal_vec_x *= invN;
+			normal_vec_y *= invN;
+			normal_vec_z *= invN;
+		}
+		var _this2 = this.object.transform.world;
+		var x1 = _this2.self._20;
+		var y1 = _this2.self._21;
+		var z1 = _this2.self._22;
+		if(z1 == null) {
+			z1 = 0.0;
+		}
+		if(y1 == null) {
+			y1 = 0.0;
+		}
+		if(x1 == null) {
+			x1 = 0.0;
+		}
+		var up_vec_x = x1;
+		var up_vec_y = y1;
+		var up_vec_z = z1;
+		var up_vec_w = 1.0;
+		var n1 = Math.sqrt(up_vec_x * up_vec_x + up_vec_y * up_vec_y + up_vec_z * up_vec_z);
+		if(n1 > 0.0) {
+			var invN1 = 1.0 / n1;
+			up_vec_x *= invN1;
+			up_vec_y *= invN1;
+			up_vec_z *= invN1;
+		}
+		var _this3 = this.object.transform.world;
+		var x2 = _this3.self._00;
+		var y2 = _this3.self._01;
+		var z2 = _this3.self._02;
+		if(z2 == null) {
+			z2 = 0.0;
+		}
+		if(y2 == null) {
+			y2 = 0.0;
+		}
+		if(x2 == null) {
+			x2 = 0.0;
+		}
+		var right_vec_x = x2;
+		var right_vec_y = y2;
+		var right_vec_z = z2;
+		var right_vec_w = 1.0;
+		var n2 = Math.sqrt(right_vec_x * right_vec_x + right_vec_y * right_vec_y + right_vec_z * right_vec_z);
+		if(n2 > 0.0) {
+			var invN2 = 1.0 / n2;
+			right_vec_x *= invN2;
+			right_vec_y *= invN2;
+			right_vec_z *= invN2;
+		}
+		if(beamNumber >= spawnsRays) {
+			haxe_Log.trace("Error: tried to spawn more Beams from source than possible",{ fileName : "arm/PolBeamSplitter_v1.hx", lineNumber : 140, className : "arm.PolBeamSplitter_v1", methodName : "GetNewChildProperties"});
+			return null;
+		}
+		var propMap = new haxe_ds_StringMap();
+		if(parBeam == null) {
+			return null;
+		}
+		if(parBeam.properties == null) {
+			parBeam.properties = new haxe_ds_StringMap();
+		}
+		propMap = parBeam.properties;
+		var value = [];
+		if(__map_reserved["arr_sub_objects"] != null) {
+			propMap.setReserved("arr_sub_objects",value);
+		} else {
+			propMap.h["arr_sub_objects"] = value;
+		}
+		if((__map_reserved["stokes_I"] != null ? propMap.getReserved("stokes_I") : propMap.h["stokes_I"]) == 0) {
+			return propMap;
+		}
+		var I = __map_reserved["stokes_I"] != null ? propMap.getReserved("stokes_I") : propMap.h["stokes_I"];
+		var p = __map_reserved["stokes_p"] != null ? propMap.getReserved("stokes_p") : propMap.h["stokes_p"];
+		var psi2 = 2 * (__map_reserved["stokes_psi"] != null ? propMap.getReserved("stokes_psi") : propMap.h["stokes_psi"]);
+		var chi2 = 2 * (__map_reserved["stokes_chi"] != null ? propMap.getReserved("stokes_chi") : propMap.h["stokes_chi"]);
+		var x3 = I;
+		var y3 = I * p * Math.cos(psi2) * Math.cos(chi2);
+		var z3 = I * p * Math.sin(psi2) * Math.cos(chi2);
+		var w = I * p * Math.sin(chi2);
+		if(w == null) {
+			w = 1.0;
+		}
+		if(z3 == null) {
+			z3 = 0.0;
+		}
+		if(y3 == null) {
+			y3 = 0.0;
+		}
+		if(x3 == null) {
+			x3 = 0.0;
+		}
+		var stokes_vec_x = x3;
+		var stokes_vec_y = y3;
+		var stokes_vec_z = z3;
+		var stokes_vec_w = w;
+		var x4 = 0;
+		var y4 = 0;
+		var z4 = 1;
+		var w1 = 1;
+		if(w1 == null) {
+			w1 = 1.0;
+		}
+		if(z4 == null) {
+			z4 = 0.0;
+		}
+		if(y4 == null) {
+			y4 = 0.0;
+		}
+		if(x4 == null) {
+			x4 = 0.0;
+		}
+		var vcross_x = x4;
+		var vcross_y = y4;
+		var vcross_z = z4;
+		var vcross_w = w1;
+		var ax = vcross_x;
+		var ay = vcross_y;
+		var az = vcross_z;
+		var vx = up_vec_x;
+		var vy = up_vec_y;
+		var vz = up_vec_z;
+		vcross_x = ay * vz - az * vy;
+		vcross_y = az * vx - ax * vz;
+		vcross_z = ax * vy - ay * vx;
+		var vb_x = 0.0;
+		var vb_y = 0.0;
+		var vb_z = 0.0;
+		var vb_w = 1.0;
+		vb_x = up_vec_x;
+		vb_y = up_vec_y;
+		vb_z = up_vec_z;
+		vb_w = up_vec_w;
+		var x5 = 0;
+		var y5 = 0;
+		var z5 = 1;
+		var w2 = 1;
+		if(w2 == null) {
+			w2 = 1.0;
+		}
+		if(z5 == null) {
+			z5 = 0.0;
+		}
+		if(y5 == null) {
+			y5 = 0.0;
+		}
+		if(x5 == null) {
+			x5 = 0.0;
+		}
+		var va_x = x5;
+		var va_y = y5;
+		var va_z = z5;
+		var va_w = w2;
+		var theta = Math.atan2(vcross_x * normal_vec_x + vcross_y * normal_vec_y + vcross_z * normal_vec_z,va_x * vb_x + va_y * vb_y + va_z * vb_z);
+		var _this4 = parBeam.transform.world;
+		var x6 = _this4.self._00;
+		var y6 = _this4.self._01;
+		var z6 = _this4.self._02;
+		if(z6 == null) {
+			z6 = 0.0;
+		}
+		if(y6 == null) {
+			y6 = 0.0;
+		}
+		if(x6 == null) {
+			x6 = 0.0;
+		}
+		var v_x = x6;
+		var v_y = y6;
+		var v_z = z6;
+		var v_w = 1.0;
+		if(normal_vec_x * v_x + normal_vec_y * v_y + normal_vec_z * v_z < 0) {
+			theta *= -1;
+		}
+		var ct = Math.cos(2 * theta);
+		var st = Math.sin(2 * theta);
+		var m1_self__00 = 1;
+		var m1_self__10 = 0;
+		var m1_self__20 = 0;
+		var m1_self__30 = 0;
+		var m1_self__01 = 0;
+		var m1_self__11 = ct;
+		var m1_self__21 = -1 * st;
+		var m1_self__31 = 0;
+		var m1_self__02 = 0;
+		var m1_self__12 = st;
+		var m1_self__22 = ct;
+		var m1_self__32 = 0;
+		var m1_self__03 = 0;
+		var m1_self__13 = 0;
+		var m1_self__23 = 0;
+		var m1_self__33 = 1;
+		var m2_self__00 = 1;
+		var m2_self__10 = -1;
+		var m2_self__20 = 0;
+		var m2_self__30 = 0;
+		var m2_self__01 = -1;
+		var m2_self__11 = 1;
+		var m2_self__21 = 0;
+		var m2_self__31 = 0;
+		var m2_self__02 = 0;
+		var m2_self__12 = 0;
+		var m2_self__22 = 0;
+		var m2_self__32 = 0;
+		var m2_self__03 = 0;
+		var m2_self__13 = 0;
+		var m2_self__23 = 0;
+		var m2_self__33 = 0;
+		var m3_self__00 = 1;
+		var m3_self__10 = 0;
+		var m3_self__20 = 0;
+		var m3_self__30 = 0;
+		var m3_self__01 = 0;
+		var m3_self__11 = ct;
+		var m3_self__21 = st;
+		var m3_self__31 = 0;
+		var m3_self__02 = 0;
+		var m3_self__12 = -1 * st;
+		var m3_self__22 = ct;
+		var m3_self__32 = 0;
+		var m3_self__03 = 0;
+		var m3_self__13 = 0;
+		var m3_self__23 = 0;
+		var m3_self__33 = 1;
+		var a00 = m3_self__00;
+		var a01 = m3_self__01;
+		var a02 = m3_self__02;
+		var a03 = m3_self__03;
+		var a10 = m3_self__10;
+		var a11 = m3_self__11;
+		var a12 = m3_self__12;
+		var a13 = m3_self__13;
+		var a20 = m3_self__20;
+		var a21 = m3_self__21;
+		var a22 = m3_self__22;
+		var a23 = m3_self__23;
+		var a30 = m3_self__30;
+		var a31 = m3_self__31;
+		var a32 = m3_self__32;
+		var a33 = m3_self__33;
+		var b0 = m2_self__00;
+		var b1 = m2_self__10;
+		var b2 = m2_self__20;
+		var b3 = m2_self__30;
+		m3_self__00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		b0 = m2_self__01;
+		b1 = m2_self__11;
+		b2 = m2_self__21;
+		b3 = m2_self__31;
+		m3_self__01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		b0 = m2_self__02;
+		b1 = m2_self__12;
+		b2 = m2_self__22;
+		b3 = m2_self__32;
+		m3_self__02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		b0 = m2_self__03;
+		b1 = m2_self__13;
+		b2 = m2_self__23;
+		b3 = m2_self__33;
+		m3_self__03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+		m3_self__13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+		m3_self__23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+		m3_self__33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+		var a001 = m3_self__00;
+		var a011 = m3_self__01;
+		var a021 = m3_self__02;
+		var a031 = m3_self__03;
+		var a101 = m3_self__10;
+		var a111 = m3_self__11;
+		var a121 = m3_self__12;
+		var a131 = m3_self__13;
+		var a201 = m3_self__20;
+		var a211 = m3_self__21;
+		var a221 = m3_self__22;
+		var a231 = m3_self__23;
+		var a301 = m3_self__30;
+		var a311 = m3_self__31;
+		var a321 = m3_self__32;
+		var a331 = m3_self__33;
+		var b01 = m1_self__00;
+		var b11 = m1_self__10;
+		var b21 = m1_self__20;
+		var b31 = m1_self__30;
+		m3_self__00 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__10 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__20 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__30 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		b01 = m1_self__01;
+		b11 = m1_self__11;
+		b21 = m1_self__21;
+		b31 = m1_self__31;
+		m3_self__01 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__11 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__21 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__31 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		b01 = m1_self__02;
+		b11 = m1_self__12;
+		b21 = m1_self__22;
+		b31 = m1_self__32;
+		m3_self__02 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__12 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__22 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__32 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		b01 = m1_self__03;
+		b11 = m1_self__13;
+		b21 = m1_self__23;
+		b31 = m1_self__33;
+		m3_self__03 = a001 * b01 + a011 * b11 + a021 * b21 + a031 * b31;
+		m3_self__13 = a101 * b01 + a111 * b11 + a121 * b21 + a131 * b31;
+		m3_self__23 = a201 * b01 + a211 * b11 + a221 * b21 + a231 * b31;
+		m3_self__33 = a301 * b01 + a311 * b11 + a321 * b21 + a331 * b31;
+		m3_self__00 *= 0.5;
+		m3_self__10 *= 0.5;
+		m3_self__20 *= 0.5;
+		m3_self__30 *= 0.5;
+		m3_self__01 *= 0.5;
+		m3_self__11 *= 0.5;
+		m3_self__21 *= 0.5;
+		m3_self__31 *= 0.5;
+		m3_self__02 *= 0.5;
+		m3_self__12 *= 0.5;
+		m3_self__22 *= 0.5;
+		m3_self__32 *= 0.5;
+		m3_self__03 *= 0.5;
+		m3_self__13 *= 0.5;
+		m3_self__23 *= 0.5;
+		m3_self__33 *= 0.5;
+		var x7 = stokes_vec_x;
+		var y7 = stokes_vec_y;
+		var z7 = stokes_vec_z;
+		var w3 = stokes_vec_w;
+		stokes_vec_x = m3_self__00 * x7 + m3_self__10 * y7 + m3_self__20 * z7 + m3_self__30 * w3;
+		stokes_vec_y = m3_self__01 * x7 + m3_self__11 * y7 + m3_self__21 * z7 + m3_self__31 * w3;
+		stokes_vec_z = m3_self__02 * x7 + m3_self__12 * y7 + m3_self__22 * z7 + m3_self__32 * w3;
+		stokes_vec_w = m3_self__03 * x7 + m3_self__13 * y7 + m3_self__23 * z7 + m3_self__33 * w3;
+		var v = stokes_vec_x;
+		var value1 = v;
+		if(__map_reserved["stokes_I"] != null) {
+			propMap.setReserved("stokes_I",value1);
+		} else {
+			propMap.h["stokes_I"] = value1;
+		}
+		var v1 = Math.sqrt(Math.pow(stokes_vec_y,2) + Math.pow(stokes_vec_z,2) + Math.pow(stokes_vec_w,2)) / stokes_vec_x;
+		var value2 = v1;
+		if(__map_reserved["stokes_p"] != null) {
+			propMap.setReserved("stokes_p",value2);
+		} else {
+			propMap.h["stokes_p"] = value2;
+		}
+		var v2 = 0.5 * Math.atan2(stokes_vec_z,stokes_vec_y) - Math.atan2(0,1);
+		var value3 = v2;
+		if(__map_reserved["stokes_psi"] != null) {
+			propMap.setReserved("stokes_psi",value3);
+		} else {
+			propMap.h["stokes_psi"] = value3;
+		}
+		var v3 = 0.5 * Math.atan2(stokes_vec_w,Math.sqrt(Math.pow(stokes_vec_z,2) + Math.pow(stokes_vec_y,2))) - Math.atan2(0,1);
+		var value4 = v3;
+		if(__map_reserved["stokes_chi"] != null) {
+			propMap.setReserved("stokes_chi",value4);
+		} else {
+			propMap.h["stokes_chi"] = value4;
+		}
+		return propMap;
+	}
+	,__class__: arm_PolBeamSplitter_$v1
 });
 var arm_PumpLaser = function() {
 	this.childprops = new haxe_ds_StringMap();
@@ -5243,6 +7620,20 @@ var arm_PumpLaser = function() {
 		} else {
 			_this7.h["stokes_chi"] = value7;
 		}
+		var _this8 = _gthis.childprops;
+		var value8 = _gthis.beamsize_x;
+		if(__map_reserved["beamsize_x"] != null) {
+			_this8.setReserved("beamsize_x",value8);
+		} else {
+			_this8.h["beamsize_x"] = value8;
+		}
+		var _this9 = _gthis.childprops;
+		var value9 = _gthis.beamsize_y;
+		if(__map_reserved["beamsize_y"] != null) {
+			_this9.setReserved("beamsize_y",value9);
+		} else {
+			_this9.h["beamsize_y"] = value9;
+		}
 	});
 };
 $hxClasses["arm.PumpLaser"] = arm_PumpLaser;
@@ -5264,6 +7655,648 @@ arm_PumpLaser.prototype = $extend(iron_Trait.prototype,{
 		return this.childprops;
 	}
 	,__class__: arm_PumpLaser
+});
+var arm_RSP1D_$Base = function() {
+	this.mouseRel = true;
+	this.objList = [];
+	this.objectGroup = 1;
+	this.visib = false;
+	this.planegroup = 2;
+	this.hitVec = null;
+	this.xyPlane = null;
+	this.movingObj = null;
+	this.scale = new iron_math_Vec4(0.01,0.01,0.01,1);
+	this.ringName = "RSP1D_Ring";
+	this.waveplateName = "WPH";
+	iron_Trait.call(this);
+	this.notifyOnInit($bind(this,this.onInit));
+	this.notifyOnUpdate($bind(this,this.onUpdate));
+};
+$hxClasses["arm.RSP1D_Base"] = arm_RSP1D_$Base;
+arm_RSP1D_$Base.__name__ = "arm.RSP1D_Base";
+arm_RSP1D_$Base.__super__ = iron_Trait;
+arm_RSP1D_$Base.prototype = $extend(iron_Trait.prototype,{
+	waveplateName: null
+	,ringName: null
+	,scale: null
+	,ringAngle: null
+	,ring: null
+	,wph: null
+	,movingObj: null
+	,xyPlane: null
+	,hitVec: null
+	,planegroup: null
+	,visib: null
+	,objectGroup: null
+	,objList: null
+	,mouseRel: null
+	,onInit: function() {
+		var object = this.object;
+		if(object != null) {
+			if(object.properties == null) {
+				object.properties = new haxe_ds_StringMap();
+			}
+		}
+		var _this = this.object.properties;
+		if((__map_reserved["ringAngle"] != null ? _this.getReserved("ringAngle") : _this.h["ringAngle"]) != null) {
+			var _this1 = this.object.properties;
+			this.ringAngle = __map_reserved["ringAngle"] != null ? _this1.getReserved("ringAngle") : _this1.h["ringAngle"];
+		} else {
+			var v = this.ringAngle;
+			var _this2 = this.object.properties;
+			var value = v;
+			if(__map_reserved["ringAngle"] != null) {
+				_this2.setReserved("ringAngle",value);
+			} else {
+				_this2.h["ringAngle"] = value;
+			}
+		}
+		if(this.ringAngle == null) {
+			this.ringAngle = 0;
+		}
+		var mCR = this.object.transform.world;
+		var mCW = this.object.getChild("C_wph_RSP1D_Base").transform.world;
+		this.ring = this.spawnObject(this.ringName,false);
+		this.ring.transform.setMatrix(mCR);
+		this.ring.transform.scale = this.scale;
+		this.ring.visible = true;
+		var tmp = this.ring.transform;
+		var _this3 = this.ring.transform.world;
+		var _this4 = new iron_math_Vec4(_this3.self._10,_this3.self._11,_this3.self._12);
+		var n = Math.sqrt(_this4.x * _this4.x + _this4.y * _this4.y + _this4.z * _this4.z);
+		if(n > 0.0) {
+			var invN = 1.0 / n;
+			_this4.x *= invN;
+			_this4.y *= invN;
+			_this4.z *= invN;
+		}
+		tmp.rotate(_this4,this.ringAngle);
+		this.rbSync(this.ring);
+		this.wph = this.spawnObject(this.waveplateName,false);
+		this.wph.transform.setMatrix(mCW);
+		this.wph.transform.scale = this.scale;
+		this.wph.visible = true;
+		var tmp1 = this.wph.transform;
+		var _this5 = this.ring.transform.world;
+		var _this6 = new iron_math_Vec4(_this5.self._10,_this5.self._11,_this5.self._12);
+		var n1 = Math.sqrt(_this6.x * _this6.x + _this6.y * _this6.y + _this6.z * _this6.z);
+		if(n1 > 0.0) {
+			var invN1 = 1.0 / n1;
+			_this6.x *= invN1;
+			_this6.y *= invN1;
+			_this6.z *= invN1;
+		}
+		tmp1.rotate(_this6,this.ringAngle);
+		this.rbSync(this.wph);
+		armory_system_Event.add("updateParts",$bind(this,this.updateParts),this.object.uid);
+		this.objList.push(this.object);
+		this.objList.push(this.ring);
+		this.objList.push(this.wph);
+		var _g = 0;
+		var _g1 = this.objList;
+		while(_g < _g1.length) {
+			var obj = _g1[_g];
+			++_g;
+			if(obj != null) {
+				if(obj.properties == null) {
+					obj.properties = new haxe_ds_StringMap();
+				}
+			}
+			if(obj != this.object) {
+				var _this7 = obj.properties;
+				var value1 = this.object;
+				if(__map_reserved["TraitObj"] != null) {
+					_this7.setReserved("TraitObj",value1);
+				} else {
+					_this7.h["TraitObj"] = value1;
+				}
+			} else {
+				var _this8 = obj.properties;
+				if(__map_reserved["TraitObj"] != null) {
+					_this8.setReserved("TraitObj","self");
+				} else {
+					_this8.h["TraitObj"] = "self";
+				}
+			}
+			var _this9 = obj.properties;
+			var value2 = "RSP1D" + "_Base";
+			if(__map_reserved["TraitName"] != null) {
+				_this9.setReserved("TraitName",value2);
+			} else {
+				_this9.h["TraitName"] = value2;
+			}
+			var _this10 = obj.properties;
+			if(__map_reserved["PauseResume"] != null) {
+				_this10.setReserved("PauseResume",true);
+			} else {
+				_this10.h["PauseResume"] = true;
+			}
+		}
+		this.pauseUpdate();
+	}
+	,pauseUpdate: function() {
+		this.removeUpdate($bind(this,this.onUpdate));
+		return true;
+	}
+	,resumeUpdate: function() {
+		this.notifyOnUpdate($bind(this,this.onUpdate));
+		return true;
+	}
+	,onUpdate: function() {
+		var mouse = iron_system_Input.getMouse();
+		var rb = null;
+		if(mouse.down("left") && this.mouseRel) {
+			var physics = armory_trait_physics_bullet_PhysicsWorld.active;
+			rb = physics.pickClosest(mouse.x,mouse.y);
+			if(rb != null) {
+				this.movingObj = rb.object;
+				if(this.movingObj.name == "xyPlane") {
+					this.movingObj.remove();
+				}
+			}
+			this.mouseRel = false;
+		}
+		if(mouse.released("left") || mouse.released("right")) {
+			this.movingObj = null;
+			if(this.xyPlane != null) {
+				this.xyPlane.remove();
+			}
+			this.hitVec = null;
+			this.mouseRel = true;
+			this.updateParts();
+			if(iron_Scene.active.getChild("xyPlane") != null) {
+				iron_Scene.active.getChild("xyPlane");
+			}
+			this.pauseUpdate();
+		}
+		if(mouse.down("left") && this.movingObj == this.ring) {
+			if(this.hitVec == null) {
+				this.hitVec = this.mouseToPlaneHit(mouse.x,mouse.y,1,1 << this.objectGroup);
+				if(this.hitVec != null || this.xyPlane == null) {
+					var tmp = this.ring.transform.loc;
+					var _this = new iron_math_Quat();
+					var x = 0;
+					var y = 0;
+					var z = 1;
+					var w = 1;
+					if(w == null) {
+						w = 1.0;
+					}
+					if(z == null) {
+						z = 0.0;
+					}
+					if(y == null) {
+						y = 0.0;
+					}
+					if(x == null) {
+						x = 0.0;
+					}
+					var v1_x = x;
+					var v1_y = y;
+					var v1_z = z;
+					var v1_w = w;
+					var _this1 = this.ring.transform.world;
+					var x1 = _this1.self._10;
+					var y1 = _this1.self._11;
+					var z1 = _this1.self._12;
+					if(z1 == null) {
+						z1 = 0.0;
+					}
+					if(y1 == null) {
+						y1 = 0.0;
+					}
+					if(x1 == null) {
+						x1 = 0.0;
+					}
+					var v2_x = x1;
+					var v2_y = y1;
+					var v2_z = z1;
+					var v2_w = 1.0;
+					var n = Math.sqrt(v2_x * v2_x + v2_y * v2_y + v2_z * v2_z);
+					if(n > 0.0) {
+						var invN = 1.0 / n;
+						v2_x *= invN;
+						v2_y *= invN;
+						v2_z *= invN;
+					}
+					var a = iron_math_Quat.helpVec0;
+					var dot = v1_x * v2_x + v1_y * v2_y + v1_z * v2_z;
+					if(dot < -0.999999) {
+						var a1 = iron_math_Quat.xAxis;
+						var ax = a1.x;
+						var ay = a1.y;
+						var az = a1.z;
+						var bx = v1_x;
+						var by = v1_y;
+						var bz = v1_z;
+						a.x = ay * bz - az * by;
+						a.y = az * bx - ax * bz;
+						a.z = ax * by - ay * bx;
+						if(Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z) < 0.000001) {
+							var a2 = iron_math_Quat.yAxis;
+							var ax1 = a2.x;
+							var ay1 = a2.y;
+							var az1 = a2.z;
+							var bx1 = v1_x;
+							var by1 = v1_y;
+							var bz1 = v1_z;
+							a.x = ay1 * bz1 - az1 * by1;
+							a.y = az1 * bx1 - ax1 * bz1;
+							a.z = ax1 * by1 - ay1 * bx1;
+						}
+						var n1 = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+						if(n1 > 0.0) {
+							var invN1 = 1.0 / n1;
+							a.x *= invN1;
+							a.y *= invN1;
+							a.z *= invN1;
+						}
+						var angle = Math.PI;
+						var s = Math.sin(angle * 0.5);
+						_this.x = a.x * s;
+						_this.y = a.y * s;
+						_this.z = a.z * s;
+						_this.w = Math.cos(angle * 0.5);
+						var l = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z + _this.w * _this.w);
+						if(l == 0.0) {
+							_this.x = 0;
+							_this.y = 0;
+							_this.z = 0;
+							_this.w = 0;
+						} else {
+							l = 1.0 / l;
+							_this.x *= l;
+							_this.y *= l;
+							_this.z *= l;
+							_this.w *= l;
+						}
+					} else if(dot > 0.999999) {
+						_this.x = 0;
+						_this.y = 0;
+						_this.z = 0;
+						_this.w = 1;
+					} else {
+						var ax2 = v1_x;
+						var ay2 = v1_y;
+						var az2 = v1_z;
+						var bx2 = v2_x;
+						var by2 = v2_y;
+						var bz2 = v2_z;
+						a.x = ay2 * bz2 - az2 * by2;
+						a.y = az2 * bx2 - ax2 * bz2;
+						a.z = ax2 * by2 - ay2 * bx2;
+						_this.x = a.x;
+						_this.y = a.y;
+						_this.z = a.z;
+						_this.w = 1 + dot;
+						var l1 = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z + _this.w * _this.w);
+						if(l1 == 0.0) {
+							_this.x = 0;
+							_this.y = 0;
+							_this.z = 0;
+							_this.w = 0;
+						} else {
+							l1 = 1.0 / l1;
+							_this.x *= l1;
+							_this.y *= l1;
+							_this.z *= l1;
+							_this.w *= l1;
+						}
+					}
+					this.xyPlane = this.spawnXZPlane(tmp,_this);
+				} else {
+					this.xyPlane.remove();
+				}
+				this.hitVec = this.mouseToPlaneHit(mouse.x,mouse.y,this.planegroup + 1,1 << this.planegroup);
+			}
+			var newHitVec = this.mouseToPlaneHit(mouse.x,mouse.y,this.planegroup + 1,1 << this.planegroup);
+			if(newHitVec != null) {
+				var angleNew;
+				var angle1;
+				var _this2 = new iron_math_Vec4();
+				var v = this.hitVec;
+				_this2.x = v.x;
+				_this2.y = v.y;
+				_this2.z = v.z;
+				_this2.w = v.w;
+				var _this3 = _this2;
+				var v1 = this.object.transform.loc;
+				_this3.x -= v1.x;
+				_this3.y -= v1.y;
+				_this3.z -= v1.z;
+				var dirVec = _this3;
+				var n2 = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y + dirVec.z * dirVec.z);
+				if(n2 > 0.0) {
+					var invN2 = 1.0 / n2;
+					dirVec.x *= invN2;
+					dirVec.y *= invN2;
+					dirVec.z *= invN2;
+				}
+				var _this4 = this.object.transform.world;
+				var _this5 = new iron_math_Vec4(_this4.self._20,_this4.self._21,_this4.self._22);
+				var n3 = Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y + _this5.z * _this5.z);
+				if(n3 > 0.0) {
+					var invN3 = 1.0 / n3;
+					_this5.x *= invN3;
+					_this5.y *= invN3;
+					_this5.z *= invN3;
+				}
+				var upAngle = this.angle3d(dirVec,_this5);
+				var _this6 = this.object.transform.world;
+				var _this7 = new iron_math_Vec4(_this6.self._00,_this6.self._01,_this6.self._02);
+				var n4 = Math.sqrt(_this7.x * _this7.x + _this7.y * _this7.y + _this7.z * _this7.z);
+				if(n4 > 0.0) {
+					var invN4 = 1.0 / n4;
+					_this7.x *= invN4;
+					_this7.y *= invN4;
+					_this7.z *= invN4;
+				}
+				var rAngle = this.angle3d(dirVec,_this7);
+				var _this8 = new iron_math_Vec4();
+				_this8.x = newHitVec.x;
+				_this8.y = newHitVec.y;
+				_this8.z = newHitVec.z;
+				_this8.w = newHitVec.w;
+				var _this9 = _this8;
+				var v2 = this.object.transform.loc;
+				_this9.x -= v2.x;
+				_this9.y -= v2.y;
+				_this9.z -= v2.z;
+				var dirVecNew = _this9;
+				var n5 = Math.sqrt(dirVecNew.x * dirVecNew.x + dirVecNew.y * dirVecNew.y + dirVecNew.z * dirVecNew.z);
+				if(n5 > 0.0) {
+					var invN5 = 1.0 / n5;
+					dirVecNew.x *= invN5;
+					dirVecNew.y *= invN5;
+					dirVecNew.z *= invN5;
+				}
+				var _this10 = this.object.transform.world;
+				var _this11 = new iron_math_Vec4(_this10.self._20,_this10.self._21,_this10.self._22);
+				var n6 = Math.sqrt(_this11.x * _this11.x + _this11.y * _this11.y + _this11.z * _this11.z);
+				if(n6 > 0.0) {
+					var invN6 = 1.0 / n6;
+					_this11.x *= invN6;
+					_this11.y *= invN6;
+					_this11.z *= invN6;
+				}
+				var upAngleNew = this.angle3d(dirVecNew,_this11);
+				var _this12 = this.object.transform.world;
+				var _this13 = new iron_math_Vec4(_this12.self._00,_this12.self._01,_this12.self._02);
+				var n7 = Math.sqrt(_this13.x * _this13.x + _this13.y * _this13.y + _this13.z * _this13.z);
+				if(n7 > 0.0) {
+					var invN7 = 1.0 / n7;
+					_this13.x *= invN7;
+					_this13.y *= invN7;
+					_this13.z *= invN7;
+				}
+				var rAngleNew = this.angle3d(dirVecNew,_this13);
+				if(rAngleNew < Math.PI / 2) {
+					angleNew = upAngleNew;
+				} else {
+					angleNew = Math.PI * 2 - upAngleNew;
+				}
+				if(rAngle < Math.PI / 2) {
+					angle1 = upAngle;
+				} else {
+					angle1 = Math.PI * 2 - upAngle;
+				}
+				this.ringAngle += angleNew - angle1;
+				this.hitVec = newHitVec;
+				var v3 = this.ringAngle;
+				var _this14 = this.object.properties;
+				var value = v3;
+				if(__map_reserved["ringAngle"] != null) {
+					_this14.setReserved("ringAngle",value);
+				} else {
+					_this14.h["ringAngle"] = value;
+				}
+				this.updateParts();
+			} else {
+				haxe_Log.trace("xyPlane not detected by rayCastmethod",{ fileName : "arm/RSP1D_Base.hx", lineNumber : 183, className : "arm.RSP1D_Base", methodName : "onUpdate"});
+			}
+		}
+	}
+	,updateParts: function() {
+		var _this = this.object.properties;
+		this.ringAngle = __map_reserved["ringAngle"] != null ? _this.getReserved("ringAngle") : _this.h["ringAngle"];
+		var mCR = this.object.transform.world;
+		var mCW = this.object.getChild("C_wph_RSP1D_Base").transform.world;
+		this.ring.transform.setMatrix(mCR);
+		this.ring.transform.scale = this.scale;
+		var tmp = this.ring.transform;
+		var _this1 = this.ring.transform.world;
+		var _this2 = new iron_math_Vec4(_this1.self._10,_this1.self._11,_this1.self._12);
+		var n = Math.sqrt(_this2.x * _this2.x + _this2.y * _this2.y + _this2.z * _this2.z);
+		if(n > 0.0) {
+			var invN = 1.0 / n;
+			_this2.x *= invN;
+			_this2.y *= invN;
+			_this2.z *= invN;
+		}
+		tmp.rotate(_this2,this.ringAngle);
+		this.rbSync(this.ring);
+		this.wph.transform.setMatrix(mCW);
+		this.wph.transform.scale = this.scale;
+		var tmp1 = this.wph.transform;
+		var _this3 = this.ring.transform.world;
+		var _this4 = new iron_math_Vec4(_this3.self._10,_this3.self._11,_this3.self._12);
+		var n1 = Math.sqrt(_this4.x * _this4.x + _this4.y * _this4.y + _this4.z * _this4.z);
+		if(n1 > 0.0) {
+			var invN1 = 1.0 / n1;
+			_this4.x *= invN1;
+			_this4.y *= invN1;
+			_this4.z *= invN1;
+		}
+		tmp1.rotate(_this4,this.ringAngle);
+		this.rbSync(this.wph);
+		armory_system_Event.send("Calc_Beams");
+	}
+	,spawnObject: function(objectName,visible) {
+		var object;
+		var matrix = null;
+		var spawnChildren = true;
+		iron_Scene.active.spawnObject(objectName,null,function(o) {
+			object = o;
+			if(matrix != null) {
+				object.transform.setMatrix(matrix);
+				var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
+				if(rigidBody != null) {
+					object.transform.buildMatrix();
+					rigidBody.syncTransform();
+				}
+			}
+			object.visible = visible;
+		},spawnChildren);
+		return object;
+	}
+	,rbSync: function(object) {
+		var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
+		if(rigidBody != null) {
+			rigidBody.syncTransform();
+		}
+	}
+	,initProps: function(object) {
+		if(object == null) {
+			return;
+		}
+		if(object.properties == null) {
+			object.properties = new haxe_ds_StringMap();
+		}
+	}
+	,allPropsToVariables: function(object) {
+		var _this = object.properties;
+		this.ringAngle = __map_reserved["ringAngle"] != null ? _this.getReserved("ringAngle") : _this.h["ringAngle"];
+	}
+	,allVariablesToProbs: function(object) {
+		var v = this.ringAngle;
+		var _this = object.properties;
+		var value = v;
+		if(__map_reserved["ringAngle"] != null) {
+			_this.setReserved("ringAngle",value);
+		} else {
+			_this.h["ringAngle"] = value;
+		}
+	}
+	,spawnXZPlane: function(loc,rot) {
+		var _gthis = this;
+		var object;
+		var matrix = new iron_math_Mat4(1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0);
+		var x = 1;
+		var y = 1;
+		var z = 1;
+		var w = 1;
+		if(w == null) {
+			w = 1.0;
+		}
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var sc_x = x;
+		var sc_y = y;
+		var sc_z = z;
+		var sc_w = w;
+		var x1 = rot.x;
+		var y1 = rot.y;
+		var z1 = rot.z;
+		var w1 = rot.w;
+		var x2 = x1 + x1;
+		var y2 = y1 + y1;
+		var z2 = z1 + z1;
+		var xx = x1 * x2;
+		var xy = x1 * y2;
+		var xz = x1 * z2;
+		var yy = y1 * y2;
+		var yz = y1 * z2;
+		var zz = z1 * z2;
+		var wx = w1 * x2;
+		var wy = w1 * y2;
+		var wz = w1 * z2;
+		matrix.self._00 = 1.0 - (yy + zz);
+		matrix.self._10 = xy - wz;
+		matrix.self._20 = xz + wy;
+		matrix.self._01 = xy + wz;
+		matrix.self._11 = 1.0 - (xx + zz);
+		matrix.self._21 = yz - wx;
+		matrix.self._02 = xz - wy;
+		matrix.self._12 = yz + wx;
+		matrix.self._22 = 1.0 - (xx + yy);
+		matrix.self._03 = 0.0;
+		matrix.self._13 = 0.0;
+		matrix.self._23 = 0.0;
+		matrix.self._30 = 0.0;
+		matrix.self._31 = 0.0;
+		matrix.self._32 = 0.0;
+		matrix.self._33 = 1.0;
+		var x11 = sc_x;
+		var y11 = sc_y;
+		var z11 = sc_z;
+		matrix.self._00 *= x11;
+		matrix.self._01 *= x11;
+		matrix.self._02 *= x11;
+		matrix.self._03 *= x11;
+		matrix.self._10 *= y11;
+		matrix.self._11 *= y11;
+		matrix.self._12 *= y11;
+		matrix.self._13 *= y11;
+		matrix.self._20 *= z11;
+		matrix.self._21 *= z11;
+		matrix.self._22 *= z11;
+		matrix.self._23 *= z11;
+		matrix.self._30 = loc.x;
+		matrix.self._31 = loc.y;
+		matrix.self._32 = loc.z;
+		var spawnChildren = false;
+		iron_Scene.active.spawnObject("xyPlane",null,function(o) {
+			object = o;
+			if(matrix != null) {
+				object.transform.setMatrix(matrix);
+				var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
+				if(rigidBody != null) {
+					object.transform.buildMatrix();
+					rigidBody.syncTransform();
+					rigidBody.group = _gthis.planegroup;
+				}
+			}
+			object.visible = false;
+		},spawnChildren);
+		return object;
+	}
+	,mouseToPlaneHit: function(inputX,inputY,group,mask) {
+		var camera = iron_Scene.active.camera;
+		var physics = armory_trait_physics_bullet_PhysicsWorld.active;
+		var start = new iron_math_Vec4();
+		var end = new iron_math_Vec4();
+		iron_math_RayCaster.getDirection(start,end,inputX,inputY,camera);
+		var _this = camera.transform.world;
+		var hit = physics.rayCast(new iron_math_Vec4(_this.self._30,_this.self._31,_this.self._32,_this.self._33),end,group,mask);
+		if(hit != null) {
+			var _this1 = new iron_math_Vec4();
+			var v = hit.pos;
+			_this1.x = v.x;
+			_this1.y = v.y;
+			_this1.z = v.z;
+			_this1.w = v.w;
+			return _this1;
+		} else {
+			return null;
+		}
+	}
+	,angle3d: function(vec1,vec2) {
+		var arg1_x = 0.0;
+		var arg1_y = 0.0;
+		var arg1_z = 0.0;
+		var arg1_w = 1.0;
+		arg1_x = vec1.x;
+		arg1_y = vec1.y;
+		arg1_z = vec1.z;
+		arg1_w = vec1.w;
+		var ax = arg1_x;
+		var ay = arg1_y;
+		var az = arg1_z;
+		var vx = vec2.x;
+		var vy = vec2.y;
+		var vz = vec2.z;
+		arg1_x = ay * vz - az * vy;
+		arg1_y = az * vx - ax * vz;
+		arg1_z = ax * vy - ay * vx;
+		var arg2_x = 0.0;
+		var arg2_y = 0.0;
+		var arg2_z = 0.0;
+		var arg2_w = 1.0;
+		arg2_x = vec1.x;
+		arg2_y = vec1.y;
+		arg2_z = vec1.z;
+		arg2_w = vec1.w;
+		var angle = Math.atan2(Math.sqrt(arg1_x * arg1_x + arg1_y * arg1_y + arg1_z * arg1_z),arg2_x * vec2.x + arg2_y * vec2.y + arg2_z * vec2.z);
+		return angle;
+	}
+	,__class__: arm_RSP1D_$Base
 });
 var arm_ResumeTraitSelector = function() {
 	iron_Trait.call(this);
@@ -5449,6 +8482,134 @@ arm_Spawner_$KM100.prototype = $extend(iron_Trait.prototype,{
 	}
 	,__class__: arm_Spawner_$KM100
 });
+var arm_Spawner_$KM100PM = function() {
+	this.once = true;
+	this.std_basePosition = 0.25;
+	this.std_postHeight = 0.75;
+	this.objectName_Component = "KM100PM_Base";
+	this.objectName_PostHolder = "UPH2_Base";
+	this.postHeight = 0.75;
+	this.postAngleDegree = 90;
+	this.basePosition = 0.25;
+	this.baseAngleDegree = 90;
+	var _gthis = this;
+	iron_Trait.call(this);
+	this.notifyOnInit(function() {
+		var loc = _gthis.object.transform.loc;
+		_gthis.convertPropsToVars();
+		var pMap = _gthis.createPropMapPost();
+		var v = _gthis.objectName_Component;
+		var value = v;
+		if(__map_reserved["componentObjectName"] != null) {
+			pMap.setReserved("componentObjectName",value);
+		} else {
+			pMap.h["componentObjectName"] = value;
+		}
+		_gthis.spawnedObjectPost = _gthis.spawnObject(_gthis.objectName_PostHolder,true,loc,pMap);
+		_gthis.rbSync(_gthis.spawnedObjectPost);
+	});
+};
+$hxClasses["arm.Spawner_KM100PM"] = arm_Spawner_$KM100PM;
+arm_Spawner_$KM100PM.__name__ = "arm.Spawner_KM100PM";
+arm_Spawner_$KM100PM.__super__ = iron_Trait;
+arm_Spawner_$KM100PM.prototype = $extend(iron_Trait.prototype,{
+	baseAngleDegree: null
+	,basePosition: null
+	,postAngleDegree: null
+	,postHeight: null
+	,objectName_PostHolder: null
+	,objectName_Component: null
+	,baseAngle: null
+	,postAngle: null
+	,postDist: null
+	,baseDist: null
+	,std_postHeight: null
+	,std_basePosition: null
+	,spawnedObjectPost: null
+	,spawnedObjectComponent: null
+	,once: null
+	,spawnObject: function(objectName,visible,loc,props) {
+		var object;
+		var spawnChildren = true;
+		iron_Scene.active.spawnObject(objectName,null,function(o) {
+			object = o;
+			object.visible = visible;
+		},spawnChildren);
+		object.transform.loc = loc;
+		if(object == null) {
+			return null;
+		}
+		if(object.properties == null) {
+			object.properties = new haxe_ds_StringMap();
+		}
+		object.properties = props;
+		return object;
+	}
+	,createPropMapPost: function() {
+		var pMap = new haxe_ds_StringMap();
+		var v = this.baseAngle;
+		var value = v;
+		if(__map_reserved["baseAngle"] != null) {
+			pMap.setReserved("baseAngle",value);
+		} else {
+			pMap.h["baseAngle"] = value;
+		}
+		var v1 = this.postAngle;
+		var value1 = v1;
+		if(__map_reserved["postAngle"] != null) {
+			pMap.setReserved("postAngle",value1);
+		} else {
+			pMap.h["postAngle"] = value1;
+		}
+		var v2 = this.baseDist;
+		var value2 = v2;
+		if(__map_reserved["baseDist"] != null) {
+			pMap.setReserved("baseDist",value2);
+		} else {
+			pMap.h["baseDist"] = value2;
+		}
+		var v3 = this.postDist;
+		var value3 = v3;
+		if(__map_reserved["postDist"] != null) {
+			pMap.setReserved("postDist",value3);
+		} else {
+			pMap.h["postDist"] = value3;
+		}
+		if(__map_reserved["spawned"] != null) {
+			pMap.setReserved("spawned",true);
+		} else {
+			pMap.h["spawned"] = true;
+		}
+		return pMap;
+	}
+	,createPropMapComp: function(postObject) {
+		var cMap = new haxe_ds_StringMap();
+		if(__map_reserved["postObject"] != null) {
+			cMap.setReserved("postObject",postObject);
+		} else {
+			cMap.h["postObject"] = postObject;
+		}
+		if(__map_reserved["spawned"] != null) {
+			cMap.setReserved("spawned",true);
+		} else {
+			cMap.h["spawned"] = true;
+		}
+		return cMap;
+	}
+	,convertPropsToVars: function() {
+		this.baseAngle = (this.baseAngleDegree - 90) * Math.PI / 180.;
+		this.postAngle = this.postAngleDegree * Math.PI / 180.;
+		this.baseDist = -1 * (this.basePosition - this.std_basePosition);
+		this.postDist = this.postHeight - this.std_postHeight;
+	}
+	,rbSync: function(object) {
+		var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
+		if(rigidBody != null) {
+			rigidBody.syncTransform();
+		}
+	}
+	,__class__: arm_Spawner_$KM100PM
+});
 var arm_Spawner_$KM100_$Base_$CPS532_$C2_$Laser = function() {
 	this.once = true;
 	this.std_basePosition = 0.25;
@@ -5576,6 +8737,203 @@ arm_Spawner_$KM100_$Base_$CPS532_$C2_$Laser.prototype = $extend(iron_Trait.proto
 		}
 	}
 	,__class__: arm_Spawner_$KM100_$Base_$CPS532_$C2_$Laser
+});
+var arm_Spawner_$RSP1D = function() {
+	this.once = true;
+	this.std_basePosition = 0.25;
+	this.std_postHeight = 0.75;
+	this.objectName_Component = "RSP1D_Base";
+	this.objectName_PostHolder = "UPH2_Base";
+	this.postHeight = 0.75;
+	this.postAngleDegree = 90;
+	this.basePosition = 0.25;
+	this.baseAngleDegree = 90;
+	this.wpAngleDegree = 0;
+	var _gthis = this;
+	iron_Trait.call(this);
+	this.notifyOnInit(function() {
+		var loc = _gthis.object.transform.loc;
+		_gthis.convertPropsToVars();
+		var pMap = _gthis.createPropMapPost();
+		var cMap = _gthis.createPropMapComp();
+		var v = _gthis.objectName_Component;
+		var value = v;
+		if(__map_reserved["componentObjectName"] != null) {
+			pMap.setReserved("componentObjectName",value);
+		} else {
+			pMap.h["componentObjectName"] = value;
+		}
+		var v1 = _gthis.calcCorrV(_gthis.objectName_Component);
+		var value1 = v1;
+		if(__map_reserved["Component_corrV"] != null) {
+			pMap.setReserved("Component_corrV",value1);
+		} else {
+			pMap.h["Component_corrV"] = value1;
+		}
+		if(__map_reserved["Component_map"] != null) {
+			pMap.setReserved("Component_map",cMap);
+		} else {
+			pMap.h["Component_map"] = cMap;
+		}
+		_gthis.spawnedObjectPost = _gthis.spawnObject(_gthis.objectName_PostHolder,true,loc,pMap);
+		_gthis.rbSync(_gthis.spawnedObjectPost);
+	});
+};
+$hxClasses["arm.Spawner_RSP1D"] = arm_Spawner_$RSP1D;
+arm_Spawner_$RSP1D.__name__ = "arm.Spawner_RSP1D";
+arm_Spawner_$RSP1D.__super__ = iron_Trait;
+arm_Spawner_$RSP1D.prototype = $extend(iron_Trait.prototype,{
+	wpAngleDegree: null
+	,baseAngleDegree: null
+	,basePosition: null
+	,postAngleDegree: null
+	,postHeight: null
+	,objectName_PostHolder: null
+	,objectName_Component: null
+	,wpAngle: null
+	,baseAngle: null
+	,postAngle: null
+	,postDist: null
+	,baseDist: null
+	,std_postHeight: null
+	,std_basePosition: null
+	,spawnedObjectPost: null
+	,spawnedObjectComponent: null
+	,once: null
+	,spawnObject: function(objectName,visible,loc,props) {
+		var object;
+		var spawnChildren = true;
+		iron_Scene.active.spawnObject(objectName,null,function(o) {
+			object = o;
+			object.visible = visible;
+		},spawnChildren);
+		object.transform.loc = loc;
+		if(object == null) {
+			return null;
+		}
+		if(object.properties == null) {
+			object.properties = new haxe_ds_StringMap();
+		}
+		object.properties = props;
+		return object;
+	}
+	,createPropMapPost: function() {
+		var pMap = new haxe_ds_StringMap();
+		var v = this.baseAngle;
+		var value = v;
+		if(__map_reserved["baseAngle"] != null) {
+			pMap.setReserved("baseAngle",value);
+		} else {
+			pMap.h["baseAngle"] = value;
+		}
+		var v1 = this.postAngle;
+		var value1 = v1;
+		if(__map_reserved["postAngle"] != null) {
+			pMap.setReserved("postAngle",value1);
+		} else {
+			pMap.h["postAngle"] = value1;
+		}
+		var v2 = this.baseDist;
+		var value2 = v2;
+		if(__map_reserved["baseDist"] != null) {
+			pMap.setReserved("baseDist",value2);
+		} else {
+			pMap.h["baseDist"] = value2;
+		}
+		var v3 = this.postDist;
+		var value3 = v3;
+		if(__map_reserved["postDist"] != null) {
+			pMap.setReserved("postDist",value3);
+		} else {
+			pMap.h["postDist"] = value3;
+		}
+		if(__map_reserved["spawned"] != null) {
+			pMap.setReserved("spawned",true);
+		} else {
+			pMap.h["spawned"] = true;
+		}
+		return pMap;
+	}
+	,createPropMapComp: function() {
+		var cMap = new haxe_ds_StringMap();
+		var v = this.wpAngle;
+		var value = v;
+		if(__map_reserved["ringAngle"] != null) {
+			cMap.setReserved("ringAngle",value);
+		} else {
+			cMap.h["ringAngle"] = value;
+		}
+		return cMap;
+	}
+	,calcCorrV: function(objectName) {
+		var corrObj = iron_Scene.active.getChild(objectName);
+		var _this = new iron_math_Vec4();
+		var _this1 = corrObj.transform.world;
+		var x = _this1.self._30;
+		var y = _this1.self._31;
+		var z = _this1.self._32;
+		var w = _this1.self._33;
+		if(w == null) {
+			w = 1.0;
+		}
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var v_x = x;
+		var v_y = y;
+		var v_z = z;
+		var v_w = w;
+		_this.x = v_x;
+		_this.y = v_y;
+		_this.z = v_z;
+		_this.w = v_w;
+		var corrV = _this;
+		var _this2 = corrObj.getChild("C_Post_RSP1D_Base").transform.world;
+		var x1 = _this2.self._30;
+		var y1 = _this2.self._31;
+		var z1 = _this2.self._32;
+		var w1 = _this2.self._33;
+		if(w1 == null) {
+			w1 = 1.0;
+		}
+		if(z1 == null) {
+			z1 = 0.0;
+		}
+		if(y1 == null) {
+			y1 = 0.0;
+		}
+		if(x1 == null) {
+			x1 = 0.0;
+		}
+		var v_x1 = x1;
+		var v_y1 = y1;
+		var v_z1 = z1;
+		var v_w1 = w1;
+		corrV.x -= v_x1;
+		corrV.y -= v_y1;
+		corrV.z -= v_z1;
+		return corrV;
+	}
+	,convertPropsToVars: function() {
+		this.baseAngle = (this.baseAngleDegree - 90) * Math.PI / 180.;
+		this.postAngle = this.postAngleDegree * Math.PI / 180.;
+		this.baseDist = -1 * (this.basePosition - this.std_basePosition);
+		this.postDist = this.postHeight - this.std_postHeight;
+		this.wpAngle = this.wpAngleDegree * Math.PI / 180.;
+	}
+	,rbSync: function(object) {
+		var rigidBody = object.getTrait(armory_trait_physics_bullet_RigidBody);
+		if(rigidBody != null) {
+			rigidBody.syncTransform();
+		}
+	}
+	,__class__: arm_Spawner_$RSP1D
 });
 var arm_UPH2_$Base = function() {
 	this.objList = [];
@@ -6992,6 +10350,2238 @@ arm_UPH2_$Base.prototype = $extend(iron_Trait.prototype,{
 	}
 	,__class__: arm_UPH2_$Base
 });
+var zui_Zui = function(ops) {
+	this.checkSelectImage = null;
+	this.elementsBaked = false;
+	this.scissor = false;
+	this.sticky = false;
+	this.tabVertical = false;
+	this.tabScroll = 0.0;
+	this.tabHandle = null;
+	this.tabColors = null;
+	this.tabNames = null;
+	this.tooltipTime = 0.0;
+	this.tooltipWait = false;
+	this.tooltipShown = false;
+	this.tooltipY = 0.0;
+	this.tooltipX = 0.0;
+	this.tooltipInvertY = false;
+	this.tooltipImgMaxWidth = null;
+	this.tooltipImg = null;
+	this.tooltipText = "";
+	this.comboToSubmit = 0;
+	this.submitComboHandle = null;
+	this.comboSelectedWindow = null;
+	this.comboSelectedHandle = null;
+	this.tabPressedHandle = null;
+	this.tabPressed = false;
+	this.textToSubmit = "";
+	this.submitTextHandle = null;
+	this.textSelectedHandle = null;
+	this.restoreY = -1.0;
+	this.restoreX = -1.0;
+	this.windowHeaderH = 0.0;
+	this.windowHeaderW = 0.0;
+	this.dragHandle = null;
+	this.scrollHandle = null;
+	this.windowEnded = true;
+	this._windowY = 0.0;
+	this._windowX = 0.0;
+	this.imageScrollAlign = true;
+	this.scrollAlign = 0.0;
+	this.curRatio = -1;
+	this.highlightAnchor = 0;
+	this.cursorX = 0;
+	this.inputStartedTime = 0.0;
+	this.key = null;
+	this.isReturnDown = false;
+	this.isEscapeDown = false;
+	this.isDeleteDown = false;
+	this.isBackspaceDown = false;
+	this.isADown = false;
+	this.isAltDown = false;
+	this.isCtrlDown = false;
+	this.isShiftDown = false;
+	this.isKeyDown = false;
+	this.isKeyPressed = false;
+	this.inputWheelDelta = 0;
+	this.inputEnabled = true;
+	this.inputRegistered = false;
+	this.touchHold = false;
+	this.highlightFullRow = false;
+	this.tabSwitchEnabled = true;
+	this.highlightOnSelect = true;
+	this.alwaysRedraw = false;
+	this.scrollEnabled = true;
+	this.imageInvertY = false;
+	this.changed = false;
+	this.isReleased = false;
+	this.isHovered = false;
+	this.isPushed = false;
+	this.isStarted = false;
+	this.enabled = true;
+	this.isTyping = false;
+	this.isScrolling = false;
+	if(ops.theme == null) {
+		ops.theme = zui_Themes.dark;
+	}
+	this.t = ops.theme;
+	if(ops.khaWindowId == null) {
+		ops.khaWindowId = 0;
+	}
+	if(ops.scaleFactor == null) {
+		ops.scaleFactor = 1.0;
+	}
+	if(ops.autoNotifyInput == null) {
+		ops.autoNotifyInput = true;
+	}
+	this.ops = ops;
+	this.setScale(ops.scaleFactor);
+	if(ops.autoNotifyInput) {
+		this.registerInput();
+	}
+	if(zui_Zui.copyReceiver == null) {
+		zui_Zui.copyReceiver = this;
+		kha_System.notifyOnCutCopyPaste($bind(this,this.onCut),$bind(this,this.onCopy),$bind(this,this.onPaste));
+		kha_System.notifyOnFrames(function(frames) {
+			if((zui_Zui.isCopy || zui_Zui.isPaste) && ++zui_Zui.copyFrame > 1) {
+				zui_Zui.isCopy = zui_Zui.isCut = zui_Zui.isPaste = false;
+				zui_Zui.copyFrame = 0;
+			}
+		});
+	}
+	var rtTextVS = kha_graphics4_Graphics2.createTextVertexStructure();
+	this.rtTextPipeline = kha_graphics4_Graphics2.createTextPipeline(rtTextVS);
+	this.rtTextPipeline.alphaBlendSource = 1;
+	this.rtTextPipeline.compile();
+};
+$hxClasses["zui.Zui"] = zui_Zui;
+zui_Zui.__name__ = "zui.Zui";
+zui_Zui.clampi = function(value,min,max) {
+	if(value < min) {
+		return min;
+	} else if(value > max) {
+		return max;
+	} else {
+		return value;
+	}
+};
+zui_Zui.prototype = {
+	isScrolling: null
+	,isTyping: null
+	,enabled: null
+	,isStarted: null
+	,isPushed: null
+	,isHovered: null
+	,isReleased: null
+	,changed: null
+	,imageInvertY: null
+	,scrollEnabled: null
+	,alwaysRedraw: null
+	,highlightOnSelect: null
+	,tabSwitchEnabled: null
+	,highlightFullRow: null
+	,touchHold: null
+	,inputRegistered: null
+	,inputEnabled: null
+	,inputX: null
+	,inputY: null
+	,inputStartedX: null
+	,inputStartedY: null
+	,inputDX: null
+	,inputDY: null
+	,inputWheelDelta: null
+	,inputStarted: null
+	,inputStartedR: null
+	,inputReleased: null
+	,inputReleasedR: null
+	,inputDown: null
+	,inputDownR: null
+	,isKeyPressed: null
+	,isKeyDown: null
+	,isShiftDown: null
+	,isCtrlDown: null
+	,isAltDown: null
+	,isADown: null
+	,isBackspaceDown: null
+	,isDeleteDown: null
+	,isEscapeDown: null
+	,isReturnDown: null
+	,key: null
+	,char: null
+	,inputStartedTime: null
+	,cursorX: null
+	,highlightAnchor: null
+	,ratios: null
+	,curRatio: null
+	,xBeforeSplit: null
+	,wBeforeSplit: null
+	,g: null
+	,t: null
+	,ops: null
+	,globalG: null
+	,rtTextPipeline: null
+	,fontSize: null
+	,fontOffsetY: null
+	,arrowOffsetX: null
+	,arrowOffsetY: null
+	,titleOffsetX: null
+	,buttonOffsetY: null
+	,checkOffsetX: null
+	,checkOffsetY: null
+	,checkSelectOffsetX: null
+	,checkSelectOffsetY: null
+	,radioOffsetX: null
+	,radioOffsetY: null
+	,radioSelectOffsetX: null
+	,radioSelectOffsetY: null
+	,scrollAlign: null
+	,imageScrollAlign: null
+	,_x: null
+	,_y: null
+	,_w: null
+	,_h: null
+	,_windowX: null
+	,_windowY: null
+	,_windowW: null
+	,_windowH: null
+	,currentWindow: null
+	,windowEnded: null
+	,scrollHandle: null
+	,dragHandle: null
+	,windowHeaderW: null
+	,windowHeaderH: null
+	,restoreX: null
+	,restoreY: null
+	,textSelectedHandle: null
+	,textSelected: null
+	,submitTextHandle: null
+	,textToSubmit: null
+	,tabPressed: null
+	,tabPressedHandle: null
+	,comboSelectedHandle: null
+	,comboSelectedWindow: null
+	,comboSelectedAlign: null
+	,comboSelectedTexts: null
+	,comboItemCount: null
+	,comboItemOffset: null
+	,comboSelectedLabel: null
+	,comboSelectedX: null
+	,comboSelectedY: null
+	,comboSelectedW: null
+	,submitComboHandle: null
+	,comboToSubmit: null
+	,tooltipText: null
+	,tooltipImg: null
+	,tooltipImgMaxWidth: null
+	,tooltipInvertY: null
+	,tooltipX: null
+	,tooltipY: null
+	,tooltipShown: null
+	,tooltipWait: null
+	,tooltipTime: null
+	,tabNames: null
+	,tabColors: null
+	,tabHandle: null
+	,tabScroll: null
+	,tabVertical: null
+	,sticky: null
+	,scissor: null
+	,elementsBaked: null
+	,checkSelectImage: null
+	,setScale: function(factor) {
+		this.ops.scaleFactor = factor;
+		this.fontSize = this.t.FONT_SIZE * this.ops.scaleFactor | 0;
+		var fontHeight = this.ops.font.height(this.fontSize);
+		this.fontOffsetY = (this.t.ELEMENT_H * this.ops.scaleFactor - fontHeight) / 2;
+		this.arrowOffsetY = (this.t.ELEMENT_H * this.ops.scaleFactor - this.t.ARROW_SIZE * this.ops.scaleFactor) / 2;
+		this.arrowOffsetX = this.arrowOffsetY;
+		this.titleOffsetX = (this.arrowOffsetX * 2 + this.t.ARROW_SIZE * this.ops.scaleFactor) / this.ops.scaleFactor;
+		this.buttonOffsetY = (this.t.ELEMENT_H * this.ops.scaleFactor - this.t.BUTTON_H * this.ops.scaleFactor) / 2;
+		this.checkOffsetY = (this.t.ELEMENT_H * this.ops.scaleFactor - this.t.CHECK_SIZE * this.ops.scaleFactor) / 2;
+		this.checkOffsetX = this.checkOffsetY;
+		this.checkSelectOffsetY = (this.t.CHECK_SIZE * this.ops.scaleFactor - this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor) / 2;
+		this.checkSelectOffsetX = this.checkSelectOffsetY;
+		this.radioOffsetY = (this.t.ELEMENT_H * this.ops.scaleFactor - this.t.CHECK_SIZE * this.ops.scaleFactor) / 2;
+		this.radioOffsetX = this.radioOffsetY;
+		this.radioSelectOffsetY = (this.t.CHECK_SIZE * this.ops.scaleFactor - this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor) / 2;
+		this.radioSelectOffsetX = this.radioSelectOffsetY;
+		this.elementsBaked = false;
+	}
+	,bakeElements: function() {
+		if(this.checkSelectImage != null) {
+			this.checkSelectImage.unload();
+		}
+		this.checkSelectImage = kha_Image.createRenderTarget(this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor | 0,this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor | 0,null,0,1,this.ops.khaWindowId);
+		var g = this.checkSelectImage.get_g2();
+		g.begin(true,0);
+		g.set_color(this.t.ACCENT_SELECT_COL);
+		g.drawLine(0,0,this.checkSelectImage.get_width(),this.checkSelectImage.get_height(),2 * this.ops.scaleFactor);
+		g.drawLine(this.checkSelectImage.get_width(),0,0,this.checkSelectImage.get_height(),2 * this.ops.scaleFactor);
+		g.end();
+		this.elementsBaked = true;
+	}
+	,remove: function() {
+		if(this.ops.autoNotifyInput) {
+			this.unregisterInput();
+		}
+	}
+	,registerInput: function() {
+		var _gthis = this;
+		kha_input_Mouse.get().notifyWindowed(this.ops.khaWindowId,$bind(this,this.onMouseDown),$bind(this,this.onMouseUp),$bind(this,this.onMouseMove),$bind(this,this.onMouseWheel));
+		kha_input_Keyboard.get().notify($bind(this,this.onKeyDown),$bind(this,this.onKeyUp),$bind(this,this.onKeyPress));
+		kha_System.notifyOnApplicationState(function() {
+			_gthis.inputDX = _gthis.inputDY = 0;
+		},null,null,null,null);
+		this.inputRegistered = true;
+	}
+	,unregisterInput: function() {
+		kha_input_Mouse.get().removeWindowed(this.ops.khaWindowId,$bind(this,this.onMouseDown),$bind(this,this.onMouseUp),$bind(this,this.onMouseMove),$bind(this,this.onMouseWheel));
+		kha_input_Keyboard.get().remove($bind(this,this.onKeyDown),$bind(this,this.onKeyUp),$bind(this,this.onKeyPress));
+		this.endInput();
+		this.inputX = this.inputY = 0;
+		this.inputRegistered = false;
+	}
+	,begin: function(g) {
+		if(!this.elementsBaked) {
+			this.bakeElements();
+		}
+		this.changed = false;
+		this.globalG = g;
+		this._x = 0;
+		this._y = 0;
+		this._w = 0;
+		this._h = 0;
+	}
+	,end: function(last) {
+		if(last == null) {
+			last = true;
+		}
+		if(!this.windowEnded) {
+			this.endWindow();
+		}
+		this.drawCombo();
+		this.drawTooltip();
+		this.tabPressedHandle = null;
+		if(last) {
+			this.endInput();
+		}
+	}
+	,beginRegion: function(g,x,y,w) {
+		if(!this.elementsBaked) {
+			g.end();
+			this.bakeElements();
+			g.begin(false);
+		}
+		this.changed = false;
+		this.globalG = g;
+		this.g = g;
+		this.currentWindow = null;
+		this.tooltipText = "";
+		this.tooltipImg = null;
+		this._windowX = 0;
+		this._windowY = 0;
+		this._windowW = w;
+		this._x = x;
+		this._y = y;
+		this._w = w;
+	}
+	,endRegion: function(last) {
+		if(last == null) {
+			last = true;
+		}
+		this.drawTooltip();
+		this.tabPressedHandle = null;
+		if(last) {
+			this.endInput();
+		}
+	}
+	,beginSticky: function() {
+		this.sticky = true;
+		this._y -= this.currentWindow.scrollOffset;
+	}
+	,endSticky: function() {
+		this.sticky = false;
+		this.scissor = true;
+		this.g.scissor(0,this._y | 0,this._windowW | 0,this._windowH - this._y | 0);
+		this.windowHeaderH += this._y - this.windowHeaderH;
+		this._y += this.currentWindow.scrollOffset;
+	}
+	,endInput: function() {
+		this.isKeyPressed = false;
+		this.inputStarted = false;
+		this.inputStartedR = false;
+		this.inputReleased = false;
+		this.inputReleasedR = false;
+		this.inputDX = 0;
+		this.inputDY = 0;
+		this.inputWheelDelta = 0;
+		zui_Zui.textToPaste = "";
+		if(zui_Zui.keyRepeat && this.isKeyDown && kha_Scheduler.time() - zui_Zui.keyRepeatTime > 0.05) {
+			if(this.key == 8 || this.key == 46 || this.key == 37 || this.key == 39 || this.key == 38 || this.key == 40) {
+				zui_Zui.keyRepeatTime = kha_Scheduler.time();
+				this.isKeyPressed = true;
+			}
+		}
+		if(zui_Zui.touchControls && this.inputDown && this.inputX == this.inputStartedX && this.inputY == this.inputStartedY && this.inputStartedTime > 0 && kha_Scheduler.time() - this.inputStartedTime > 0.5) {
+			this.touchHold = true;
+			this.inputStartedTime = 0;
+		}
+	}
+	,inputChanged: function() {
+		if(!(this.inputDX != 0 || this.inputDY != 0 || this.inputWheelDelta != 0 || this.inputStarted || this.inputStartedR || this.inputReleased || this.inputReleasedR || this.inputDown || this.inputDownR)) {
+			return this.isKeyPressed;
+		} else {
+			return true;
+		}
+	}
+	,windowDirty: function(handle,x,y,w,h) {
+		var wx = x + handle.dragX;
+		var wy = y + handle.dragY;
+		var inputChanged = this.getInputInRect(wx,wy,w,h) && this.inputChanged();
+		if(!(this.alwaysRedraw || this.isScrolling || this.isTyping)) {
+			return inputChanged;
+		} else {
+			return true;
+		}
+	}
+	,window: function(handle,x,y,w,h,drag) {
+		if(drag == null) {
+			drag = false;
+		}
+		if(handle.texture == null || w != handle.texture.get_width() || h != handle.texture.get_height()) {
+			this.resize(handle,w,h,this.ops.khaWindowId);
+		}
+		if(!this.windowEnded) {
+			this.endWindow();
+		}
+		this.windowEnded = false;
+		this.g = handle.texture.get_g2();
+		this.currentWindow = handle;
+		this._windowX = x + handle.dragX;
+		this._windowY = y + handle.dragY;
+		this._windowW = w;
+		this._windowH = h;
+		this.windowHeaderW = 0;
+		this.windowHeaderH = 0;
+		if(this.windowDirty(handle,x,y,w,h)) {
+			handle.redraws = 2;
+		}
+		if(zui_Zui.onBorderHover != null) {
+			if(this.getInputInRect(this._windowX - 4,this._windowY,8,this._windowH)) {
+				zui_Zui.onBorderHover(handle,0);
+			} else if(this.getInputInRect(this._windowX + this._windowW - 4,this._windowY,8,this._windowH)) {
+				zui_Zui.onBorderHover(handle,1);
+			} else if(this.getInputInRect(this._windowX,this._windowY - 4,this._windowW,8)) {
+				zui_Zui.onBorderHover(handle,2);
+			} else if(this.getInputInRect(this._windowX,this._windowY + this._windowH - 4,this._windowW,8)) {
+				zui_Zui.onBorderHover(handle,3);
+			}
+		}
+		if(handle.redraws <= 0) {
+			return false;
+		}
+		this._x = 0;
+		this._y = handle.scrollOffset;
+		if(handle.layout == 1) {
+			w = this.t.ELEMENT_W * this.ops.scaleFactor | 0;
+		}
+		this._w = !handle.scrollEnabled ? w : w - (this.t.SCROLL_W * this.ops.scaleFactor | 0);
+		this._h = h;
+		this.tooltipText = "";
+		this.tooltipImg = null;
+		this.tabNames = null;
+		if(this.t.FILL_WINDOW_BG) {
+			this.g.begin(true,this.t.WINDOW_BG_COL);
+		} else {
+			this.g.begin(true,0);
+			this.g.set_color(this.t.WINDOW_BG_COL);
+			this.g.fillRect(this._x,this._y - handle.scrollOffset,handle.lastMaxX,handle.lastMaxY);
+		}
+		handle.dragEnabled = drag;
+		if(drag) {
+			if(this.inputStarted && this.getInputInRect(this._windowX,this._windowY,this._windowW,15 * this.ops.scaleFactor | 0)) {
+				this.dragHandle = handle;
+			} else if(this.inputReleased) {
+				this.dragHandle = null;
+			}
+			if(handle == this.dragHandle) {
+				handle.redraws = 2;
+				handle.dragX += this.inputDX | 0;
+				handle.dragY += this.inputDY | 0;
+			}
+			this._y += 15 * this.ops.scaleFactor | 0;
+			this.windowHeaderH += 15 * this.ops.scaleFactor | 0;
+		}
+		return true;
+	}
+	,endWindow: function(bindGlobalG) {
+		if(bindGlobalG == null) {
+			bindGlobalG = true;
+		}
+		var handle = this.currentWindow;
+		if(handle == null) {
+			return;
+		}
+		if(handle.redraws > 0 || this.isScrolling || this.isTyping) {
+			if(this.scissor) {
+				this.scissor = false;
+				this.g.disableScissor();
+			}
+			if(this.tabNames != null) {
+				this.drawTabs();
+			}
+			if(handle.dragEnabled) {
+				this.g.set_color(this.t.SEPARATOR_COL);
+				this.g.fillRect(0,0,this._windowW,15 * this.ops.scaleFactor | 0);
+			}
+			var wh = this._windowH - this.windowHeaderH;
+			var fullHeight = this._y - handle.scrollOffset - this.windowHeaderH;
+			if(fullHeight < wh || handle.layout == 1 || !this.scrollEnabled) {
+				handle.scrollEnabled = false;
+				handle.scrollOffset = 0;
+			} else {
+				handle.scrollEnabled = true;
+				if(this.tabScroll < 0) {
+					handle.scrollOffset = this.tabScroll;
+					this.tabScroll = 0;
+				}
+				var wy = this._windowY + this.windowHeaderH;
+				var amountToScroll = fullHeight - wh;
+				var amountScrolled = -handle.scrollOffset;
+				var ratio = amountScrolled / amountToScroll;
+				var barH = wh * Math.abs(wh / fullHeight);
+				barH = Math.max(barH,this.t.ELEMENT_H * this.ops.scaleFactor);
+				var totalScrollableArea = wh - barH;
+				var e = amountToScroll / totalScrollableArea;
+				var barY = totalScrollableArea * ratio + this.windowHeaderH;
+				var barFocus = this.getInputInRect(this._windowX + this._windowW - (this.t.SCROLL_W * this.ops.scaleFactor | 0),barY + this._windowY,this.t.SCROLL_W * this.ops.scaleFactor | 0,barH);
+				if(this.inputStarted && barFocus) {
+					this.scrollHandle = handle;
+					this.isScrolling = true;
+				}
+				var scrollDelta = this.inputWheelDelta;
+				if(zui_Zui.touchControls && this.inputDownR && this.inputDY != 0) {
+					this.isScrolling = true;
+					scrollDelta = -this.inputDY / 20;
+				}
+				if(handle == this.scrollHandle) {
+					this.scroll(this.inputDY * e,fullHeight);
+				} else if(scrollDelta != 0 && this.comboSelectedHandle == null && this.getInputInRect(this._windowX,wy,this._windowW,wh)) {
+					this.scroll(scrollDelta * (this.t.ELEMENT_H * this.ops.scaleFactor),fullHeight);
+				}
+				if(handle.scrollOffset > 0) {
+					handle.scrollOffset = 0;
+				} else if(fullHeight + handle.scrollOffset < wh) {
+					handle.scrollOffset = wh - fullHeight;
+				}
+				this.g.set_color(this.t.WINDOW_BG_COL);
+				this.g.fillRect(this._windowW - (this.t.SCROLL_W * this.ops.scaleFactor | 0),wy,this.t.SCROLL_W * this.ops.scaleFactor | 0,wh);
+				this.g.set_color(this.t.ACCENT_COL);
+				var scrollbarFocus = this.getInputInRect(this._windowX + this._windowW - (this.t.SCROLL_W * this.ops.scaleFactor | 0),wy,this.t.SCROLL_W * this.ops.scaleFactor | 0,wh);
+				var barW = scrollbarFocus || handle == this.scrollHandle ? this.t.SCROLL_W * this.ops.scaleFactor | 0 : (this.t.SCROLL_W * this.ops.scaleFactor | 0) / 3;
+				this.g.fillRect(this._windowW - barW - this.scrollAlign,barY,barW,barH);
+			}
+			handle.lastMaxX = this._x;
+			handle.lastMaxY = this._y;
+			if(handle.layout == 0) {
+				handle.lastMaxX += this._windowW;
+			} else {
+				handle.lastMaxY += this._windowH;
+			}
+			handle.redraws--;
+			this.g.end();
+		}
+		this.windowEnded = true;
+		if(zui_Zui.alwaysRedrawWindow || handle.redraws > -4) {
+			if(bindGlobalG) {
+				this.globalG.begin(false);
+			}
+			this.globalG.set_color(this.t.WINDOW_TINT_COL);
+			this.globalG.drawImage(handle.texture,this._windowX,this._windowY);
+			if(bindGlobalG) {
+				this.globalG.end();
+			}
+			if(handle.redraws <= 0) {
+				handle.redraws--;
+			}
+		}
+	}
+	,scroll: function(delta,fullHeight) {
+		this.currentWindow.scrollOffset -= delta;
+	}
+	,tab: function(handle,text,vertical,color) {
+		if(color == null) {
+			color = -1;
+		}
+		if(vertical == null) {
+			vertical = false;
+		}
+		if(this.tabNames == null) {
+			this.tabNames = [];
+			this.tabColors = [];
+			this.tabHandle = handle;
+			this.tabVertical = vertical;
+			this._w -= this.tabVertical ? this.t.ELEMENT_OFFSET * this.ops.scaleFactor + this.t.ELEMENT_W * this.ops.scaleFactor - this.ops.scaleFactor | 0 : 0;
+			if(vertical) {
+				this.windowHeaderW += this.t.ELEMENT_W * this.ops.scaleFactor;
+			} else {
+				this.windowHeaderH += this.t.BUTTON_H * this.ops.scaleFactor + this.buttonOffsetY + this.t.ELEMENT_OFFSET * this.ops.scaleFactor;
+			}
+			this.restoreX = this.inputX;
+			this.restoreY = this.inputY;
+			if(!vertical && this.getInputInRect(this._windowX,this._windowY,this._windowW,this.windowHeaderH)) {
+				this.inputX = this.inputY = -1;
+			}
+			if(vertical) {
+				this._x += this.windowHeaderW + 6;
+				this._w -= 6;
+			} else {
+				this._y += this.windowHeaderH + 3;
+			}
+		}
+		this.tabNames.push(text);
+		this.tabColors.push(color);
+		return handle.position == this.tabNames.length - 1;
+	}
+	,drawTabs: function() {
+		this.inputX = this.restoreX;
+		this.inputY = this.restoreY;
+		if(this.currentWindow == null) {
+			return;
+		}
+		var tabX = 0.0;
+		var tabY = 0.0;
+		var tabH = this.t.BUTTON_H * this.ops.scaleFactor * 1.1 | 0;
+		var origy = this._y;
+		this._y = this.currentWindow.dragEnabled ? 15 * this.ops.scaleFactor | 0 : 0;
+		this.tabHandle.changed = false;
+		this.g.set_color(this.t.SEPARATOR_COL);
+		if(this.tabVertical) {
+			this.g.fillRect(0,this._y,this.t.ELEMENT_W * this.ops.scaleFactor,this._windowH);
+		} else {
+			this.g.fillRect(0,this._y,this._windowW,this.buttonOffsetY + tabH + 2);
+		}
+		this.g.set_color(this.t.ACCENT_COL);
+		if(this.tabVertical) {
+			this.g.fillRect(this.t.ELEMENT_W * this.ops.scaleFactor,this._y,1,this._windowH);
+		} else {
+			this.g.fillRect(this.buttonOffsetY,this._y + this.buttonOffsetY + tabH + 2,this._windowW - this.buttonOffsetY * 2,1);
+		}
+		var basey = this.tabVertical ? this._y : this._y + 2;
+		var _g = 0;
+		var _g1 = this.tabNames.length;
+		while(_g < _g1) {
+			var i = _g++;
+			this._x = tabX;
+			this._y = basey + tabY;
+			this._w = this.tabVertical ? this.t.ELEMENT_W * this.ops.scaleFactor - this.ops.scaleFactor | 0 : this.ops.font.width(this.fontSize,this.tabNames[i]) + this.buttonOffsetY * 2 + 18 * this.ops.scaleFactor | 0;
+			var released = this.getReleased();
+			var pushed = this.getPushed();
+			var hover = this.getHover();
+			if(released) {
+				var h = this.tabHandle.nest(this.tabHandle.position);
+				h.scrollOffset = this.currentWindow.scrollOffset;
+				h = this.tabHandle.nest(i);
+				this.tabScroll = h.scrollOffset;
+				this.tabHandle.position = i;
+				this.currentWindow.redraws = 3;
+				this.tabHandle.changed = true;
+			}
+			var selected = this.tabHandle.position == i;
+			this.g.set_color(pushed || hover ? this.t.BUTTON_HOVER_COL : this.tabColors[i] != -1 ? this.tabColors[i] : selected ? this.t.WINDOW_BG_COL : this.t.SEPARATOR_COL);
+			if(this.tabVertical) {
+				tabY += tabH + 1;
+			} else {
+				tabX += this._w + 1;
+			}
+			var g = this.g;
+			var x = this._x + this.buttonOffsetY;
+			var y = this._y + this.buttonOffsetY;
+			var w = this._w;
+			var strength = 0.0;
+			if(strength == 0.0) {
+				strength = 1;
+			}
+			if(!this.enabled) {
+				this.fadeColor();
+			}
+			g.fillRect(x,y - 1,w,tabH + 1);
+			this.g.set_color(selected ? this.t.BUTTON_TEXT_COL : this.t.LABEL_COL);
+			this.drawString(this.g,this.tabNames[i],this.t.TEXT_OFFSET,0,0);
+			if(selected && !this.tabVertical) {
+				this.g.set_color(this.t.WINDOW_BG_COL);
+				this.g.fillRect(this._x + this.buttonOffsetY + 1,this._y + this.buttonOffsetY + tabH,this._w - 1,1);
+			}
+		}
+		this._x = 0;
+		this._y = origy;
+		this._w = (!this.currentWindow.scrollEnabled ? this._windowW : this._windowW - (this.t.SCROLL_W * this.ops.scaleFactor | 0)) | 0;
+	}
+	,panel: function(handle,text,isTree,filled,pack) {
+		if(pack == null) {
+			pack = true;
+		}
+		if(filled == null) {
+			filled = true;
+		}
+		if(isTree == null) {
+			isTree = false;
+		}
+		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
+			this.endElement();
+			return handle.selected;
+		}
+		if(this.getReleased()) {
+			handle.selected = !handle.selected;
+			handle.changed = this.changed = true;
+		}
+		if(filled) {
+			this.g.set_color(this.t.PANEL_BG_COL);
+			var g = this.g;
+			var x = this._x;
+			var y = this._y;
+			var w = this._w;
+			var h = this.t.ELEMENT_H * this.ops.scaleFactor;
+			var strength = 0.0;
+			if(strength == 0.0) {
+				strength = 1;
+			}
+			if(!this.enabled) {
+				this.fadeColor();
+			}
+			g.fillRect(x,y - 1,w,h + 1);
+		}
+		if(isTree) {
+			this.drawTree(handle.selected);
+		} else {
+			this.drawArrow(handle.selected);
+		}
+		this.g.set_color(this.t.LABEL_COL);
+		this.g.set_opacity(1.0);
+		this.drawString(this.g,text,this.titleOffsetX,0);
+		this.endElement();
+		if(pack && !handle.selected) {
+			this._y -= this.t.ELEMENT_OFFSET * this.ops.scaleFactor;
+		}
+		return handle.selected;
+	}
+	,image: function(image,tint,h,sx,sy,sw,sh) {
+		if(sh == null) {
+			sh = 0;
+		}
+		if(sw == null) {
+			sw = 0;
+		}
+		if(sy == null) {
+			sy = 0;
+		}
+		if(sx == null) {
+			sx = 0;
+		}
+		if(tint == null) {
+			tint = -1;
+		}
+		var iw = (sw > 0 ? sw : image.get_width()) * this.ops.scaleFactor;
+		var ih = (sh > 0 ? sh : image.get_height()) * this.ops.scaleFactor;
+		var w = Math.min(iw,this._w);
+		var x = this._x;
+		var scroll = this.currentWindow != null && this.currentWindow.scrollEnabled;
+		var r;
+		if(this.curRatio == -1) {
+			r = 1.0;
+		} else {
+			var ratio = this.ratios[this.curRatio];
+			r = ratio < 0 ? -ratio : ratio;
+		}
+		if(this.imageScrollAlign) {
+			w = Math.min(iw,this._w - this.buttonOffsetY * 2);
+			x += this.buttonOffsetY;
+			if(!scroll) {
+				w -= (this.t.SCROLL_W * this.ops.scaleFactor | 0) * r;
+				x += (this.t.SCROLL_W * this.ops.scaleFactor | 0) * r / 2;
+			}
+		} else if(scroll) {
+			w += (this.t.SCROLL_W * this.ops.scaleFactor | 0) * r;
+		}
+		var ratio1 = h == null ? w / iw : h / ih;
+		if(h == null) {
+			h = ih * ratio1;
+		} else {
+			w = iw * ratio1;
+		}
+		if(!this.isVisible(h)) {
+			this.endElement(h);
+			return 0;
+		}
+		var started = this.getStarted(h);
+		var down = this.getPushed(h);
+		var released = this.getReleased(h);
+		var hover = this.getHover(h);
+		this.g.set_color(tint);
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		var h_float = h;
+		if(sw > 0) {
+			if(this.imageInvertY) {
+				this.g.drawScaledSubImage(image,sx,sy,sw,sh,x,this._y + h_float,w,-h_float);
+			} else {
+				this.g.drawScaledSubImage(image,sx,sy,sw,sh,x,this._y,w,h_float);
+			}
+		} else if(this.imageInvertY) {
+			this.g.drawScaledImage(image,x,this._y + h_float,w,-h_float);
+		} else {
+			this.g.drawScaledImage(image,x,this._y,w,h_float);
+		}
+		this.endElement(h);
+		if(started) {
+			return 1;
+		} else if(released) {
+			return 3;
+		} else if(down) {
+			return 2;
+		} else if(hover) {
+			return 4;
+		} else {
+			return 0;
+		}
+	}
+	,text: function(text,align,bg) {
+		if(bg == null) {
+			bg = 0;
+		}
+		if(align == null) {
+			align = 0;
+		}
+		if(text.indexOf("\n") >= 0) {
+			var align1 = align;
+			var bg1 = bg;
+			if(bg1 == null) {
+				bg1 = 0;
+			}
+			if(align1 == null) {
+				align1 = 0;
+			}
+			var _g = 0;
+			var _g1 = text.split("\n");
+			while(_g < _g1.length) {
+				var line = _g1[_g];
+				++_g;
+				this.text(line,align1,bg1);
+			}
+			return 0;
+		}
+		var h = Math.max(this.t.ELEMENT_H * this.ops.scaleFactor,this.ops.font.height(this.fontSize));
+		if(!this.isVisible(h)) {
+			this.endElement(h + this.t.ELEMENT_OFFSET * this.ops.scaleFactor);
+			return 0;
+		}
+		var started = this.getStarted(h);
+		var down = this.getPushed(h);
+		var released = this.getReleased(h);
+		var hover = this.getHover(h);
+		if(bg != 0) {
+			this.g.set_color(bg);
+			this.g.fillRect(this._x + this.buttonOffsetY,this._y + this.buttonOffsetY,this._w - this.buttonOffsetY * 2,this.t.BUTTON_H * this.ops.scaleFactor);
+		}
+		this.g.set_color(this.t.TEXT_COL);
+		this.drawString(this.g,text,this.t.TEXT_OFFSET * this.ops.scaleFactor,0,align);
+		this.endElement(h + this.t.ELEMENT_OFFSET * this.ops.scaleFactor);
+		if(started) {
+			return 1;
+		} else if(released) {
+			return 3;
+		} else if(down) {
+			return 2;
+		} else {
+			return 0;
+		}
+	}
+	,splitText: function(lines,align,bg) {
+		if(bg == null) {
+			bg = 0;
+		}
+		if(align == null) {
+			align = 0;
+		}
+		var _g = 0;
+		var _g1 = lines.split("\n");
+		while(_g < _g1.length) {
+			var line = _g1[_g];
+			++_g;
+			this.text(line,align,bg);
+		}
+	}
+	,startTextEdit: function(handle) {
+		this.isTyping = true;
+		this.submitTextHandle = this.textSelectedHandle;
+		this.textToSubmit = this.textSelected;
+		this.textSelectedHandle = handle;
+		this.textSelected = handle.text;
+		this.cursorX = handle.text.length;
+		if(this.tabPressed) {
+			this.tabPressed = false;
+			this.isKeyPressed = false;
+		} else if(!this.highlightOnSelect) {
+			var x = this.inputX - (this._windowX + this._x + this.t.TEXT_OFFSET * this.ops.scaleFactor);
+			this.cursorX = 0;
+			while(this.cursorX < this.textSelected.length && this.ops.font.width(this.fontSize,HxOverrides.substr(this.textSelected,0,this.cursorX)) < x) this.cursorX++;
+		}
+		this.tabPressedHandle = handle;
+		this.highlightAnchor = this.highlightOnSelect ? 0 : this.cursorX;
+		if(kha_input_Keyboard.get() != null) {
+			kha_input_Keyboard.get().show();
+		}
+	}
+	,submitTextEdit: function() {
+		this.submitTextHandle.text = this.textToSubmit;
+		this.submitTextHandle.changed = this.changed = true;
+		this.submitTextHandle = null;
+		this.textToSubmit = "";
+		this.textSelected = "";
+	}
+	,updateTextEdit: function(align,editable) {
+		if(editable == null) {
+			editable = true;
+		}
+		if(align == null) {
+			align = 0;
+		}
+		var text = this.textSelected;
+		if(this.isKeyPressed) {
+			if(this.key == 37) {
+				if(this.cursorX > 0) {
+					this.cursorX--;
+				}
+			} else if(this.key == 39) {
+				if(this.cursorX < text.length) {
+					this.cursorX++;
+				}
+			} else if(editable && this.key == 8) {
+				if(this.cursorX > 0 && this.highlightAnchor == this.cursorX) {
+					text = HxOverrides.substr(text,0,this.cursorX - 1) + HxOverrides.substr(text,this.cursorX,text.length);
+					this.cursorX--;
+				} else if(this.highlightAnchor < this.cursorX) {
+					text = HxOverrides.substr(text,0,this.highlightAnchor) + HxOverrides.substr(text,this.cursorX,text.length);
+					this.cursorX = this.highlightAnchor;
+				} else {
+					text = HxOverrides.substr(text,0,this.cursorX) + HxOverrides.substr(text,this.highlightAnchor,text.length);
+				}
+			} else if(editable && this.key == 46) {
+				if(this.highlightAnchor == this.cursorX) {
+					text = HxOverrides.substr(text,0,this.cursorX) + HxOverrides.substr(text,this.cursorX + 1,null);
+				} else if(this.highlightAnchor < this.cursorX) {
+					text = HxOverrides.substr(text,0,this.highlightAnchor) + HxOverrides.substr(text,this.cursorX,text.length);
+					this.cursorX = this.highlightAnchor;
+				} else {
+					text = HxOverrides.substr(text,0,this.cursorX) + HxOverrides.substr(text,this.highlightAnchor,text.length);
+				}
+			} else if(this.key == 13) {
+				this.deselectText();
+			} else if(this.key == 27) {
+				this.textSelected = this.textSelectedHandle.text;
+				this.deselectText();
+			} else if(this.key == 9 && this.tabSwitchEnabled) {
+				this.tabPressed = true;
+				this.deselectText();
+				this.key = null;
+			} else if(this.key == 36) {
+				this.cursorX = 0;
+			} else if(this.key == 35) {
+				this.cursorX = text.length;
+			} else if(this.isCtrlDown && this.isADown) {
+				this.cursorX = text.length;
+				this.highlightAnchor = 0;
+			} else if(editable && this.key != 16 && this.key != 20 && this.key != 17 && this.key != 224 && this.key != 18 && this.key != 38 && this.key != 40 && this.char != null && this.char != "" && HxOverrides.cca(this.char,0) >= 32) {
+				text = HxOverrides.substr(text,0,this.highlightAnchor) + this.char + HxOverrides.substr(text,this.cursorX,null);
+				this.cursorX = this.cursorX + 1 > text.length ? text.length : this.cursorX + 1;
+			}
+			var selecting = this.isShiftDown && (this.key == 37 || this.key == 39 || this.key == 16);
+			if(!selecting && !this.isCtrlDown) {
+				this.highlightAnchor = this.cursorX;
+			}
+		}
+		if(zui_Zui.textToPaste != "") {
+			text = HxOverrides.substr(text,0,this.highlightAnchor) + zui_Zui.textToPaste + HxOverrides.substr(text,this.cursorX,null);
+			this.cursorX += zui_Zui.textToPaste.length;
+			this.highlightAnchor = this.cursorX;
+			zui_Zui.textToPaste = "";
+		}
+		if(this.highlightAnchor == this.cursorX) {
+			zui_Zui.textToCopy = text;
+		} else if(this.highlightAnchor < this.cursorX) {
+			zui_Zui.textToCopy = text.substring(this.highlightAnchor,this.cursorX);
+		} else {
+			zui_Zui.textToCopy = text.substring(this.cursorX,this.highlightAnchor);
+		}
+		if(zui_Zui.isCut) {
+			if(this.highlightAnchor == this.cursorX) {
+				text = "";
+			} else if(this.highlightAnchor < this.cursorX) {
+				text = HxOverrides.substr(text,0,this.highlightAnchor) + HxOverrides.substr(text,this.cursorX,text.length);
+				this.cursorX = this.highlightAnchor;
+			} else {
+				text = HxOverrides.substr(text,0,this.cursorX) + HxOverrides.substr(text,this.highlightAnchor,text.length);
+			}
+		}
+		var off = this.t.TEXT_OFFSET * this.ops.scaleFactor;
+		var lineHeight = this.t.ELEMENT_H * this.ops.scaleFactor;
+		var cursorHeight = lineHeight - this.buttonOffsetY * 3.0;
+		if(this.highlightAnchor != this.cursorX) {
+			var istart = this.cursorX;
+			var iend = this.highlightAnchor;
+			if(this.highlightAnchor < this.cursorX) {
+				istart = this.highlightAnchor;
+				iend = this.cursorX;
+			}
+			var hlstr = HxOverrides.substr(text,istart,iend - istart);
+			var hlstrw = this.ops.font.width(this.fontSize,hlstr);
+			var startoff = this.ops.font.width(this.fontSize,HxOverrides.substr(text,0,istart));
+			var hlStart = align == 0 ? this._x + startoff + off : this._x + this._w - hlstrw - off;
+			if(align == 2) {
+				hlStart -= this.ops.font.width(this.fontSize,HxOverrides.substr(text,iend,text.length));
+			}
+			this.g.set_color(this.t.ACCENT_SELECT_COL);
+			this.g.fillRect(hlStart,this._y + this.buttonOffsetY * 1.5,hlstrw,cursorHeight);
+		}
+		var time = kha_Scheduler.time();
+		if(this.isKeyDown || time % 1. < 0.5) {
+			var str = align == 0 ? HxOverrides.substr(text,0,this.cursorX) : text.substring(this.cursorX,text.length);
+			var strw = this.ops.font.width(this.fontSize,str);
+			var cursorX = align == 0 ? this._x + strw + off : this._x + this._w - strw - off;
+			this.g.set_color(this.t.TEXT_COL);
+			this.g.fillRect(cursorX,this._y + this.buttonOffsetY * 1.5,this.ops.scaleFactor,cursorHeight);
+		}
+		this.textSelected = text;
+	}
+	,textInput: function(handle,label,align,editable) {
+		if(editable == null) {
+			editable = true;
+		}
+		if(align == null) {
+			align = 0;
+		}
+		if(label == null) {
+			label = "";
+		}
+		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
+			this.endElement();
+			return handle.text;
+		}
+		var hover = this.getHover();
+		if(hover && zui_Zui.onTextHover != null) {
+			zui_Zui.onTextHover();
+		}
+		this.g.set_color(hover ? this.t.ACCENT_HOVER_COL : this.t.ACCENT_COL);
+		var g = this.g;
+		var fill = this.t.FILL_ACCENT_BG;
+		var x = this._x + this.buttonOffsetY;
+		var y = this._y + this.buttonOffsetY;
+		var w = this._w - this.buttonOffsetY * 2;
+		var h = this.t.BUTTON_H * this.ops.scaleFactor;
+		var strength = 0.0;
+		if(strength == 0.0) {
+			strength = 1;
+		}
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		if(fill) {
+			g.fillRect(x,y - 1,w,h + 1);
+		} else {
+			g.drawRect(x,y,w,h,strength);
+		}
+		var startEdit = this.getReleased() || this.tabPressed;
+		if(this.textSelectedHandle != handle && startEdit) {
+			this.startTextEdit(handle);
+		}
+		if(this.textSelectedHandle == handle) {
+			this.updateTextEdit(align,editable);
+		}
+		if(this.submitTextHandle == handle) {
+			this.submitTextEdit();
+		} else {
+			handle.changed = false;
+		}
+		if(label != "") {
+			this.g.set_color(this.t.LABEL_COL);
+			var labelAlign = align == 2 ? 0 : 2;
+			var xOffset = labelAlign == 0 ? 7 : 0;
+			this.drawString(this.g,label,xOffset,0,labelAlign);
+		}
+		this.g.set_color(this.t.TEXT_COL);
+		if(this.textSelectedHandle != handle) {
+			this.drawString(this.g,handle.text,null,0,align);
+		} else {
+			this.drawString(this.g,this.textSelected,null,0,align);
+		}
+		this.endElement();
+		return handle.text;
+	}
+	,deselectText: function() {
+		if(this.textSelectedHandle == null) {
+			return;
+		}
+		this.submitTextHandle = this.textSelectedHandle;
+		this.textToSubmit = this.textSelected;
+		this.textSelectedHandle = null;
+		this.isTyping = false;
+		if(this.currentWindow != null) {
+			this.currentWindow.redraws = 2;
+		}
+		if(kha_input_Keyboard.get() != null) {
+			kha_input_Keyboard.get().hide();
+		}
+		this.highlightAnchor = this.cursorX;
+	}
+	,button: function(text,align,label) {
+		if(label == null) {
+			label = "";
+		}
+		if(align == null) {
+			align = 1;
+		}
+		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
+			this.endElement();
+			return false;
+		}
+		var released = this.getReleased();
+		var pushed = this.getPushed();
+		var hover = this.getHover();
+		if(released) {
+			this.changed = true;
+		}
+		this.g.set_color(pushed ? this.t.BUTTON_PRESSED_COL : hover ? this.t.BUTTON_HOVER_COL : this.t.BUTTON_COL);
+		var g = this.g;
+		var fill = this.t.FILL_BUTTON_BG;
+		var x = this._x + this.buttonOffsetY;
+		var y = this._y + this.buttonOffsetY;
+		var w = this._w - this.buttonOffsetY * 2;
+		var h = this.t.BUTTON_H * this.ops.scaleFactor;
+		var strength = 0.0;
+		if(strength == 0.0) {
+			strength = 1;
+		}
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		if(fill) {
+			g.fillRect(x,y - 1,w,h + 1);
+		} else {
+			g.drawRect(x,y,w,h,strength);
+		}
+		this.g.set_color(this.t.BUTTON_TEXT_COL);
+		this.drawString(this.g,text,this.t.TEXT_OFFSET * this.ops.scaleFactor,0,align);
+		if(label != "") {
+			this.g.set_color(this.t.LABEL_COL);
+			this.drawString(this.g,label,this.t.TEXT_OFFSET * this.ops.scaleFactor,0,align == 2 ? 0 : 2);
+		}
+		this.endElement();
+		return released;
+	}
+	,check: function(handle,text) {
+		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
+			this.endElement();
+			return handle.selected;
+		}
+		if(this.getReleased()) {
+			handle.selected = !handle.selected;
+			handle.changed = this.changed = true;
+		} else {
+			handle.changed = false;
+		}
+		var hover = this.getHover();
+		this.drawCheck(handle.selected,hover);
+		this.g.set_color(this.t.TEXT_COL);
+		this.drawString(this.g,text,this.titleOffsetX,0,0);
+		this.endElement();
+		return handle.selected;
+	}
+	,radio: function(handle,position,text) {
+		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
+			this.endElement();
+			return handle.position == position;
+		}
+		if(position == 0) {
+			handle.changed = false;
+		}
+		if(this.getReleased()) {
+			handle.position = position;
+			handle.changed = this.changed = true;
+		}
+		var hover = this.getHover();
+		this.drawRadio(handle.position == position,hover);
+		this.g.set_color(this.t.TEXT_COL);
+		this.drawString(this.g,text,this.titleOffsetX,0);
+		this.endElement();
+		return handle.position == position;
+	}
+	,combo: function(handle,texts,label,showLabel,align,itemCount) {
+		if(itemCount == null) {
+			itemCount = -1;
+		}
+		if(align == null) {
+			align = 0;
+		}
+		if(showLabel == null) {
+			showLabel = false;
+		}
+		if(label == null) {
+			label = "";
+		}
+		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
+			this.endElement();
+			return handle.position;
+		}
+		if(this.getReleased()) {
+			if(this.comboSelectedHandle == null) {
+				this.inputEnabled = false;
+				this.comboSelectedHandle = handle;
+				this.comboSelectedWindow = this.currentWindow;
+				this.comboSelectedAlign = align;
+				this.comboSelectedTexts = texts;
+				this.comboSelectedLabel = label;
+				this.comboSelectedX = this._x + this._windowX | 0;
+				this.comboSelectedY = this._y + this._windowY + this.t.ELEMENT_H * this.ops.scaleFactor | 0;
+				this.comboSelectedW = this._w | 0;
+				this.comboItemCount = itemCount < 0 ? texts.length : itemCount;
+				this.comboItemOffset = -1;
+			}
+		}
+		if(handle == this.submitComboHandle) {
+			handle.position = this.comboToSubmit;
+			this.submitComboHandle = null;
+			handle.changed = this.changed = true;
+		} else {
+			handle.changed = false;
+		}
+		if(this.inputWheelDelta != 0 && this.comboSelectedHandle != null) {
+			this.comboItemOffset += this.inputWheelDelta > 0 ? 1 : -1;
+			var maxOffset = this.comboSelectedTexts.length - this.comboItemCount;
+			if(this.comboItemOffset > maxOffset) {
+				this.comboItemOffset = maxOffset;
+			}
+			if(this.comboItemOffset < 0) {
+				this.comboItemOffset = 0;
+			}
+		}
+		var hover = this.getHover();
+		if(hover) {
+			this.g.set_color(this.t.ACCENT_HOVER_COL);
+			var g = this.g;
+			var fill = this.t.FILL_ACCENT_BG;
+			var x = this._x + this.buttonOffsetY;
+			var y = this._y + this.buttonOffsetY;
+			var w = this._w - this.buttonOffsetY * 2;
+			var h = this.t.BUTTON_H * this.ops.scaleFactor;
+			var strength = 0.0;
+			if(strength == 0.0) {
+				strength = 1;
+			}
+			if(!this.enabled) {
+				this.fadeColor();
+			}
+			if(fill) {
+				g.fillRect(x,y - 1,w,h + 1);
+			} else {
+				g.drawRect(x,y,w,h,strength);
+			}
+		} else {
+			this.g.set_color(this.t.ACCENT_COL);
+			var g1 = this.g;
+			var fill1 = this.t.FILL_ACCENT_BG;
+			var x1 = this._x + this.buttonOffsetY;
+			var y1 = this._y + this.buttonOffsetY;
+			var w1 = this._w - this.buttonOffsetY * 2;
+			var h1 = this.t.BUTTON_H * this.ops.scaleFactor;
+			var strength1 = 0.0;
+			if(strength1 == 0.0) {
+				strength1 = 1;
+			}
+			if(!this.enabled) {
+				this.fadeColor();
+			}
+			if(fill1) {
+				g1.fillRect(x1,y1 - 1,w1,h1 + 1);
+			} else {
+				g1.drawRect(x1,y1,w1,h1,strength1);
+			}
+		}
+		var x2 = this._x + this._w - this.arrowOffsetX - 8;
+		var y2 = this._y + this.arrowOffsetY + 3;
+		this.g.fillTriangle(x2,y2,x2 + this.t.ARROW_SIZE * this.ops.scaleFactor,y2,x2 + this.t.ARROW_SIZE * this.ops.scaleFactor / 2,y2 + this.t.ARROW_SIZE * this.ops.scaleFactor / 2);
+		if(showLabel && label != "") {
+			if(align == 0) {
+				this._x -= 15;
+			}
+			this.g.set_color(this.t.LABEL_COL);
+			this.drawString(this.g,label,null,0,align == 0 ? 2 : 0);
+			if(align == 0) {
+				this._x += 15;
+			}
+		}
+		if(align == 2) {
+			this._x -= 15;
+		}
+		this.g.set_color(this.t.TEXT_COL);
+		if(handle.position < texts.length) {
+			this.drawString(this.g,texts[handle.position],null,0,align);
+		}
+		if(align == 2) {
+			this._x += 15;
+		}
+		this.endElement();
+		return handle.position;
+	}
+	,slider: function(handle,text,from,to,filled,precision,displayValue,align,textEdit) {
+		if(textEdit == null) {
+			textEdit = true;
+		}
+		if(align == null) {
+			align = 2;
+		}
+		if(displayValue == null) {
+			displayValue = true;
+		}
+		if(precision == null) {
+			precision = 100.0;
+		}
+		if(filled == null) {
+			filled = false;
+		}
+		if(to == null) {
+			to = 1.0;
+		}
+		if(from == null) {
+			from = 0.0;
+		}
+		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
+			this.endElement();
+			return handle.value;
+		}
+		if(this.getStarted()) {
+			this.scrollHandle = handle;
+			this.isScrolling = true;
+		}
+		handle.changed = false;
+		if(handle == this.scrollHandle) {
+			var range = to - from;
+			var sliderX = this._x + this._windowX + this.buttonOffsetY;
+			var sliderW = this._w - this.buttonOffsetY * 2;
+			var step = range / sliderW;
+			var value = from + (this.inputX - sliderX) * step;
+			handle.value = Math.round(value * precision) / precision;
+			if(handle.value < from) {
+				handle.value = from;
+			} else if(handle.value > to) {
+				handle.value = to;
+			}
+			handle.changed = this.changed = true;
+		}
+		var hover = this.getHover();
+		this.drawSlider(handle.value,from,to,filled,hover);
+		var startEdit = (this.getReleased() || this.tabPressed) && textEdit;
+		if(startEdit) {
+			handle.text = handle.value + "";
+			this.startTextEdit(handle);
+			handle.changed = this.changed = true;
+		}
+		var lalign = align == 0 ? 2 : 0;
+		if(this.textSelectedHandle == handle) {
+			this.updateTextEdit(lalign);
+		}
+		if(this.submitTextHandle == handle) {
+			this.submitTextEdit();
+			handle.value = eval(handle.text);
+			handle.changed = this.changed = true;
+		}
+		this.g.set_color(this.t.LABEL_COL);
+		this.drawString(this.g,text,null,0,align);
+		if(displayValue) {
+			this.g.set_color(this.t.TEXT_COL);
+			if(this.textSelectedHandle != handle) {
+				this.drawString(this.g,Math.round(handle.value * precision) / precision + "",null,0,lalign);
+			} else {
+				this.drawString(this.g,this.textSelected,null,0,lalign);
+			}
+		}
+		this.endElement();
+		return handle.value;
+	}
+	,separator: function(h,fill) {
+		if(fill == null) {
+			fill = true;
+		}
+		if(h == null) {
+			h = 4;
+		}
+		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
+			this._y += h * this.ops.scaleFactor;
+			return;
+		}
+		if(fill) {
+			this.g.set_color(this.t.SEPARATOR_COL);
+			this.g.fillRect(this._x,this._y,this._w,h * this.ops.scaleFactor);
+		}
+		this._y += h * this.ops.scaleFactor;
+	}
+	,tooltip: function(text) {
+		this.tooltipText = text;
+		this.tooltipY = this._y + this._windowY;
+	}
+	,tooltipImage: function(image,maxWidth) {
+		this.tooltipImg = image;
+		this.tooltipImgMaxWidth = maxWidth;
+		this.tooltipInvertY = this.imageInvertY;
+		this.tooltipY = this._y + this._windowY;
+	}
+	,drawArrow: function(selected) {
+		var x = this._x + this.arrowOffsetX;
+		var y = this._y + this.arrowOffsetY;
+		this.g.set_color(this.t.TEXT_COL);
+		if(selected) {
+			this.g.fillTriangle(x,y,x + this.t.ARROW_SIZE * this.ops.scaleFactor,y,x + this.t.ARROW_SIZE * this.ops.scaleFactor / 2,y + this.t.ARROW_SIZE * this.ops.scaleFactor);
+		} else {
+			this.g.fillTriangle(x,y,x,y + this.t.ARROW_SIZE * this.ops.scaleFactor,x + this.t.ARROW_SIZE * this.ops.scaleFactor,y + this.t.ARROW_SIZE * this.ops.scaleFactor / 2);
+		}
+	}
+	,drawTree: function(selected) {
+		var SIGN_W = 7 * this.ops.scaleFactor;
+		var x = this._x + this.arrowOffsetX + 1;
+		var y = this._y + this.arrowOffsetY + 1;
+		this.g.set_color(this.t.TEXT_COL);
+		if(selected) {
+			this.g.fillRect(x,y + SIGN_W / 2 - 1,SIGN_W,SIGN_W / 8);
+		} else {
+			this.g.fillRect(x,y + SIGN_W / 2 - 1,SIGN_W,SIGN_W / 8);
+			this.g.fillRect(x + SIGN_W / 2 - 1,y,SIGN_W / 8,SIGN_W);
+		}
+	}
+	,drawCheck: function(selected,hover) {
+		var x = this._x + this.checkOffsetX;
+		var y = this._y + this.checkOffsetY;
+		this.g.set_color(hover ? this.t.ACCENT_HOVER_COL : this.t.ACCENT_COL);
+		var g = this.g;
+		var fill = this.t.FILL_ACCENT_BG;
+		var w = this.t.CHECK_SIZE * this.ops.scaleFactor;
+		var h = this.t.CHECK_SIZE * this.ops.scaleFactor;
+		var strength = 0.0;
+		if(strength == 0.0) {
+			strength = 1;
+		}
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		if(fill) {
+			g.fillRect(x,y - 1,w,h + 1);
+		} else {
+			g.drawRect(x,y,w,h,strength);
+		}
+		if(selected) {
+			this.g.set_color(-1);
+			if(!this.enabled) {
+				this.fadeColor();
+			}
+			var size = this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor | 0;
+			this.g.drawScaledImage(this.checkSelectImage,x + this.checkSelectOffsetX,y + this.checkSelectOffsetY,size,size);
+		}
+	}
+	,drawRadio: function(selected,hover) {
+		var x = this._x + this.radioOffsetX;
+		var y = this._y + this.radioOffsetY;
+		this.g.set_color(hover ? this.t.ACCENT_HOVER_COL : this.t.ACCENT_COL);
+		var g = this.g;
+		var fill = this.t.FILL_ACCENT_BG;
+		var w = this.t.CHECK_SIZE * this.ops.scaleFactor;
+		var h = this.t.CHECK_SIZE * this.ops.scaleFactor;
+		var strength = 0.0;
+		if(strength == 0.0) {
+			strength = 1;
+		}
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		if(fill) {
+			g.fillRect(x,y - 1,w,h + 1);
+		} else {
+			g.drawRect(x,y,w,h,strength);
+		}
+		if(selected) {
+			this.g.set_color(this.t.ACCENT_SELECT_COL);
+			if(!this.enabled) {
+				this.fadeColor();
+			}
+			this.g.fillRect(x + this.radioSelectOffsetX,y + this.radioSelectOffsetY,this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor,this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor);
+		}
+	}
+	,drawSlider: function(value,from,to,filled,hover) {
+		var x = this._x + this.buttonOffsetY;
+		var y = this._y + this.buttonOffsetY;
+		var w = this._w - this.buttonOffsetY * 2;
+		this.g.set_color(hover ? this.t.ACCENT_HOVER_COL : this.t.ACCENT_COL);
+		var g = this.g;
+		var fill = this.t.FILL_ACCENT_BG;
+		var h = this.t.BUTTON_H * this.ops.scaleFactor;
+		var strength = 0.0;
+		if(strength == 0.0) {
+			strength = 1;
+		}
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		if(fill) {
+			g.fillRect(x,y - 1,w,h + 1);
+		} else {
+			g.drawRect(x,y,w,h,strength);
+		}
+		this.g.set_color(hover ? this.t.ACCENT_HOVER_COL : this.t.ACCENT_COL);
+		var offset = (value - from) / (to - from);
+		var barW = 8 * this.ops.scaleFactor;
+		var sliderX = filled ? x : x + (w - barW) * offset;
+		var sliderW = filled ? w * offset : barW;
+		sliderW = Math.max(Math.min(sliderW,w),0);
+		var g1 = this.g;
+		var h1 = this.t.BUTTON_H * this.ops.scaleFactor;
+		var strength1 = 0.0;
+		if(strength1 == 0.0) {
+			strength1 = 1;
+		}
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		g1.fillRect(sliderX,y - 1,sliderW,h1 + 1);
+	}
+	,drawCombo: function() {
+		if(this.comboSelectedHandle == null) {
+			return;
+		}
+		var _g = this.g;
+		this.globalG.set_color(this.t.SEPARATOR_COL);
+		var elementSize = this.t.ELEMENT_H * this.ops.scaleFactor + this.t.ELEMENT_OFFSET * this.ops.scaleFactor | 0;
+		var maxItemCount = Math.min(this.comboSelectedTexts.length,this.comboItemCount) | 0;
+		var comboH = (maxItemCount + 1) * elementSize;
+		this.globalG.begin(false);
+		var distTop = this.comboSelectedY - comboH - (this.t.ELEMENT_H * this.ops.scaleFactor | 0);
+		var distBottom = kha_System.windowHeight() - (this.comboSelectedY + comboH);
+		var outOfScreen = distBottom < 0 && distBottom < distTop;
+		var comboY = outOfScreen ? this.comboSelectedY - comboH - (this.t.ELEMENT_H * this.ops.scaleFactor | 0) : this.comboSelectedY;
+		this.globalG.fillRect(this.comboSelectedX,comboY,this.comboSelectedW,comboH);
+		this.beginRegion(this.globalG,this.comboSelectedX,comboY,this.comboSelectedW);
+		if(this.comboItemOffset == -1) {
+			if(outOfScreen) {
+				this.comboItemOffset = this.comboSelectedTexts.length - 1 - this.comboSelectedHandle.position;
+			} else {
+				this.comboItemOffset = this.comboSelectedHandle.position;
+			}
+			var value = this.comboItemOffset;
+			var max = this.comboSelectedTexts.length - maxItemCount;
+			this.comboItemOffset = value < 0 ? 0 : value > max ? max : value;
+		}
+		if(outOfScreen) {
+			this.g.set_color(this.t.LABEL_COL);
+			this.drawString(this.g,this.comboSelectedLabel,null,0,2);
+			this._y += elementSize;
+			this.fill(0,0,this._w / this.ops.scaleFactor,this.ops.scaleFactor,this.t.ACCENT_SELECT_COL);
+		}
+		this.inputEnabled = true;
+		var BUTTON_COL = this.t.BUTTON_COL;
+		var _g1 = this.comboItemOffset;
+		var _g11 = this.comboItemOffset + maxItemCount;
+		while(_g1 < _g11) {
+			var i = _g1++;
+			var j = outOfScreen ? this.comboSelectedTexts.length - 1 - i : i;
+			this.t.BUTTON_COL = j == this.comboSelectedHandle.position ? this.t.ACCENT_SELECT_COL : this.t.SEPARATOR_COL;
+			if(this.button(this.comboSelectedTexts[j],this.comboSelectedAlign)) {
+				this.comboToSubmit = j;
+				this.submitComboHandle = this.comboSelectedHandle;
+				if(this.comboSelectedWindow != null) {
+					this.comboSelectedWindow.redraws = 2;
+				}
+				break;
+			}
+		}
+		this.t.BUTTON_COL = BUTTON_COL;
+		if(!outOfScreen) {
+			this.fill(0,0,this._w / this.ops.scaleFactor,this.ops.scaleFactor,this.t.ACCENT_SELECT_COL);
+			this.g.set_color(this.t.LABEL_COL);
+			this.drawString(this.g,this.comboSelectedLabel,null,0,2);
+		}
+		var maxOffset = this.comboSelectedTexts.length - this.comboItemCount;
+		if(maxOffset > 0) {
+			var barH = Math.max(this.comboItemCount / this.comboSelectedTexts.length * (this.t.ELEMENT_H * this.ops.scaleFactor) * 16,this.t.ELEMENT_H * this.ops.scaleFactor);
+			var off = (comboH - barH - elementSize) * this.comboItemOffset / maxOffset;
+			this.g.set_color(this.t.ACCENT_COL);
+			this.g.fillRect(this._x + this._w - (this.t.SCROLL_W * this.ops.scaleFactor | 0) / 3,comboY + off,(this.t.SCROLL_W * this.ops.scaleFactor | 0) / 3,barH);
+		}
+		if((this.inputReleased || this.isEscapeDown) && !zui_Zui.comboFirst) {
+			this.comboSelectedHandle = null;
+			zui_Zui.comboFirst = true;
+		} else {
+			zui_Zui.comboFirst = false;
+		}
+		this.inputEnabled = this.comboSelectedHandle == null;
+		this.endRegion(false);
+		this.globalG.end();
+		this.g = _g;
+	}
+	,drawTooltip: function() {
+		if(this.tooltipText != "" || this.tooltipImg != null) {
+			if(this.inputChanged()) {
+				this.tooltipShown = false;
+				this.tooltipWait = this.inputDX == 0 && this.inputDY == 0;
+			}
+			if(!this.tooltipShown) {
+				this.tooltipShown = true;
+				this.tooltipX = this.inputX;
+				this.tooltipTime = kha_Scheduler.time();
+			}
+			if(!this.tooltipWait && kha_Scheduler.time() - this.tooltipTime > 1.0) {
+				if(this.tooltipText != "") {
+					this.drawTooltipText();
+				} else {
+					this.drawTooltipImage();
+				}
+			}
+		} else {
+			this.tooltipShown = false;
+		}
+	}
+	,drawTooltipText: function() {
+		this.globalG.set_color(this.t.TEXT_COL);
+		var lines = this.tooltipText.split("\n");
+		var tooltipW = 0.0;
+		var _g = 0;
+		while(_g < lines.length) {
+			var line = lines[_g];
+			++_g;
+			var lineTooltipW = this.ops.font.width(this.fontSize,line);
+			if(lineTooltipW > tooltipW) {
+				tooltipW = lineTooltipW;
+			}
+		}
+		this.tooltipX = Math.min(this.tooltipX,kha_System.windowWidth() - tooltipW - 20);
+		this.globalG.begin(false);
+		this.globalG.fillRect(this.tooltipX,this.tooltipY,tooltipW + 20,this.t.ELEMENT_H * this.ops.scaleFactor * lines.length * 0.6);
+		this.globalG.set_font(this.ops.font);
+		this.globalG.set_fontSize(this.fontSize);
+		this.globalG.set_color(this.t.ACCENT_COL);
+		var _g1 = 0;
+		var _g2 = lines.length;
+		while(_g1 < _g2) {
+			var i = _g1++;
+			this.globalG.drawString(lines[i],this.tooltipX + 5,this.tooltipY + i * this.fontSize);
+		}
+		this.globalG.end();
+	}
+	,drawTooltipImage: function() {
+		var w = this.tooltipImg.get_width();
+		if(this.tooltipImgMaxWidth != null && w > this.tooltipImgMaxWidth) {
+			w = this.tooltipImgMaxWidth;
+		}
+		var h = this.tooltipImg.get_height() * (w / this.tooltipImg.get_width());
+		this.tooltipX = Math.min(this.tooltipX,kha_System.windowWidth() - w - 20);
+		this.tooltipY = Math.min(this.tooltipY,kha_System.windowHeight() - h - 20);
+		this.globalG.set_color(-16777216);
+		this.globalG.begin(false);
+		this.globalG.fillRect(this.tooltipX,this.tooltipY,w,h);
+		this.globalG.set_color(-1);
+		if(this.tooltipInvertY) {
+			this.globalG.drawScaledImage(this.tooltipImg,this.tooltipX,this.tooltipY + h,w,-h);
+		} else {
+			this.globalG.drawScaledImage(this.tooltipImg,this.tooltipX,this.tooltipY,w,h);
+		}
+		this.globalG.end();
+	}
+	,drawString: function(g,text,xOffset,yOffset,align) {
+		if(align == null) {
+			align = 0;
+		}
+		if(yOffset == null) {
+			yOffset = 0;
+		}
+		var fullLength = text.length;
+		while(text.length > 0 && this.ops.font.width(this.fontSize,text) > this._w) text = HxOverrides.substr(text,0,text.length - 1);
+		if(text.length < fullLength) {
+			text += "..";
+		}
+		if(xOffset == null) {
+			xOffset = this.t.TEXT_OFFSET;
+		}
+		xOffset *= this.ops.scaleFactor;
+		g.set_font(this.ops.font);
+		g.set_fontSize(this.fontSize);
+		if(align == 1) {
+			xOffset = this._w / 2 - this.ops.font.width(this.fontSize,text) / 2;
+		} else if(align == 2) {
+			xOffset = this._w - this.ops.font.width(this.fontSize,text) - this.t.TEXT_OFFSET * this.ops.scaleFactor;
+		}
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		g.set_pipeline(this.rtTextPipeline);
+		g.drawString(text,this._x + xOffset,this._y + this.fontOffsetY + yOffset);
+		g.set_pipeline(null);
+	}
+	,endElement: function(elementSize) {
+		if(elementSize == null) {
+			elementSize = this.t.ELEMENT_H * this.ops.scaleFactor + this.t.ELEMENT_OFFSET * this.ops.scaleFactor;
+		}
+		if(this.currentWindow == null || this.currentWindow.layout == 0) {
+			if(this.curRatio == -1 || this.ratios != null && this.curRatio == this.ratios.length - 1) {
+				this._y += elementSize;
+				if(this.ratios != null && this.curRatio == this.ratios.length - 1) {
+					this.curRatio = -1;
+					this.ratios = null;
+					this._x = this.xBeforeSplit;
+					this._w = this.wBeforeSplit;
+					this.highlightFullRow = false;
+				}
+			} else {
+				this.curRatio++;
+				this._x += this._w;
+				var ratio = this.ratios[this.curRatio];
+				this._w = (ratio < 0 ? -ratio : ratio * this.wBeforeSplit) | 0;
+			}
+		} else {
+			this._x += this._w + this.t.ELEMENT_OFFSET * this.ops.scaleFactor;
+		}
+	}
+	,highlightNextRow: function() {
+		this.highlightFullRow = true;
+	}
+	,getRatio: function(ratio,dyn) {
+		if(ratio < 0) {
+			return -ratio;
+		} else {
+			return ratio * dyn;
+		}
+	}
+	,row: function(ratios) {
+		this.ratios = ratios;
+		this.curRatio = 0;
+		this.xBeforeSplit = this._x;
+		this.wBeforeSplit = this._w;
+		var ratio = ratios[this.curRatio];
+		this._w = (ratio < 0 ? -ratio : ratio * this._w) | 0;
+	}
+	,indent: function(bothSides) {
+		if(bothSides == null) {
+			bothSides = true;
+		}
+		this._x += this.t.TAB_W * this.ops.scaleFactor | 0;
+		this._w -= this.t.TAB_W * this.ops.scaleFactor | 0;
+		if(bothSides) {
+			this._w -= this.t.TAB_W * this.ops.scaleFactor | 0;
+		}
+	}
+	,unindent: function(bothSides) {
+		if(bothSides == null) {
+			bothSides = true;
+		}
+		this._x -= this.t.TAB_W * this.ops.scaleFactor | 0;
+		this._w += this.t.TAB_W * this.ops.scaleFactor | 0;
+		if(bothSides) {
+			this._w += this.t.TAB_W * this.ops.scaleFactor | 0;
+		}
+	}
+	,fadeColor: function() {
+		this.g.set_color(kha__$Color_Color_$Impl_$.fromFloats(((this.g.get_color() & 16711680) >>> 16) * 0.00392156862745098,((this.g.get_color() & 65280) >>> 8) * 0.00392156862745098,(this.g.get_color() & 255) * 0.00392156862745098,0.25));
+	}
+	,fill: function(x,y,w,h,color) {
+		this.g.set_color(color);
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		this.g.fillRect(this._x + x * this.ops.scaleFactor,this._y + y * this.ops.scaleFactor - 1,w * this.ops.scaleFactor,h * this.ops.scaleFactor);
+		this.g.set_color(-1);
+	}
+	,rect: function(x,y,w,h,color,strength) {
+		if(strength == null) {
+			strength = 1.0;
+		}
+		this.g.set_color(color);
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		this.g.drawRect(this._x + x * this.ops.scaleFactor,this._y + y * this.ops.scaleFactor,w * this.ops.scaleFactor,h * this.ops.scaleFactor,strength);
+		this.g.set_color(-1);
+	}
+	,drawRect: function(g,fill,x,y,w,h,strength) {
+		if(strength == null) {
+			strength = 0.0;
+		}
+		if(strength == 0.0) {
+			strength = 1;
+		}
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		if(fill) {
+			g.fillRect(x,y - 1,w,h + 1);
+		} else {
+			g.drawRect(x,y,w,h,strength);
+		}
+	}
+	,isVisible: function(elemH) {
+		if(this.currentWindow == null) {
+			return true;
+		}
+		if(this._y + elemH > this.windowHeaderH) {
+			return this._y < this.currentWindow.texture.get_height();
+		} else {
+			return false;
+		}
+	}
+	,getReleased: function(elemH) {
+		if(elemH == null) {
+			elemH = -1.0;
+		}
+		this.isReleased = this.enabled && this.inputEnabled && this.inputReleased && this.getHover(elemH) && this.getInitialHover(elemH);
+		return this.isReleased;
+	}
+	,getPushed: function(elemH) {
+		if(elemH == null) {
+			elemH = -1.0;
+		}
+		this.isPushed = this.enabled && this.inputEnabled && this.inputDown && this.getHover(elemH) && this.getInitialHover(elemH);
+		return this.isPushed;
+	}
+	,getStarted: function(elemH) {
+		if(elemH == null) {
+			elemH = -1.0;
+		}
+		this.isStarted = this.enabled && this.inputEnabled && this.inputStarted && this.getHover(elemH);
+		return this.isStarted;
+	}
+	,getInitialHover: function(elemH) {
+		if(elemH == null) {
+			elemH = -1.0;
+		}
+		if(this.scissor && this.inputY < this._windowY + this.windowHeaderH) {
+			return false;
+		}
+		if(elemH == -1.0) {
+			elemH = this.t.ELEMENT_H * this.ops.scaleFactor;
+		}
+		if(this.enabled && this.inputEnabled && this.inputStartedX >= this._windowX + this._x && this.inputStartedX < this._windowX + this._x + this._w && this.inputStartedY >= this._windowY + this._y) {
+			return this.inputStartedY < this._windowY + this._y + elemH;
+		} else {
+			return false;
+		}
+	}
+	,getHover: function(elemH) {
+		if(elemH == null) {
+			elemH = -1.0;
+		}
+		if(this.scissor && this.inputY < this._windowY + this.windowHeaderH) {
+			return false;
+		}
+		if(elemH == -1.0) {
+			elemH = this.t.ELEMENT_H * this.ops.scaleFactor;
+		}
+		this.isHovered = this.enabled && this.inputEnabled && this.inputX >= this._windowX + (this.highlightFullRow ? 0 : this._x) && this.inputX < this._windowX + this._x + (this.highlightFullRow ? this._windowW : this._w) && this.inputY >= this._windowY + this._y && this.inputY < this._windowY + this._y + elemH;
+		return this.isHovered;
+	}
+	,getInputInRect: function(x,y,w,h,scale) {
+		if(scale == null) {
+			scale = 1.0;
+		}
+		if(this.enabled && this.inputEnabled && this.inputX >= x * scale && this.inputX < (x + w) * scale && this.inputY >= y * scale) {
+			return this.inputY < (y + h) * scale;
+		} else {
+			return false;
+		}
+	}
+	,onMouseDown: function(button,x,y) {
+		if(button == 0) {
+			this.inputStarted = true;
+		} else {
+			this.inputStartedR = true;
+		}
+		if(button == 0) {
+			this.inputDown = true;
+		} else {
+			this.inputDownR = true;
+		}
+		this.inputStartedTime = kha_Scheduler.time();
+		this.setInputPosition(x,y);
+		this.inputStartedX = x;
+		this.inputStartedY = y;
+	}
+	,onMouseUp: function(button,x,y) {
+		if(this.isScrolling) {
+			this.isScrolling = false;
+			this.scrollHandle = null;
+			if(x == this.inputStartedX && y == this.inputStartedY) {
+				if(button == 0) {
+					this.inputReleased = true;
+				} else {
+					this.inputReleasedR = true;
+				}
+			}
+		} else if(button == 0) {
+			this.inputReleased = true;
+		} else {
+			this.inputReleasedR = true;
+		}
+		if(button == 0) {
+			this.inputDown = false;
+		} else {
+			this.inputDownR = false;
+		}
+		this.setInputPosition(x,y);
+		this.deselectText();
+		if(this.touchHold) {
+			this.touchHold = false;
+			this.inputReleased = false;
+			this.inputReleasedR = true;
+		}
+	}
+	,onMouseMove: function(x,y,movementX,movementY) {
+		this.setInputPosition(x,y);
+	}
+	,onMouseWheel: function(delta) {
+		this.inputWheelDelta = delta;
+	}
+	,setInputPosition: function(x,y) {
+		this.inputDX += x - this.inputX;
+		this.inputDY += y - this.inputY;
+		this.inputX = x;
+		this.inputY = y;
+	}
+	,onKeyDown: function(code) {
+		this.key = code;
+		this.isKeyPressed = true;
+		this.isKeyDown = true;
+		zui_Zui.keyRepeatTime = kha_Scheduler.time() + 0.4;
+		switch(code) {
+		case 8:
+			this.isBackspaceDown = true;
+			break;
+		case 13:
+			this.isReturnDown = true;
+			break;
+		case 16:
+			this.isShiftDown = true;
+			break;
+		case 17:
+			this.isCtrlDown = true;
+			break;
+		case 18:
+			this.isAltDown = true;
+			break;
+		case 27:
+			this.isEscapeDown = true;
+			break;
+		case 32:
+			this.char = " ";
+			break;
+		case 46:
+			this.isDeleteDown = true;
+			break;
+		case 65:
+			this.isADown = true;
+			break;
+		default:
+		}
+	}
+	,onKeyUp: function(code) {
+		this.isKeyDown = false;
+		switch(code) {
+		case 8:
+			this.isBackspaceDown = false;
+			break;
+		case 13:
+			this.isReturnDown = false;
+			break;
+		case 16:
+			this.isShiftDown = false;
+			break;
+		case 17:
+			this.isCtrlDown = false;
+			break;
+		case 18:
+			this.isAltDown = false;
+			break;
+		case 27:
+			this.isEscapeDown = false;
+			break;
+		case 46:
+			this.isDeleteDown = false;
+			break;
+		case 65:
+			this.isADown = false;
+			break;
+		default:
+		}
+	}
+	,onKeyPress: function(char) {
+		this.char = char;
+		this.isKeyPressed = true;
+	}
+	,onCut: function() {
+		zui_Zui.isCut = true;
+		return this.onCopy();
+	}
+	,onCopy: function() {
+		zui_Zui.isCopy = true;
+		return zui_Zui.textToCopy;
+	}
+	,onPaste: function(s) {
+		zui_Zui.isPaste = true;
+		zui_Zui.textToPaste = s;
+	}
+	,ELEMENT_W: function() {
+		return this.t.ELEMENT_W * this.ops.scaleFactor;
+	}
+	,ELEMENT_H: function() {
+		return this.t.ELEMENT_H * this.ops.scaleFactor;
+	}
+	,ELEMENT_OFFSET: function() {
+		return this.t.ELEMENT_OFFSET * this.ops.scaleFactor;
+	}
+	,ARROW_SIZE: function() {
+		return this.t.ARROW_SIZE * this.ops.scaleFactor;
+	}
+	,BUTTON_H: function() {
+		return this.t.BUTTON_H * this.ops.scaleFactor;
+	}
+	,CHECK_SIZE: function() {
+		return this.t.CHECK_SIZE * this.ops.scaleFactor;
+	}
+	,CHECK_SELECT_SIZE: function() {
+		return this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor;
+	}
+	,FONT_SIZE: function() {
+		return this.t.FONT_SIZE * this.ops.scaleFactor | 0;
+	}
+	,SCROLL_W: function() {
+		return this.t.SCROLL_W * this.ops.scaleFactor | 0;
+	}
+	,TEXT_OFFSET: function() {
+		return this.t.TEXT_OFFSET * this.ops.scaleFactor;
+	}
+	,TAB_W: function() {
+		return this.t.TAB_W * this.ops.scaleFactor | 0;
+	}
+	,HEADER_DRAG_H: function() {
+		return 15 * this.ops.scaleFactor | 0;
+	}
+	,SCALE: function() {
+		return this.ops.scaleFactor;
+	}
+	,FLASH_SPEED: function() {
+		return 0.5;
+	}
+	,TOOLTIP_DELAY: function() {
+		return 1.0;
+	}
+	,resize: function(handle,w,h,khaWindowId) {
+		if(khaWindowId == null) {
+			khaWindowId = 0;
+		}
+		handle.redraws = 2;
+		if(handle.texture != null) {
+			handle.texture.unload();
+		}
+		if(w < 1) {
+			w = 1;
+		}
+		if(h < 1) {
+			h = 1;
+		}
+		handle.texture = kha_Image.createRenderTarget(w,h,0,0,1,khaWindowId);
+		handle.texture.get_g2().set_imageScaleQuality(1);
+	}
+	,__class__: zui_Zui
+};
+var arm_ZuiPlotLib = function(ops) {
+	zui_Zui.call(this,ops);
+};
+$hxClasses["arm.ZuiPlotLib"] = arm_ZuiPlotLib;
+arm_ZuiPlotLib.__name__ = "arm.ZuiPlotLib";
+arm_ZuiPlotLib.__super__ = zui_Zui;
+arm_ZuiPlotLib.prototype = $extend(zui_Zui.prototype,{
+	testLine: function(x1,y1,x2,y2,color,strength) {
+		if(strength == null) {
+			strength = 1.0;
+		}
+		this.g.set_color(color);
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		this.g.drawLine(this._x + x1 * this.ops.scaleFactor,this._y + y1 * this.ops.scaleFactor,this._x + x2 * this.ops.scaleFactor,this._y + y2 * this.ops.scaleFactor,strength);
+		this.g.set_color(-1);
+	}
+	,coordinateSystem: function(xVals,yValsList,width,height,strength) {
+		var x0 = 80. * this.ops.scaleFactor;
+		var y0 = 40. * this.ops.scaleFactor;
+		var xl = width * this.ops.scaleFactor - x0;
+		var yl = height * this.ops.scaleFactor - y0;
+		var fontSize = 30;
+		var origin_x = this._x + x0;
+		var origin_y = this._y + y0 + yl;
+		var colors = [-65536,-16776961,-16711936];
+		this.g.set_color(-1);
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		var xDmin = 0;
+		var xDmax = 10;
+		var yDmin = 0;
+		var yDmax = 0.3;
+		var _g = 0;
+		while(_g < yValsList.length) {
+			var yVals = yValsList[_g];
+			++_g;
+			var _g1 = 0;
+			while(_g1 < yVals.length) {
+				var value = yVals[_g1];
+				++_g1;
+				if(yDmax < value) {
+					yDmax = value;
+				}
+			}
+		}
+		var xA = xl * 0.05;
+		var yA = yl * 0.05;
+		var xScale = (xl - 2 * xA) / (xDmax - xDmin);
+		var yScale = (yl - 2 * yA) / (yDmax - yDmin);
+		var xTicks = [0,2,4,6,8,10];
+		var xTickMap = new haxe_ds_StringMap();
+		var yTickMap = new haxe_ds_StringMap();
+		var _g11 = 0;
+		while(_g11 < xTicks.length) {
+			var tick = xTicks[_g11];
+			++_g11;
+			var v = this._x + x0 + xA + xScale * tick;
+			var key = tick == null ? "null" : "" + tick;
+			if(__map_reserved[key] != null) {
+				xTickMap.setReserved(key,v);
+			} else {
+				xTickMap.h[key] = v;
+			}
+		}
+		var maxNYTicks = Math.floor((yl - 2 * yA) / fontSize);
+		var yScaleTicks = new arm_NiceScale(yDmin,yDmax);
+		yScaleTicks.setMaxTicks(maxNYTicks);
+		var yTicks = yScaleTicks.getTicks();
+		var _g2 = 0;
+		while(_g2 < yTicks.length) {
+			var tick1 = yTicks[_g2];
+			++_g2;
+			if(yScale * tick1 < yl - 2 * yA) {
+				var v1 = this._x + x0 + yA + yScale * tick1;
+				var key1 = tick1 == null ? "null" : "" + tick1;
+				if(__map_reserved[key1] != null) {
+					yTickMap.setReserved(key1,v1);
+				} else {
+					yTickMap.h[key1] = v1;
+				}
+			}
+		}
+		this.drawAxes(origin_x,origin_y,xl,yl,strength,xTickMap,yTickMap,"Time (s)","Countrate (kHz)");
+		var endI = xVals.length;
+		var colorI = 0;
+		var _g3 = 0;
+		while(_g3 < yValsList.length) {
+			var yVals1 = yValsList[_g3];
+			++_g3;
+			this.g.set_color(colors[colorI]);
+			var _g31 = 0;
+			var _g4 = endI;
+			while(_g31 < _g4) {
+				var i = _g31++;
+				var posX = this._x + x0 + xA + xScale * xVals[i];
+				var posY = this._y + y0 - yA + yl - yScale * yVals1[i];
+				this.drawMarker(posX,posY,5);
+			}
+			++colorI;
+		}
+		this.g.set_color(-1);
+		this._y += y0 + yl + fontSize * 2.5;
+	}
+	,drawAxes: function(oX,oY,xl,yl,strength,xTickMap,yTickMap,labelx,labely,fontSize) {
+		if(fontSize == null) {
+			fontSize = 30;
+		}
+		if(labely == null) {
+			labely = "";
+		}
+		if(labelx == null) {
+			labelx = "";
+		}
+		var oldFontsize = this.g.get_fontSize();
+		this.g.set_font(this.ops.font);
+		this.g.set_fontSize(fontSize);
+		var fontShiftx = this.ops.font.width(fontSize,labelx) * 0.5;
+		var fontShifty = this.ops.font.width(fontSize,labely) * 0.5;
+		this.g.fillRect(oX - strength / 2,oY - strength / 2,xl,strength);
+		this.g.fillRect(oX - strength / 2,oY - strength / 2 - yl + strength,xl,strength);
+		var tickLabel = xTickMap.keys();
+		while(tickLabel.hasNext()) {
+			var tickLabel1 = tickLabel.next();
+			this.drawTick(tickLabel1,__map_reserved[tickLabel1] != null ? xTickMap.getReserved(tickLabel1) : xTickMap.h[tickLabel1],oY - strength / 2,strength * .5);
+		}
+		this.g.set_pipeline(this.rtTextPipeline);
+		this.g.drawString(labelx,oX + xl / 2 - fontShiftx,oY + strength + fontSize * 1.25);
+		this.g.set_pipeline(null);
+		this.g.rotate(-Math.PI / 2,oX,oY);
+		this.g.fillRect(oX - strength / 2,oY - strength / 2,yl,strength);
+		this.g.fillRect(oX - strength / 2,oY - strength / 2 + xl - strength,yl,strength);
+		var tickLabel2 = yTickMap.keys();
+		while(tickLabel2.hasNext()) {
+			var tickLabel3 = tickLabel2.next();
+			this.drawTick(tickLabel3,__map_reserved[tickLabel3] != null ? yTickMap.getReserved(tickLabel3) : yTickMap.h[tickLabel3],oY - strength / 2,strength * .5,30,"Y");
+		}
+		this.g.set_pipeline(this.rtTextPipeline);
+		this.g.drawString(labely,oX + yl / 2 - fontShifty,oY - strength - fontSize * 2.5);
+		this.g.set_pipeline(null);
+		this.g.rotate(Math.PI / 2,oX,oY);
+		this.g.set_fontSize(oldFontsize);
+		return true;
+	}
+	,drawTick: function(tLabel,posX,posY,strength,fontSize,axis) {
+		if(axis == null) {
+			axis = "X";
+		}
+		if(fontSize == null) {
+			fontSize = 30;
+		}
+		var labelSize = fontSize * 0.75 | 0;
+		this.g.fillRect(posX,posY - labelSize / 2 + strength / 2,strength,labelSize);
+		var oldFontsize = this.g.get_fontSize();
+		this.g.set_font(this.ops.font);
+		this.g.set_fontSize(labelSize);
+		var fontShift = this.ops.font.width(labelSize,tLabel) * 0.5;
+		this.g.set_pipeline(this.rtTextPipeline);
+		if(axis == "X") {
+			this.g.drawString(tLabel,posX - fontShift,posY + strength + labelSize);
+		} else {
+			this.g.drawString(tLabel,posX - fontShift,posY - strength - labelSize * 2);
+		}
+		this.g.set_pipeline(null);
+		this.g.set_fontSize(oldFontsize);
+	}
+	,drawMarker: function(posX,posY,size,style) {
+		if(style == null) {
+			style = "square";
+		}
+		if(size == null) {
+			size = 10.;
+		}
+		if(style == "square") {
+			this.g.fillRect(posX - size / 2,posY - size / 2,size,size);
+		}
+		if(style == "triangle") {
+			var a = size;
+			var ri = a / (2 * Math.sqrt(3));
+			this.g.fillTriangle(posX - a / 2,posY + ri,posX + a / 2,posY + ri,posX,posY - ri * 2);
+		}
+	}
+	,__class__: arm_ZuiPlotLib
+});
 var armory_logicnode_LogicTree = function() {
 	this.paused = false;
 	this.loopBreak = false;
@@ -7195,6 +12785,102 @@ arm_node_Genral_$Object_$properties_$blocking_$002.prototype = $extend(armory_lo
 		_SetProperty_001.addOutputs([new armory_logicnode_NullNode(this)]);
 	}
 	,__class__: arm_node_Genral_$Object_$properties_$blocking_$002
+});
+var arm_node_Genral_$Object_$properties_$blocking_$003 = function() {
+	armory_logicnode_LogicTree.call(this);
+	this.name = "Genral_Object_properties_blocking_003";
+	this.functionNodes = new haxe_ds_StringMap();
+	this.functionOutputNodes = new haxe_ds_StringMap();
+	this.notifyOnAdd($bind(this,this.add));
+};
+$hxClasses["arm.node.Genral_Object_properties_blocking_003"] = arm_node_Genral_$Object_$properties_$blocking_$003;
+arm_node_Genral_$Object_$properties_$blocking_$003.__name__ = "arm.node.Genral_Object_properties_blocking_003";
+arm_node_Genral_$Object_$properties_$blocking_$003.__super__ = armory_logicnode_LogicTree;
+arm_node_Genral_$Object_$properties_$blocking_$003.prototype = $extend(armory_logicnode_LogicTree.prototype,{
+	functionNodes: null
+	,functionOutputNodes: null
+	,add: function() {
+		var _SetProperty_001 = new armory_logicnode_SetPropertyNode(this);
+		var _OnInit = new armory_logicnode_OnInitNode(this);
+		var _SetProperty_003 = new armory_logicnode_SetPropertyNode(this);
+		_SetProperty_003.addInput(_OnInit,0);
+		var _Self_002 = new armory_logicnode_SelfNode(this);
+		var _SetProperty_002 = new armory_logicnode_SetPropertyNode(this);
+		_SetProperty_002.addInput(_OnInit,0);
+		_SetProperty_002.addInput(_Self_002,0);
+		_SetProperty_002.addInput(new armory_logicnode_StringNode(this,"blocksBeam"),0);
+		var _Boolean_002 = new armory_logicnode_BooleanNode(this);
+		_Boolean_002.addInput(new armory_logicnode_BooleanNode(this,true),0);
+		_Boolean_002.addOutputs([_SetProperty_002]);
+		_SetProperty_002.addInput(_Boolean_002,0);
+		_SetProperty_002.addOutputs([new armory_logicnode_NullNode(this)]);
+		_Self_002.addOutputs([_SetProperty_003,_SetProperty_001,_SetProperty_002]);
+		_SetProperty_003.addInput(_Self_002,0);
+		_SetProperty_003.addInput(new armory_logicnode_StringNode(this,"movable"),0);
+		var _Boolean_001 = new armory_logicnode_BooleanNode(this);
+		_Boolean_001.addInput(new armory_logicnode_BooleanNode(this,true),0);
+		_Boolean_001.addOutputs([_SetProperty_003]);
+		_SetProperty_003.addInput(_Boolean_001,0);
+		_SetProperty_003.addOutputs([new armory_logicnode_NullNode(this)]);
+		_OnInit.addOutputs([_SetProperty_003,_SetProperty_001,_SetProperty_002]);
+		_SetProperty_001.addInput(_OnInit,0);
+		_SetProperty_001.addInput(_Self_002,0);
+		_SetProperty_001.addInput(new armory_logicnode_StringNode(this,"size_xy"),0);
+		var _Float = new armory_logicnode_FloatNode(this);
+		_Float.addInput(new armory_logicnode_FloatNode(this,2.0),0);
+		_Float.addOutputs([_SetProperty_001]);
+		_SetProperty_001.addInput(_Float,0);
+		_SetProperty_001.addOutputs([new armory_logicnode_NullNode(this)]);
+	}
+	,__class__: arm_node_Genral_$Object_$properties_$blocking_$003
+});
+var arm_node_Genral_$Object_$properties_$blocking_$004 = function() {
+	armory_logicnode_LogicTree.call(this);
+	this.name = "Genral_Object_properties_blocking_004";
+	this.functionNodes = new haxe_ds_StringMap();
+	this.functionOutputNodes = new haxe_ds_StringMap();
+	this.notifyOnAdd($bind(this,this.add));
+};
+$hxClasses["arm.node.Genral_Object_properties_blocking_004"] = arm_node_Genral_$Object_$properties_$blocking_$004;
+arm_node_Genral_$Object_$properties_$blocking_$004.__name__ = "arm.node.Genral_Object_properties_blocking_004";
+arm_node_Genral_$Object_$properties_$blocking_$004.__super__ = armory_logicnode_LogicTree;
+arm_node_Genral_$Object_$properties_$blocking_$004.prototype = $extend(armory_logicnode_LogicTree.prototype,{
+	functionNodes: null
+	,functionOutputNodes: null
+	,add: function() {
+		var _SetProperty_001 = new armory_logicnode_SetPropertyNode(this);
+		var _OnInit = new armory_logicnode_OnInitNode(this);
+		var _SetProperty_003 = new armory_logicnode_SetPropertyNode(this);
+		_SetProperty_003.addInput(_OnInit,0);
+		var _Self_002 = new armory_logicnode_SelfNode(this);
+		var _SetProperty_002 = new armory_logicnode_SetPropertyNode(this);
+		_SetProperty_002.addInput(_OnInit,0);
+		_SetProperty_002.addInput(_Self_002,0);
+		_SetProperty_002.addInput(new armory_logicnode_StringNode(this,"blocksBeam"),0);
+		var _Boolean_002 = new armory_logicnode_BooleanNode(this);
+		_Boolean_002.addInput(new armory_logicnode_BooleanNode(this,true),0);
+		_Boolean_002.addOutputs([_SetProperty_002]);
+		_SetProperty_002.addInput(_Boolean_002,0);
+		_SetProperty_002.addOutputs([new armory_logicnode_NullNode(this)]);
+		_Self_002.addOutputs([_SetProperty_003,_SetProperty_001,_SetProperty_002]);
+		_SetProperty_003.addInput(_Self_002,0);
+		_SetProperty_003.addInput(new armory_logicnode_StringNode(this,"movable"),0);
+		var _Boolean_001 = new armory_logicnode_BooleanNode(this);
+		_Boolean_001.addInput(new armory_logicnode_BooleanNode(this,true),0);
+		_Boolean_001.addOutputs([_SetProperty_003]);
+		_SetProperty_003.addInput(_Boolean_001,0);
+		_SetProperty_003.addOutputs([new armory_logicnode_NullNode(this)]);
+		_OnInit.addOutputs([_SetProperty_003,_SetProperty_001,_SetProperty_002]);
+		_SetProperty_001.addInput(_OnInit,0);
+		_SetProperty_001.addInput(_Self_002,0);
+		_SetProperty_001.addInput(new armory_logicnode_StringNode(this,"size_xy"),0);
+		var _Float = new armory_logicnode_FloatNode(this);
+		_Float.addInput(new armory_logicnode_FloatNode(this,2.0),0);
+		_Float.addOutputs([_SetProperty_001]);
+		_SetProperty_001.addInput(_Float,0);
+		_SetProperty_001.addOutputs([new armory_logicnode_NullNode(this)]);
+	}
+	,__class__: arm_node_Genral_$Object_$properties_$blocking_$004
 });
 var arm_node_Kamera_$Bewegung = function() {
 	armory_logicnode_LogicTree.call(this);
@@ -11764,8 +17450,8 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 		if(!this.visible) {
 			return;
 		}
-		var hwin = zui_Handle.global.nest(0,null);
-		var htab = zui_Handle.global.nest(1,{ position : 0});
+		var hwin = zui_Handle.global.nest(7,null);
+		var htab = zui_Handle.global.nest(8,{ position : 0});
 		var ww = 280 * this.scaleFactor | 0;
 		var wx = kha_System.windowWidth() - ww;
 		var wy = 0;
@@ -11778,7 +17464,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 		if(this.ui.window(hwin,wx,wy,ww,wh,true)) {
 			var tmp = this.ui.tab(htab,"");
 			if(this.ui.tab(htab,"Scene")) {
-				if(this.ui.panel(zui_Handle.global.nest(2,{ selected : true}),"Outliner")) {
+				if(this.ui.panel(zui_Handle.global.nest(9,{ selected : true}),"Outliner")) {
 					this.ui.indent();
 					var lineCounter = 0;
 					var drawList = null;
@@ -11841,7 +17527,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					while(_g2 < _g11.length) {
 						var c = _g11[_g2];
 						++_g2;
-						var tmp1 = zui_Handle.global.nest(3,null);
+						var tmp1 = zui_Handle.global.nest(10,null);
 						drawList(tmp1,c);
 					}
 					this.ui.unindent();
@@ -11849,10 +17535,10 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 				if(this.selectedObject == null) {
 					this.selectedType = "";
 				}
-				if(this.ui.panel(zui_Handle.global.nest(4,{ selected : true}),"Properties " + this.selectedType)) {
+				if(this.ui.panel(zui_Handle.global.nest(11,{ selected : true}),"Properties " + this.selectedType)) {
 					this.ui.indent();
 					if(this.selectedObject != null) {
-						var h = zui_Handle.global.nest(5,null);
+						var h = zui_Handle.global.nest(12,null);
 						h.selected = this.selectedObject.visible;
 						this.selectedObject.visible = this.ui.check(h,"Visible");
 						var localPos = this.selectedObject.transform.loc;
@@ -11910,31 +17596,31 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("World Loc");
 						this.ui.enabled = false;
-						h = zui_Handle.global.nest(6,null);
+						h = zui_Handle.global.nest(13,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos_x) + "";
 						f = parseFloat(this.ui.textInput(h,"X"));
-						h = zui_Handle.global.nest(7,null);
+						h = zui_Handle.global.nest(14,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos_y) + "";
 						f = parseFloat(this.ui.textInput(h,"Y"));
-						h = zui_Handle.global.nest(8,null);
+						h = zui_Handle.global.nest(15,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos_z) + "";
 						f = parseFloat(this.ui.textInput(h,"Z"));
 						this.ui.enabled = true;
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Local Loc");
-						h = zui_Handle.global.nest(9,null);
+						h = zui_Handle.global.nest(16,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.x) + "";
 						f = parseFloat(this.ui.textInput(h,"X"));
 						if(this.ui.changed) {
 							localPos.x = f;
 						}
-						h = zui_Handle.global.nest(10,null);
+						h = zui_Handle.global.nest(17,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.y) + "";
 						f = parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							localPos.y = f;
 						}
-						h = zui_Handle.global.nest(11,null);
+						h = zui_Handle.global.nest(18,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.z) + "";
 						f = parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -11942,7 +17628,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Rotation");
-						h = zui_Handle.global.nest(12,null);
+						h = zui_Handle.global.nest(19,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot_x) + "";
 						f = parseFloat(this.ui.textInput(h,"X"));
 						var changed = false;
@@ -11950,14 +17636,14 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 							changed = true;
 							rot_x = f;
 						}
-						h = zui_Handle.global.nest(13,null);
+						h = zui_Handle.global.nest(20,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot_y) + "";
 						f = parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							changed = true;
 							rot_y = f;
 						}
-						h = zui_Handle.global.nest(14,null);
+						h = zui_Handle.global.nest(21,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot_z) + "";
 						f = parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -11990,19 +17676,19 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Scale");
-						h = zui_Handle.global.nest(15,null);
+						h = zui_Handle.global.nest(22,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.x) + "";
 						f = parseFloat(this.ui.textInput(h,"X"));
 						if(this.ui.changed) {
 							scale.x = f;
 						}
-						h = zui_Handle.global.nest(16,null);
+						h = zui_Handle.global.nest(23,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.y) + "";
 						f = parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							scale.y = f;
 						}
-						h = zui_Handle.global.nest(17,null);
+						h = zui_Handle.global.nest(24,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.z) + "";
 						f = parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -12010,19 +17696,19 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Dimensions");
-						h = zui_Handle.global.nest(18,null);
+						h = zui_Handle.global.nest(25,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.x) + "";
 						f = parseFloat(this.ui.textInput(h,"X"));
 						if(this.ui.changed) {
 							dim.x = f;
 						}
-						h = zui_Handle.global.nest(19,null);
+						h = zui_Handle.global.nest(26,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.y) + "";
 						f = parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							dim.y = f;
 						}
-						h = zui_Handle.global.nest(20,null);
+						h = zui_Handle.global.nest(27,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.z) + "";
 						f = parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -12054,7 +17740,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 							if(iron_Scene.active.world != null) {
 								var p = iron_Scene.active.world.probe;
 								var tmp2 = this.ui;
-								var tmp3 = zui_Handle.global.nest(21,{ value : p.raw.strength});
+								var tmp3 = zui_Handle.global.nest(28,{ value : p.raw.strength});
 								p.raw.strength = tmp2.slider(tmp3,"Env Strength",0.0,5.0,true);
 							} else {
 								this.ui.text("This scene has no world data to edit.");
@@ -12062,14 +17748,14 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						} else if(((this.selectedObject) instanceof iron_object_LightObject)) {
 							this.selectedType = "(Light)";
 							var light = js_Boot.__cast(this.selectedObject , iron_object_LightObject);
-							var lightHandle = zui_Handle.global.nest(22,null);
+							var lightHandle = zui_Handle.global.nest(29,null);
 							lightHandle.value = light.data.raw.strength / 10;
 							var tmp4 = this.ui.slider(lightHandle,"Strength",0.0,5.0,true);
 							light.data.raw.strength = tmp4 * 10;
 						} else if(((this.selectedObject) instanceof iron_object_CameraObject)) {
 							this.selectedType = "(Camera)";
 							var cam = js_Boot.__cast(this.selectedObject , iron_object_CameraObject);
-							var fovHandle = zui_Handle.global.nest(23,null);
+							var fovHandle = zui_Handle.global.nest(30,null);
 							fovHandle.value = (cam.data.raw.fov * 100 | 0) / 100;
 							cam.data.raw.fov = this.ui.slider(fovHandle,"Field of View",0.3,2.0,true);
 							if(this.ui.changed) {
@@ -12085,7 +17771,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			var avg = Math.round(this.frameTimeAvg * 10000) / 10;
 			var fpsAvg = avg > 0 ? Math.round(1000 / avg) : 0;
 			if(this.ui.tab(htab,"" + avg + " ms")) {
-				if(this.ui.panel(zui_Handle.global.nest(24,{ selected : true}),"Performance")) {
+				if(this.ui.panel(zui_Handle.global.nest(31,{ selected : true}),"Performance")) {
 					if(this.graph != null) {
 						this.ui.image(this.graph);
 					}
@@ -12107,7 +17793,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					this.ui.text(Math.round(this.physTimeAvg * 10000) / 10 + " ms",2);
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(25,{ selected : false}),"Draw")) {
+				if(this.ui.panel(zui_Handle.global.nest(32,{ selected : false}),"Draw")) {
 					this.ui.indent();
 					this.ui.row(armory_trait_internal_DebugConsole.lrow);
 					var numMeshes = iron_Scene.active.meshes.length;
@@ -12127,7 +17813,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					this.ui.text(iron_RenderPath.culled + " / " + numMeshes * 2,2);
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(26,{ selected : false}),"Render Targets")) {
+				if(this.ui.panel(zui_Handle.global.nest(33,{ selected : false}),"Render Targets")) {
 					this.ui.indent();
 					var _this8 = iron_RenderPath.active.renderTargets;
 					var rt = new haxe_ds__$StringMap_StringMapIterator(_this8,_this8.arrayKeys());
@@ -12140,7 +17826,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					}
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(27,{ selected : false}),"Cached Materials")) {
+				if(this.ui.panel(zui_Handle.global.nest(34,{ selected : false}),"Cached Materials")) {
 					this.ui.indent();
 					var _this9 = iron_data_Data.cachedMaterials;
 					var c5 = new haxe_ds__$StringMap_StringMapIterator(_this9,_this9.arrayKeys());
@@ -12150,7 +17836,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					}
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(28,{ selected : false}),"Cached Shaders")) {
+				if(this.ui.panel(zui_Handle.global.nest(35,{ selected : false}),"Cached Shaders")) {
 					this.ui.indent();
 					var _this10 = iron_data_Data.cachedShaders;
 					var c7 = new haxe_ds__$StringMap_StringMapIterator(_this10,_this10.arrayKeys());
@@ -12162,9 +17848,9 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 				}
 			}
 			if(this.ui.tab(htab,armory_trait_internal_DebugConsole.lastTraces[0] == "" ? "Console" : HxOverrides.substr(armory_trait_internal_DebugConsole.lastTraces[0],0,20))) {
-				if(this.ui.panel(zui_Handle.global.nest(29,{ selected : false}),"Script")) {
+				if(this.ui.panel(zui_Handle.global.nest(36,{ selected : false}),"Script")) {
 					this.ui.indent();
-					var t2 = this.ui.textInput(zui_Handle.global.nest(30,null));
+					var t2 = this.ui.textInput(zui_Handle.global.nest(37,null));
 					if(this.ui.button("Run")) {
 						try {
 							haxe_Log.trace("> " + t2,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 512, className : "armory.trait.internal.DebugConsole", methodName : "render2D"});
@@ -12175,7 +17861,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					}
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(31,{ selected : true}),"Log")) {
+				if(this.ui.panel(zui_Handle.global.nest(38,{ selected : true}),"Log")) {
 					this.ui.indent();
 					if(this.ui.button("Clear")) {
 						armory_trait_internal_DebugConsole.lastTraces[0] = "";
@@ -12202,7 +17888,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			}
 			this.ui.separator();
 		}
-		var handleWinTrait = zui_Handle.global.nest(32,null);
+		var handleWinTrait = zui_Handle.global.nest(39,null);
 		var _g6 = 0;
 		var _g15 = this.selectedTraits;
 		while(_g6 < _g15.length) {
@@ -12234,7 +17920,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			this.ui.text("Object:");
 			this.ui.text(trait.object.name,2);
 			this.ui.separator();
-			if(this.ui.panel(zui_Handle.global.nest(33,null).nest(objectID).nest(traitIndex),"Attributes")) {
+			if(this.ui.panel(zui_Handle.global.nest(40,null).nest(objectID).nest(traitIndex),"Attributes")) {
 				this.ui.indent();
 				var _g7 = 0;
 				var _g16 = Reflect.fields(trait);
@@ -16124,6 +21810,196 @@ haxe_ds__$StringMap_StringMapIterator.prototype = {
 	}
 	,__class__: haxe_ds__$StringMap_StringMapIterator
 };
+var haxe_http_HttpBase = function(url) {
+	this.url = url;
+	this.headers = [];
+	this.params = [];
+	this.emptyOnData = $bind(this,this.onData);
+};
+$hxClasses["haxe.http.HttpBase"] = haxe_http_HttpBase;
+haxe_http_HttpBase.__name__ = "haxe.http.HttpBase";
+haxe_http_HttpBase.prototype = {
+	url: null
+	,responseBytes: null
+	,responseAsString: null
+	,postData: null
+	,postBytes: null
+	,headers: null
+	,params: null
+	,emptyOnData: null
+	,onData: function(data) {
+	}
+	,onBytes: function(data) {
+	}
+	,onError: function(msg) {
+	}
+	,onStatus: function(status) {
+	}
+	,hasOnData: function() {
+		return !Reflect.compareMethods($bind(this,this.onData),this.emptyOnData);
+	}
+	,success: function(data) {
+		this.responseBytes = data;
+		this.responseAsString = null;
+		if(this.hasOnData()) {
+			this.onData(this.get_responseData());
+		}
+		this.onBytes(this.responseBytes);
+	}
+	,get_responseData: function() {
+		if(this.responseAsString == null && this.responseBytes != null) {
+			this.responseAsString = this.responseBytes.getString(0,this.responseBytes.length,haxe_io_Encoding.UTF8);
+		}
+		return this.responseAsString;
+	}
+	,__class__: haxe_http_HttpBase
+	,__properties__: {get_responseData:"get_responseData"}
+};
+var haxe_http_HttpJs = function(url) {
+	this.async = true;
+	this.withCredentials = false;
+	haxe_http_HttpBase.call(this,url);
+};
+$hxClasses["haxe.http.HttpJs"] = haxe_http_HttpJs;
+haxe_http_HttpJs.__name__ = "haxe.http.HttpJs";
+haxe_http_HttpJs.__super__ = haxe_http_HttpBase;
+haxe_http_HttpJs.prototype = $extend(haxe_http_HttpBase.prototype,{
+	async: null
+	,withCredentials: null
+	,req: null
+	,request: function(post) {
+		var _gthis = this;
+		this.responseAsString = null;
+		this.responseBytes = null;
+		var r = this.req = js_Browser.createXMLHttpRequest();
+		var onreadystatechange = function(_) {
+			if(r.readyState != 4) {
+				return;
+			}
+			var s;
+			try {
+				s = r.status;
+			} catch( e ) {
+				var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
+				s = null;
+			}
+			if(s == 0 && typeof(window) != "undefined") {
+				var protocol = window.location.protocol.toLowerCase();
+				var rlocalProtocol = new EReg("^(?:about|app|app-storage|.+-extension|file|res|widget):$","");
+				var isLocal = rlocalProtocol.match(protocol);
+				if(isLocal) {
+					s = r.response != null ? 200 : 404;
+				}
+			}
+			if(s == undefined) {
+				s = null;
+			}
+			if(s != null) {
+				_gthis.onStatus(s);
+			}
+			if(s != null && s >= 200 && s < 400) {
+				_gthis.req = null;
+				var onreadystatechange1 = haxe_io_Bytes.ofData(r.response);
+				_gthis.success(onreadystatechange1);
+			} else if(s == null) {
+				_gthis.req = null;
+				_gthis.onError("Failed to connect or resolve host");
+			} else if(s == null) {
+				_gthis.req = null;
+				_gthis.responseBytes = haxe_io_Bytes.ofData(r.response);
+				_gthis.onError("Http Error #" + r.status);
+			} else {
+				switch(s) {
+				case 12007:
+					_gthis.req = null;
+					_gthis.onError("Unknown host");
+					break;
+				case 12029:
+					_gthis.req = null;
+					_gthis.onError("Failed to connect to host");
+					break;
+				default:
+					_gthis.req = null;
+					_gthis.responseBytes = haxe_io_Bytes.ofData(r.response);
+					_gthis.onError("Http Error #" + r.status);
+				}
+			}
+		};
+		if(this.async) {
+			r.onreadystatechange = onreadystatechange;
+		}
+		var uri;
+		var _g = this.postBytes;
+		var _g1 = this.postData;
+		if(_g1 == null) {
+			if(_g == null) {
+				uri = null;
+			} else {
+				var bytes = _g;
+				uri = new Blob([bytes.b.bufferValue]);
+			}
+		} else if(_g == null) {
+			var str = _g1;
+			uri = str;
+		} else {
+			uri = null;
+		}
+		if(uri != null) {
+			post = true;
+		} else {
+			var _g2 = 0;
+			var _g3 = this.params;
+			while(_g2 < _g3.length) {
+				var p = _g3[_g2];
+				++_g2;
+				if(uri == null) {
+					uri = "";
+				} else {
+					uri = Std.string(uri) + "&";
+				}
+				var s1 = p.name;
+				var value = Std.string(uri) + encodeURIComponent(s1) + "=";
+				var s2 = p.value;
+				uri = value + encodeURIComponent(s2);
+			}
+		}
+		try {
+			if(post) {
+				r.open("POST",this.url,this.async);
+			} else if(uri != null) {
+				var question = this.url.split("?").length <= 1;
+				r.open("GET",this.url + (question ? "?" : "&") + Std.string(uri),this.async);
+				uri = null;
+			} else {
+				r.open("GET",this.url,this.async);
+			}
+			r.responseType = "arraybuffer";
+		} catch( e2 ) {
+			var e3 = ((e2) instanceof js__$Boot_HaxeError) ? e2.val : e2;
+			this.req = null;
+			this.onError(e3.toString());
+			return;
+		}
+		r.withCredentials = this.withCredentials;
+		if(!Lambda.exists(this.headers,function(h) {
+			return h.name == "Content-Type";
+		}) && post && this.postData == null) {
+			r.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+		}
+		var _g21 = 0;
+		var _g31 = this.headers;
+		while(_g21 < _g31.length) {
+			var h1 = _g31[_g21];
+			++_g21;
+			r.setRequestHeader(h1.name,h1.value);
+		}
+		r.send(uri);
+		if(!this.async) {
+			onreadystatechange(null);
+		}
+	}
+	,__class__: haxe_http_HttpJs
+});
 var haxe_io_Bytes = function(data) {
 	this.length = data.byteLength;
 	this.b = new Uint8Array(data);
@@ -31373,6 +37249,18 @@ js_Boot.__isNativeObj = function(o) {
 js_Boot.__resolveNativeClass = function(name) {
 	return $global[name];
 };
+var js_Browser = function() { };
+$hxClasses["js.Browser"] = js_Browser;
+js_Browser.__name__ = "js.Browser";
+js_Browser.createXMLHttpRequest = function() {
+	if(typeof XMLHttpRequest != "undefined") {
+		return new XMLHttpRequest();
+	}
+	if(typeof ActiveXObject != "undefined") {
+		return new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	throw new js__$Boot_HaxeError("Unable to create XMLHttpRequest object.");
+};
 var js_lib__$ArrayBuffer_ArrayBufferCompat = function() { };
 $hxClasses["js.lib._ArrayBuffer.ArrayBufferCompat"] = js_lib__$ArrayBuffer_ArrayBufferCompat;
 js_lib__$ArrayBuffer_ArrayBufferCompat.__name__ = "js.lib._ArrayBuffer.ArrayBufferCompat";
@@ -33022,315 +38910,365 @@ kha_Shaders.init = function() {
 	blobs5.push(kha_internal_BytesBlob.fromBytes(bytes5));
 	kha_Shaders.KM100_Base_001_mesh_frag = new kha_graphics4_FragmentShader(blobs5,["KM100_Base_001_mesh.frag.d3d11"]);
 	var blobs6 = [];
-	var data6 = Reflect.field(kha_Shaders,"KM100_Screw_001_mesh_fragData" + 0);
+	var data6 = Reflect.field(kha_Shaders,"KM100_Base_002_mesh_fragData" + 0);
 	var bytes6 = haxe_Unserializer.run(data6);
 	blobs6.push(kha_internal_BytesBlob.fromBytes(bytes6));
-	kha_Shaders.KM100_Screw_001_mesh_frag = new kha_graphics4_FragmentShader(blobs6,["KM100_Screw_001_mesh.frag.d3d11"]);
+	kha_Shaders.KM100_Base_002_mesh_frag = new kha_graphics4_FragmentShader(blobs6,["KM100_Base_002_mesh.frag.d3d11"]);
 	var blobs7 = [];
-	var data7 = Reflect.field(kha_Shaders,"KM100_Screw_mesh_fragData" + 0);
+	var data7 = Reflect.field(kha_Shaders,"KM100_Screw_001_mesh_fragData" + 0);
 	var bytes7 = haxe_Unserializer.run(data7);
 	blobs7.push(kha_internal_BytesBlob.fromBytes(bytes7));
-	kha_Shaders.KM100_Screw_mesh_frag = new kha_graphics4_FragmentShader(blobs7,["KM100_Screw_mesh.frag.d3d11"]);
+	kha_Shaders.KM100_Screw_001_mesh_frag = new kha_graphics4_FragmentShader(blobs7,["KM100_Screw_001_mesh.frag.d3d11"]);
 	var blobs8 = [];
-	var data8 = Reflect.field(kha_Shaders,"KM100_Top_001_mesh_fragData" + 0);
+	var data8 = Reflect.field(kha_Shaders,"KM100_Screw_002_mesh_fragData" + 0);
 	var bytes8 = haxe_Unserializer.run(data8);
 	blobs8.push(kha_internal_BytesBlob.fromBytes(bytes8));
-	kha_Shaders.KM100_Top_001_mesh_frag = new kha_graphics4_FragmentShader(blobs8,["KM100_Top_001_mesh.frag.d3d11"]);
+	kha_Shaders.KM100_Screw_002_mesh_frag = new kha_graphics4_FragmentShader(blobs8,["KM100_Screw_002_mesh.frag.d3d11"]);
 	var blobs9 = [];
-	var data9 = Reflect.field(kha_Shaders,"KM100_Top_mesh_fragData" + 0);
+	var data9 = Reflect.field(kha_Shaders,"KM100_Screw_mesh_fragData" + 0);
 	var bytes9 = haxe_Unserializer.run(data9);
 	blobs9.push(kha_internal_BytesBlob.fromBytes(bytes9));
-	kha_Shaders.KM100_Top_mesh_frag = new kha_graphics4_FragmentShader(blobs9,["KM100_Top_mesh.frag.d3d11"]);
+	kha_Shaders.KM100_Screw_mesh_frag = new kha_graphics4_FragmentShader(blobs9,["KM100_Screw_mesh.frag.d3d11"]);
 	var blobs10 = [];
-	var data10 = Reflect.field(kha_Shaders,"LDM56_Textur_mesh_fragData" + 0);
+	var data10 = Reflect.field(kha_Shaders,"KM100_Top_001_mesh_fragData" + 0);
 	var bytes10 = haxe_Unserializer.run(data10);
 	blobs10.push(kha_internal_BytesBlob.fromBytes(bytes10));
-	kha_Shaders.LDM56_Textur_mesh_frag = new kha_graphics4_FragmentShader(blobs10,["LDM56_Textur_mesh.frag.d3d11"]);
+	kha_Shaders.KM100_Top_001_mesh_frag = new kha_graphics4_FragmentShader(blobs10,["KM100_Top_001_mesh.frag.d3d11"]);
 	var blobs11 = [];
-	var data11 = Reflect.field(kha_Shaders,"Laser_mesh_fragData" + 0);
+	var data11 = Reflect.field(kha_Shaders,"KM100_Top_mesh_fragData" + 0);
 	var bytes11 = haxe_Unserializer.run(data11);
 	blobs11.push(kha_internal_BytesBlob.fromBytes(bytes11));
-	kha_Shaders.Laser_mesh_frag = new kha_graphics4_FragmentShader(blobs11,["Laser_mesh.frag.d3d11"]);
+	kha_Shaders.KM100_Top_mesh_frag = new kha_graphics4_FragmentShader(blobs11,["KM100_Top_mesh.frag.d3d11"]);
 	var blobs12 = [];
-	var data12 = Reflect.field(kha_Shaders,"Material_001_mesh_fragData" + 0);
+	var data12 = Reflect.field(kha_Shaders,"LDM56_Textur_mesh_fragData" + 0);
 	var bytes12 = haxe_Unserializer.run(data12);
 	blobs12.push(kha_internal_BytesBlob.fromBytes(bytes12));
-	kha_Shaders.Material_001_mesh_frag = new kha_graphics4_FragmentShader(blobs12,["Material_001_mesh.frag.d3d11"]);
+	kha_Shaders.LDM56_Textur_mesh_frag = new kha_graphics4_FragmentShader(blobs12,["LDM56_Textur_mesh.frag.d3d11"]);
 	var blobs13 = [];
-	var data13 = Reflect.field(kha_Shaders,"Material_002_mesh_fragData" + 0);
+	var data13 = Reflect.field(kha_Shaders,"Laser_mesh_fragData" + 0);
 	var bytes13 = haxe_Unserializer.run(data13);
 	blobs13.push(kha_internal_BytesBlob.fromBytes(bytes13));
-	kha_Shaders.Material_002_mesh_frag = new kha_graphics4_FragmentShader(blobs13,["Material_002_mesh.frag.d3d11"]);
+	kha_Shaders.Laser_mesh_frag = new kha_graphics4_FragmentShader(blobs13,["Laser_mesh.frag.d3d11"]);
 	var blobs14 = [];
-	var data14 = Reflect.field(kha_Shaders,"Material_003_mesh_fragData" + 0);
+	var data14 = Reflect.field(kha_Shaders,"Material_001_mesh_fragData" + 0);
 	var bytes14 = haxe_Unserializer.run(data14);
 	blobs14.push(kha_internal_BytesBlob.fromBytes(bytes14));
-	kha_Shaders.Material_003_mesh_frag = new kha_graphics4_FragmentShader(blobs14,["Material_003_mesh.frag.d3d11"]);
+	kha_Shaders.Material_001_mesh_frag = new kha_graphics4_FragmentShader(blobs14,["Material_001_mesh.frag.d3d11"]);
 	var blobs15 = [];
-	var data15 = Reflect.field(kha_Shaders,"Platte_001_mesh_fragData" + 0);
+	var data15 = Reflect.field(kha_Shaders,"Material_002_mesh_fragData" + 0);
 	var bytes15 = haxe_Unserializer.run(data15);
 	blobs15.push(kha_internal_BytesBlob.fromBytes(bytes15));
-	kha_Shaders.Platte_001_mesh_frag = new kha_graphics4_FragmentShader(blobs15,["Platte_001_mesh.frag.d3d11"]);
+	kha_Shaders.Material_002_mesh_frag = new kha_graphics4_FragmentShader(blobs15,["Material_002_mesh.frag.d3d11"]);
 	var blobs16 = [];
-	var data16 = Reflect.field(kha_Shaders,"Post_000_mesh_fragData" + 0);
+	var data16 = Reflect.field(kha_Shaders,"Material_003_mesh_fragData" + 0);
 	var bytes16 = haxe_Unserializer.run(data16);
 	blobs16.push(kha_internal_BytesBlob.fromBytes(bytes16));
-	kha_Shaders.Post_000_mesh_frag = new kha_graphics4_FragmentShader(blobs16,["Post_000_mesh.frag.d3d11"]);
+	kha_Shaders.Material_003_mesh_frag = new kha_graphics4_FragmentShader(blobs16,["Material_003_mesh.frag.d3d11"]);
 	var blobs17 = [];
-	var data17 = Reflect.field(kha_Shaders,"Post_002_mesh_fragData" + 0);
+	var data17 = Reflect.field(kha_Shaders,"Material_004_mesh_fragData" + 0);
 	var bytes17 = haxe_Unserializer.run(data17);
 	blobs17.push(kha_internal_BytesBlob.fromBytes(bytes17));
-	kha_Shaders.Post_002_mesh_frag = new kha_graphics4_FragmentShader(blobs17,["Post_002_mesh.frag.d3d11"]);
+	kha_Shaders.Material_004_mesh_frag = new kha_graphics4_FragmentShader(blobs17,["Material_004_mesh.frag.d3d11"]);
 	var blobs18 = [];
-	var data18 = Reflect.field(kha_Shaders,"Schraube_000_mesh_fragData" + 0);
+	var data18 = Reflect.field(kha_Shaders,"Material_004_translucent_fragData" + 0);
 	var bytes18 = haxe_Unserializer.run(data18);
 	blobs18.push(kha_internal_BytesBlob.fromBytes(bytes18));
-	kha_Shaders.Schraube_000_mesh_frag = new kha_graphics4_FragmentShader(blobs18,["Schraube_000_mesh.frag.d3d11"]);
+	kha_Shaders.Material_004_translucent_frag = new kha_graphics4_FragmentShader(blobs18,["Material_004_translucent.frag.d3d11"]);
 	var blobs19 = [];
-	var data19 = Reflect.field(kha_Shaders,"Schraube_002_mesh_fragData" + 0);
+	var data19 = Reflect.field(kha_Shaders,"Material_004_translucent_vertData" + 0);
 	var bytes19 = haxe_Unserializer.run(data19);
 	blobs19.push(kha_internal_BytesBlob.fromBytes(bytes19));
-	kha_Shaders.Schraube_002_mesh_frag = new kha_graphics4_FragmentShader(blobs19,["Schraube_002_mesh.frag.d3d11"]);
+	kha_Shaders.Material_004_translucent_vert = new kha_graphics4_VertexShader(blobs19,["Material_004_translucent.vert.d3d11"]);
 	var blobs20 = [];
-	var data20 = Reflect.field(kha_Shaders,"UPH_Base_000_mesh_fragData" + 0);
+	var data20 = Reflect.field(kha_Shaders,"Metal_PBS_001_mesh_fragData" + 0);
 	var bytes20 = haxe_Unserializer.run(data20);
 	blobs20.push(kha_internal_BytesBlob.fromBytes(bytes20));
-	kha_Shaders.UPH_Base_000_mesh_frag = new kha_graphics4_FragmentShader(blobs20,["UPH_Base_000_mesh.frag.d3d11"]);
+	kha_Shaders.Metal_PBS_001_mesh_frag = new kha_graphics4_FragmentShader(blobs20,["Metal_PBS_001_mesh.frag.d3d11"]);
 	var blobs21 = [];
-	var data21 = Reflect.field(kha_Shaders,"UPH_Top_000_mesh_fragData" + 0);
+	var data21 = Reflect.field(kha_Shaders,"Platte_001_mesh_fragData" + 0);
 	var bytes21 = haxe_Unserializer.run(data21);
 	blobs21.push(kha_internal_BytesBlob.fromBytes(bytes21));
-	kha_Shaders.UPH_Top_000_mesh_frag = new kha_graphics4_FragmentShader(blobs21,["UPH_Top_000_mesh.frag.d3d11"]);
+	kha_Shaders.Platte_001_mesh_frag = new kha_graphics4_FragmentShader(blobs21,["Platte_001_mesh.frag.d3d11"]);
 	var blobs22 = [];
-	var data22 = Reflect.field(kha_Shaders,"UPH_Top_002_mesh_fragData" + 0);
+	var data22 = Reflect.field(kha_Shaders,"Post_000_mesh_fragData" + 0);
 	var bytes22 = haxe_Unserializer.run(data22);
 	blobs22.push(kha_internal_BytesBlob.fromBytes(bytes22));
-	kha_Shaders.UPH_Top_002_mesh_frag = new kha_graphics4_FragmentShader(blobs22,["UPH_Top_002_mesh.frag.d3d11"]);
+	kha_Shaders.Post_000_mesh_frag = new kha_graphics4_FragmentShader(blobs22,["Post_000_mesh.frag.d3d11"]);
 	var blobs23 = [];
-	var data23 = Reflect.field(kha_Shaders,"World_World_fragData" + 0);
+	var data23 = Reflect.field(kha_Shaders,"Post_002_mesh_fragData" + 0);
 	var bytes23 = haxe_Unserializer.run(data23);
 	blobs23.push(kha_internal_BytesBlob.fromBytes(bytes23));
-	kha_Shaders.World_World_frag = new kha_graphics4_FragmentShader(blobs23,["World_World.frag.d3d11"]);
+	kha_Shaders.Post_002_mesh_frag = new kha_graphics4_FragmentShader(blobs23,["Post_002_mesh.frag.d3d11"]);
 	var blobs24 = [];
-	var data24 = Reflect.field(kha_Shaders,"World_World_vertData" + 0);
+	var data24 = Reflect.field(kha_Shaders,"Schraube_000_mesh_fragData" + 0);
 	var bytes24 = haxe_Unserializer.run(data24);
 	blobs24.push(kha_internal_BytesBlob.fromBytes(bytes24));
-	kha_Shaders.World_World_vert = new kha_graphics4_VertexShader(blobs24,["World_World.vert.d3d11"]);
+	kha_Shaders.Schraube_000_mesh_frag = new kha_graphics4_FragmentShader(blobs24,["Schraube_000_mesh.frag.d3d11"]);
 	var blobs25 = [];
-	var data25 = Reflect.field(kha_Shaders,"_0_0_0_mesh_fragData" + 0);
+	var data25 = Reflect.field(kha_Shaders,"Schraube_002_mesh_fragData" + 0);
 	var bytes25 = haxe_Unserializer.run(data25);
 	blobs25.push(kha_internal_BytesBlob.fromBytes(bytes25));
-	kha_Shaders._0_0_0_mesh_frag = new kha_graphics4_FragmentShader(blobs25,["_0_0_0_mesh.frag.d3d11"]);
+	kha_Shaders.Schraube_002_mesh_frag = new kha_graphics4_FragmentShader(blobs25,["Schraube_002_mesh.frag.d3d11"]);
 	var blobs26 = [];
-	var data26 = Reflect.field(kha_Shaders,"_0_128_0_mesh_fragData" + 0);
+	var data26 = Reflect.field(kha_Shaders,"UPH_Base_000_mesh_fragData" + 0);
 	var bytes26 = haxe_Unserializer.run(data26);
 	blobs26.push(kha_internal_BytesBlob.fromBytes(bytes26));
-	kha_Shaders._0_128_0_mesh_frag = new kha_graphics4_FragmentShader(blobs26,["_0_128_0_mesh.frag.d3d11"]);
+	kha_Shaders.UPH_Base_000_mesh_frag = new kha_graphics4_FragmentShader(blobs26,["UPH_Base_000_mesh.frag.d3d11"]);
 	var blobs27 = [];
-	var data27 = Reflect.field(kha_Shaders,"_192_192_192_mesh_fragData" + 0);
+	var data27 = Reflect.field(kha_Shaders,"UPH_Top_000_mesh_fragData" + 0);
 	var bytes27 = haxe_Unserializer.run(data27);
 	blobs27.push(kha_internal_BytesBlob.fromBytes(bytes27));
-	kha_Shaders._192_192_192_mesh_frag = new kha_graphics4_FragmentShader(blobs27,["_192_192_192_mesh.frag.d3d11"]);
+	kha_Shaders.UPH_Top_000_mesh_frag = new kha_graphics4_FragmentShader(blobs27,["UPH_Top_000_mesh.frag.d3d11"]);
 	var blobs28 = [];
-	var data28 = Reflect.field(kha_Shaders,"_202_209_238_mesh_fragData" + 0);
+	var data28 = Reflect.field(kha_Shaders,"UPH_Top_002_mesh_fragData" + 0);
 	var bytes28 = haxe_Unserializer.run(data28);
 	blobs28.push(kha_internal_BytesBlob.fromBytes(bytes28));
-	kha_Shaders._202_209_238_mesh_frag = new kha_graphics4_FragmentShader(blobs28,["_202_209_238_mesh.frag.d3d11"]);
+	kha_Shaders.UPH_Top_002_mesh_frag = new kha_graphics4_FragmentShader(blobs28,["UPH_Top_002_mesh.frag.d3d11"]);
 	var blobs29 = [];
-	var data29 = Reflect.field(kha_Shaders,"_202_209_239_mesh_fragData" + 0);
+	var data29 = Reflect.field(kha_Shaders,"World_World_fragData" + 0);
 	var bytes29 = haxe_Unserializer.run(data29);
 	blobs29.push(kha_internal_BytesBlob.fromBytes(bytes29));
-	kha_Shaders._202_209_239_mesh_frag = new kha_graphics4_FragmentShader(blobs29,["_202_209_239_mesh.frag.d3d11"]);
+	kha_Shaders.World_World_frag = new kha_graphics4_FragmentShader(blobs29,["World_World.frag.d3d11"]);
 	var blobs30 = [];
-	var data30 = Reflect.field(kha_Shaders,"_229_234_237_mesh_fragData" + 0);
+	var data30 = Reflect.field(kha_Shaders,"World_World_vertData" + 0);
 	var bytes30 = haxe_Unserializer.run(data30);
 	blobs30.push(kha_internal_BytesBlob.fromBytes(bytes30));
-	kha_Shaders._229_234_237_mesh_frag = new kha_graphics4_FragmentShader(blobs30,["_229_234_237_mesh.frag.d3d11"]);
+	kha_Shaders.World_World_vert = new kha_graphics4_VertexShader(blobs30,["World_World.vert.d3d11"]);
 	var blobs31 = [];
-	var data31 = Reflect.field(kha_Shaders,"_255_255_255_001_mesh_fragData" + 0);
+	var data31 = Reflect.field(kha_Shaders,"_0_0_0_mesh_fragData" + 0);
 	var bytes31 = haxe_Unserializer.run(data31);
 	blobs31.push(kha_internal_BytesBlob.fromBytes(bytes31));
-	kha_Shaders._255_255_255_001_mesh_frag = new kha_graphics4_FragmentShader(blobs31,["_255_255_255_001_mesh.frag.d3d11"]);
+	kha_Shaders._0_0_0_mesh_frag = new kha_graphics4_FragmentShader(blobs31,["_0_0_0_mesh.frag.d3d11"]);
 	var blobs32 = [];
-	var data32 = Reflect.field(kha_Shaders,"_255_255_255_1_mesh_fragData" + 0);
+	var data32 = Reflect.field(kha_Shaders,"_0_128_0_mesh_fragData" + 0);
 	var bytes32 = haxe_Unserializer.run(data32);
 	blobs32.push(kha_internal_BytesBlob.fromBytes(bytes32));
-	kha_Shaders._255_255_255_1_mesh_frag = new kha_graphics4_FragmentShader(blobs32,["_255_255_255_1_mesh.frag.d3d11"]);
+	kha_Shaders._0_128_0_mesh_frag = new kha_graphics4_FragmentShader(blobs32,["_0_128_0_mesh.frag.d3d11"]);
 	var blobs33 = [];
-	var data33 = Reflect.field(kha_Shaders,"_255_255_255_1_shadowmap_fragData" + 0);
+	var data33 = Reflect.field(kha_Shaders,"_192_192_192_mesh_fragData" + 0);
 	var bytes33 = haxe_Unserializer.run(data33);
 	blobs33.push(kha_internal_BytesBlob.fromBytes(bytes33));
-	kha_Shaders._255_255_255_1_shadowmap_frag = new kha_graphics4_FragmentShader(blobs33,["_255_255_255_1_shadowmap.frag.d3d11"]);
+	kha_Shaders._192_192_192_mesh_frag = new kha_graphics4_FragmentShader(blobs33,["_192_192_192_mesh.frag.d3d11"]);
 	var blobs34 = [];
-	var data34 = Reflect.field(kha_Shaders,"_255_255_255_1_translucent_fragData" + 0);
+	var data34 = Reflect.field(kha_Shaders,"_202_209_238_mesh_fragData" + 0);
 	var bytes34 = haxe_Unserializer.run(data34);
 	blobs34.push(kha_internal_BytesBlob.fromBytes(bytes34));
-	kha_Shaders._255_255_255_1_translucent_frag = new kha_graphics4_FragmentShader(blobs34,["_255_255_255_1_translucent.frag.d3d11"]);
+	kha_Shaders._202_209_238_mesh_frag = new kha_graphics4_FragmentShader(blobs34,["_202_209_238_mesh.frag.d3d11"]);
 	var blobs35 = [];
-	var data35 = Reflect.field(kha_Shaders,"_255_255_255_1_translucent_vertData" + 0);
+	var data35 = Reflect.field(kha_Shaders,"_202_209_239_mesh_fragData" + 0);
 	var bytes35 = haxe_Unserializer.run(data35);
 	blobs35.push(kha_internal_BytesBlob.fromBytes(bytes35));
-	kha_Shaders._255_255_255_1_translucent_vert = new kha_graphics4_VertexShader(blobs35,["_255_255_255_1_translucent.vert.d3d11"]);
+	kha_Shaders._202_209_239_mesh_frag = new kha_graphics4_FragmentShader(blobs35,["_202_209_239_mesh.frag.d3d11"]);
 	var blobs36 = [];
-	var data36 = Reflect.field(kha_Shaders,"_255_255_255_mesh_fragData" + 0);
+	var data36 = Reflect.field(kha_Shaders,"_229_234_237_mesh_fragData" + 0);
 	var bytes36 = haxe_Unserializer.run(data36);
 	blobs36.push(kha_internal_BytesBlob.fromBytes(bytes36));
-	kha_Shaders._255_255_255_mesh_frag = new kha_graphics4_FragmentShader(blobs36,["_255_255_255_mesh.frag.d3d11"]);
+	kha_Shaders._229_234_237_mesh_frag = new kha_graphics4_FragmentShader(blobs36,["_229_234_237_mesh.frag.d3d11"]);
 	var blobs37 = [];
-	var data37 = Reflect.field(kha_Shaders,"_64_64_64_001_mesh_fragData" + 0);
+	var data37 = Reflect.field(kha_Shaders,"_255_255_255_001_mesh_fragData" + 0);
 	var bytes37 = haxe_Unserializer.run(data37);
 	blobs37.push(kha_internal_BytesBlob.fromBytes(bytes37));
-	kha_Shaders._64_64_64_001_mesh_frag = new kha_graphics4_FragmentShader(blobs37,["_64_64_64_001_mesh.frag.d3d11"]);
+	kha_Shaders._255_255_255_001_mesh_frag = new kha_graphics4_FragmentShader(blobs37,["_255_255_255_001_mesh.frag.d3d11"]);
 	var blobs38 = [];
-	var data38 = Reflect.field(kha_Shaders,"_64_64_64_mesh_fragData" + 0);
+	var data38 = Reflect.field(kha_Shaders,"_255_255_255_1_mesh_fragData" + 0);
 	var bytes38 = haxe_Unserializer.run(data38);
 	blobs38.push(kha_internal_BytesBlob.fromBytes(bytes38));
-	kha_Shaders._64_64_64_mesh_frag = new kha_graphics4_FragmentShader(blobs38,["_64_64_64_mesh.frag.d3d11"]);
+	kha_Shaders._255_255_255_1_mesh_frag = new kha_graphics4_FragmentShader(blobs38,["_255_255_255_1_mesh.frag.d3d11"]);
 	var blobs39 = [];
-	var data39 = Reflect.field(kha_Shaders,"armdefault_mesh_fragData" + 0);
+	var data39 = Reflect.field(kha_Shaders,"_255_255_255_1_shadowmap_fragData" + 0);
 	var bytes39 = haxe_Unserializer.run(data39);
 	blobs39.push(kha_internal_BytesBlob.fromBytes(bytes39));
-	kha_Shaders.armdefault_mesh_frag = new kha_graphics4_FragmentShader(blobs39,["armdefault_mesh.frag.d3d11"]);
+	kha_Shaders._255_255_255_1_shadowmap_frag = new kha_graphics4_FragmentShader(blobs39,["_255_255_255_1_shadowmap.frag.d3d11"]);
 	var blobs40 = [];
-	var data40 = Reflect.field(kha_Shaders,"armdefault_mesh_vertData" + 0);
+	var data40 = Reflect.field(kha_Shaders,"_255_255_255_1_translucent_fragData" + 0);
 	var bytes40 = haxe_Unserializer.run(data40);
 	blobs40.push(kha_internal_BytesBlob.fromBytes(bytes40));
-	kha_Shaders.armdefault_mesh_vert = new kha_graphics4_VertexShader(blobs40,["armdefault_mesh.vert.d3d11"]);
+	kha_Shaders._255_255_255_1_translucent_frag = new kha_graphics4_FragmentShader(blobs40,["_255_255_255_1_translucent.frag.d3d11"]);
 	var blobs41 = [];
-	var data41 = Reflect.field(kha_Shaders,"armdefault_shadowmap_fragData" + 0);
+	var data41 = Reflect.field(kha_Shaders,"_255_255_255_1_translucent_vertData" + 0);
 	var bytes41 = haxe_Unserializer.run(data41);
 	blobs41.push(kha_internal_BytesBlob.fromBytes(bytes41));
-	kha_Shaders.armdefault_shadowmap_frag = new kha_graphics4_FragmentShader(blobs41,["armdefault_shadowmap.frag.d3d11"]);
+	kha_Shaders._255_255_255_1_translucent_vert = new kha_graphics4_VertexShader(blobs41,["_255_255_255_1_translucent.vert.d3d11"]);
 	var blobs42 = [];
-	var data42 = Reflect.field(kha_Shaders,"armdefault_shadowmap_vertData" + 0);
+	var data42 = Reflect.field(kha_Shaders,"_255_255_255_mesh_fragData" + 0);
 	var bytes42 = haxe_Unserializer.run(data42);
 	blobs42.push(kha_internal_BytesBlob.fromBytes(bytes42));
-	kha_Shaders.armdefault_shadowmap_vert = new kha_graphics4_VertexShader(blobs42,["armdefault_shadowmap.vert.d3d11"]);
+	kha_Shaders._255_255_255_mesh_frag = new kha_graphics4_FragmentShader(blobs42,["_255_255_255_mesh.frag.d3d11"]);
 	var blobs43 = [];
-	var data43 = Reflect.field(kha_Shaders,"blur_edge_pass_fragData" + 0);
+	var data43 = Reflect.field(kha_Shaders,"_64_64_64_001_mesh_fragData" + 0);
 	var bytes43 = haxe_Unserializer.run(data43);
 	blobs43.push(kha_internal_BytesBlob.fromBytes(bytes43));
-	kha_Shaders.blur_edge_pass_frag = new kha_graphics4_FragmentShader(blobs43,["blur_edge_pass.frag.d3d11"]);
+	kha_Shaders._64_64_64_001_mesh_frag = new kha_graphics4_FragmentShader(blobs43,["_64_64_64_001_mesh.frag.d3d11"]);
 	var blobs44 = [];
-	var data44 = Reflect.field(kha_Shaders,"compositor_pass_fragData" + 0);
+	var data44 = Reflect.field(kha_Shaders,"_64_64_64_mesh_fragData" + 0);
 	var bytes44 = haxe_Unserializer.run(data44);
 	blobs44.push(kha_internal_BytesBlob.fromBytes(bytes44));
-	kha_Shaders.compositor_pass_frag = new kha_graphics4_FragmentShader(blobs44,["compositor_pass.frag.d3d11"]);
+	kha_Shaders._64_64_64_mesh_frag = new kha_graphics4_FragmentShader(blobs44,["_64_64_64_mesh.frag.d3d11"]);
 	var blobs45 = [];
-	var data45 = Reflect.field(kha_Shaders,"compositor_pass_vertData" + 0);
+	var data45 = Reflect.field(kha_Shaders,"armdefault_mesh_fragData" + 0);
 	var bytes45 = haxe_Unserializer.run(data45);
 	blobs45.push(kha_internal_BytesBlob.fromBytes(bytes45));
-	kha_Shaders.compositor_pass_vert = new kha_graphics4_VertexShader(blobs45,["compositor_pass.vert.d3d11"]);
+	kha_Shaders.armdefault_mesh_frag = new kha_graphics4_FragmentShader(blobs45,["armdefault_mesh.frag.d3d11"]);
 	var blobs46 = [];
-	var data46 = Reflect.field(kha_Shaders,"deferred_light_fragData" + 0);
+	var data46 = Reflect.field(kha_Shaders,"armdefault_mesh_vertData" + 0);
 	var bytes46 = haxe_Unserializer.run(data46);
 	blobs46.push(kha_internal_BytesBlob.fromBytes(bytes46));
-	kha_Shaders.deferred_light_frag = new kha_graphics4_FragmentShader(blobs46,["deferred_light.frag.d3d11"]);
+	kha_Shaders.armdefault_mesh_vert = new kha_graphics4_VertexShader(blobs46,["armdefault_mesh.vert.d3d11"]);
 	var blobs47 = [];
-	var data47 = Reflect.field(kha_Shaders,"line_deferred_fragData" + 0);
+	var data47 = Reflect.field(kha_Shaders,"armdefault_shadowmap_fragData" + 0);
 	var bytes47 = haxe_Unserializer.run(data47);
 	blobs47.push(kha_internal_BytesBlob.fromBytes(bytes47));
-	kha_Shaders.line_deferred_frag = new kha_graphics4_FragmentShader(blobs47,["line_deferred.frag.d3d11"]);
+	kha_Shaders.armdefault_shadowmap_frag = new kha_graphics4_FragmentShader(blobs47,["armdefault_shadowmap.frag.d3d11"]);
 	var blobs48 = [];
-	var data48 = Reflect.field(kha_Shaders,"line_fragData" + 0);
+	var data48 = Reflect.field(kha_Shaders,"armdefault_shadowmap_vertData" + 0);
 	var bytes48 = haxe_Unserializer.run(data48);
 	blobs48.push(kha_internal_BytesBlob.fromBytes(bytes48));
-	kha_Shaders.line_frag = new kha_graphics4_FragmentShader(blobs48,["line.frag.d3d11"]);
+	kha_Shaders.armdefault_shadowmap_vert = new kha_graphics4_VertexShader(blobs48,["armdefault_shadowmap.vert.d3d11"]);
 	var blobs49 = [];
-	var data49 = Reflect.field(kha_Shaders,"line_vertData" + 0);
+	var data49 = Reflect.field(kha_Shaders,"blur_edge_pass_fragData" + 0);
 	var bytes49 = haxe_Unserializer.run(data49);
 	blobs49.push(kha_internal_BytesBlob.fromBytes(bytes49));
-	kha_Shaders.line_vert = new kha_graphics4_VertexShader(blobs49,["line.vert.d3d11"]);
+	kha_Shaders.blur_edge_pass_frag = new kha_graphics4_FragmentShader(blobs49,["blur_edge_pass.frag.d3d11"]);
 	var blobs50 = [];
-	var data50 = Reflect.field(kha_Shaders,"painter_colored_fragData" + 0);
+	var data50 = Reflect.field(kha_Shaders,"compositor_pass_fragData" + 0);
 	var bytes50 = haxe_Unserializer.run(data50);
 	blobs50.push(kha_internal_BytesBlob.fromBytes(bytes50));
-	kha_Shaders.painter_colored_frag = new kha_graphics4_FragmentShader(blobs50,["painter-colored.frag.d3d11"]);
+	kha_Shaders.compositor_pass_frag = new kha_graphics4_FragmentShader(blobs50,["compositor_pass.frag.d3d11"]);
 	var blobs51 = [];
-	var data51 = Reflect.field(kha_Shaders,"painter_colored_vertData" + 0);
+	var data51 = Reflect.field(kha_Shaders,"compositor_pass_vertData" + 0);
 	var bytes51 = haxe_Unserializer.run(data51);
 	blobs51.push(kha_internal_BytesBlob.fromBytes(bytes51));
-	kha_Shaders.painter_colored_vert = new kha_graphics4_VertexShader(blobs51,["painter-colored.vert.d3d11"]);
+	kha_Shaders.compositor_pass_vert = new kha_graphics4_VertexShader(blobs51,["compositor_pass.vert.d3d11"]);
 	var blobs52 = [];
-	var data52 = Reflect.field(kha_Shaders,"painter_image_fragData" + 0);
+	var data52 = Reflect.field(kha_Shaders,"deferred_light_fragData" + 0);
 	var bytes52 = haxe_Unserializer.run(data52);
 	blobs52.push(kha_internal_BytesBlob.fromBytes(bytes52));
-	kha_Shaders.painter_image_frag = new kha_graphics4_FragmentShader(blobs52,["painter-image.frag.d3d11"]);
+	kha_Shaders.deferred_light_frag = new kha_graphics4_FragmentShader(blobs52,["deferred_light.frag.d3d11"]);
 	var blobs53 = [];
-	var data53 = Reflect.field(kha_Shaders,"painter_image_vertData" + 0);
+	var data53 = Reflect.field(kha_Shaders,"lambert369SG_002_mesh_fragData" + 0);
 	var bytes53 = haxe_Unserializer.run(data53);
 	blobs53.push(kha_internal_BytesBlob.fromBytes(bytes53));
-	kha_Shaders.painter_image_vert = new kha_graphics4_VertexShader(blobs53,["painter-image.vert.d3d11"]);
+	kha_Shaders.lambert369SG_002_mesh_frag = new kha_graphics4_FragmentShader(blobs53,["lambert369SG_002_mesh.frag.d3d11"]);
 	var blobs54 = [];
-	var data54 = Reflect.field(kha_Shaders,"painter_text_fragData" + 0);
+	var data54 = Reflect.field(kha_Shaders,"lambert418SG_mesh_fragData" + 0);
 	var bytes54 = haxe_Unserializer.run(data54);
 	blobs54.push(kha_internal_BytesBlob.fromBytes(bytes54));
-	kha_Shaders.painter_text_frag = new kha_graphics4_FragmentShader(blobs54,["painter-text.frag.d3d11"]);
+	kha_Shaders.lambert418SG_mesh_frag = new kha_graphics4_FragmentShader(blobs54,["lambert418SG_mesh.frag.d3d11"]);
 	var blobs55 = [];
-	var data55 = Reflect.field(kha_Shaders,"painter_text_vertData" + 0);
+	var data55 = Reflect.field(kha_Shaders,"lambert423SG_mesh_fragData" + 0);
 	var bytes55 = haxe_Unserializer.run(data55);
 	blobs55.push(kha_internal_BytesBlob.fromBytes(bytes55));
-	kha_Shaders.painter_text_vert = new kha_graphics4_VertexShader(blobs55,["painter-text.vert.d3d11"]);
+	kha_Shaders.lambert423SG_mesh_frag = new kha_graphics4_FragmentShader(blobs55,["lambert423SG_mesh.frag.d3d11"]);
 	var blobs56 = [];
-	var data56 = Reflect.field(kha_Shaders,"painter_video_fragData" + 0);
+	var data56 = Reflect.field(kha_Shaders,"lambert424SG_mesh_fragData" + 0);
 	var bytes56 = haxe_Unserializer.run(data56);
 	blobs56.push(kha_internal_BytesBlob.fromBytes(bytes56));
-	kha_Shaders.painter_video_frag = new kha_graphics4_FragmentShader(blobs56,["painter-video.frag.d3d11"]);
+	kha_Shaders.lambert424SG_mesh_frag = new kha_graphics4_FragmentShader(blobs56,["lambert424SG_mesh.frag.d3d11"]);
 	var blobs57 = [];
-	var data57 = Reflect.field(kha_Shaders,"painter_video_vertData" + 0);
+	var data57 = Reflect.field(kha_Shaders,"line_deferred_fragData" + 0);
 	var bytes57 = haxe_Unserializer.run(data57);
 	blobs57.push(kha_internal_BytesBlob.fromBytes(bytes57));
-	kha_Shaders.painter_video_vert = new kha_graphics4_VertexShader(blobs57,["painter-video.vert.d3d11"]);
+	kha_Shaders.line_deferred_frag = new kha_graphics4_FragmentShader(blobs57,["line_deferred.frag.d3d11"]);
 	var blobs58 = [];
-	var data58 = Reflect.field(kha_Shaders,"pass_vertData" + 0);
+	var data58 = Reflect.field(kha_Shaders,"line_fragData" + 0);
 	var bytes58 = haxe_Unserializer.run(data58);
 	blobs58.push(kha_internal_BytesBlob.fromBytes(bytes58));
-	kha_Shaders.pass_vert = new kha_graphics4_VertexShader(blobs58,["pass.vert.d3d11"]);
+	kha_Shaders.line_frag = new kha_graphics4_FragmentShader(blobs58,["line.frag.d3d11"]);
 	var blobs59 = [];
-	var data59 = Reflect.field(kha_Shaders,"pass_viewray_vertData" + 0);
+	var data59 = Reflect.field(kha_Shaders,"line_vertData" + 0);
 	var bytes59 = haxe_Unserializer.run(data59);
 	blobs59.push(kha_internal_BytesBlob.fromBytes(bytes59));
-	kha_Shaders.pass_viewray_vert = new kha_graphics4_VertexShader(blobs59,["pass_viewray.vert.d3d11"]);
+	kha_Shaders.line_vert = new kha_graphics4_VertexShader(blobs59,["line.vert.d3d11"]);
 	var blobs60 = [];
-	var data60 = Reflect.field(kha_Shaders,"smaa_blend_weight_fragData" + 0);
+	var data60 = Reflect.field(kha_Shaders,"painter_colored_fragData" + 0);
 	var bytes60 = haxe_Unserializer.run(data60);
 	blobs60.push(kha_internal_BytesBlob.fromBytes(bytes60));
-	kha_Shaders.smaa_blend_weight_frag = new kha_graphics4_FragmentShader(blobs60,["smaa_blend_weight.frag.d3d11"]);
+	kha_Shaders.painter_colored_frag = new kha_graphics4_FragmentShader(blobs60,["painter-colored.frag.d3d11"]);
 	var blobs61 = [];
-	var data61 = Reflect.field(kha_Shaders,"smaa_blend_weight_vertData" + 0);
+	var data61 = Reflect.field(kha_Shaders,"painter_colored_vertData" + 0);
 	var bytes61 = haxe_Unserializer.run(data61);
 	blobs61.push(kha_internal_BytesBlob.fromBytes(bytes61));
-	kha_Shaders.smaa_blend_weight_vert = new kha_graphics4_VertexShader(blobs61,["smaa_blend_weight.vert.d3d11"]);
+	kha_Shaders.painter_colored_vert = new kha_graphics4_VertexShader(blobs61,["painter-colored.vert.d3d11"]);
 	var blobs62 = [];
-	var data62 = Reflect.field(kha_Shaders,"smaa_edge_detect_fragData" + 0);
+	var data62 = Reflect.field(kha_Shaders,"painter_image_fragData" + 0);
 	var bytes62 = haxe_Unserializer.run(data62);
 	blobs62.push(kha_internal_BytesBlob.fromBytes(bytes62));
-	kha_Shaders.smaa_edge_detect_frag = new kha_graphics4_FragmentShader(blobs62,["smaa_edge_detect.frag.d3d11"]);
+	kha_Shaders.painter_image_frag = new kha_graphics4_FragmentShader(blobs62,["painter-image.frag.d3d11"]);
 	var blobs63 = [];
-	var data63 = Reflect.field(kha_Shaders,"smaa_edge_detect_vertData" + 0);
+	var data63 = Reflect.field(kha_Shaders,"painter_image_vertData" + 0);
 	var bytes63 = haxe_Unserializer.run(data63);
 	blobs63.push(kha_internal_BytesBlob.fromBytes(bytes63));
-	kha_Shaders.smaa_edge_detect_vert = new kha_graphics4_VertexShader(blobs63,["smaa_edge_detect.vert.d3d11"]);
+	kha_Shaders.painter_image_vert = new kha_graphics4_VertexShader(blobs63,["painter-image.vert.d3d11"]);
 	var blobs64 = [];
-	var data64 = Reflect.field(kha_Shaders,"smaa_neighborhood_blend_fragData" + 0);
+	var data64 = Reflect.field(kha_Shaders,"painter_text_fragData" + 0);
 	var bytes64 = haxe_Unserializer.run(data64);
 	blobs64.push(kha_internal_BytesBlob.fromBytes(bytes64));
-	kha_Shaders.smaa_neighborhood_blend_frag = new kha_graphics4_FragmentShader(blobs64,["smaa_neighborhood_blend.frag.d3d11"]);
+	kha_Shaders.painter_text_frag = new kha_graphics4_FragmentShader(blobs64,["painter-text.frag.d3d11"]);
 	var blobs65 = [];
-	var data65 = Reflect.field(kha_Shaders,"smaa_neighborhood_blend_vertData" + 0);
+	var data65 = Reflect.field(kha_Shaders,"painter_text_vertData" + 0);
 	var bytes65 = haxe_Unserializer.run(data65);
 	blobs65.push(kha_internal_BytesBlob.fromBytes(bytes65));
-	kha_Shaders.smaa_neighborhood_blend_vert = new kha_graphics4_VertexShader(blobs65,["smaa_neighborhood_blend.vert.d3d11"]);
+	kha_Shaders.painter_text_vert = new kha_graphics4_VertexShader(blobs65,["painter-text.vert.d3d11"]);
 	var blobs66 = [];
-	var data66 = Reflect.field(kha_Shaders,"ssao_pass_fragData" + 0);
+	var data66 = Reflect.field(kha_Shaders,"painter_video_fragData" + 0);
 	var bytes66 = haxe_Unserializer.run(data66);
 	blobs66.push(kha_internal_BytesBlob.fromBytes(bytes66));
-	kha_Shaders.ssao_pass_frag = new kha_graphics4_FragmentShader(blobs66,["ssao_pass.frag.d3d11"]);
+	kha_Shaders.painter_video_frag = new kha_graphics4_FragmentShader(blobs66,["painter-video.frag.d3d11"]);
 	var blobs67 = [];
-	var data67 = Reflect.field(kha_Shaders,"translucent_resolve_fragData" + 0);
+	var data67 = Reflect.field(kha_Shaders,"painter_video_vertData" + 0);
 	var bytes67 = haxe_Unserializer.run(data67);
 	blobs67.push(kha_internal_BytesBlob.fromBytes(bytes67));
-	kha_Shaders.translucent_resolve_frag = new kha_graphics4_FragmentShader(blobs67,["translucent_resolve.frag.d3d11"]);
+	kha_Shaders.painter_video_vert = new kha_graphics4_VertexShader(blobs67,["painter-video.vert.d3d11"]);
+	var blobs68 = [];
+	var data68 = Reflect.field(kha_Shaders,"pass_vertData" + 0);
+	var bytes68 = haxe_Unserializer.run(data68);
+	blobs68.push(kha_internal_BytesBlob.fromBytes(bytes68));
+	kha_Shaders.pass_vert = new kha_graphics4_VertexShader(blobs68,["pass.vert.d3d11"]);
+	var blobs69 = [];
+	var data69 = Reflect.field(kha_Shaders,"pass_viewray_vertData" + 0);
+	var bytes69 = haxe_Unserializer.run(data69);
+	blobs69.push(kha_internal_BytesBlob.fromBytes(bytes69));
+	kha_Shaders.pass_viewray_vert = new kha_graphics4_VertexShader(blobs69,["pass_viewray.vert.d3d11"]);
+	var blobs70 = [];
+	var data70 = Reflect.field(kha_Shaders,"smaa_blend_weight_fragData" + 0);
+	var bytes70 = haxe_Unserializer.run(data70);
+	blobs70.push(kha_internal_BytesBlob.fromBytes(bytes70));
+	kha_Shaders.smaa_blend_weight_frag = new kha_graphics4_FragmentShader(blobs70,["smaa_blend_weight.frag.d3d11"]);
+	var blobs71 = [];
+	var data71 = Reflect.field(kha_Shaders,"smaa_blend_weight_vertData" + 0);
+	var bytes71 = haxe_Unserializer.run(data71);
+	blobs71.push(kha_internal_BytesBlob.fromBytes(bytes71));
+	kha_Shaders.smaa_blend_weight_vert = new kha_graphics4_VertexShader(blobs71,["smaa_blend_weight.vert.d3d11"]);
+	var blobs72 = [];
+	var data72 = Reflect.field(kha_Shaders,"smaa_edge_detect_fragData" + 0);
+	var bytes72 = haxe_Unserializer.run(data72);
+	blobs72.push(kha_internal_BytesBlob.fromBytes(bytes72));
+	kha_Shaders.smaa_edge_detect_frag = new kha_graphics4_FragmentShader(blobs72,["smaa_edge_detect.frag.d3d11"]);
+	var blobs73 = [];
+	var data73 = Reflect.field(kha_Shaders,"smaa_edge_detect_vertData" + 0);
+	var bytes73 = haxe_Unserializer.run(data73);
+	blobs73.push(kha_internal_BytesBlob.fromBytes(bytes73));
+	kha_Shaders.smaa_edge_detect_vert = new kha_graphics4_VertexShader(blobs73,["smaa_edge_detect.vert.d3d11"]);
+	var blobs74 = [];
+	var data74 = Reflect.field(kha_Shaders,"smaa_neighborhood_blend_fragData" + 0);
+	var bytes74 = haxe_Unserializer.run(data74);
+	blobs74.push(kha_internal_BytesBlob.fromBytes(bytes74));
+	kha_Shaders.smaa_neighborhood_blend_frag = new kha_graphics4_FragmentShader(blobs74,["smaa_neighborhood_blend.frag.d3d11"]);
+	var blobs75 = [];
+	var data75 = Reflect.field(kha_Shaders,"smaa_neighborhood_blend_vertData" + 0);
+	var bytes75 = haxe_Unserializer.run(data75);
+	blobs75.push(kha_internal_BytesBlob.fromBytes(bytes75));
+	kha_Shaders.smaa_neighborhood_blend_vert = new kha_graphics4_VertexShader(blobs75,["smaa_neighborhood_blend.vert.d3d11"]);
+	var blobs76 = [];
+	var data76 = Reflect.field(kha_Shaders,"ssao_pass_fragData" + 0);
+	var bytes76 = haxe_Unserializer.run(data76);
+	blobs76.push(kha_internal_BytesBlob.fromBytes(bytes76));
+	kha_Shaders.ssao_pass_frag = new kha_graphics4_FragmentShader(blobs76,["ssao_pass.frag.d3d11"]);
+	var blobs77 = [];
+	var data77 = Reflect.field(kha_Shaders,"translucent_resolve_fragData" + 0);
+	var bytes77 = haxe_Unserializer.run(data77);
+	blobs77.push(kha_internal_BytesBlob.fromBytes(bytes77));
+	kha_Shaders.translucent_resolve_frag = new kha_graphics4_FragmentShader(blobs77,["translucent_resolve.frag.d3d11"]);
 };
 var kha_Sound = function() {
 	this.sampleRate = 0;
@@ -49421,7 +55359,7 @@ zui_Ext.colorWheel = function(ui,handle,alpha,w,colorPreview) {
 	if(colorPreview) {
 		ui.text("",2,handle.color);
 	}
-	var pos = zui_Ext.inlineRadio(ui,zui_Handle.global.nest(34,null),["RGB","HSV","Hex"]);
+	var pos = zui_Ext.inlineRadio(ui,zui_Handle.global.nest(0,null),["RGB","HSV","Hex"]);
 	var h0 = handle.nest(0).nest(0);
 	var h1 = handle.nest(0).nest(1);
 	var h2 = handle.nest(0).nest(2);
@@ -50028,2052 +55966,6 @@ zui_Popup.init = function(mx,my,mw,mh) {
 var zui_Themes = function() { };
 $hxClasses["zui.Themes"] = zui_Themes;
 zui_Themes.__name__ = "zui.Themes";
-var zui_Zui = function(ops) {
-	this.checkSelectImage = null;
-	this.elementsBaked = false;
-	this.scissor = false;
-	this.sticky = false;
-	this.tabVertical = false;
-	this.tabScroll = 0.0;
-	this.tabHandle = null;
-	this.tabColors = null;
-	this.tabNames = null;
-	this.tooltipTime = 0.0;
-	this.tooltipWait = false;
-	this.tooltipShown = false;
-	this.tooltipY = 0.0;
-	this.tooltipX = 0.0;
-	this.tooltipInvertY = false;
-	this.tooltipImgMaxWidth = null;
-	this.tooltipImg = null;
-	this.tooltipText = "";
-	this.comboToSubmit = 0;
-	this.submitComboHandle = null;
-	this.comboSelectedWindow = null;
-	this.comboSelectedHandle = null;
-	this.tabPressedHandle = null;
-	this.tabPressed = false;
-	this.textToSubmit = "";
-	this.submitTextHandle = null;
-	this.textSelectedHandle = null;
-	this.restoreY = -1.0;
-	this.restoreX = -1.0;
-	this.windowHeaderH = 0.0;
-	this.windowHeaderW = 0.0;
-	this.dragHandle = null;
-	this.scrollHandle = null;
-	this.windowEnded = true;
-	this._windowY = 0.0;
-	this._windowX = 0.0;
-	this.imageScrollAlign = true;
-	this.scrollAlign = 0.0;
-	this.curRatio = -1;
-	this.highlightAnchor = 0;
-	this.cursorX = 0;
-	this.inputStartedTime = 0.0;
-	this.key = null;
-	this.isReturnDown = false;
-	this.isEscapeDown = false;
-	this.isDeleteDown = false;
-	this.isBackspaceDown = false;
-	this.isADown = false;
-	this.isAltDown = false;
-	this.isCtrlDown = false;
-	this.isShiftDown = false;
-	this.isKeyDown = false;
-	this.isKeyPressed = false;
-	this.inputWheelDelta = 0;
-	this.inputEnabled = true;
-	this.inputRegistered = false;
-	this.touchHold = false;
-	this.highlightFullRow = false;
-	this.tabSwitchEnabled = true;
-	this.highlightOnSelect = true;
-	this.alwaysRedraw = false;
-	this.scrollEnabled = true;
-	this.imageInvertY = false;
-	this.changed = false;
-	this.isReleased = false;
-	this.isHovered = false;
-	this.isPushed = false;
-	this.isStarted = false;
-	this.enabled = true;
-	this.isTyping = false;
-	this.isScrolling = false;
-	if(ops.theme == null) {
-		ops.theme = zui_Themes.dark;
-	}
-	this.t = ops.theme;
-	if(ops.khaWindowId == null) {
-		ops.khaWindowId = 0;
-	}
-	if(ops.scaleFactor == null) {
-		ops.scaleFactor = 1.0;
-	}
-	if(ops.autoNotifyInput == null) {
-		ops.autoNotifyInput = true;
-	}
-	this.ops = ops;
-	this.setScale(ops.scaleFactor);
-	if(ops.autoNotifyInput) {
-		this.registerInput();
-	}
-	if(zui_Zui.copyReceiver == null) {
-		zui_Zui.copyReceiver = this;
-		kha_System.notifyOnCutCopyPaste($bind(this,this.onCut),$bind(this,this.onCopy),$bind(this,this.onPaste));
-		kha_System.notifyOnFrames(function(frames) {
-			if((zui_Zui.isCopy || zui_Zui.isPaste) && ++zui_Zui.copyFrame > 1) {
-				zui_Zui.isCopy = zui_Zui.isCut = zui_Zui.isPaste = false;
-				zui_Zui.copyFrame = 0;
-			}
-		});
-	}
-	var rtTextVS = kha_graphics4_Graphics2.createTextVertexStructure();
-	this.rtTextPipeline = kha_graphics4_Graphics2.createTextPipeline(rtTextVS);
-	this.rtTextPipeline.alphaBlendSource = 1;
-	this.rtTextPipeline.compile();
-};
-$hxClasses["zui.Zui"] = zui_Zui;
-zui_Zui.__name__ = "zui.Zui";
-zui_Zui.clampi = function(value,min,max) {
-	if(value < min) {
-		return min;
-	} else if(value > max) {
-		return max;
-	} else {
-		return value;
-	}
-};
-zui_Zui.prototype = {
-	isScrolling: null
-	,isTyping: null
-	,enabled: null
-	,isStarted: null
-	,isPushed: null
-	,isHovered: null
-	,isReleased: null
-	,changed: null
-	,imageInvertY: null
-	,scrollEnabled: null
-	,alwaysRedraw: null
-	,highlightOnSelect: null
-	,tabSwitchEnabled: null
-	,highlightFullRow: null
-	,touchHold: null
-	,inputRegistered: null
-	,inputEnabled: null
-	,inputX: null
-	,inputY: null
-	,inputStartedX: null
-	,inputStartedY: null
-	,inputDX: null
-	,inputDY: null
-	,inputWheelDelta: null
-	,inputStarted: null
-	,inputStartedR: null
-	,inputReleased: null
-	,inputReleasedR: null
-	,inputDown: null
-	,inputDownR: null
-	,isKeyPressed: null
-	,isKeyDown: null
-	,isShiftDown: null
-	,isCtrlDown: null
-	,isAltDown: null
-	,isADown: null
-	,isBackspaceDown: null
-	,isDeleteDown: null
-	,isEscapeDown: null
-	,isReturnDown: null
-	,key: null
-	,char: null
-	,inputStartedTime: null
-	,cursorX: null
-	,highlightAnchor: null
-	,ratios: null
-	,curRatio: null
-	,xBeforeSplit: null
-	,wBeforeSplit: null
-	,g: null
-	,t: null
-	,ops: null
-	,globalG: null
-	,rtTextPipeline: null
-	,fontSize: null
-	,fontOffsetY: null
-	,arrowOffsetX: null
-	,arrowOffsetY: null
-	,titleOffsetX: null
-	,buttonOffsetY: null
-	,checkOffsetX: null
-	,checkOffsetY: null
-	,checkSelectOffsetX: null
-	,checkSelectOffsetY: null
-	,radioOffsetX: null
-	,radioOffsetY: null
-	,radioSelectOffsetX: null
-	,radioSelectOffsetY: null
-	,scrollAlign: null
-	,imageScrollAlign: null
-	,_x: null
-	,_y: null
-	,_w: null
-	,_h: null
-	,_windowX: null
-	,_windowY: null
-	,_windowW: null
-	,_windowH: null
-	,currentWindow: null
-	,windowEnded: null
-	,scrollHandle: null
-	,dragHandle: null
-	,windowHeaderW: null
-	,windowHeaderH: null
-	,restoreX: null
-	,restoreY: null
-	,textSelectedHandle: null
-	,textSelected: null
-	,submitTextHandle: null
-	,textToSubmit: null
-	,tabPressed: null
-	,tabPressedHandle: null
-	,comboSelectedHandle: null
-	,comboSelectedWindow: null
-	,comboSelectedAlign: null
-	,comboSelectedTexts: null
-	,comboItemCount: null
-	,comboItemOffset: null
-	,comboSelectedLabel: null
-	,comboSelectedX: null
-	,comboSelectedY: null
-	,comboSelectedW: null
-	,submitComboHandle: null
-	,comboToSubmit: null
-	,tooltipText: null
-	,tooltipImg: null
-	,tooltipImgMaxWidth: null
-	,tooltipInvertY: null
-	,tooltipX: null
-	,tooltipY: null
-	,tooltipShown: null
-	,tooltipWait: null
-	,tooltipTime: null
-	,tabNames: null
-	,tabColors: null
-	,tabHandle: null
-	,tabScroll: null
-	,tabVertical: null
-	,sticky: null
-	,scissor: null
-	,elementsBaked: null
-	,checkSelectImage: null
-	,setScale: function(factor) {
-		this.ops.scaleFactor = factor;
-		this.fontSize = this.t.FONT_SIZE * this.ops.scaleFactor | 0;
-		var fontHeight = this.ops.font.height(this.fontSize);
-		this.fontOffsetY = (this.t.ELEMENT_H * this.ops.scaleFactor - fontHeight) / 2;
-		this.arrowOffsetY = (this.t.ELEMENT_H * this.ops.scaleFactor - this.t.ARROW_SIZE * this.ops.scaleFactor) / 2;
-		this.arrowOffsetX = this.arrowOffsetY;
-		this.titleOffsetX = (this.arrowOffsetX * 2 + this.t.ARROW_SIZE * this.ops.scaleFactor) / this.ops.scaleFactor;
-		this.buttonOffsetY = (this.t.ELEMENT_H * this.ops.scaleFactor - this.t.BUTTON_H * this.ops.scaleFactor) / 2;
-		this.checkOffsetY = (this.t.ELEMENT_H * this.ops.scaleFactor - this.t.CHECK_SIZE * this.ops.scaleFactor) / 2;
-		this.checkOffsetX = this.checkOffsetY;
-		this.checkSelectOffsetY = (this.t.CHECK_SIZE * this.ops.scaleFactor - this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor) / 2;
-		this.checkSelectOffsetX = this.checkSelectOffsetY;
-		this.radioOffsetY = (this.t.ELEMENT_H * this.ops.scaleFactor - this.t.CHECK_SIZE * this.ops.scaleFactor) / 2;
-		this.radioOffsetX = this.radioOffsetY;
-		this.radioSelectOffsetY = (this.t.CHECK_SIZE * this.ops.scaleFactor - this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor) / 2;
-		this.radioSelectOffsetX = this.radioSelectOffsetY;
-		this.elementsBaked = false;
-	}
-	,bakeElements: function() {
-		if(this.checkSelectImage != null) {
-			this.checkSelectImage.unload();
-		}
-		this.checkSelectImage = kha_Image.createRenderTarget(this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor | 0,this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor | 0,null,0,1,this.ops.khaWindowId);
-		var g = this.checkSelectImage.get_g2();
-		g.begin(true,0);
-		g.set_color(this.t.ACCENT_SELECT_COL);
-		g.drawLine(0,0,this.checkSelectImage.get_width(),this.checkSelectImage.get_height(),2 * this.ops.scaleFactor);
-		g.drawLine(this.checkSelectImage.get_width(),0,0,this.checkSelectImage.get_height(),2 * this.ops.scaleFactor);
-		g.end();
-		this.elementsBaked = true;
-	}
-	,remove: function() {
-		if(this.ops.autoNotifyInput) {
-			this.unregisterInput();
-		}
-	}
-	,registerInput: function() {
-		var _gthis = this;
-		kha_input_Mouse.get().notifyWindowed(this.ops.khaWindowId,$bind(this,this.onMouseDown),$bind(this,this.onMouseUp),$bind(this,this.onMouseMove),$bind(this,this.onMouseWheel));
-		kha_input_Keyboard.get().notify($bind(this,this.onKeyDown),$bind(this,this.onKeyUp),$bind(this,this.onKeyPress));
-		kha_System.notifyOnApplicationState(function() {
-			_gthis.inputDX = _gthis.inputDY = 0;
-		},null,null,null,null);
-		this.inputRegistered = true;
-	}
-	,unregisterInput: function() {
-		kha_input_Mouse.get().removeWindowed(this.ops.khaWindowId,$bind(this,this.onMouseDown),$bind(this,this.onMouseUp),$bind(this,this.onMouseMove),$bind(this,this.onMouseWheel));
-		kha_input_Keyboard.get().remove($bind(this,this.onKeyDown),$bind(this,this.onKeyUp),$bind(this,this.onKeyPress));
-		this.endInput();
-		this.inputX = this.inputY = 0;
-		this.inputRegistered = false;
-	}
-	,begin: function(g) {
-		if(!this.elementsBaked) {
-			this.bakeElements();
-		}
-		this.changed = false;
-		this.globalG = g;
-		this._x = 0;
-		this._y = 0;
-		this._w = 0;
-		this._h = 0;
-	}
-	,end: function(last) {
-		if(last == null) {
-			last = true;
-		}
-		if(!this.windowEnded) {
-			this.endWindow();
-		}
-		this.drawCombo();
-		this.drawTooltip();
-		this.tabPressedHandle = null;
-		if(last) {
-			this.endInput();
-		}
-	}
-	,beginRegion: function(g,x,y,w) {
-		if(!this.elementsBaked) {
-			g.end();
-			this.bakeElements();
-			g.begin(false);
-		}
-		this.changed = false;
-		this.globalG = g;
-		this.g = g;
-		this.currentWindow = null;
-		this.tooltipText = "";
-		this.tooltipImg = null;
-		this._windowX = 0;
-		this._windowY = 0;
-		this._windowW = w;
-		this._x = x;
-		this._y = y;
-		this._w = w;
-	}
-	,endRegion: function(last) {
-		if(last == null) {
-			last = true;
-		}
-		this.drawTooltip();
-		this.tabPressedHandle = null;
-		if(last) {
-			this.endInput();
-		}
-	}
-	,beginSticky: function() {
-		this.sticky = true;
-		this._y -= this.currentWindow.scrollOffset;
-	}
-	,endSticky: function() {
-		this.sticky = false;
-		this.scissor = true;
-		this.g.scissor(0,this._y | 0,this._windowW | 0,this._windowH - this._y | 0);
-		this.windowHeaderH += this._y - this.windowHeaderH;
-		this._y += this.currentWindow.scrollOffset;
-	}
-	,endInput: function() {
-		this.isKeyPressed = false;
-		this.inputStarted = false;
-		this.inputStartedR = false;
-		this.inputReleased = false;
-		this.inputReleasedR = false;
-		this.inputDX = 0;
-		this.inputDY = 0;
-		this.inputWheelDelta = 0;
-		zui_Zui.textToPaste = "";
-		if(zui_Zui.keyRepeat && this.isKeyDown && kha_Scheduler.time() - zui_Zui.keyRepeatTime > 0.05) {
-			if(this.key == 8 || this.key == 46 || this.key == 37 || this.key == 39 || this.key == 38 || this.key == 40) {
-				zui_Zui.keyRepeatTime = kha_Scheduler.time();
-				this.isKeyPressed = true;
-			}
-		}
-		if(zui_Zui.touchControls && this.inputDown && this.inputX == this.inputStartedX && this.inputY == this.inputStartedY && this.inputStartedTime > 0 && kha_Scheduler.time() - this.inputStartedTime > 0.5) {
-			this.touchHold = true;
-			this.inputStartedTime = 0;
-		}
-	}
-	,inputChanged: function() {
-		if(!(this.inputDX != 0 || this.inputDY != 0 || this.inputWheelDelta != 0 || this.inputStarted || this.inputStartedR || this.inputReleased || this.inputReleasedR || this.inputDown || this.inputDownR)) {
-			return this.isKeyPressed;
-		} else {
-			return true;
-		}
-	}
-	,windowDirty: function(handle,x,y,w,h) {
-		var wx = x + handle.dragX;
-		var wy = y + handle.dragY;
-		var inputChanged = this.getInputInRect(wx,wy,w,h) && this.inputChanged();
-		if(!(this.alwaysRedraw || this.isScrolling || this.isTyping)) {
-			return inputChanged;
-		} else {
-			return true;
-		}
-	}
-	,window: function(handle,x,y,w,h,drag) {
-		if(drag == null) {
-			drag = false;
-		}
-		if(handle.texture == null || w != handle.texture.get_width() || h != handle.texture.get_height()) {
-			this.resize(handle,w,h,this.ops.khaWindowId);
-		}
-		if(!this.windowEnded) {
-			this.endWindow();
-		}
-		this.windowEnded = false;
-		this.g = handle.texture.get_g2();
-		this.currentWindow = handle;
-		this._windowX = x + handle.dragX;
-		this._windowY = y + handle.dragY;
-		this._windowW = w;
-		this._windowH = h;
-		this.windowHeaderW = 0;
-		this.windowHeaderH = 0;
-		if(this.windowDirty(handle,x,y,w,h)) {
-			handle.redraws = 2;
-		}
-		if(zui_Zui.onBorderHover != null) {
-			if(this.getInputInRect(this._windowX - 4,this._windowY,8,this._windowH)) {
-				zui_Zui.onBorderHover(handle,0);
-			} else if(this.getInputInRect(this._windowX + this._windowW - 4,this._windowY,8,this._windowH)) {
-				zui_Zui.onBorderHover(handle,1);
-			} else if(this.getInputInRect(this._windowX,this._windowY - 4,this._windowW,8)) {
-				zui_Zui.onBorderHover(handle,2);
-			} else if(this.getInputInRect(this._windowX,this._windowY + this._windowH - 4,this._windowW,8)) {
-				zui_Zui.onBorderHover(handle,3);
-			}
-		}
-		if(handle.redraws <= 0) {
-			return false;
-		}
-		this._x = 0;
-		this._y = handle.scrollOffset;
-		if(handle.layout == 1) {
-			w = this.t.ELEMENT_W * this.ops.scaleFactor | 0;
-		}
-		this._w = !handle.scrollEnabled ? w : w - (this.t.SCROLL_W * this.ops.scaleFactor | 0);
-		this._h = h;
-		this.tooltipText = "";
-		this.tooltipImg = null;
-		this.tabNames = null;
-		if(this.t.FILL_WINDOW_BG) {
-			this.g.begin(true,this.t.WINDOW_BG_COL);
-		} else {
-			this.g.begin(true,0);
-			this.g.set_color(this.t.WINDOW_BG_COL);
-			this.g.fillRect(this._x,this._y - handle.scrollOffset,handle.lastMaxX,handle.lastMaxY);
-		}
-		handle.dragEnabled = drag;
-		if(drag) {
-			if(this.inputStarted && this.getInputInRect(this._windowX,this._windowY,this._windowW,15 * this.ops.scaleFactor | 0)) {
-				this.dragHandle = handle;
-			} else if(this.inputReleased) {
-				this.dragHandle = null;
-			}
-			if(handle == this.dragHandle) {
-				handle.redraws = 2;
-				handle.dragX += this.inputDX | 0;
-				handle.dragY += this.inputDY | 0;
-			}
-			this._y += 15 * this.ops.scaleFactor | 0;
-			this.windowHeaderH += 15 * this.ops.scaleFactor | 0;
-		}
-		return true;
-	}
-	,endWindow: function(bindGlobalG) {
-		if(bindGlobalG == null) {
-			bindGlobalG = true;
-		}
-		var handle = this.currentWindow;
-		if(handle == null) {
-			return;
-		}
-		if(handle.redraws > 0 || this.isScrolling || this.isTyping) {
-			if(this.scissor) {
-				this.scissor = false;
-				this.g.disableScissor();
-			}
-			if(this.tabNames != null) {
-				this.drawTabs();
-			}
-			if(handle.dragEnabled) {
-				this.g.set_color(this.t.SEPARATOR_COL);
-				this.g.fillRect(0,0,this._windowW,15 * this.ops.scaleFactor | 0);
-			}
-			var wh = this._windowH - this.windowHeaderH;
-			var fullHeight = this._y - handle.scrollOffset - this.windowHeaderH;
-			if(fullHeight < wh || handle.layout == 1 || !this.scrollEnabled) {
-				handle.scrollEnabled = false;
-				handle.scrollOffset = 0;
-			} else {
-				handle.scrollEnabled = true;
-				if(this.tabScroll < 0) {
-					handle.scrollOffset = this.tabScroll;
-					this.tabScroll = 0;
-				}
-				var wy = this._windowY + this.windowHeaderH;
-				var amountToScroll = fullHeight - wh;
-				var amountScrolled = -handle.scrollOffset;
-				var ratio = amountScrolled / amountToScroll;
-				var barH = wh * Math.abs(wh / fullHeight);
-				barH = Math.max(barH,this.t.ELEMENT_H * this.ops.scaleFactor);
-				var totalScrollableArea = wh - barH;
-				var e = amountToScroll / totalScrollableArea;
-				var barY = totalScrollableArea * ratio + this.windowHeaderH;
-				var barFocus = this.getInputInRect(this._windowX + this._windowW - (this.t.SCROLL_W * this.ops.scaleFactor | 0),barY + this._windowY,this.t.SCROLL_W * this.ops.scaleFactor | 0,barH);
-				if(this.inputStarted && barFocus) {
-					this.scrollHandle = handle;
-					this.isScrolling = true;
-				}
-				var scrollDelta = this.inputWheelDelta;
-				if(zui_Zui.touchControls && this.inputDownR && this.inputDY != 0) {
-					this.isScrolling = true;
-					scrollDelta = -this.inputDY / 20;
-				}
-				if(handle == this.scrollHandle) {
-					this.scroll(this.inputDY * e,fullHeight);
-				} else if(scrollDelta != 0 && this.comboSelectedHandle == null && this.getInputInRect(this._windowX,wy,this._windowW,wh)) {
-					this.scroll(scrollDelta * (this.t.ELEMENT_H * this.ops.scaleFactor),fullHeight);
-				}
-				if(handle.scrollOffset > 0) {
-					handle.scrollOffset = 0;
-				} else if(fullHeight + handle.scrollOffset < wh) {
-					handle.scrollOffset = wh - fullHeight;
-				}
-				this.g.set_color(this.t.WINDOW_BG_COL);
-				this.g.fillRect(this._windowW - (this.t.SCROLL_W * this.ops.scaleFactor | 0),wy,this.t.SCROLL_W * this.ops.scaleFactor | 0,wh);
-				this.g.set_color(this.t.ACCENT_COL);
-				var scrollbarFocus = this.getInputInRect(this._windowX + this._windowW - (this.t.SCROLL_W * this.ops.scaleFactor | 0),wy,this.t.SCROLL_W * this.ops.scaleFactor | 0,wh);
-				var barW = scrollbarFocus || handle == this.scrollHandle ? this.t.SCROLL_W * this.ops.scaleFactor | 0 : (this.t.SCROLL_W * this.ops.scaleFactor | 0) / 3;
-				this.g.fillRect(this._windowW - barW - this.scrollAlign,barY,barW,barH);
-			}
-			handle.lastMaxX = this._x;
-			handle.lastMaxY = this._y;
-			if(handle.layout == 0) {
-				handle.lastMaxX += this._windowW;
-			} else {
-				handle.lastMaxY += this._windowH;
-			}
-			handle.redraws--;
-			this.g.end();
-		}
-		this.windowEnded = true;
-		if(zui_Zui.alwaysRedrawWindow || handle.redraws > -4) {
-			if(bindGlobalG) {
-				this.globalG.begin(false);
-			}
-			this.globalG.set_color(this.t.WINDOW_TINT_COL);
-			this.globalG.drawImage(handle.texture,this._windowX,this._windowY);
-			if(bindGlobalG) {
-				this.globalG.end();
-			}
-			if(handle.redraws <= 0) {
-				handle.redraws--;
-			}
-		}
-	}
-	,scroll: function(delta,fullHeight) {
-		this.currentWindow.scrollOffset -= delta;
-	}
-	,tab: function(handle,text,vertical,color) {
-		if(color == null) {
-			color = -1;
-		}
-		if(vertical == null) {
-			vertical = false;
-		}
-		if(this.tabNames == null) {
-			this.tabNames = [];
-			this.tabColors = [];
-			this.tabHandle = handle;
-			this.tabVertical = vertical;
-			this._w -= this.tabVertical ? this.t.ELEMENT_OFFSET * this.ops.scaleFactor + this.t.ELEMENT_W * this.ops.scaleFactor - this.ops.scaleFactor | 0 : 0;
-			if(vertical) {
-				this.windowHeaderW += this.t.ELEMENT_W * this.ops.scaleFactor;
-			} else {
-				this.windowHeaderH += this.t.BUTTON_H * this.ops.scaleFactor + this.buttonOffsetY + this.t.ELEMENT_OFFSET * this.ops.scaleFactor;
-			}
-			this.restoreX = this.inputX;
-			this.restoreY = this.inputY;
-			if(!vertical && this.getInputInRect(this._windowX,this._windowY,this._windowW,this.windowHeaderH)) {
-				this.inputX = this.inputY = -1;
-			}
-			if(vertical) {
-				this._x += this.windowHeaderW + 6;
-				this._w -= 6;
-			} else {
-				this._y += this.windowHeaderH + 3;
-			}
-		}
-		this.tabNames.push(text);
-		this.tabColors.push(color);
-		return handle.position == this.tabNames.length - 1;
-	}
-	,drawTabs: function() {
-		this.inputX = this.restoreX;
-		this.inputY = this.restoreY;
-		if(this.currentWindow == null) {
-			return;
-		}
-		var tabX = 0.0;
-		var tabY = 0.0;
-		var tabH = this.t.BUTTON_H * this.ops.scaleFactor * 1.1 | 0;
-		var origy = this._y;
-		this._y = this.currentWindow.dragEnabled ? 15 * this.ops.scaleFactor | 0 : 0;
-		this.tabHandle.changed = false;
-		this.g.set_color(this.t.SEPARATOR_COL);
-		if(this.tabVertical) {
-			this.g.fillRect(0,this._y,this.t.ELEMENT_W * this.ops.scaleFactor,this._windowH);
-		} else {
-			this.g.fillRect(0,this._y,this._windowW,this.buttonOffsetY + tabH + 2);
-		}
-		this.g.set_color(this.t.ACCENT_COL);
-		if(this.tabVertical) {
-			this.g.fillRect(this.t.ELEMENT_W * this.ops.scaleFactor,this._y,1,this._windowH);
-		} else {
-			this.g.fillRect(this.buttonOffsetY,this._y + this.buttonOffsetY + tabH + 2,this._windowW - this.buttonOffsetY * 2,1);
-		}
-		var basey = this.tabVertical ? this._y : this._y + 2;
-		var _g = 0;
-		var _g1 = this.tabNames.length;
-		while(_g < _g1) {
-			var i = _g++;
-			this._x = tabX;
-			this._y = basey + tabY;
-			this._w = this.tabVertical ? this.t.ELEMENT_W * this.ops.scaleFactor - this.ops.scaleFactor | 0 : this.ops.font.width(this.fontSize,this.tabNames[i]) + this.buttonOffsetY * 2 + 18 * this.ops.scaleFactor | 0;
-			var released = this.getReleased();
-			var pushed = this.getPushed();
-			var hover = this.getHover();
-			if(released) {
-				var h = this.tabHandle.nest(this.tabHandle.position);
-				h.scrollOffset = this.currentWindow.scrollOffset;
-				h = this.tabHandle.nest(i);
-				this.tabScroll = h.scrollOffset;
-				this.tabHandle.position = i;
-				this.currentWindow.redraws = 3;
-				this.tabHandle.changed = true;
-			}
-			var selected = this.tabHandle.position == i;
-			this.g.set_color(pushed || hover ? this.t.BUTTON_HOVER_COL : this.tabColors[i] != -1 ? this.tabColors[i] : selected ? this.t.WINDOW_BG_COL : this.t.SEPARATOR_COL);
-			if(this.tabVertical) {
-				tabY += tabH + 1;
-			} else {
-				tabX += this._w + 1;
-			}
-			var g = this.g;
-			var x = this._x + this.buttonOffsetY;
-			var y = this._y + this.buttonOffsetY;
-			var w = this._w;
-			var strength = 0.0;
-			if(strength == 0.0) {
-				strength = 1;
-			}
-			if(!this.enabled) {
-				this.fadeColor();
-			}
-			g.fillRect(x,y - 1,w,tabH + 1);
-			this.g.set_color(selected ? this.t.BUTTON_TEXT_COL : this.t.LABEL_COL);
-			this.drawString(this.g,this.tabNames[i],this.t.TEXT_OFFSET,0,0);
-			if(selected && !this.tabVertical) {
-				this.g.set_color(this.t.WINDOW_BG_COL);
-				this.g.fillRect(this._x + this.buttonOffsetY + 1,this._y + this.buttonOffsetY + tabH,this._w - 1,1);
-			}
-		}
-		this._x = 0;
-		this._y = origy;
-		this._w = (!this.currentWindow.scrollEnabled ? this._windowW : this._windowW - (this.t.SCROLL_W * this.ops.scaleFactor | 0)) | 0;
-	}
-	,panel: function(handle,text,isTree,filled,pack) {
-		if(pack == null) {
-			pack = true;
-		}
-		if(filled == null) {
-			filled = true;
-		}
-		if(isTree == null) {
-			isTree = false;
-		}
-		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
-			this.endElement();
-			return handle.selected;
-		}
-		if(this.getReleased()) {
-			handle.selected = !handle.selected;
-			handle.changed = this.changed = true;
-		}
-		if(filled) {
-			this.g.set_color(this.t.PANEL_BG_COL);
-			var g = this.g;
-			var x = this._x;
-			var y = this._y;
-			var w = this._w;
-			var h = this.t.ELEMENT_H * this.ops.scaleFactor;
-			var strength = 0.0;
-			if(strength == 0.0) {
-				strength = 1;
-			}
-			if(!this.enabled) {
-				this.fadeColor();
-			}
-			g.fillRect(x,y - 1,w,h + 1);
-		}
-		if(isTree) {
-			this.drawTree(handle.selected);
-		} else {
-			this.drawArrow(handle.selected);
-		}
-		this.g.set_color(this.t.LABEL_COL);
-		this.g.set_opacity(1.0);
-		this.drawString(this.g,text,this.titleOffsetX,0);
-		this.endElement();
-		if(pack && !handle.selected) {
-			this._y -= this.t.ELEMENT_OFFSET * this.ops.scaleFactor;
-		}
-		return handle.selected;
-	}
-	,image: function(image,tint,h,sx,sy,sw,sh) {
-		if(sh == null) {
-			sh = 0;
-		}
-		if(sw == null) {
-			sw = 0;
-		}
-		if(sy == null) {
-			sy = 0;
-		}
-		if(sx == null) {
-			sx = 0;
-		}
-		if(tint == null) {
-			tint = -1;
-		}
-		var iw = (sw > 0 ? sw : image.get_width()) * this.ops.scaleFactor;
-		var ih = (sh > 0 ? sh : image.get_height()) * this.ops.scaleFactor;
-		var w = Math.min(iw,this._w);
-		var x = this._x;
-		var scroll = this.currentWindow != null && this.currentWindow.scrollEnabled;
-		var r;
-		if(this.curRatio == -1) {
-			r = 1.0;
-		} else {
-			var ratio = this.ratios[this.curRatio];
-			r = ratio < 0 ? -ratio : ratio;
-		}
-		if(this.imageScrollAlign) {
-			w = Math.min(iw,this._w - this.buttonOffsetY * 2);
-			x += this.buttonOffsetY;
-			if(!scroll) {
-				w -= (this.t.SCROLL_W * this.ops.scaleFactor | 0) * r;
-				x += (this.t.SCROLL_W * this.ops.scaleFactor | 0) * r / 2;
-			}
-		} else if(scroll) {
-			w += (this.t.SCROLL_W * this.ops.scaleFactor | 0) * r;
-		}
-		var ratio1 = h == null ? w / iw : h / ih;
-		if(h == null) {
-			h = ih * ratio1;
-		} else {
-			w = iw * ratio1;
-		}
-		if(!this.isVisible(h)) {
-			this.endElement(h);
-			return 0;
-		}
-		var started = this.getStarted(h);
-		var down = this.getPushed(h);
-		var released = this.getReleased(h);
-		var hover = this.getHover(h);
-		this.g.set_color(tint);
-		if(!this.enabled) {
-			this.fadeColor();
-		}
-		var h_float = h;
-		if(sw > 0) {
-			if(this.imageInvertY) {
-				this.g.drawScaledSubImage(image,sx,sy,sw,sh,x,this._y + h_float,w,-h_float);
-			} else {
-				this.g.drawScaledSubImage(image,sx,sy,sw,sh,x,this._y,w,h_float);
-			}
-		} else if(this.imageInvertY) {
-			this.g.drawScaledImage(image,x,this._y + h_float,w,-h_float);
-		} else {
-			this.g.drawScaledImage(image,x,this._y,w,h_float);
-		}
-		this.endElement(h);
-		if(started) {
-			return 1;
-		} else if(released) {
-			return 3;
-		} else if(down) {
-			return 2;
-		} else if(hover) {
-			return 4;
-		} else {
-			return 0;
-		}
-	}
-	,text: function(text,align,bg) {
-		if(bg == null) {
-			bg = 0;
-		}
-		if(align == null) {
-			align = 0;
-		}
-		if(text.indexOf("\n") >= 0) {
-			var align1 = align;
-			var bg1 = bg;
-			if(bg1 == null) {
-				bg1 = 0;
-			}
-			if(align1 == null) {
-				align1 = 0;
-			}
-			var _g = 0;
-			var _g1 = text.split("\n");
-			while(_g < _g1.length) {
-				var line = _g1[_g];
-				++_g;
-				this.text(line,align1,bg1);
-			}
-			return 0;
-		}
-		var h = Math.max(this.t.ELEMENT_H * this.ops.scaleFactor,this.ops.font.height(this.fontSize));
-		if(!this.isVisible(h)) {
-			this.endElement(h + this.t.ELEMENT_OFFSET * this.ops.scaleFactor);
-			return 0;
-		}
-		var started = this.getStarted(h);
-		var down = this.getPushed(h);
-		var released = this.getReleased(h);
-		var hover = this.getHover(h);
-		if(bg != 0) {
-			this.g.set_color(bg);
-			this.g.fillRect(this._x + this.buttonOffsetY,this._y + this.buttonOffsetY,this._w - this.buttonOffsetY * 2,this.t.BUTTON_H * this.ops.scaleFactor);
-		}
-		this.g.set_color(this.t.TEXT_COL);
-		this.drawString(this.g,text,this.t.TEXT_OFFSET * this.ops.scaleFactor,0,align);
-		this.endElement(h + this.t.ELEMENT_OFFSET * this.ops.scaleFactor);
-		if(started) {
-			return 1;
-		} else if(released) {
-			return 3;
-		} else if(down) {
-			return 2;
-		} else {
-			return 0;
-		}
-	}
-	,splitText: function(lines,align,bg) {
-		if(bg == null) {
-			bg = 0;
-		}
-		if(align == null) {
-			align = 0;
-		}
-		var _g = 0;
-		var _g1 = lines.split("\n");
-		while(_g < _g1.length) {
-			var line = _g1[_g];
-			++_g;
-			this.text(line,align,bg);
-		}
-	}
-	,startTextEdit: function(handle) {
-		this.isTyping = true;
-		this.submitTextHandle = this.textSelectedHandle;
-		this.textToSubmit = this.textSelected;
-		this.textSelectedHandle = handle;
-		this.textSelected = handle.text;
-		this.cursorX = handle.text.length;
-		if(this.tabPressed) {
-			this.tabPressed = false;
-			this.isKeyPressed = false;
-		} else if(!this.highlightOnSelect) {
-			var x = this.inputX - (this._windowX + this._x + this.t.TEXT_OFFSET * this.ops.scaleFactor);
-			this.cursorX = 0;
-			while(this.cursorX < this.textSelected.length && this.ops.font.width(this.fontSize,HxOverrides.substr(this.textSelected,0,this.cursorX)) < x) this.cursorX++;
-		}
-		this.tabPressedHandle = handle;
-		this.highlightAnchor = this.highlightOnSelect ? 0 : this.cursorX;
-		if(kha_input_Keyboard.get() != null) {
-			kha_input_Keyboard.get().show();
-		}
-	}
-	,submitTextEdit: function() {
-		this.submitTextHandle.text = this.textToSubmit;
-		this.submitTextHandle.changed = this.changed = true;
-		this.submitTextHandle = null;
-		this.textToSubmit = "";
-		this.textSelected = "";
-	}
-	,updateTextEdit: function(align,editable) {
-		if(editable == null) {
-			editable = true;
-		}
-		if(align == null) {
-			align = 0;
-		}
-		var text = this.textSelected;
-		if(this.isKeyPressed) {
-			if(this.key == 37) {
-				if(this.cursorX > 0) {
-					this.cursorX--;
-				}
-			} else if(this.key == 39) {
-				if(this.cursorX < text.length) {
-					this.cursorX++;
-				}
-			} else if(editable && this.key == 8) {
-				if(this.cursorX > 0 && this.highlightAnchor == this.cursorX) {
-					text = HxOverrides.substr(text,0,this.cursorX - 1) + HxOverrides.substr(text,this.cursorX,text.length);
-					this.cursorX--;
-				} else if(this.highlightAnchor < this.cursorX) {
-					text = HxOverrides.substr(text,0,this.highlightAnchor) + HxOverrides.substr(text,this.cursorX,text.length);
-					this.cursorX = this.highlightAnchor;
-				} else {
-					text = HxOverrides.substr(text,0,this.cursorX) + HxOverrides.substr(text,this.highlightAnchor,text.length);
-				}
-			} else if(editable && this.key == 46) {
-				if(this.highlightAnchor == this.cursorX) {
-					text = HxOverrides.substr(text,0,this.cursorX) + HxOverrides.substr(text,this.cursorX + 1,null);
-				} else if(this.highlightAnchor < this.cursorX) {
-					text = HxOverrides.substr(text,0,this.highlightAnchor) + HxOverrides.substr(text,this.cursorX,text.length);
-					this.cursorX = this.highlightAnchor;
-				} else {
-					text = HxOverrides.substr(text,0,this.cursorX) + HxOverrides.substr(text,this.highlightAnchor,text.length);
-				}
-			} else if(this.key == 13) {
-				this.deselectText();
-			} else if(this.key == 27) {
-				this.textSelected = this.textSelectedHandle.text;
-				this.deselectText();
-			} else if(this.key == 9 && this.tabSwitchEnabled) {
-				this.tabPressed = true;
-				this.deselectText();
-				this.key = null;
-			} else if(this.key == 36) {
-				this.cursorX = 0;
-			} else if(this.key == 35) {
-				this.cursorX = text.length;
-			} else if(this.isCtrlDown && this.isADown) {
-				this.cursorX = text.length;
-				this.highlightAnchor = 0;
-			} else if(editable && this.key != 16 && this.key != 20 && this.key != 17 && this.key != 224 && this.key != 18 && this.key != 38 && this.key != 40 && this.char != null && this.char != "" && HxOverrides.cca(this.char,0) >= 32) {
-				text = HxOverrides.substr(text,0,this.highlightAnchor) + this.char + HxOverrides.substr(text,this.cursorX,null);
-				this.cursorX = this.cursorX + 1 > text.length ? text.length : this.cursorX + 1;
-			}
-			var selecting = this.isShiftDown && (this.key == 37 || this.key == 39 || this.key == 16);
-			if(!selecting && !this.isCtrlDown) {
-				this.highlightAnchor = this.cursorX;
-			}
-		}
-		if(zui_Zui.textToPaste != "") {
-			text = HxOverrides.substr(text,0,this.highlightAnchor) + zui_Zui.textToPaste + HxOverrides.substr(text,this.cursorX,null);
-			this.cursorX += zui_Zui.textToPaste.length;
-			this.highlightAnchor = this.cursorX;
-			zui_Zui.textToPaste = "";
-		}
-		if(this.highlightAnchor == this.cursorX) {
-			zui_Zui.textToCopy = text;
-		} else if(this.highlightAnchor < this.cursorX) {
-			zui_Zui.textToCopy = text.substring(this.highlightAnchor,this.cursorX);
-		} else {
-			zui_Zui.textToCopy = text.substring(this.cursorX,this.highlightAnchor);
-		}
-		if(zui_Zui.isCut) {
-			if(this.highlightAnchor == this.cursorX) {
-				text = "";
-			} else if(this.highlightAnchor < this.cursorX) {
-				text = HxOverrides.substr(text,0,this.highlightAnchor) + HxOverrides.substr(text,this.cursorX,text.length);
-				this.cursorX = this.highlightAnchor;
-			} else {
-				text = HxOverrides.substr(text,0,this.cursorX) + HxOverrides.substr(text,this.highlightAnchor,text.length);
-			}
-		}
-		var off = this.t.TEXT_OFFSET * this.ops.scaleFactor;
-		var lineHeight = this.t.ELEMENT_H * this.ops.scaleFactor;
-		var cursorHeight = lineHeight - this.buttonOffsetY * 3.0;
-		if(this.highlightAnchor != this.cursorX) {
-			var istart = this.cursorX;
-			var iend = this.highlightAnchor;
-			if(this.highlightAnchor < this.cursorX) {
-				istart = this.highlightAnchor;
-				iend = this.cursorX;
-			}
-			var hlstr = HxOverrides.substr(text,istart,iend - istart);
-			var hlstrw = this.ops.font.width(this.fontSize,hlstr);
-			var startoff = this.ops.font.width(this.fontSize,HxOverrides.substr(text,0,istart));
-			var hlStart = align == 0 ? this._x + startoff + off : this._x + this._w - hlstrw - off;
-			if(align == 2) {
-				hlStart -= this.ops.font.width(this.fontSize,HxOverrides.substr(text,iend,text.length));
-			}
-			this.g.set_color(this.t.ACCENT_SELECT_COL);
-			this.g.fillRect(hlStart,this._y + this.buttonOffsetY * 1.5,hlstrw,cursorHeight);
-		}
-		var time = kha_Scheduler.time();
-		if(this.isKeyDown || time % 1. < 0.5) {
-			var str = align == 0 ? HxOverrides.substr(text,0,this.cursorX) : text.substring(this.cursorX,text.length);
-			var strw = this.ops.font.width(this.fontSize,str);
-			var cursorX = align == 0 ? this._x + strw + off : this._x + this._w - strw - off;
-			this.g.set_color(this.t.TEXT_COL);
-			this.g.fillRect(cursorX,this._y + this.buttonOffsetY * 1.5,this.ops.scaleFactor,cursorHeight);
-		}
-		this.textSelected = text;
-	}
-	,textInput: function(handle,label,align,editable) {
-		if(editable == null) {
-			editable = true;
-		}
-		if(align == null) {
-			align = 0;
-		}
-		if(label == null) {
-			label = "";
-		}
-		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
-			this.endElement();
-			return handle.text;
-		}
-		var hover = this.getHover();
-		if(hover && zui_Zui.onTextHover != null) {
-			zui_Zui.onTextHover();
-		}
-		this.g.set_color(hover ? this.t.ACCENT_HOVER_COL : this.t.ACCENT_COL);
-		var g = this.g;
-		var fill = this.t.FILL_ACCENT_BG;
-		var x = this._x + this.buttonOffsetY;
-		var y = this._y + this.buttonOffsetY;
-		var w = this._w - this.buttonOffsetY * 2;
-		var h = this.t.BUTTON_H * this.ops.scaleFactor;
-		var strength = 0.0;
-		if(strength == 0.0) {
-			strength = 1;
-		}
-		if(!this.enabled) {
-			this.fadeColor();
-		}
-		if(fill) {
-			g.fillRect(x,y - 1,w,h + 1);
-		} else {
-			g.drawRect(x,y,w,h,strength);
-		}
-		var startEdit = this.getReleased() || this.tabPressed;
-		if(this.textSelectedHandle != handle && startEdit) {
-			this.startTextEdit(handle);
-		}
-		if(this.textSelectedHandle == handle) {
-			this.updateTextEdit(align,editable);
-		}
-		if(this.submitTextHandle == handle) {
-			this.submitTextEdit();
-		} else {
-			handle.changed = false;
-		}
-		if(label != "") {
-			this.g.set_color(this.t.LABEL_COL);
-			var labelAlign = align == 2 ? 0 : 2;
-			var xOffset = labelAlign == 0 ? 7 : 0;
-			this.drawString(this.g,label,xOffset,0,labelAlign);
-		}
-		this.g.set_color(this.t.TEXT_COL);
-		if(this.textSelectedHandle != handle) {
-			this.drawString(this.g,handle.text,null,0,align);
-		} else {
-			this.drawString(this.g,this.textSelected,null,0,align);
-		}
-		this.endElement();
-		return handle.text;
-	}
-	,deselectText: function() {
-		if(this.textSelectedHandle == null) {
-			return;
-		}
-		this.submitTextHandle = this.textSelectedHandle;
-		this.textToSubmit = this.textSelected;
-		this.textSelectedHandle = null;
-		this.isTyping = false;
-		if(this.currentWindow != null) {
-			this.currentWindow.redraws = 2;
-		}
-		if(kha_input_Keyboard.get() != null) {
-			kha_input_Keyboard.get().hide();
-		}
-		this.highlightAnchor = this.cursorX;
-	}
-	,button: function(text,align,label) {
-		if(label == null) {
-			label = "";
-		}
-		if(align == null) {
-			align = 1;
-		}
-		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
-			this.endElement();
-			return false;
-		}
-		var released = this.getReleased();
-		var pushed = this.getPushed();
-		var hover = this.getHover();
-		if(released) {
-			this.changed = true;
-		}
-		this.g.set_color(pushed ? this.t.BUTTON_PRESSED_COL : hover ? this.t.BUTTON_HOVER_COL : this.t.BUTTON_COL);
-		var g = this.g;
-		var fill = this.t.FILL_BUTTON_BG;
-		var x = this._x + this.buttonOffsetY;
-		var y = this._y + this.buttonOffsetY;
-		var w = this._w - this.buttonOffsetY * 2;
-		var h = this.t.BUTTON_H * this.ops.scaleFactor;
-		var strength = 0.0;
-		if(strength == 0.0) {
-			strength = 1;
-		}
-		if(!this.enabled) {
-			this.fadeColor();
-		}
-		if(fill) {
-			g.fillRect(x,y - 1,w,h + 1);
-		} else {
-			g.drawRect(x,y,w,h,strength);
-		}
-		this.g.set_color(this.t.BUTTON_TEXT_COL);
-		this.drawString(this.g,text,this.t.TEXT_OFFSET * this.ops.scaleFactor,0,align);
-		if(label != "") {
-			this.g.set_color(this.t.LABEL_COL);
-			this.drawString(this.g,label,this.t.TEXT_OFFSET * this.ops.scaleFactor,0,align == 2 ? 0 : 2);
-		}
-		this.endElement();
-		return released;
-	}
-	,check: function(handle,text) {
-		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
-			this.endElement();
-			return handle.selected;
-		}
-		if(this.getReleased()) {
-			handle.selected = !handle.selected;
-			handle.changed = this.changed = true;
-		} else {
-			handle.changed = false;
-		}
-		var hover = this.getHover();
-		this.drawCheck(handle.selected,hover);
-		this.g.set_color(this.t.TEXT_COL);
-		this.drawString(this.g,text,this.titleOffsetX,0,0);
-		this.endElement();
-		return handle.selected;
-	}
-	,radio: function(handle,position,text) {
-		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
-			this.endElement();
-			return handle.position == position;
-		}
-		if(position == 0) {
-			handle.changed = false;
-		}
-		if(this.getReleased()) {
-			handle.position = position;
-			handle.changed = this.changed = true;
-		}
-		var hover = this.getHover();
-		this.drawRadio(handle.position == position,hover);
-		this.g.set_color(this.t.TEXT_COL);
-		this.drawString(this.g,text,this.titleOffsetX,0);
-		this.endElement();
-		return handle.position == position;
-	}
-	,combo: function(handle,texts,label,showLabel,align,itemCount) {
-		if(itemCount == null) {
-			itemCount = -1;
-		}
-		if(align == null) {
-			align = 0;
-		}
-		if(showLabel == null) {
-			showLabel = false;
-		}
-		if(label == null) {
-			label = "";
-		}
-		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
-			this.endElement();
-			return handle.position;
-		}
-		if(this.getReleased()) {
-			if(this.comboSelectedHandle == null) {
-				this.inputEnabled = false;
-				this.comboSelectedHandle = handle;
-				this.comboSelectedWindow = this.currentWindow;
-				this.comboSelectedAlign = align;
-				this.comboSelectedTexts = texts;
-				this.comboSelectedLabel = label;
-				this.comboSelectedX = this._x + this._windowX | 0;
-				this.comboSelectedY = this._y + this._windowY + this.t.ELEMENT_H * this.ops.scaleFactor | 0;
-				this.comboSelectedW = this._w | 0;
-				this.comboItemCount = itemCount < 0 ? texts.length : itemCount;
-				this.comboItemOffset = -1;
-			}
-		}
-		if(handle == this.submitComboHandle) {
-			handle.position = this.comboToSubmit;
-			this.submitComboHandle = null;
-			handle.changed = this.changed = true;
-		} else {
-			handle.changed = false;
-		}
-		if(this.inputWheelDelta != 0 && this.comboSelectedHandle != null) {
-			this.comboItemOffset += this.inputWheelDelta > 0 ? 1 : -1;
-			var maxOffset = this.comboSelectedTexts.length - this.comboItemCount;
-			if(this.comboItemOffset > maxOffset) {
-				this.comboItemOffset = maxOffset;
-			}
-			if(this.comboItemOffset < 0) {
-				this.comboItemOffset = 0;
-			}
-		}
-		var hover = this.getHover();
-		if(hover) {
-			this.g.set_color(this.t.ACCENT_HOVER_COL);
-			var g = this.g;
-			var fill = this.t.FILL_ACCENT_BG;
-			var x = this._x + this.buttonOffsetY;
-			var y = this._y + this.buttonOffsetY;
-			var w = this._w - this.buttonOffsetY * 2;
-			var h = this.t.BUTTON_H * this.ops.scaleFactor;
-			var strength = 0.0;
-			if(strength == 0.0) {
-				strength = 1;
-			}
-			if(!this.enabled) {
-				this.fadeColor();
-			}
-			if(fill) {
-				g.fillRect(x,y - 1,w,h + 1);
-			} else {
-				g.drawRect(x,y,w,h,strength);
-			}
-		} else {
-			this.g.set_color(this.t.ACCENT_COL);
-			var g1 = this.g;
-			var fill1 = this.t.FILL_ACCENT_BG;
-			var x1 = this._x + this.buttonOffsetY;
-			var y1 = this._y + this.buttonOffsetY;
-			var w1 = this._w - this.buttonOffsetY * 2;
-			var h1 = this.t.BUTTON_H * this.ops.scaleFactor;
-			var strength1 = 0.0;
-			if(strength1 == 0.0) {
-				strength1 = 1;
-			}
-			if(!this.enabled) {
-				this.fadeColor();
-			}
-			if(fill1) {
-				g1.fillRect(x1,y1 - 1,w1,h1 + 1);
-			} else {
-				g1.drawRect(x1,y1,w1,h1,strength1);
-			}
-		}
-		var x2 = this._x + this._w - this.arrowOffsetX - 8;
-		var y2 = this._y + this.arrowOffsetY + 3;
-		this.g.fillTriangle(x2,y2,x2 + this.t.ARROW_SIZE * this.ops.scaleFactor,y2,x2 + this.t.ARROW_SIZE * this.ops.scaleFactor / 2,y2 + this.t.ARROW_SIZE * this.ops.scaleFactor / 2);
-		if(showLabel && label != "") {
-			if(align == 0) {
-				this._x -= 15;
-			}
-			this.g.set_color(this.t.LABEL_COL);
-			this.drawString(this.g,label,null,0,align == 0 ? 2 : 0);
-			if(align == 0) {
-				this._x += 15;
-			}
-		}
-		if(align == 2) {
-			this._x -= 15;
-		}
-		this.g.set_color(this.t.TEXT_COL);
-		if(handle.position < texts.length) {
-			this.drawString(this.g,texts[handle.position],null,0,align);
-		}
-		if(align == 2) {
-			this._x += 15;
-		}
-		this.endElement();
-		return handle.position;
-	}
-	,slider: function(handle,text,from,to,filled,precision,displayValue,align,textEdit) {
-		if(textEdit == null) {
-			textEdit = true;
-		}
-		if(align == null) {
-			align = 2;
-		}
-		if(displayValue == null) {
-			displayValue = true;
-		}
-		if(precision == null) {
-			precision = 100.0;
-		}
-		if(filled == null) {
-			filled = false;
-		}
-		if(to == null) {
-			to = 1.0;
-		}
-		if(from == null) {
-			from = 0.0;
-		}
-		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
-			this.endElement();
-			return handle.value;
-		}
-		if(this.getStarted()) {
-			this.scrollHandle = handle;
-			this.isScrolling = true;
-		}
-		handle.changed = false;
-		if(handle == this.scrollHandle) {
-			var range = to - from;
-			var sliderX = this._x + this._windowX + this.buttonOffsetY;
-			var sliderW = this._w - this.buttonOffsetY * 2;
-			var step = range / sliderW;
-			var value = from + (this.inputX - sliderX) * step;
-			handle.value = Math.round(value * precision) / precision;
-			if(handle.value < from) {
-				handle.value = from;
-			} else if(handle.value > to) {
-				handle.value = to;
-			}
-			handle.changed = this.changed = true;
-		}
-		var hover = this.getHover();
-		this.drawSlider(handle.value,from,to,filled,hover);
-		var startEdit = (this.getReleased() || this.tabPressed) && textEdit;
-		if(startEdit) {
-			handle.text = handle.value + "";
-			this.startTextEdit(handle);
-			handle.changed = this.changed = true;
-		}
-		var lalign = align == 0 ? 2 : 0;
-		if(this.textSelectedHandle == handle) {
-			this.updateTextEdit(lalign);
-		}
-		if(this.submitTextHandle == handle) {
-			this.submitTextEdit();
-			handle.value = eval(handle.text);
-			handle.changed = this.changed = true;
-		}
-		this.g.set_color(this.t.LABEL_COL);
-		this.drawString(this.g,text,null,0,align);
-		if(displayValue) {
-			this.g.set_color(this.t.TEXT_COL);
-			if(this.textSelectedHandle != handle) {
-				this.drawString(this.g,Math.round(handle.value * precision) / precision + "",null,0,lalign);
-			} else {
-				this.drawString(this.g,this.textSelected,null,0,lalign);
-			}
-		}
-		this.endElement();
-		return handle.value;
-	}
-	,separator: function(h,fill) {
-		if(fill == null) {
-			fill = true;
-		}
-		if(h == null) {
-			h = 4;
-		}
-		if(!this.isVisible(this.t.ELEMENT_H * this.ops.scaleFactor)) {
-			this._y += h * this.ops.scaleFactor;
-			return;
-		}
-		if(fill) {
-			this.g.set_color(this.t.SEPARATOR_COL);
-			this.g.fillRect(this._x,this._y,this._w,h * this.ops.scaleFactor);
-		}
-		this._y += h * this.ops.scaleFactor;
-	}
-	,tooltip: function(text) {
-		this.tooltipText = text;
-		this.tooltipY = this._y + this._windowY;
-	}
-	,tooltipImage: function(image,maxWidth) {
-		this.tooltipImg = image;
-		this.tooltipImgMaxWidth = maxWidth;
-		this.tooltipInvertY = this.imageInvertY;
-		this.tooltipY = this._y + this._windowY;
-	}
-	,drawArrow: function(selected) {
-		var x = this._x + this.arrowOffsetX;
-		var y = this._y + this.arrowOffsetY;
-		this.g.set_color(this.t.TEXT_COL);
-		if(selected) {
-			this.g.fillTriangle(x,y,x + this.t.ARROW_SIZE * this.ops.scaleFactor,y,x + this.t.ARROW_SIZE * this.ops.scaleFactor / 2,y + this.t.ARROW_SIZE * this.ops.scaleFactor);
-		} else {
-			this.g.fillTriangle(x,y,x,y + this.t.ARROW_SIZE * this.ops.scaleFactor,x + this.t.ARROW_SIZE * this.ops.scaleFactor,y + this.t.ARROW_SIZE * this.ops.scaleFactor / 2);
-		}
-	}
-	,drawTree: function(selected) {
-		var SIGN_W = 7 * this.ops.scaleFactor;
-		var x = this._x + this.arrowOffsetX + 1;
-		var y = this._y + this.arrowOffsetY + 1;
-		this.g.set_color(this.t.TEXT_COL);
-		if(selected) {
-			this.g.fillRect(x,y + SIGN_W / 2 - 1,SIGN_W,SIGN_W / 8);
-		} else {
-			this.g.fillRect(x,y + SIGN_W / 2 - 1,SIGN_W,SIGN_W / 8);
-			this.g.fillRect(x + SIGN_W / 2 - 1,y,SIGN_W / 8,SIGN_W);
-		}
-	}
-	,drawCheck: function(selected,hover) {
-		var x = this._x + this.checkOffsetX;
-		var y = this._y + this.checkOffsetY;
-		this.g.set_color(hover ? this.t.ACCENT_HOVER_COL : this.t.ACCENT_COL);
-		var g = this.g;
-		var fill = this.t.FILL_ACCENT_BG;
-		var w = this.t.CHECK_SIZE * this.ops.scaleFactor;
-		var h = this.t.CHECK_SIZE * this.ops.scaleFactor;
-		var strength = 0.0;
-		if(strength == 0.0) {
-			strength = 1;
-		}
-		if(!this.enabled) {
-			this.fadeColor();
-		}
-		if(fill) {
-			g.fillRect(x,y - 1,w,h + 1);
-		} else {
-			g.drawRect(x,y,w,h,strength);
-		}
-		if(selected) {
-			this.g.set_color(-1);
-			if(!this.enabled) {
-				this.fadeColor();
-			}
-			var size = this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor | 0;
-			this.g.drawScaledImage(this.checkSelectImage,x + this.checkSelectOffsetX,y + this.checkSelectOffsetY,size,size);
-		}
-	}
-	,drawRadio: function(selected,hover) {
-		var x = this._x + this.radioOffsetX;
-		var y = this._y + this.radioOffsetY;
-		this.g.set_color(hover ? this.t.ACCENT_HOVER_COL : this.t.ACCENT_COL);
-		var g = this.g;
-		var fill = this.t.FILL_ACCENT_BG;
-		var w = this.t.CHECK_SIZE * this.ops.scaleFactor;
-		var h = this.t.CHECK_SIZE * this.ops.scaleFactor;
-		var strength = 0.0;
-		if(strength == 0.0) {
-			strength = 1;
-		}
-		if(!this.enabled) {
-			this.fadeColor();
-		}
-		if(fill) {
-			g.fillRect(x,y - 1,w,h + 1);
-		} else {
-			g.drawRect(x,y,w,h,strength);
-		}
-		if(selected) {
-			this.g.set_color(this.t.ACCENT_SELECT_COL);
-			if(!this.enabled) {
-				this.fadeColor();
-			}
-			this.g.fillRect(x + this.radioSelectOffsetX,y + this.radioSelectOffsetY,this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor,this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor);
-		}
-	}
-	,drawSlider: function(value,from,to,filled,hover) {
-		var x = this._x + this.buttonOffsetY;
-		var y = this._y + this.buttonOffsetY;
-		var w = this._w - this.buttonOffsetY * 2;
-		this.g.set_color(hover ? this.t.ACCENT_HOVER_COL : this.t.ACCENT_COL);
-		var g = this.g;
-		var fill = this.t.FILL_ACCENT_BG;
-		var h = this.t.BUTTON_H * this.ops.scaleFactor;
-		var strength = 0.0;
-		if(strength == 0.0) {
-			strength = 1;
-		}
-		if(!this.enabled) {
-			this.fadeColor();
-		}
-		if(fill) {
-			g.fillRect(x,y - 1,w,h + 1);
-		} else {
-			g.drawRect(x,y,w,h,strength);
-		}
-		this.g.set_color(hover ? this.t.ACCENT_HOVER_COL : this.t.ACCENT_COL);
-		var offset = (value - from) / (to - from);
-		var barW = 8 * this.ops.scaleFactor;
-		var sliderX = filled ? x : x + (w - barW) * offset;
-		var sliderW = filled ? w * offset : barW;
-		sliderW = Math.max(Math.min(sliderW,w),0);
-		var g1 = this.g;
-		var h1 = this.t.BUTTON_H * this.ops.scaleFactor;
-		var strength1 = 0.0;
-		if(strength1 == 0.0) {
-			strength1 = 1;
-		}
-		if(!this.enabled) {
-			this.fadeColor();
-		}
-		g1.fillRect(sliderX,y - 1,sliderW,h1 + 1);
-	}
-	,drawCombo: function() {
-		if(this.comboSelectedHandle == null) {
-			return;
-		}
-		var _g = this.g;
-		this.globalG.set_color(this.t.SEPARATOR_COL);
-		var elementSize = this.t.ELEMENT_H * this.ops.scaleFactor + this.t.ELEMENT_OFFSET * this.ops.scaleFactor | 0;
-		var maxItemCount = Math.min(this.comboSelectedTexts.length,this.comboItemCount) | 0;
-		var comboH = (maxItemCount + 1) * elementSize;
-		this.globalG.begin(false);
-		var distTop = this.comboSelectedY - comboH - (this.t.ELEMENT_H * this.ops.scaleFactor | 0);
-		var distBottom = kha_System.windowHeight() - (this.comboSelectedY + comboH);
-		var outOfScreen = distBottom < 0 && distBottom < distTop;
-		var comboY = outOfScreen ? this.comboSelectedY - comboH - (this.t.ELEMENT_H * this.ops.scaleFactor | 0) : this.comboSelectedY;
-		this.globalG.fillRect(this.comboSelectedX,comboY,this.comboSelectedW,comboH);
-		this.beginRegion(this.globalG,this.comboSelectedX,comboY,this.comboSelectedW);
-		if(this.comboItemOffset == -1) {
-			if(outOfScreen) {
-				this.comboItemOffset = this.comboSelectedTexts.length - 1 - this.comboSelectedHandle.position;
-			} else {
-				this.comboItemOffset = this.comboSelectedHandle.position;
-			}
-			var value = this.comboItemOffset;
-			var max = this.comboSelectedTexts.length - maxItemCount;
-			this.comboItemOffset = value < 0 ? 0 : value > max ? max : value;
-		}
-		if(outOfScreen) {
-			this.g.set_color(this.t.LABEL_COL);
-			this.drawString(this.g,this.comboSelectedLabel,null,0,2);
-			this._y += elementSize;
-			this.fill(0,0,this._w / this.ops.scaleFactor,this.ops.scaleFactor,this.t.ACCENT_SELECT_COL);
-		}
-		this.inputEnabled = true;
-		var BUTTON_COL = this.t.BUTTON_COL;
-		var _g1 = this.comboItemOffset;
-		var _g11 = this.comboItemOffset + maxItemCount;
-		while(_g1 < _g11) {
-			var i = _g1++;
-			var j = outOfScreen ? this.comboSelectedTexts.length - 1 - i : i;
-			this.t.BUTTON_COL = j == this.comboSelectedHandle.position ? this.t.ACCENT_SELECT_COL : this.t.SEPARATOR_COL;
-			if(this.button(this.comboSelectedTexts[j],this.comboSelectedAlign)) {
-				this.comboToSubmit = j;
-				this.submitComboHandle = this.comboSelectedHandle;
-				if(this.comboSelectedWindow != null) {
-					this.comboSelectedWindow.redraws = 2;
-				}
-				break;
-			}
-		}
-		this.t.BUTTON_COL = BUTTON_COL;
-		if(!outOfScreen) {
-			this.fill(0,0,this._w / this.ops.scaleFactor,this.ops.scaleFactor,this.t.ACCENT_SELECT_COL);
-			this.g.set_color(this.t.LABEL_COL);
-			this.drawString(this.g,this.comboSelectedLabel,null,0,2);
-		}
-		var maxOffset = this.comboSelectedTexts.length - this.comboItemCount;
-		if(maxOffset > 0) {
-			var barH = Math.max(this.comboItemCount / this.comboSelectedTexts.length * (this.t.ELEMENT_H * this.ops.scaleFactor) * 16,this.t.ELEMENT_H * this.ops.scaleFactor);
-			var off = (comboH - barH - elementSize) * this.comboItemOffset / maxOffset;
-			this.g.set_color(this.t.ACCENT_COL);
-			this.g.fillRect(this._x + this._w - (this.t.SCROLL_W * this.ops.scaleFactor | 0) / 3,comboY + off,(this.t.SCROLL_W * this.ops.scaleFactor | 0) / 3,barH);
-		}
-		if((this.inputReleased || this.isEscapeDown) && !zui_Zui.comboFirst) {
-			this.comboSelectedHandle = null;
-			zui_Zui.comboFirst = true;
-		} else {
-			zui_Zui.comboFirst = false;
-		}
-		this.inputEnabled = this.comboSelectedHandle == null;
-		this.endRegion(false);
-		this.globalG.end();
-		this.g = _g;
-	}
-	,drawTooltip: function() {
-		if(this.tooltipText != "" || this.tooltipImg != null) {
-			if(this.inputChanged()) {
-				this.tooltipShown = false;
-				this.tooltipWait = this.inputDX == 0 && this.inputDY == 0;
-			}
-			if(!this.tooltipShown) {
-				this.tooltipShown = true;
-				this.tooltipX = this.inputX;
-				this.tooltipTime = kha_Scheduler.time();
-			}
-			if(!this.tooltipWait && kha_Scheduler.time() - this.tooltipTime > 1.0) {
-				if(this.tooltipText != "") {
-					this.drawTooltipText();
-				} else {
-					this.drawTooltipImage();
-				}
-			}
-		} else {
-			this.tooltipShown = false;
-		}
-	}
-	,drawTooltipText: function() {
-		this.globalG.set_color(this.t.TEXT_COL);
-		var lines = this.tooltipText.split("\n");
-		var tooltipW = 0.0;
-		var _g = 0;
-		while(_g < lines.length) {
-			var line = lines[_g];
-			++_g;
-			var lineTooltipW = this.ops.font.width(this.fontSize,line);
-			if(lineTooltipW > tooltipW) {
-				tooltipW = lineTooltipW;
-			}
-		}
-		this.tooltipX = Math.min(this.tooltipX,kha_System.windowWidth() - tooltipW - 20);
-		this.globalG.begin(false);
-		this.globalG.fillRect(this.tooltipX,this.tooltipY,tooltipW + 20,this.t.ELEMENT_H * this.ops.scaleFactor * lines.length * 0.6);
-		this.globalG.set_font(this.ops.font);
-		this.globalG.set_fontSize(this.fontSize);
-		this.globalG.set_color(this.t.ACCENT_COL);
-		var _g1 = 0;
-		var _g2 = lines.length;
-		while(_g1 < _g2) {
-			var i = _g1++;
-			this.globalG.drawString(lines[i],this.tooltipX + 5,this.tooltipY + i * this.fontSize);
-		}
-		this.globalG.end();
-	}
-	,drawTooltipImage: function() {
-		var w = this.tooltipImg.get_width();
-		if(this.tooltipImgMaxWidth != null && w > this.tooltipImgMaxWidth) {
-			w = this.tooltipImgMaxWidth;
-		}
-		var h = this.tooltipImg.get_height() * (w / this.tooltipImg.get_width());
-		this.tooltipX = Math.min(this.tooltipX,kha_System.windowWidth() - w - 20);
-		this.tooltipY = Math.min(this.tooltipY,kha_System.windowHeight() - h - 20);
-		this.globalG.set_color(-16777216);
-		this.globalG.begin(false);
-		this.globalG.fillRect(this.tooltipX,this.tooltipY,w,h);
-		this.globalG.set_color(-1);
-		if(this.tooltipInvertY) {
-			this.globalG.drawScaledImage(this.tooltipImg,this.tooltipX,this.tooltipY + h,w,-h);
-		} else {
-			this.globalG.drawScaledImage(this.tooltipImg,this.tooltipX,this.tooltipY,w,h);
-		}
-		this.globalG.end();
-	}
-	,drawString: function(g,text,xOffset,yOffset,align) {
-		if(align == null) {
-			align = 0;
-		}
-		if(yOffset == null) {
-			yOffset = 0;
-		}
-		var fullLength = text.length;
-		while(text.length > 0 && this.ops.font.width(this.fontSize,text) > this._w) text = HxOverrides.substr(text,0,text.length - 1);
-		if(text.length < fullLength) {
-			text += "..";
-		}
-		if(xOffset == null) {
-			xOffset = this.t.TEXT_OFFSET;
-		}
-		xOffset *= this.ops.scaleFactor;
-		g.set_font(this.ops.font);
-		g.set_fontSize(this.fontSize);
-		if(align == 1) {
-			xOffset = this._w / 2 - this.ops.font.width(this.fontSize,text) / 2;
-		} else if(align == 2) {
-			xOffset = this._w - this.ops.font.width(this.fontSize,text) - this.t.TEXT_OFFSET * this.ops.scaleFactor;
-		}
-		if(!this.enabled) {
-			this.fadeColor();
-		}
-		g.set_pipeline(this.rtTextPipeline);
-		g.drawString(text,this._x + xOffset,this._y + this.fontOffsetY + yOffset);
-		g.set_pipeline(null);
-	}
-	,endElement: function(elementSize) {
-		if(elementSize == null) {
-			elementSize = this.t.ELEMENT_H * this.ops.scaleFactor + this.t.ELEMENT_OFFSET * this.ops.scaleFactor;
-		}
-		if(this.currentWindow == null || this.currentWindow.layout == 0) {
-			if(this.curRatio == -1 || this.ratios != null && this.curRatio == this.ratios.length - 1) {
-				this._y += elementSize;
-				if(this.ratios != null && this.curRatio == this.ratios.length - 1) {
-					this.curRatio = -1;
-					this.ratios = null;
-					this._x = this.xBeforeSplit;
-					this._w = this.wBeforeSplit;
-					this.highlightFullRow = false;
-				}
-			} else {
-				this.curRatio++;
-				this._x += this._w;
-				var ratio = this.ratios[this.curRatio];
-				this._w = (ratio < 0 ? -ratio : ratio * this.wBeforeSplit) | 0;
-			}
-		} else {
-			this._x += this._w + this.t.ELEMENT_OFFSET * this.ops.scaleFactor;
-		}
-	}
-	,highlightNextRow: function() {
-		this.highlightFullRow = true;
-	}
-	,getRatio: function(ratio,dyn) {
-		if(ratio < 0) {
-			return -ratio;
-		} else {
-			return ratio * dyn;
-		}
-	}
-	,row: function(ratios) {
-		this.ratios = ratios;
-		this.curRatio = 0;
-		this.xBeforeSplit = this._x;
-		this.wBeforeSplit = this._w;
-		var ratio = ratios[this.curRatio];
-		this._w = (ratio < 0 ? -ratio : ratio * this._w) | 0;
-	}
-	,indent: function(bothSides) {
-		if(bothSides == null) {
-			bothSides = true;
-		}
-		this._x += this.t.TAB_W * this.ops.scaleFactor | 0;
-		this._w -= this.t.TAB_W * this.ops.scaleFactor | 0;
-		if(bothSides) {
-			this._w -= this.t.TAB_W * this.ops.scaleFactor | 0;
-		}
-	}
-	,unindent: function(bothSides) {
-		if(bothSides == null) {
-			bothSides = true;
-		}
-		this._x -= this.t.TAB_W * this.ops.scaleFactor | 0;
-		this._w += this.t.TAB_W * this.ops.scaleFactor | 0;
-		if(bothSides) {
-			this._w += this.t.TAB_W * this.ops.scaleFactor | 0;
-		}
-	}
-	,fadeColor: function() {
-		this.g.set_color(kha__$Color_Color_$Impl_$.fromFloats(((this.g.get_color() & 16711680) >>> 16) * 0.00392156862745098,((this.g.get_color() & 65280) >>> 8) * 0.00392156862745098,(this.g.get_color() & 255) * 0.00392156862745098,0.25));
-	}
-	,fill: function(x,y,w,h,color) {
-		this.g.set_color(color);
-		if(!this.enabled) {
-			this.fadeColor();
-		}
-		this.g.fillRect(this._x + x * this.ops.scaleFactor,this._y + y * this.ops.scaleFactor - 1,w * this.ops.scaleFactor,h * this.ops.scaleFactor);
-		this.g.set_color(-1);
-	}
-	,rect: function(x,y,w,h,color,strength) {
-		if(strength == null) {
-			strength = 1.0;
-		}
-		this.g.set_color(color);
-		if(!this.enabled) {
-			this.fadeColor();
-		}
-		this.g.drawRect(this._x + x * this.ops.scaleFactor,this._y + y * this.ops.scaleFactor,w * this.ops.scaleFactor,h * this.ops.scaleFactor,strength);
-		this.g.set_color(-1);
-	}
-	,drawRect: function(g,fill,x,y,w,h,strength) {
-		if(strength == null) {
-			strength = 0.0;
-		}
-		if(strength == 0.0) {
-			strength = 1;
-		}
-		if(!this.enabled) {
-			this.fadeColor();
-		}
-		if(fill) {
-			g.fillRect(x,y - 1,w,h + 1);
-		} else {
-			g.drawRect(x,y,w,h,strength);
-		}
-	}
-	,isVisible: function(elemH) {
-		if(this.currentWindow == null) {
-			return true;
-		}
-		if(this._y + elemH > this.windowHeaderH) {
-			return this._y < this.currentWindow.texture.get_height();
-		} else {
-			return false;
-		}
-	}
-	,getReleased: function(elemH) {
-		if(elemH == null) {
-			elemH = -1.0;
-		}
-		this.isReleased = this.enabled && this.inputEnabled && this.inputReleased && this.getHover(elemH) && this.getInitialHover(elemH);
-		return this.isReleased;
-	}
-	,getPushed: function(elemH) {
-		if(elemH == null) {
-			elemH = -1.0;
-		}
-		this.isPushed = this.enabled && this.inputEnabled && this.inputDown && this.getHover(elemH) && this.getInitialHover(elemH);
-		return this.isPushed;
-	}
-	,getStarted: function(elemH) {
-		if(elemH == null) {
-			elemH = -1.0;
-		}
-		this.isStarted = this.enabled && this.inputEnabled && this.inputStarted && this.getHover(elemH);
-		return this.isStarted;
-	}
-	,getInitialHover: function(elemH) {
-		if(elemH == null) {
-			elemH = -1.0;
-		}
-		if(this.scissor && this.inputY < this._windowY + this.windowHeaderH) {
-			return false;
-		}
-		if(elemH == -1.0) {
-			elemH = this.t.ELEMENT_H * this.ops.scaleFactor;
-		}
-		if(this.enabled && this.inputEnabled && this.inputStartedX >= this._windowX + this._x && this.inputStartedX < this._windowX + this._x + this._w && this.inputStartedY >= this._windowY + this._y) {
-			return this.inputStartedY < this._windowY + this._y + elemH;
-		} else {
-			return false;
-		}
-	}
-	,getHover: function(elemH) {
-		if(elemH == null) {
-			elemH = -1.0;
-		}
-		if(this.scissor && this.inputY < this._windowY + this.windowHeaderH) {
-			return false;
-		}
-		if(elemH == -1.0) {
-			elemH = this.t.ELEMENT_H * this.ops.scaleFactor;
-		}
-		this.isHovered = this.enabled && this.inputEnabled && this.inputX >= this._windowX + (this.highlightFullRow ? 0 : this._x) && this.inputX < this._windowX + this._x + (this.highlightFullRow ? this._windowW : this._w) && this.inputY >= this._windowY + this._y && this.inputY < this._windowY + this._y + elemH;
-		return this.isHovered;
-	}
-	,getInputInRect: function(x,y,w,h,scale) {
-		if(scale == null) {
-			scale = 1.0;
-		}
-		if(this.enabled && this.inputEnabled && this.inputX >= x * scale && this.inputX < (x + w) * scale && this.inputY >= y * scale) {
-			return this.inputY < (y + h) * scale;
-		} else {
-			return false;
-		}
-	}
-	,onMouseDown: function(button,x,y) {
-		if(button == 0) {
-			this.inputStarted = true;
-		} else {
-			this.inputStartedR = true;
-		}
-		if(button == 0) {
-			this.inputDown = true;
-		} else {
-			this.inputDownR = true;
-		}
-		this.inputStartedTime = kha_Scheduler.time();
-		this.setInputPosition(x,y);
-		this.inputStartedX = x;
-		this.inputStartedY = y;
-	}
-	,onMouseUp: function(button,x,y) {
-		if(this.isScrolling) {
-			this.isScrolling = false;
-			this.scrollHandle = null;
-			if(x == this.inputStartedX && y == this.inputStartedY) {
-				if(button == 0) {
-					this.inputReleased = true;
-				} else {
-					this.inputReleasedR = true;
-				}
-			}
-		} else if(button == 0) {
-			this.inputReleased = true;
-		} else {
-			this.inputReleasedR = true;
-		}
-		if(button == 0) {
-			this.inputDown = false;
-		} else {
-			this.inputDownR = false;
-		}
-		this.setInputPosition(x,y);
-		this.deselectText();
-		if(this.touchHold) {
-			this.touchHold = false;
-			this.inputReleased = false;
-			this.inputReleasedR = true;
-		}
-	}
-	,onMouseMove: function(x,y,movementX,movementY) {
-		this.setInputPosition(x,y);
-	}
-	,onMouseWheel: function(delta) {
-		this.inputWheelDelta = delta;
-	}
-	,setInputPosition: function(x,y) {
-		this.inputDX += x - this.inputX;
-		this.inputDY += y - this.inputY;
-		this.inputX = x;
-		this.inputY = y;
-	}
-	,onKeyDown: function(code) {
-		this.key = code;
-		this.isKeyPressed = true;
-		this.isKeyDown = true;
-		zui_Zui.keyRepeatTime = kha_Scheduler.time() + 0.4;
-		switch(code) {
-		case 8:
-			this.isBackspaceDown = true;
-			break;
-		case 13:
-			this.isReturnDown = true;
-			break;
-		case 16:
-			this.isShiftDown = true;
-			break;
-		case 17:
-			this.isCtrlDown = true;
-			break;
-		case 18:
-			this.isAltDown = true;
-			break;
-		case 27:
-			this.isEscapeDown = true;
-			break;
-		case 32:
-			this.char = " ";
-			break;
-		case 46:
-			this.isDeleteDown = true;
-			break;
-		case 65:
-			this.isADown = true;
-			break;
-		default:
-		}
-	}
-	,onKeyUp: function(code) {
-		this.isKeyDown = false;
-		switch(code) {
-		case 8:
-			this.isBackspaceDown = false;
-			break;
-		case 13:
-			this.isReturnDown = false;
-			break;
-		case 16:
-			this.isShiftDown = false;
-			break;
-		case 17:
-			this.isCtrlDown = false;
-			break;
-		case 18:
-			this.isAltDown = false;
-			break;
-		case 27:
-			this.isEscapeDown = false;
-			break;
-		case 46:
-			this.isDeleteDown = false;
-			break;
-		case 65:
-			this.isADown = false;
-			break;
-		default:
-		}
-	}
-	,onKeyPress: function(char) {
-		this.char = char;
-		this.isKeyPressed = true;
-	}
-	,onCut: function() {
-		zui_Zui.isCut = true;
-		return this.onCopy();
-	}
-	,onCopy: function() {
-		zui_Zui.isCopy = true;
-		return zui_Zui.textToCopy;
-	}
-	,onPaste: function(s) {
-		zui_Zui.isPaste = true;
-		zui_Zui.textToPaste = s;
-	}
-	,ELEMENT_W: function() {
-		return this.t.ELEMENT_W * this.ops.scaleFactor;
-	}
-	,ELEMENT_H: function() {
-		return this.t.ELEMENT_H * this.ops.scaleFactor;
-	}
-	,ELEMENT_OFFSET: function() {
-		return this.t.ELEMENT_OFFSET * this.ops.scaleFactor;
-	}
-	,ARROW_SIZE: function() {
-		return this.t.ARROW_SIZE * this.ops.scaleFactor;
-	}
-	,BUTTON_H: function() {
-		return this.t.BUTTON_H * this.ops.scaleFactor;
-	}
-	,CHECK_SIZE: function() {
-		return this.t.CHECK_SIZE * this.ops.scaleFactor;
-	}
-	,CHECK_SELECT_SIZE: function() {
-		return this.t.CHECK_SELECT_SIZE * this.ops.scaleFactor;
-	}
-	,FONT_SIZE: function() {
-		return this.t.FONT_SIZE * this.ops.scaleFactor | 0;
-	}
-	,SCROLL_W: function() {
-		return this.t.SCROLL_W * this.ops.scaleFactor | 0;
-	}
-	,TEXT_OFFSET: function() {
-		return this.t.TEXT_OFFSET * this.ops.scaleFactor;
-	}
-	,TAB_W: function() {
-		return this.t.TAB_W * this.ops.scaleFactor | 0;
-	}
-	,HEADER_DRAG_H: function() {
-		return 15 * this.ops.scaleFactor | 0;
-	}
-	,SCALE: function() {
-		return this.ops.scaleFactor;
-	}
-	,FLASH_SPEED: function() {
-		return 0.5;
-	}
-	,TOOLTIP_DELAY: function() {
-		return 1.0;
-	}
-	,resize: function(handle,w,h,khaWindowId) {
-		if(khaWindowId == null) {
-			khaWindowId = 0;
-		}
-		handle.redraws = 2;
-		if(handle.texture != null) {
-			handle.texture.unload();
-		}
-		if(w < 1) {
-			w = 1;
-		}
-		if(h < 1) {
-			h = 1;
-		}
-		handle.texture = kha_Image.createRenderTarget(w,h,0,0,1,khaWindowId);
-		handle.texture.get_g2().set_imageScaleQuality(1);
-	}
-	,__class__: zui_Zui
-};
 function $getIterator(o) { if( o instanceof Array ) return HxOverrides.iter(o); else return o.iterator(); }
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $global.$haxeUID++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = m.bind(o); o.hx__closures__[m.__id__] = f; } return f; }
 $global.$haxeUID |= 0;
@@ -52103,14 +55995,31 @@ if(ArrayBuffer.prototype.slice == null) {
 Main.projectName = "CPS532-C2_Laser";
 Main.projectVersion = "1.0";
 Main.projectPackage = "arm";
-arm_Beam_$Control_$v7.__meta__ = { fields : { directSpawn : { prop : null}, directSpawn_LaserName : { prop : null}, beam_name : { prop : null}, pol_arrow_name : { prop : null}, pol_torus_name : { prop : null}, rayNumber : { prop : null}, beamNumber : { prop : null}, max_arrows : { prop : null}, updateTime : { prop : null}, laser_on : { prop : null}, pol_on : { prop : null}, timer_on : { prop : null}, mask : { prop : null}, beamdiameter : { prop : null}, arrow_diameter : { prop : null}, arrow_length : { prop : null}, arrow_dist : { prop : null}, nameArrayDetectableBeams : { prop : null}}};
+arm_Beam_$Control_$v7.__meta__ = { fields : { directSpawn : { prop : null}, directSpawn_LaserName : { prop : null}, beam_name : { prop : null}, pol_arrow_name : { prop : null}, pol_torus_name : { prop : null}, rayNumber : { prop : null}, beamNumber : { prop : null}, max_arrows : { prop : null}, updateTime : { prop : null}, laser_on : { prop : null}, pol_on : { prop : null}, timer_on : { prop : null}, mask : { prop : null}, beamdiameter : { prop : null}, arrow_diameter : { prop : null}, arrow_length : { prop : null}, arrow_dist : { prop : null}}};
+arm_KM100PM_$Base.__meta__ = { fields : { pbsName : { prop : null}, frontName : { prop : null}, screwName : { prop : null}, holderName : { prop : null}, stageName : { prop : null}}};
 arm_KM100_$Base.__meta__ = { fields : { mirrorName : { prop : null}, frontName : { prop : null}, screwName : { prop : null}}};
 arm_KM100_$Base_$CPS532_$C2_$Laser.__meta__ = { fields : { laserName : { prop : null}, adapterName : { prop : null}, frontName : { prop : null}, screwName : { prop : null}, outputName : { prop : null}}};
 arm_LDM56_$Base.__meta__ = { fields : { plateName : { prop : null}, mScrewName : { prop : null}, screwName : { prop : null}, postName : { prop : null}, topName : { prop : null}, laserName : { prop : null}, outputName : { prop : null}, defaultControls : { prop : null}}};
+arm_MeasurementPlotMain.__meta__ = { fields : { getDatafromServer : { prop : null}, nameMeasurementObject : { prop : null}}};
+arm_PhotoDiode.__meta__ = { fields : { String_Beam_Ray_Traits : { prop : null}, changes_prop : { prop : null}, blocksBeam : { prop : null}, nameDetektor : { prop : null}, detectorSize : { prop : null}}};
 arm_PumpLaser.__meta__ = { fields : { String_Beam_Ray_Traits : { prop : null}, wl : { prop : null}, stokes_I : { prop : null}, stokes_p : { prop : null}, stokes_psi : { prop : null}, stokes_chi : { prop : null}, beamsize_x : { prop : null}, beamsize_y : { prop : null}, changes_prop : { prop : null}, blocksBeam : { prop : null}}};
+arm_RSP1D_$Base.__meta__ = { fields : { waveplateName : { prop : null}, ringName : { prop : null}}};
 arm_Spawner_$KM100.__meta__ = { fields : { baseAngleDegree : { prop : null}, basePosition : { prop : null}, postAngleDegree : { prop : null}, postHeight : { prop : null}, objectName_PostHolder : { prop : null}, objectName_Component : { prop : null}}};
+arm_Spawner_$KM100PM.__meta__ = { fields : { baseAngleDegree : { prop : null}, basePosition : { prop : null}, postAngleDegree : { prop : null}, postHeight : { prop : null}, objectName_PostHolder : { prop : null}, objectName_Component : { prop : null}}};
 arm_Spawner_$KM100_$Base_$CPS532_$C2_$Laser.__meta__ = { fields : { baseAngleDegree : { prop : null}, basePosition : { prop : null}, postAngleDegree : { prop : null}, postHeight : { prop : null}, objectName_PostHolder : { prop : null}, objectName_Component : { prop : null}}};
+arm_Spawner_$RSP1D.__meta__ = { fields : { wpAngleDegree : { prop : null}, baseAngleDegree : { prop : null}, basePosition : { prop : null}, postAngleDegree : { prop : null}, postHeight : { prop : null}, objectName_PostHolder : { prop : null}, objectName_Component : { prop : null}}};
 arm_UPH2_$Base.__meta__ = { fields : { plateName : { prop : null}, mScrewName : { prop : null}, screwName : { prop : null}, postName : { prop : null}, topName : { prop : null}, defaultControls : { prop : null}}};
+zui_Zui.alwaysRedrawWindow = true;
+zui_Zui.keyRepeat = true;
+zui_Zui.touchControls = false;
+zui_Zui.keyRepeatTime = 0.0;
+zui_Zui.textToPaste = "";
+zui_Zui.textToCopy = "";
+zui_Zui.isCut = false;
+zui_Zui.isCopy = false;
+zui_Zui.isPaste = false;
+zui_Zui.copyFrame = 0;
+zui_Zui.comboFirst = true;
 armory_data_Config.configLoaded = false;
 armory_renderpath_Inc.superSample = 1.0;
 armory_renderpath_Inc.pointIndex = 0;
@@ -52330,7 +56239,9 @@ kha_Shaders.BA2_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdl
 kha_Shaders.BA2_mesh_vertData0 = "s1806:A25vcgAAcG9zAAF0ZXgAAgEkR2xvYmFscwAAA3RleFVucGFjawAAAAAABAAAAAEBTgAQAAAALAAAAAMDV1ZQAEAAAABAAAAABAREWEJDjqYjAwTbd12%JW88Rgn93QEAAAAABQAABQAAADQAAABQAQAAtAEAACQCAACEBAAAUkRFRhQBAAABAAAASAAAAAEAAAAcAAAAAAT%:wABAADsAAAAPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAkR2xvYmFscwCrq6s8AAAAAwAAAGAAAACAAAAAAAAAAAAAAACoAAAAAAAAAAQAAAACAAAAtAAAAAAAAADEAAAAEAAAACwAAAACAAAAyAAAAAAAAADYAAAAQAAAAEAAAAACAAAA3AAAAAAAAAB0ZXhVbnBhY2sAq6sAAAMAAQABAAAAAAAAAAAATgCrqwMAAwADAAMAAAAAAAAAAABXVlAAAwADAAQABAAAAAAAAAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOXAAAAAMAAAAIAAAAUAAAAAAAAAAAAAAAAwAAAAAAAAADAwAAUAAAAAEAAAAAAAAAAwAAAAEAAAAPDwAAUAAAAAIAAAAAAAAAAwAAAAIAAAADAwAAVEVYQ09PUkQAq6urT1NHTmgAAAADAAAACAAAAFAAAAAAAAAAAAAAAAMAAAAAAAAAAwwAAFAAAAABAAAAAAAAAAMAAAABAAAABwgAAFkAAAAAAAAAAQAAAAMAAAACAAAADwAAAFRFWENPT1JEAFNWX1Bvc2l0aW9uAKurq1NIRFJYAgAAQAABAJYAAABZAAAERo4gAAAAAAAIAAAAXwAAAzIQEAAAAAAAXwAAA:IQEAABAAAAXwAAAzIQEAACAAAAZQAAAzIgEAAAAAAAZQAAA3IgEAABAAAAZwAABPIgEAACAAAAAQAAAGgAAAICAAAAOAAACDIgEAAAAAAARhAQAAIAAAAGgCAAAAAAAAAAAAA2AAAFMgAQAAAAAABGEBAAAAAAADYAAAVCABAAAAAAADoQEAABAAAAEAAACBIAEAABAAAARgIQAAAAAABGgiAAAAAAAAEAAAAQAAAIIgAQAAEAAABGAhAAAAAAAEaCIAAAAAAAAgAAABAAAAhCABAAAQAAAEYCEAAAAAAARoIgAAAAAAADAAAAEAAABxIAEAAAAAAARgIQAAEAAABGAhAAAQAAAEQAAAUSABAAAAAAAAoAEAAAAAAAOAAAB3IgEAABAAAABgAQAAAAAABGAhAAAQAAADYAAAVyABAAAAAAAEYSEAABAAAANgAABYIAEAAAAAAAAUAAAAAAgD8RAAAIEgAQAAEAAABGDhAAAAAAAEaOIAAAAAAABgAAABEAAAgiABAAAQAAAEYOEAAAAAAARo4gAAAAAAAHAAAAAAAABxIAEAABAAAAGgAQAAEAAAAKABAAAQAAADYAAAWCIBAAAgAAABoAEAABAAAAOAAAB0IgEAACAAAACgAQAAEAAAABQAAAAAAAPxEAAAgSIBAAAgAAAEYOEAAAAAAARo4gAAAAAAAEAAAAEQAACCIgEAACAAAARg4QAAAAAABGjiAAAAAAAAUAAAA%AAABU1RBVHQAAAATAAAAAgAAAAAAAAAGAAAADQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.KM100_Base_000_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.KM100_Base_001_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+kha_Shaders.KM100_Base_002_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.KM100_Screw_001_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+kha_Shaders.KM100_Screw_002_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.KM100_Screw_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.KM100_Top_001_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.KM100_Top_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -52339,6 +56250,10 @@ kha_Shaders.Laser_mesh_fragData0 = "s1426:AAEkR2xvYmFscwAAAXBhcmFtX1JHQgAAAAAADA
 kha_Shaders.Material_001_mesh_fragData0 = "s1188:AAAARFhCQ5Byg7OWhiGgGqhyx6E20roBAAAAeAMAAAUAAAA0AAAAgAAAALQAAAAAAQAA:AIAAFJERUZEAAAAAAAAAAAAAAAAAAAAHAAAAAAE::8AAQAAHAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAVEVYQ09PUkQAq6urT1NHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAADwAAADgAAAABAAAAAAAAAAMAAAABAAAADwAAAFNWX1RhcmdldACrq1NIRFL0AQAAQAAAAH0AAABiEAADchAQAAAAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAAAAAAARhIQAAAAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAAAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAzczMPgAAAAA2AAAI8iAQAAEAAAACQAAAzcxMP83MTD:NzEw:AIB:Qz4AAAFTVEFUdAAAAA4AAAADAAAAAAAAAAMAAAAJAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.Material_002_mesh_fragData0 = "s1188:AAAARFhCQ48zFNtXvc9lqG9zOMzBs2IBAAAAeAMAAAUAAAA0AAAAgAAAALQAAAAAAQAA:AIAAFJERUZEAAAAAAAAAAAAAAAAAAAAHAAAAAAE::8AAQAAHAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAVEVYQ09PUkQAq6urT1NHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAADwAAADgAAAABAAAAAAAAAAMAAAABAAAADwAAAFNWX1RhcmdldACrq1NIRFL0AQAAQAAAAH0AAABiEAADchAQAAAAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAAAAAAARhIQAAAAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAAAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAAAAAIAAgD02AAAI8iAQAAEAAAACQAAA::%XQgAAAAAAAAAAcf1:Qz4AAAFTVEFUdAAAAA4AAAADAAAAAAAAAAMAAAAJAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.Material_003_mesh_fragData0 = "s1188:AAAARFhCQ6GbPQbiDb9di4xdVc12a5UBAAAAeAMAAAUAAAA0AAAAgAAAALQAAAAAAQAA:AIAAFJERUZEAAAAAAAAAAAAAAAAAAAAHAAAAAAE::8AAQAAHAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAVEVYQ09PUkQAq6urT1NHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAADwAAADgAAAABAAAAAAAAAAMAAAABAAAADwAAAFNWX1RhcmdldACrq1NIRFL0AQAAQAAAAH0AAABiEAADchAQAAAAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAAAAAAARhIQAAAAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAAAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAzczMPgAAAAA2AAAI8iAQAAEAAAACQAAACRgHPwkYBz8JGAc:AIB:Qz4AAAFTVEFUdAAAAA4AAAADAAAAAAAAAAMAAAAJAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+kha_Shaders.Material_004_mesh_fragData0 = "s1204:AAAARFhCQ096uEAtX:1yPzJNZMD4pwEBAAAAhAMAAAUAAAA0AAAAgAAAALQAAAAAAQAACAMAAFJERUZEAAAAAAAAAAAAAAAAAAAAHAAAAAAE::8AAQAAHAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAVEVYQ09PUkQAq6urT1NHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAADwAAADgAAAABAAAAAAAAAAMAAAABAAAADwAAAFNWX1RhcmdldACrq1NIRFIAAgAAQAAAAIAAAABiEAADchAQAAAAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAAA0ABAMBQAAA:::::xAAAAcSABAAAAAAAEYSEAAAAAAARhIQAAAAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAAAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAA5DWUPgAAAAA2AAAI8iAQAAEAAAACQAAAzcxMP83MTD:NzEw:cf1:Qz4AAAFTVEFUdAAAAA8AAAADAAAAAAAAAAMAAAAJAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+kha_Shaders.Material_004_translucent_fragData0 = "s9436:AANfc2hhZG93TWFwX3NhbXBsZXIAAHNoYWRvd01hcAAAJEdsb2JhbHMAAAhjYXNEYXRhAAAAAABAAQAABAFzaGlycgBAAQAAcAAAAAQBZW52bWFwU3RyZW5ndGgAsAEAAAQAAAABAXN1bkRpcgC0AQAADAAAAAMBcmVjZWl2ZVNoYWRvdwDAAQAABAAAAAEBZXllAMQBAAAMAAAAAwFzaGFkb3dzQmlhcwDQAQAABAAAAAEBc3VuQ29sANQBAAAMAAAAAwFEWEJDVyCNSryi1Ch9D01EVnN1MQEAAADgGgAABQAAADQAAACAAgAACAMAAFQDAABkGgAAUkRFRkQCAAABAAAApAAAAAMAAAAcAAAAAAT::wABAAAbAgAAfAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAMAAACPAAAAAgAAAAUAAAAEAAAA:::::wAAAAABAAAADQAAAJkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAX3NoYWRvd01hcF9zYW1wbGVyAHNoYWRvd01hcAAkR2xvYmFscwCrq5kAAAAIAAAAvAAAAOABAAAAAAAAAAAAAHwBAAAAAAAAQAEAAAIAAACEAQAAAAAAAJQBAABAAQAAcAAAAAIAAACcAQAAAAAAAKwBAACwAQAABAAAAAIAAAC8AQAAAAAAAMwBAAC0AQAADAAAAAIAAADUAQAAAAAAAOQBAADAAQAABAAAAAIAAAD0AQAAAAAAAAQCAADEAQAADAAAAAIAAADUAQAAAAAAAAgCAADQAQAABAAAAAIAAAC8AQAAAAAAABQCAADUAQAADAAAAAIAAADUAQAAAAAAAGNhc0RhdGEAAQADAAEABAAUAAAAAAAAAHNoaXJyAKurAQADAAEABAAHAAAAAAAAAGVudm1hcFN0cmVuZ3RoAKsAAAMAAQABAAAAAAAAAAAAc3VuRGlyAKsBAAMAAQADAAAAAAAAAAAAcmVjZWl2ZVNoYWRvdwCrqwAAAQABAAEAAAAAAAAAAABleWUAc2hhZG93c0JpYXMAc3VuQ29sAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQCrSVNHToAAAAAEAAAACAAAAGgAAAAAAAAAAAAAAAMAAAAAAAAABwcAAGgAAAABAAAAAAAAAAMAAAABAAAABwcAAGgAAAACAAAAAAAAAAMAAAACAAAABwcAAHEAAAAAAAAAAQAAAAMAAAADAAAADwQAAFRFWENPT1JEAFNWX1Bvc2l0aW9uAKurq09TR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAA8AAAA4AAAAAQAAAAAAAAADAAAAAQAAAA8AAABTVl9UYXJnZXQAq6tTSERSCBcAAEAAAADCBQAANRgAABIAAAAAAIA:AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAAAAAAIA:WQgABEaOIAAAAAAAHgAAAFoIAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADchAQAAAAAABiEAADchAQAAEAAABiEAADchAQAAIAAABkIAAEQhAQAAMAAAABAAAAZQAAA:IgEAAAAAAAZQAAA:IgEAABAAAAaAAAAgYAAAAQAAAHEgAQAAAAAABGEhAAAQAAAEYSEAABAAAARAAABRIAEAAAAAAACgAQAAAAAAA4AAAHcgAQAAAAAAAGABAAAAAAAEYSEAABAAAAEAAAB4IAEAAAAAAARhIQAAAAAABGEhAAAAAAAEQAAAWCABAAAAAAADoAEAAAAAAAOAAAB3IAEAABAAAA9g8QAAAAAABGEhAAAAAAABAAAAeCABAAAQAAAEYCEAAAAAAARgIQAAEAAAA0AAAHggAQAAEAAAA6ABAAAQAAAAFAAAAAAAAAOAAAC3IAEAACAAAARoIgAAAAAAAaAAAAAkAAAIar2z6Gq9s%hqvbPgAAAAA4AAAHMgAQAAMAAAAmChAAAAAAACYKEAAAAAAAMgAACoIAEAACAAAAGgAQAAAAAAAaABAAAAAAAAoAEIBBAAAAAwAAADYAAAYyABAABAAAAOaKIAAAAAAAGAAAADYAAAZCABAABAAAAAqAIAAAAAAAGQAAADgAAAdyABAAAwAAAFYFEAADAAAARgIQAAQAAAA4AAAKcgAQAAMAAABGAhAAAwAAAAJAAABxPT4:cT0%P3E9Pj8AAAAAMgAACXIAEAACAAAARgIQAAIAAAD2DxAAAgAAAEYCEAADAAAAMgAADXIAEAACAAAARoIgAAAAAAAUAAAAAkAAAMbfYj:G32I:xt9iPwAAAABGAhAAAgAAADIAAA1yABAAAgAAAEYCEIBBAAAABAAAAAJAAAAqp30%Kqd9PiqnfT4AAAAARgIQAAIAAAA4AAAIcgAQAAMAAABWBRAAAAAAAEaCIAAAAAAAFwAAADgAAApyABAAAwAAAEYCEAADAAAAAkAAAIarWz%Gq1s:hqtbPwAAAAAyAAAKcgAQAAIAAABGAhAAAwAAAKYKEIBBAAAAAAAAAEYCEAACAAAAOAAACHIAEAADAAAAVgUQAAAAAACWhyAAAAAAABkAAAA4AAAHcgAQAAMAAAAGABAAAAAAAEYCEAADAAAAMgAADHIAEAACAAAARgIQAAMAAAACQAAAhqtbP4arWz%Gq1s:AAAAAEYCEAACAAAAOAAACRIAEAADAAAAKgAQgEEAAAAAAAAAOoAgAAAAAAAXAAAAOAAACWIAEAADAAAApgoQgEEAAAAAAAAABoEgAAAAAAAYAAAAOAAAB3IAEAADAAAABgAQAAAAAABGAhAAAwAAADIAAAxyABAAAgAAAEYCEAADAAAAAkAAAIarWz%Gq1s:hqtbPwAAAABGAhAAAgAAADgAAAhyABAAAwAAAFYFEAAAAAAAlocgAAAAAAAWAAAAMgAADHIAEAACAAAARgIQAAMAAAACQAAAafyCP2n8gj9p:II:AAAAAEYCEAACAAAAOAAACRIAEAADAAAAKgAQgEEAAAAAAAAAOoAgAAAAAAAUAAAAOAAACWIAEAADAAAApgoQgEEAAAAAAAAABoEgAAAAAAAVAAAAMgAADHIAEAACAAAARgIQAAMAAAACQAAAafyCP2n8gj9p:II:AAAAAEYCEAACAAAAOAAACDIAEAADAAAABgAQAAAAAADmiiAAAAAAABUAAAA4AAAIQgAQAAMAAAAKABAAAAAAAAqAIAAAAAAAFgAAADIAAAxyABAAAgAAAEYCEAADAAAAAkAAAGn8gj9p:II:afyCPwAAAABGAhAAAgAAADgAAAhyABAAAgAAAEYCEAACAAAABoAgAAAAAAAbAAAAMgAACnIAEAADAAAARhIQAAAAAAD2DxAAAAAAAJaHIAAAAAAAGwAAABAAAAeCABAAAAAAAEYCEAADAAAARgIQAAMAAABEAAAFggAQAAAAAAA6ABAAAAAAADgAAAdyABAAAwAAAPYPEAAAAAAARgIQAAMAAAAQAAAIggAQAAAAAABGAhAAAAAAAJaHIAAAAAAAGwAAABAAAAeCABAAAgAAAEYCEAAAAAAARgIQAAMAAAAQAAAHEgAQAAEAAABGAhAAAQAAAEYCEAADAAAAHwAEBAqAIAAAAAAAHAAAADgAAAhyABAAAAAAAEYCEAAAAAAABoAgAAAAAAAdAAAAMgAADHIAEAAAAAAARgIQAAAAAAACQAAAAAAgQQAAIEEAACBBAAAAAEYSEAACAAAAAAAACXIAEAADAAAARgIQgEEAAAAAAAAAlocgAAAAAAAcAAAAEAAAByIAEAABAAAARgIQAAMAAABGAhAAAwAAAEsAAAUiABAAAQAAABoAEAABAAAAMQAACPIAEAADAAAARo4gAAAAAAAQAAAAVgUQAAEAAAABAAAK8gAQAAMAAABGDhAAAwAAAAJAAAAAAIA:AACAPwAAgD8AAIA:EQAACkIAEAABAAAAAkAAAAAAgD8AAIA:AACAPwAAgD9GDhAAAwAAABsAAAVCABAAAQAAACoAEAABAAAAKQAABxIAEAADAAAAKgAQAAEAAAABQAAAAgAAAB4AAAriABAAAwAAAAYAEAADAAAAAkAAAAAAAAABAAAAAgAAAAMAAAA4AAAJ8gAQAAQAAABWBRAAAAAAAEaOIAQAAAAAGgAQAAMAAAAyAAAL8gAQAAQAAAAGABAAAAAAAEaOIAQAAAAACgAQAAMAAABGDhAABAAAADIAAAvyABAABAAAAKYKEAAAAAAARo4gBAAAAAAqABAAAwAAAEYOEAAEAAAAAAAACfIAEAAEAAAARg4QAAQAAABGjiAEAAAAADoAEAADAAAAMQAAByIAEAADAAAAAUAAAAAAAAA6ABAABAAAAB8ABAMaABAAAwAAAA4AAAfiABAAAwAAAAYJEAAEAAAA9g8QAAQAAAAAAAAJggAQAAMAAAA6ABAAAwAAAAqAIIBBAAAAAAAAAB0AAAAAAAAK8gAQAAQAAACWCRAAAwAAAAJAAAAAAIC5AACAugAAgLkAAAAARgAACxIAEAAEAAAARgAQAAQAAAAGcBAAAAAAAABgEAAAAAAAOgAQAAMAAABGAAALIgAQAAQAAADmChAABAAAAAZwEAAAAAAAAGAQAAAAAAA6ABAAAwAAAAAAAAcSABAABAAAABoAEAAEAAAACgAQAAQAAAAAAAAK8gAQAAUAAACWCRAAAwAAAAJAAAAAAIC5AACAOgAAAAAAAIC6RgAACyIAEAAEAAAARgAQAAUAAAAGcBAAAAAAAABgEAAAAAAAOgAQAAMAAAAAAAAHEgAQAAQAAAAaABAABAAAAAoAEAAEAAAARgAACyIAEAAEAAAA5goQAAUAAAAGcBAAAAAAAABgEAAAAAAAOgAQAAMAAAAAAAAHEgAQAAQAAAAaABAABAAAAAoAEAAEAAAARgAACyIAEAAEAAAAlgUQAAMAAAAGcBAAAAAAAABgEAAAAAAAOgAQAAMAAAAAAAAHEgAQAAQAAAAaABAABAAAAAoAEAAEAAAAAAAACvIAEAAFAAAAlgkQAAMAAAACQAAAAAAAAAAAgDoAAIA5AACAukYAAAsiABAABAAAAEYAEAAFAAAABnAQAAAAAAAAYBAAAAAAADoAEAADAAAAAAAABxIAEAAEAAAAGgAQAAQAAAAKABAABAAAAEYAAAsiABAABAAAAOYKEAAFAAAABnAQAAAAAAAAYBAAAAAAADoAEAADAAAAAAAABxIAEAAEAAAAGgAQAAQAAAAKABAABAAAAAAAAAryABAABQAAAJYJEAADAAAAAkAAAAAAgDkAAAAAAACAOQAAgDpGAAALIgAQAAMAAABGABAABQAAAAZwEAAAAAAAAGAQAAAAAAA6ABAAAwAAAAAAAAciABAAAwAAABoAEAADAAAACgAQAAQAAABGAAALQgAQAAMAAADmChAABQAAAAZwEAAAAAAAAGAQAAAAAAA6ABAAAwAAAAAAAAciABAAAwAAACoAEAADAAAAGgAQAAMAAAA4AAAHIgAQAAMAAAAaABAAAwAAAAFAAAA5juM9EgAAATYAAAUiABAAAwAAAAFAAAAAAIA:FQAAAREAAAlCABAAAwAAAEaOIAAAAAAAEAAAAEaekAAqABAAAQAAAB8AAAMqABAAAQAAADYAAAWCABAAAwAAACoAEAADAAAAEgAAAR4AAAcSABAABAAAACoAEAABAAAAAUAAAP::::8RAAAJEgAQAAQAAABGjiAAAAAAABAAAABGnpAACgAQAAQAAAAAAAAIggAQAAMAAAAqABAAAwAAAAoAEIBBAAAABAAAABUAAAEAAAAIIgAQAAEAAAAaABCAQQAAAAEAAAAqABAAAwAAAA4AAAciABAAAQAAABoAEAABAAAAOgAQAAMAAAAdAAAHQgAQAAMAAAABQAAAmpkZPhoAEAABAAAAJwAAB0IAEAABAAAAKgAQAAEAAAABQAAAAwAAAAEAAAdCABAAAQAAACoAEAABAAAAKgAQAAMAAAAfAAQDKgAQAAEAAAAeAAAHQgAQAAMAAAAKABAAAwAAAAFAAAAEAAAAHgAACnIAEAAEAAAApgoQAAMAAAACQAAAAQAAAAIAAAADAAAAAAAAADgAAAnyABAABQAAAFYFEAAAAAAARo4gBAAAAAAKABAABAAAADIAAAzyABAABQAAAAYAEAAAAAAARo4gBgAAAAAEAAAACgAQAAMAAABGDhAABQAAADIAAAvyABAABQAAAKYKEAAAAAAARo4gBAAAAAAaABAABAAAAEYOEAAFAAAAAAAACfIAEAAEAAAARg4QAAUAAABGjiAEAAAAACoAEAAEAAAAMQAABxIAEAAAAAAAAUAAAAAAAAA6ABAABAAAAB8ABAMKABAAAAAAAA4AAAdyABAAAAAAAEYCEAAEAAAA9g8QAAQAAAAAAAAJQgAQAAAAAAAqABAAAAAAAAqAIIBBAAAAAAAAAB0AAAAAAAAK8gAQAAQAAABGBBAAAAAAAAJAAAAAAIC5AACAugAAgLkAAAAARgAACxIAEAADAAAARgAQAAQAAAAGcBAAAAAAAABgEAAAAAAAKgAQAAAAAABGAAALQgAQAAMAAADmChAABAAAAAZwEAAAAAAAAGAQAAAAAAAqABAAAAAAAAAAAAcSABAAAwAAACoAEAADAAAACgAQAAMAAAAAAAAK8gAQAAQAAABGBBAAAAAAAAJAAAAAAIC5AACAOgAAAAAAAIC6RgAAC0IAEAADAAAARgAQAAQAAAAGcBAAAAAAAABgEAAAAAAAKgAQAAAAAAAAAAAHEgAQAAMAAAAqABAAAwAAAAoAEAADAAAARgAAC0IAEAADAAAA5goQAAQAAAAGcBAAAAAAAABgEAAAAAAAKgAQAAAAAAAAAAAHEgAQAAMAAAAqABAAAwAAAAoAEAADAAAARgAAC0IAEAADAAAARgAQAAAAAAAGcBAAAAAAAABgEAAAAAAAKgAQAAAAAAAAAAAHEgAQAAMAAAAqABAAAwAAAAoAEAADAAAAAAAACvIAEAAEAAAARgQQAAAAAAACQAAAAAAAAAAAgDoAAIA5AACAukYAAAtCABAAAwAAAEYAEAAEAAAABnAQAAAAAAAAYBAAAAAAACoAEAAAAAAAAAAABxIAEAADAAAAKgAQAAMAAAAKABAAAwAAAEYAAAtCABAAAwAAAOYKEAAEAAAABnAQAAAAAAAAYBAAAAAAACoAEAAAAAAAAAAABxIAEAADAAAAKgAQAAMAAAAKABAAAwAAAAAAAAryABAABAAAAEYEEAAAAAAAAkAAAAAAgDkAAAAAAACAOQAAgDpGAAALEgAQAAAAAABGABAABAAAAAZwEAAAAAAAAGAQAAAAAAAqABAAAAAAAAAAAAcSABAAAAAAAAoAEAAAAAAACgAQAAMAAABGAAALIgAQAAAAAADmChAABAAAAAZwEAAAAAAAAGAQAAAAAAAqABAAAAAAAAAAAAcSABAAAAAAABoAEAAAAAAACgAQAAAAAAA4AAAHEgAQAAAAAAAKABAAAAAAAAFAAAA5juM9EgAAATYAAAUSABAAAAAAAAFAAAAAAIA:FQAAATggAAciABAAAAAAABoAEAABAAAAAUAAAFVV1UAyAAAJQgAQAAAAAAAaABAAAAAAAAFAAAAAAADAAUAAAAAAQEA4AAAHIgAQAAAAAAAaABAAAAAAABoAEAAAAAAAOAAAByIAEAAAAAAAGgAQAAAAAAAqABAAAAAAAAAAAAhCABAAAAAAAAoAEIBBAAAAAAAAABoAEAADAAAAMgAACRIAEAAAAAAAGgAQAAAAAAAqABAAAAAAAAoAEAAAAAAAFQAAATcAAAkSABAAAAAAACoAEAABAAAACgAQAAAAAAAaABAAAwAAABIAAAE2AAAFEgAQAAAAAAABQAAAAACAPxUAAAE0AAAHIgAQAAAAAAA6ABAAAAAAAAFAAAAAAAAAMgAACUIAEAAAAAAACgAQAAEAAAABQAAAWcCxwAFAAAAMdt:AOAAAB0IAEAAAAAAACgAQAAEAAAAqABAAAAAAABkAAAVCABAAAAAAACoAEAAAAAAAMgAACUIAEAAAAAAAKgAQAAAAAAABQAAAj8J1PwFAAAAK1yM9OAAABxIAEAABAAAAOgAQAAIAAAA6ABAAAgAAADIAAAkSABAAAQAAAAoAEAABAAAAAUAAANUzfr8BQAAAAACAPzgAAAcSABAAAQAAAAoAEAABAAAACgAQAAEAAAAOAAAHEgAQAAEAAAABQAAA1XkSOwoAEAABAAAAMgAACYIAEAAAAAAAOgAQAAAAAAABQAAAaYxqPwFAAAC2nKs9MgAACSIAEAABAAAAOgAQAAEAAAABQAAAaYxqPwFAAAC2nKs9OAAAB4IAEAAAAAAAOgAQAAAAAAAaABAAAQAAAA4AAAqCABAAAAAAAAJAAAAAAIA:AACAPwAAgD8AAIA:OgAQAAAAAAA2IAAFggAQAAAAAAA6ABAAAAAAADgAAAeCABAAAAAAADoAEAAAAAAACgAQAAEAAAA4AAAHQgAQAAAAAAA6ABAAAAAAACoAEAAAAAAAOAAAB0IAEAAAAAAAKgAQAAAAAAABQAAAAACAPjIAAAkiABAAAAAAABoAEAAAAAAAAUAAAM3MTD8qABAAAAAAADgAAAjiABAAAAAAAFYFEAAAAAAAVo4gAAAAAAAdAAAAOAAACnIAEAABAAAARgIQAAIAAAACQAAAzczMPs3MzD7NzMw%AAAAADIAAAlyABAAAAAAAJYHEAAAAAAABgAQAAAAAABGAhAAAQAAADIAAAqCABAAAAAAACoQEIBBAAAAAwAAAAFAAABmZmY:AUAAAAAAgD84AAAHEgAQAAEAAAA6ABAAAAAAADoAEAAAAAAAOAAAB4IAEAAAAAAAOgAQAAAAAAAKABAAAQAAADgAAAryABAAAAAAAEYOEAAAAAAAAkAAAFRWKj9UVio:VFYqP6qDxEw0AAAHggAQAAAAAAA6ABAAAAAAAAFAAAAK1yM8MwAAB4IAEAAAAAAAOgAQAAAAAAABQAAAAIA7RTgAAAdyIBAAAAAAAPYPEAAAAAAARgIQAAAAAAA4AAAHEiAQAAEAAAA6ABAAAAAAAAFAAABUVio:NgAABYIgEAAAAAAAAUAAAFRWKj82AAAI4iAQAAEAAAACQAAAAAAAAAAAAAAAAAAAAACAPz4AAAFTVEFUdAAAALUAAAAGAAAABAAAAAYAAACBAAAABgAAAAIAAAAGAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASAAAAAAAAAAAAAAAJAAAAAQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+kha_Shaders.Material_004_translucent_vertData0 = "s1994:Am5vcgAAcG9zAAEBJEdsb2JhbHMAAARXAAAAAABAAAAABAROAEAAAAAsAAAAAwNXVlAAcAAAAEAAAAAEBGV5ZQCwAAAADAAAAAMBRFhCQxjxVZlJyXE5s1HBwib7TM0BAAAAjAUAAAUAAAA0AAAAZAEAALABAAA4AgAAEAUAAFJERUYoAQAAAQAAAEgAAAABAAAAHAAAAAAE:v8AAQAAAAEAADwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAJEdsb2JhbHMAq6urPAAAAAQAAABgAAAAwAAAAAAAAAAAAAAAwAAAAAAAAABAAAAAAgAAAMQAAAAAAAAA1AAAAEAAAAAsAAAAAgAAANgAAAAAAAAA6AAAAHAAAABAAAAAAgAAAMQAAAAAAAAA7AAAALAAAAAMAAAAAgAAAPAAAAAAAAAAVwCrqwMAAwAEAAQAAAAAAAAAAABOAKurAwADAAMAAwAAAAAAAAAAAFdWUABleWUAAQADAAEAAwAAAAAAAAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAADAwAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPDwAAVEVYQ09PUkQAq6urT1NHToAAAAAEAAAACAAAAGgAAAAAAAAAAAAAAAMAAAAAAAAABwgAAGgAAAABAAAAAAAAAAMAAAABAAAABwgAAGgAAAACAAAAAAAAAAMAAAACAAAABwgAAHEAAAAAAAAAAQAAAAMAAAADAAAADwAAAFRFWENPT1JEAFNWX1Bvc2l0aW9uAKurq1NIRFLQAgAAQAABALQAAABZAAAERo4gAAAAAAAMAAAAXwAAAzIQEAAAAAAAXwAAA:IQEAABAAAAZQAAA3IgEAAAAAAAZQAAA3IgEAABAAAAZQAAA3IgEAACAAAAZwAABPIgEAADAAAAAQAAAGgAAAIDAAAANgAABXIAEAAAAAAARhIQAAEAAAA2AAAFggAQAAAAAAABQAAAAACAPxEAAAgSABAAAQAAAEYOEAAAAAAARo4gAAAAAAAAAAAAEQAACCIAEAABAAAARg4QAAAAAABGjiAAAAAAAAEAAAARAAAIQgAQAAEAAABGDhAAAAAAAEaOIAAAAAAAAgAAAAAAAAlyIBAAAAAAAEYCEIBBAAAAAQAAAEaCIAAAAAAACwAAADYAAAVyIBAAAgAAAEYCEAABAAAANgAABTIAEAABAAAARhAQAAAAAAA2AAAFQgAQAAEAAAA6EBAAAQAAABAAAAgSABAAAgAAAEYCEAABAAAARoIgAAAAAAAEAAAAEAAACCIAEAACAAAARgIQAAEAAABGgiAAAAAAAAUAAAAQAAAIQgAQAAIAAABGAhAAAQAAAEaCIAAAAAAABgAAABAAAAcSABAAAQAAAEYCEAACAAAARgIQAAIAAABEAAAFEgAQAAEAAAAKABAAAQAAADgAAAdyIBAAAQAAAAYAEAABAAAARgIQAAIAAAARAAAIEgAQAAEAAABGDhAAAAAAAEaOIAAAAAAACQAAABEAAAgiABAAAQAAAEYOEAAAAAAARo4gAAAAAAAKAAAAAAAABxIAEAABAAAAGgAQAAEAAAAKABAAAQAAADYAAAWCIBAAAwAAABoAEAABAAAAOAAAB0IgEAADAAAACgAQAAEAAAABQAAAAAAAPxEAAAgSIBAAAwAAAEYOEAAAAAAARo4gAAAAAAAHAAAAEQAACCIgEAADAAAARg4QAAAAAABGjiAAAAAAAAgAAAA%AAABU1RBVHQAAAAXAAAAAwAAAAAAAAAGAAAAEAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+kha_Shaders.Metal_PBS_001_mesh_fragData0 = "s1188:AAAARFhCQzzmWPDQajcTcM89zCV4zhwBAAAAeAMAAAUAAAA0AAAAgAAAALQAAAAAAQAA:AIAAFJERUZEAAAAAAAAAAAAAAAAAAAAHAAAAAAE::8AAQAAHAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAVEVYQ09PUkQAq6urT1NHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAADwAAADgAAAABAAAAAAAAAAMAAAABAAAADwAAAFNWX1RhcmdldACrq1NIRFL0AQAAQAAAAH0AAABiEAADchAQAAAAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAAAAAAARhIQAAAAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAAAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAA8MeaPQDxfz02AAAI8iAQAAEAAAACQAAAAACAPwAAgD8AAIA:cf1:Qz4AAAFTVEFUdAAAAA4AAAADAAAAAAAAAAMAAAAJAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.Platte_001_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.Post_000_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.Post_002_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMp67KUlGABzQqjbFnQJ26FAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAABx:X9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -52371,6 +56286,10 @@ kha_Shaders.blur_edge_pass_fragData0 = "s3976:AAVfZ2J1ZmZlcjBfc2FtcGxlcgAAX3RleF
 kha_Shaders.compositor_pass_fragData0 = "s1214:AAJfdGV4X3NhbXBsZXIAAHRleAAAAERYQkNwNkrz4dowNe5hJDo1vWiSAQAAAHgDAAAFAAAANAAAANQAAAAIAQAAPAEAAPwCAABSREVGmAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAG0AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAGkAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX3RleF9zYW1wbGVyAHRleABNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq6urSVNHTiwAAAABAAAACAAAACAAAAAAAAAAAAAAAAMAAAAAAAAAAwMAAFRFWENPT1JEAKurq09TR04sAAAAAQAAAAgAAAAgAAAAAAAAAAAAAAADAAAAAAAAAA8AAABTVl9UYXJnZXQAq6tTSERSuAEAAEAAAABuAAAAWgAAAwBgEAAAAAAAWBgABABwEAAAAAAAVVUAAGIQAAMyEBAAAAAAAGUAAAPyIBAAAAAAAGgAAAIDAAAASAAAC:IAEAAAAAAARhAQAAAAAABGfhAAAAAAAABgEAAAAAAAAUAAAAAAAAAAAAAKcgAQAAAAAABGAhAAAAAAAAJAAABvEoO7bxKDu28Sg7sAAAAANgAABYIgEAAAAAAAOgAQAAAAAAA0AAAKcgAQAAAAAABGAhAAAAAAAAJAAAAAAAAAAAAAAAAAAAAAAAAAMgAAD3IAEAABAAAARgIQAAAAAAACQAAAZmbGQGZmxkBmZsZAAAAAAAJAAAAAAAA:AAAAPwAAAD8AAAAAOAAAB3IAEAABAAAARgIQAAAAAABGAhAAAQAAADIAAA9yABAAAgAAAEYCEAAAAAAAAkAAAGZmxkBmZsZAZmbGQAAAAAACQAAAmpnZP5qZ2T%amdk:AAAAADIAAAxyABAAAAAAAEYCEAAAAAAARgIQAAIAAAACQAAAj8J1PY:CdT2PwnU9AAAAAA4AAAdyIBAAAAAAAEYCEAABAAAARgIQAAAAAAA%AAABU1RBVHQAAAAKAAAAAwAAAAAAAAACAAAABwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.compositor_pass_vertData0 = "s763:AXBvcwAAAABEWEJDtpmVVJ2wtBYIEKtdn7IyBgEAAAA0AgAABQAAADQAAACAAAAAtAAAAAwBAAC4AQAAUkRFRkQAAAAAAAAAAAAAAAAAAAAcAAAAAAT%:wABAAAcAAAATWljcm9zb2Z0IChSKSBITFNMIFNoYWRlciBDb21waWxlciAxMC4xAElTR04sAAAAAQAAAAgAAAAgAAAAAAAAAAAAAAADAAAAAAAAAAMDAABURVhDT09SRACrq6tPU0dOUAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAADDAAAQQAAAAAAAAABAAAAAwAAAAEAAAAPAAAAVEVYQ09PUkQAU1ZfUG9zaXRpb24Aq6urU0hEUqQAAABAAAEAKQAAAF8AAAMyEBAAAAAAAGUAAAMyIBAAAAAAAGcAAATyIBAAAQAAAAEAAAAyAAAPMiAQAAAAAABGEBAAAAAAAAJAAAAAAAA:AAAAvwAAAAAAAAAAAkAAAAAAAD8AAAA:AAAAAAAAAAA2AAAFMiAQAAEAAABGEBAAAAAAADYAAAjCIBAAAQAAAAJAAAAAAAAAAAAAAAAAAD8AAIA:PgAAAVNUQVR0AAAABAAAAAAAAAAAAAAAAwAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.deferred_light_fragData0 = "s11768:AAtfZ2J1ZmZlcjBfc2FtcGxlcgAAX2didWZmZXIxX3NhbXBsZXIAAV9nYnVmZmVyRF9zYW1wbGVyAAJfc3Nhb3RleF9zYW1wbGVyAANfc2hhZG93TWFwX3NhbXBsZXIABGdidWZmZXIwAABnYnVmZmVyMQABZ2J1ZmZlckQAAnNzYW90ZXgAA3NoYWRvd01hcAAEJEdsb2JhbHMAAAljYXNEYXRhAAAAAABAAQAABAFleWUAQAEAAAwAAAADAWV5ZUxvb2sAUAEAAAwAAAADAWNhbWVyYVByb2oAYAEAAAgAAAACAXNoaXJyAHABAABwAAAABAFlbnZtYXBTdHJlbmd0aADgAQAABAAAAAEBc3VuRGlyAOQBAAAMAAAAAwFzaGFkb3dzQmlhcwDwAQAABAAAAAEBc3VuQ29sAPQBAAAMAAAAAwFEWEJD960gAoYH4RtBjORZaM62yQEAAAA0IQAABQAAADQAAAAEBAAAUAQAAIQEAAC4IAAAUkRFRsgDAAABAAAADAIAAAsAAAAcAAAAAAT::wABAACeAwAAfAEAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAEAAACOAQAAAwAAAAAAAAAAAAAAAAAAAAEAAAABAAAAAQAAAKABAAADAAAAAAAAAAAAAAAAAAAAAgAAAAEAAAABAAAAsgEAAAMAAAAAAAAAAAAAAAAAAAADAAAAAQAAAAEAAADDAQAAAwAAAAAAAAAAAAAAAAAAAAQAAAABAAAAAwAAANYBAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAA3wEAAAIAAAAFAAAABAAAAP::::8BAAAAAQAAAA0AAADoAQAAAgAAAAUAAAAEAAAA:::::wIAAAABAAAADQAAAPEBAAACAAAABQAAAAQAAAD:::::AwAAAAEAAAANAAAA%QEAAAIAAAAFAAAABAAAAP::::8EAAAAAQAAAA0AAAADAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAF9nYnVmZmVyMF9zYW1wbGVyAF9nYnVmZmVyMV9zYW1wbGVyAF9nYnVmZmVyRF9zYW1wbGVyAF9zc2FvdGV4X3NhbXBsZXIAX3NoYWRvd01hcF9zYW1wbGVyAGdidWZmZXIwAGdidWZmZXIxAGdidWZmZXJEAHNzYW90ZXgAc2hhZG93TWFwACRHbG9iYWxzAAMCAAAJAAAAJAIAAAACAAAAAAAAAAAAAPwCAAAAAAAAQAEAAAIAAAAEAwAAAAAAABQDAABAAQAADAAAAAIAAAAYAwAAAAAAACgDAABQAQAADAAAAAIAAAAYAwAAAAAAADADAABgAQAACAAAAAIAAAA8AwAAAAAAAEwDAABwAQAAcAAAAAIAAABUAwAAAAAAAGQDAADgAQAABAAAAAIAAAB0AwAAAAAAAIQDAADkAQAADAAAAAIAAAAYAwAAAAAAAIsDAADwAQAABAAAAAIAAAB0AwAAAAAAAJcDAAD0AQAADAAAAAIAAAAYAwAAAAAAAGNhc0RhdGEAAQADAAEABAAUAAAAAAAAAGV5ZQABAAMAAQADAAAAAAAAAAAAZXllTG9vawBjYW1lcmFQcm9qAKsBAAMAAQACAAAAAAAAAAAAc2hpcnIAq6sBAAMAAQAEAAcAAAAAAAAAZW52bWFwU3RyZW5ndGgAqwAAAwABAAEAAAAAAAAAAABzdW5EaXIAc2hhZG93c0JpYXMAc3VuQ29sAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQCrq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUiwcAABAAAAACwcAADUYAAASAAAAAACAPwAAAAAAAAAAAAAAAAAAAAAAAIA:AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAP1kIAARGjiAAAAAAACAAAABaAAADAGAQAAAAAABaAAADAGAQAAEAAABaAAADAGAQAAIAAABaAAADAGAQAAMAAABaCAADAGAQAAQAAABYGAAEAHAQAAAAAABVVQAAWBgABABwEAABAAAAVVUAAFgYAAQAcBAAAgAAAFVVAABYGAAEAHAQAAMAAABVVQAAWBgABABwEAAEAAAAVVUAAGIQAAMyEBAAAAAAAGIQAANyEBAAAQAAAGUAAAPyIBAAAAAAAGgAAAILAAAASAAAC:IAEAAAAAAARhAQAAAAAABGfhAAAAAAAABgEAAAAAAAAUAAAAAAAAAAAAALcgAQAAEAAABGABCAwQAAAAAAAAACQAAAAACAPwAAgD8AAIA:AAAAAAAAAAhCABAAAgAAABoAEIDBAAAAAAAAAAoAEAABAAAAHQAABxIAEAABAAAAKgAQAAIAAAABQAAAAAAAAB0AAAoyABAAAwAAAEYAEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPMgAQAAMAAABGABAAAwAAAAJAAAAAAIA:AACAPwAAAAAAAAAAAkAAAAAAgL8AAIC:AAAAAAAAAAA4AAAHYgAQAAEAAABWBhAAAQAAAAYBEAADAAAANwAACTIAEAACAAAABgAQAAEAAABGABAAAAAAAJYFEAABAAAAEAAABxIAEAAAAAAARgIQAAIAAABGAhAAAgAAAEQAAAUSABAAAAAAAAoAEAAAAAAAOAAAB3IAEAABAAAABgAQAAAAAABGAhAAAgAAADIAAAkSABAAAAAAADoAEAAAAAAAAUAAAAD:f0EBQAAAgACANxsAAAUSABAAAAAAAAoAEAAAAAAAVgAABRIAEAAAAAAACgAQAAAAAAAyAAAJEgAQAAAAAAAKABAAAAAAAAFAAACAAIC9OgAQAAAAAAA4IAAHEgAQAAAAAAAKABAAAAAAAAFAAACAB4BBSAAAC:IAEAACAAAARhAQAAAAAABGfhAAAQAAAABgEAABAAAAAUAAAAAAAABBAAAFIgAQAAAAAAA6ABAAAgAAADgAAAgiABAAAAAAABoAEAAAAAAACoAgAAAAAAAeAAAAGgAABYIAEAABAAAAOgAQAAIAAAAyAAAKcgAQAAMAAAAGABAAAAAAAEYCEIBBAAAAAgAAAEYCEAACAAAAAAAACnIAEAAEAAAARgIQAAIAAAACQAAACtcjvQrXI70K1yO9AAAAADIAAAxyABAABAAAAAYAEAAAAAAARgIQAAQAAAACQAAACtcjPQrXIz0K1yM9AAAAAEgAAAvyABAABQAAAEYQEAAAAAAARn4QAAIAAAAAYBAAAgAAAAFAAAAAAAAAMgAACRIAEAAAAAAACgAQAAUAAAABQAAAAAAAQAFAAAAAAIC:EAAAB4IAEAACAAAARhIQAAEAAABGEhAAAQAAAEQAAAWCABAAAgAAADoAEAACAAAAOAAAB3IAEAAFAAAA9g8QAAIAAABGEhAAAQAAADIAAAkSABAAAAAAAAoAEAAAAAAAAUAAAAAAAD8BQAAAAAAAPwAAAAkSABAAAAAAAAoAEAAAAAAACoAggEEAAAAAAAAAFgAAAA4AAAgSABAAAAAAABqAIAAAAAAAFgAAAAoAEAAAAAAAEAAACIIAEAACAAAARoIgAAAAAAAVAAAARgIQAAUAAAAOAAAHEgAQAAAAAAAKABAAAAAAADoAEAACAAAAMgAACnIAEAAFAAAARgIQAAUAAAAGABAAAAAAAEaCIAAAAAAAFAAAAAAAAAlyABAABgAAAEYCEIBBAAAABQAAAEaCIAAAAAAAFAAAABAAAAcSABAAAAAAAEYCEAAGAAAARgIQAAYAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAABwAAAAYAEAAAAAAARgIQAAYAAAAQAAAHggAQAAIAAABGAhAAAQAAAEYCEAAHAAAANAAAB4IAEAACAAAAOgAQAAIAAAABQAAAAAAAADgAAAtyABAACAAAAEaCIAAAAAAAHQAAAAJAAACGq9s%hqvbPoar2z4AAAAAOAAABzIAEAAJAAAAJgoQAAEAAAAmChAAAQAAADIAAAqCABAAAwAAABoAEAABAAAAGgAQAAEAAAAKABCAQQAAAAkAAAA2AAAGMgAQAAoAAADmiiAAAAAAABsAAAA2AAAGQgAQAAoAAAAKgCAAAAAAABwAAAA4AAAHcgAQAAkAAABWBRAACQAAAEYCEAAKAAAAOAAACnIAEAAJAAAARgIQAAkAAAACQAAAcT0%P3E9Pj9xPT4:AAAAADIAAAlyABAACAAAAEYCEAAIAAAA9g8QAAMAAABGAhAACQAAADIAAA1yABAACAAAAEaCIAAAAAAAFwAAAAJAAADG32I:xt9iP8bfYj8AAAAARgIQAAgAAAAyAAANcgAQAAgAAABGAhCAQQAAAAoAAAACQAAAKqd9PiqnfT4qp30%AAAAAEYCEAAIAAAAOAAACHIAEAAJAAAAVgUQAAEAAABGgiAAAAAAABoAAAA4AAAKcgAQAAkAAABGAhAACQAAAAJAAACGq1s:hqtbP4arWz8AAAAAMgAACnIAEAAIAAAARgIQAAkAAACmChCAQQAAAAEAAABGAhAACAAAADgAAAhyABAACQAAAFYFEAABAAAAlocgAAAAAAAcAAAAOAAAB3IAEAAJAAAABgAQAAEAAABGAhAACQAAADIAAAxyABAACAAAAEYCEAAJAAAAAkAAAIarWz%Gq1s:hqtbPwAAAABGAhAACAAAADgAAAkSABAACQAAACoAEIBBAAAAAQAAADqAIAAAAAAAGgAAADgAAAliABAACQAAAKYKEIBBAAAAAQAAAAaBIAAAAAAAGwAAADgAAAdyABAACQAAAAYAEAABAAAARgIQAAkAAAAyAAAMcgAQAAgAAABGAhAACQAAAAJAAACGq1s:hqtbP4arWz8AAAAARgIQAAgAAAA4AAAIcgAQAAkAAABWBRAAAQAAAJaHIAAAAAAAGQAAADIAAAxyABAACAAAAEYCEAAJAAAAAkAAAGn8gj9p:II:afyCPwAAAABGAhAACAAAADgAAAkSABAACQAAACoAEIBBAAAAAQAAADqAIAAAAAAAFwAAADgAAAliABAACQAAAKYKEIBBAAAAAQAAAAaBIAAAAAAAGAAAADIAAAxyABAACAAAAEYCEAAJAAAAAkAAAGn8gj9p:II:afyCPwAAAABGAhAACAAAADgAAAgyABAACQAAAAYAEAABAAAA5oogAAAAAAAYAAAAOAAACEIAEAAJAAAACgAQAAEAAAAKgCAAAAAAABkAAAAyAAAMcgAQAAgAAABGAhAACQAAAAJAAABp:II:afyCP2n8gj8AAAAARgIQAAgAAAA4AAAHcgAQAAgAAABGAhAAAwAAAEYCEAAIAAAAOAAAByIAEAAAAAAAGgAQAAAAAAABQAAAgYCAOzgAAAdyABAACAAAAFYFEAAAAAAARgIQAAgAAABIAAAL8gAQAAkAAABGEBAAAAAAAEZ%EAADAAAAAGAQAAMAAAABQAAAAAAAADgAAAfiABAACQAAAAYJEAAIAAAABgAQAAkAAAAYAAAHIgAQAAAAAAA6ABAAAAAAAAFAAAAAAIA:MgAACXIAEAACAAAARgIQAAgAAAAGABAACQAAAEYCEAACAAAANwAACXIAEAACAAAAVgUQAAAAAABGAhAAAgAAAJYHEAAJAAAANwAADHIAEAADAAAAVgUQAAAAAAACQAAAAAAAAAAAAAAAAAAAAAAAAEYCEAADAAAAMgAACrIAEAAAAAAARggQAAYAAAAGABAAAAAAAJaNIAAAAAAAHgAAABAAAAeCABAAAwAAAEYDEAAAAAAARgMQAAAAAABEAAAFggAQAAMAAAA6ABAAAwAAADgAAAeyABAAAAAAAEYMEAAAAAAA9g8QAAMAAAAQAAAHggAQAAMAAABGAhAAAQAAAEYDEAAAAAAAEAAABxIAEAAAAAAARgIQAAcAAABGAxAAAAAAABAAAAgiABAAAAAAAEYCEAABAAAAlocgAAAAAAAeAAAANAAAB4IAEAAAAAAAGgAQAAAAAAABQAAAAAAAADgAAAeCABAABAAAACoAEAAAAAAAKgAQAAAAAAAAAAALcgAQAAYAAABGAhCAQQAAAAQAAAACQAAAAACAPwAAgD8AAIA:AAAAADIAAAmCABAABQAAAAoAEAAAAAAAAUAAAFnAscABQAAADHbfwDgAAAcSABAAAAAAAAoAEAAAAAAAOgAQAAUAAAAZAAAFEgAQAAAAAAAKABAAAAAAADIAAAlyABAABAAAAEYCEAAGAAAABgAQAAAAAABGAhAABAAAADgAAAcSABAAAAAAADoAEAAEAAAAOgAQAAQAAAA4AAAHggAQAAMAAAA6ABAAAwAAADoAEAADAAAAMgAACYIAEAAFAAAAOgAQAAQAAAA6ABAABAAAAAFAAAAAAIC:MgAACYIAEAADAAAAOgAQAAMAAAA6ABAABQAAAAFAAAAAAIA:OAAAB4IAEAADAAAAOgAQAAMAAAA6ABAAAwAAADgAAAcSABAAAAAAAAoAEAAAAAAAAUAAAIP5oj4OAAAHEgAQAAAAAAAKABAAAAAAADoAEAADAAAAMgAACkIAEAAAAAAAKgAQgEEAAAAAAAAAKgAQAAAAAAABQAAAAACAPzIAAAkiABAAAAAAABoAEAAAAAAAKgAQAAAAAAA6ABAABAAAADIAAAlCABAAAAAAADoAEAACAAAAKgAQAAAAAAA6ABAABAAAADgAAAciABAAAAAAACoAEAAAAAAAGgAQAAAAAAAOAAAKIgAQAAAAAAACQAAAAACAPwAAgD8AAIA:AACAPxoAEAAAAAAANiAABSIAEAAAAAAAGgAQAAAAAAA4AAAHEgAQAAAAAAAaABAAAAAAAAoAEAAAAAAAOAAAB3IAEAAAAAAABgAQAAAAAABGAhAABAAAADgAAAdyABAAAAAAAPYPEAABAAAARgIQAAAAAAA4AAAKcgAQAAAAAABGAhAAAAAAAAJAAAAAAIA%AACAPgAAgD4AAAAAMgAACXIAEAAAAAAARgIQAAMAAAD2DxAAAAAAAEYCEAAAAAAAOAAACHIAEAABAAAARgIQAAEAAAAGgCAAAAAAAB8AAAAyAAAMcgAQAAEAAABGAhAAAQAAAAJAAAAAACBBAAAgQQAAIEEAAAAARgIQAAUAAAAAAAAJcgAQAAMAAABGAhCAQQAAAAEAAABGgiAAAAAAABQAAAAQAAAHggAQAAAAAABGAhAAAwAAAEYCEAADAAAASwAABYIAEAAAAAAAOgAQAAAAAAAxAAAI8gAQAAMAAABGjiAAAAAAABAAAAD2DxAAAAAAAAEAAAryABAAAwAAAEYOEAADAAAAAkAAAAAAgD8AAIA:AACAPwAAgD8RAAAKggAQAAEAAAACQAAAAACAPwAAgD8AAIA:AACAP0YOEAADAAAAGwAABYIAEAABAAAAOgAQAAEAAAApAAAHggAQAAIAAAA6ABAAAQAAAAFAAAACAAAAHgAACnIAEAADAAAA9g8QAAIAAAACQAAAAQAAAAIAAAADAAAAAAAAADgAAAnyABAABAAAAFYFEAABAAAARo4gBAAAAAAKABAAAwAAADIAAAvyABAABAAAAAYAEAABAAAARo4gBAAAAAA6ABAAAgAAAEYOEAAEAAAAMgAAC:IAEAAEAAAApgoQAAEAAABGjiAEAAAAABoAEAADAAAARg4QAAQAAAAAAAAJ8gAQAAMAAABGDhAABAAAAEaOIAQAAAAAKgAQAAMAAAAxAAAHEgAQAAQAAAABQAAAAAAAADoAEAADAAAAHwAEAwoAEAAEAAAADgAAB3IAEAADAAAARgIQAAMAAAD2DxAAAwAAAAAAAAlCABAAAwAAACoAEAADAAAACoAggEEAAAAAAAAAHwAAAAAAAAryABAABAAAAEYEEAADAAAAAkAAAAAAgLkAAIC6AACAuQAAAABGAAALggAQAAMAAABGABAABAAAAAZwEAAEAAAAAGAQAAQAAAAqABAAAwAAAEYAAAsSABAABAAAAOYKEAAEAAAABnAQAAQAAAAAYBAABAAAACoAEAADAAAAAAAAB4IAEAADAAAAOgAQAAMAAAAKABAABAAAAAAAAAryABAABAAAAEYEEAADAAAAAkAAAAAAgLkAAIA6AAAAAAAAgLpGAAALEgAQAAQAAABGABAABAAAAAZwEAAEAAAAAGAQAAQAAAAqABAAAwAAAAAAAAeCABAAAwAAADoAEAADAAAACgAQAAQAAABGAAALEgAQAAQAAADmChAABAAAAAZwEAAEAAAAAGAQAAQAAAAqABAAAwAAAAAAAAeCABAAAwAAADoAEAADAAAACgAQAAQAAABGAAALEgAQAAQAAABGABAAAwAAAAZwEAAEAAAAAGAQAAQAAAAqABAAAwAAAAAAAAeCABAAAwAAADoAEAADAAAACgAQAAQAAAAAAAAK8gAQAAQAAABGBBAAAwAAAAJAAAAAAAAAAACAOgAAgDkAAIC6RgAACxIAEAAEAAAARgAQAAQAAAAGcBAABAAAAABgEAAEAAAAKgAQAAMAAAAAAAAHggAQAAMAAAA6ABAAAwAAAAoAEAAEAAAARgAACxIAEAAEAAAA5goQAAQAAAAGcBAABAAAAABgEAAEAAAAKgAQAAMAAAAAAAAHggAQAAMAAAA6ABAAAwAAAAoAEAAEAAAAAAAACvIAEAAEAAAARgQQAAMAAAACQAAAAACAOQAAAAAAAIA5AACAOkYAAAsSABAAAwAAAEYAEAAEAAAABnAQAAQAAAAAYBAABAAAACoAEAADAAAAAAAABxIAEAADAAAACgAQAAMAAAA6ABAAAwAAAEYAAAsiABAAAwAAAOYKEAAEAAAABnAQAAQAAAAAYBAABAAAACoAEAADAAAAAAAABxIAEAADAAAAGgAQAAMAAAAKABAAAwAAADgAAAcSABAAAwAAAAoAEAADAAAAAUAAADmO4z0SAAABNgAABRIAEAADAAAAAUAAAAAAgD8VAAABEQAACSIAEAADAAAARo4gAAAAAAAQAAAARp6QADoAEAABAAAAHwAAAzoAEAABAAAANgAABUIAEAADAAAAGgAQAAMAAAASAAABHgAAB4IAEAADAAAAOgAQAAEAAAABQAAA:::::xEAAAmCABAAAwAAAEaOIAAAAAAAEAAAAEaekAA6ABAAAwAAAAAAAAhCABAAAwAAADoAEIBBAAAAAwAAABoAEAADAAAAFQAAAQAAAAiCABAAAAAAADoAEIBBAAAAAAAAABoAEAADAAAADgAAB4IAEAAAAAAAOgAQAAAAAAAqABAAAwAAAB0AAAciABAAAwAAAAFAAACamRk%OgAQAAAAAAAnAAAHggAQAAEAAAA6ABAAAQAAAAFAAAADAAAAAQAAB4IAEAABAAAAOgAQAAEAAAAaABAAAwAAAB8ABAM6ABAAAQAAAB4AAAciABAAAwAAADoAEAACAAAAAUAAAAQAAAAeAAAK4gAQAAMAAABWBRAAAwAAAAJAAAAAAAAAAQAAAAIAAAADAAAAOAAACfIAEAAEAAAAVgUQAAEAAABGjiAEAAAAABoAEAADAAAAMgAADPIAEAAEAAAABgAQAAEAAABGjiAGAAAAAAQAAAA6ABAAAgAAAEYOEAAEAAAAMgAAC:IAEAAEAAAApgoQAAEAAABGjiAEAAAAACoAEAADAAAARg4QAAQAAAAAAAAJ8gAQAAQAAABGDhAABAAAAEaOIAQAAAAAOgAQAAMAAAAxAAAHEgAQAAEAAAABQAAAAAAAADoAEAAEAAAAHwAEAwoAEAABAAAADgAAB3IAEAABAAAARgIQAAQAAAD2DxAABAAAAAAAAAlCABAAAQAAACoAEAABAAAACoAggEEAAAAAAAAAHwAAAAAAAAryABAABAAAAEYEEAABAAAAAkAAAAAAgLkAAIC6AACAuQAAAABGAAALggAQAAIAAABGABAABAAAAAZwEAAEAAAAAGAQAAQAAAAqABAAAQAAAEYAAAsiABAAAwAAAOYKEAAEAAAABnAQAAQAAAAAYBAABAAAACoAEAABAAAAAAAAB4IAEAACAAAAOgAQAAIAAAAaABAAAwAAAAAAAAryABAABAAAAEYEEAABAAAAAkAAAAAAgLkAAIA6AAAAAAAAgLpGAAALIgAQAAMAAABGABAABAAAAAZwEAAEAAAAAGAQAAQAAAAqABAAAQAAAAAAAAeCABAAAgAAADoAEAACAAAAGgAQAAMAAABGAAALIgAQAAMAAADmChAABAAAAAZwEAAEAAAAAGAQAAQAAAAqABAAAQAAAAAAAAeCABAAAgAAADoAEAACAAAAGgAQAAMAAABGAAALIgAQAAMAAABGABAAAQAAAAZwEAAEAAAAAGAQAAQAAAAqABAAAQAAAAAAAAeCABAAAgAAADoAEAACAAAAGgAQAAMAAAAAAAAK8gAQAAQAAABGBBAAAQAAAAJAAAAAAAAAAACAOgAAgDkAAIC6RgAACyIAEAADAAAARgAQAAQAAAAGcBAABAAAAABgEAAEAAAAKgAQAAEAAAAAAAAHggAQAAIAAAA6ABAAAgAAABoAEAADAAAARgAACyIAEAADAAAA5goQAAQAAAAGcBAABAAAAABgEAAEAAAAKgAQAAEAAAAAAAAHggAQAAIAAAA6ABAAAgAAABoAEAADAAAAAAAACvIAEAAEAAAARgQQAAEAAAACQAAAAACAOQAAAAAAAIA5AACAOkYAAAsSABAAAQAAAEYAEAAEAAAABnAQAAQAAAAAYBAABAAAACoAEAABAAAAAAAABxIAEAABAAAACgAQAAEAAAA6ABAAAgAAAEYAAAsiABAAAQAAAOYKEAAEAAAABnAQAAQAAAAAYBAABAAAACoAEAABAAAAAAAABxIAEAABAAAAGgAQAAEAAAAKABAAAQAAADgAAAcSABAAAQAAAAoAEAABAAAAAUAAADmO4z0SAAABNgAABRIAEAABAAAAAUAAAAAAgD8VAAABOCAAB4IAEAAAAAAAOgAQAAAAAAABQAAAVVXVQDIAAAkiABAAAQAAADoAEAAAAAAAAUAAAAAAAMABQAAAAABAQDgAAAeCABAAAAAAADoAEAAAAAAAOgAQAAAAAAA4AAAHggAQAAAAAAA6ABAAAAAAABoAEAABAAAAAAAACCIAEAABAAAACgAQgEEAAAABAAAACgAQAAMAAAAyAAAJggAQAAAAAAA6ABAAAAAAABoAEAABAAAACgAQAAEAAAAVAAABNwAACYIAEAAAAAAAOgAQAAEAAAA6ABAAAAAAAAoAEAADAAAAOAAAB3IAEAAAAAAA9g8QAAAAAABGAhAAAAAAADIAAApyIBAAAAAAAEYCEAAAAAAAlocgAAAAAAAfAAAARgIQAAIAAAA2AAAFgiAQAAAAAAABQAAAAACAPz4AAAFTVEFUdAAAANYAAAALAAAABAAAAAMAAACdAAAABgAAAAIAAAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAASAAAAAAAAAAAAAAAHAAAABQAAAAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+kha_Shaders.lambert369SG_002_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMF6iVCBMpmjogPn5JooShTAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAAAAAH9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+kha_Shaders.lambert418SG_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMF6iVCBMpmjogPn5JooShTAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAAAAAH9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+kha_Shaders.lambert423SG_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMF6iVCBMpmjogPn5JooShTAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAAAAAH9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+kha_Shaders.lambert424SG_mesh_fragData0 = "s1595:AAJfSW1hZ2VUZXh0dXJlX3NhbXBsZXIAAEltYWdlVGV4dHVyZQAAAERYQkMF6iVCBMpmjogPn5JooShTAQAAAIQEAAAFAAAANAAAAOQAAAAwAQAAfAEAAAgEAABSREVGqAAAAAAAAAAAAAAAAgAAABwAAAAABP::AAEAAH8AAABcAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAHIAAAACAAAABQAAAAQAAAD:::::AAAAAAEAAAANAAAAX0ltYWdlVGV4dHVyZV9zYW1wbGVyAEltYWdlVGV4dHVyZQBNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEAq0lTR05EAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAMDAAA4AAAAAQAAAAAAAAADAAAAAQAAAAcHAABURVhDT09SRACrq6tPU0dORAAAAAIAAAAIAAAAOAAAAAAAAAAAAAAAAwAAAAAAAAAPAAAAOAAAAAEAAAAAAAAAAwAAAAEAAAAPAAAAU1ZfVGFyZ2V0AKurU0hEUoQCAABAAAAAoQAAAFoAAAMAYBAAAAAAAFgYAAQAcBAAAAAAAFVVAABiEAADMhAQAAAAAABiEAADchAQAAEAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAABoAAACAwAAABAAAAcSABAAAAAAAEYSEAABAAAARhIQAAEAAABEAAAFEgAQAAAAAAAKABAAAAAAADgAAAdyABAAAAAAAAYAEAAAAAAAJhkQAAEAAAAAAAAJggAQAAAAAAAqABCAgQAAAAAAAAAaABCAgQAAAAAAAAAAAAAIggAQAAAAAAAKABCAgQAAAAAAAAA6ABAAAAAAAA4AAAdyABAAAAAAAEYCEAAAAAAA9g8QAAAAAAAAAAALMgAQAAEAAABmChCAwQAAAAAAAAACQAAAAACAPwAAgD8AAAAAAAAAAB0AAApyABAAAgAAAEYCEAAAAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAA3AAAPkgAQAAAAAABWCRAAAgAAAAJAAAAAAIA:AAAAAAAAAAAAAIA:AkAAAAAAgL8AAAAAAAAAAAAAgL84AAAHkgAQAAAAAAAGDBAAAAAAAAYEEAABAAAANwAACTIgEAAAAAAABgAQAAIAAACWBRAAAAAAAMYAEAAAAAAANgAACMIgEAAAAAAAAkAAAAAAAAAAAAAAAACAPwAAAABFAAAJ8gAQAAAAAABGEBAAAAAAAEZ%EAAAAAAAAGAQAAAAAAAvAAAFcgAQAAAAAABGAhAAAAAAADgAAApyABAAAAAAAEYCEAAAAAAAAkAAAM3MDEDNzAxAzcwMQAAAAAAZAAAFciAQAAEAAABGAhAAAAAAADYAAAWCIBAAAQAAAAFAAAAAAH9DPgAAAVNUQVR0AAAAEgAAAAMAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.line_deferred_fragData0 = "s682:AAAARFhCQ5vz:tmFILt8j9P6xQPbPW8BAAAA:AEAAAUAAAA0AAAAgAAAALQAAAAAAQAAgAEAAFJERUZEAAAAAAAAAAAAAAAAAAAAHAAAAAAE::8AAQAAHAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAVEVYQ09PUkQAq6urT1NHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAADwAAADgAAAABAAAAAAAAAAMAAAABAAAADwAAAFNWX1RhcmdldACrq1NIRFJ4AAAAQAAAAB4AAABiEAADchAQAAAAAABlAAAD8iAQAAAAAABlAAAD8iAQAAEAAAA2AAAI8iAQAAAAAAACQAAAAACAPwAAgD8AAAAAAACAPzYAAAVyIBAAAQAAAEYSEAAAAAAANgAABYIgEAABAAAAAUAAAAAAgD8%AAABU1RBVHQAAAAEAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.line_fragData0 = "s591:AAAARFhCQ%muGK28:m72kj3ngjsknooBAAAAuAEAAAUAAAA0AAAAgAAAALQAAADoAAAAPAEAAFJERUZEAAAAAAAAAAAAAAAAAAAAHAAAAAAE::8AAQAAHAAAAE1pY3Jvc29mdCAoUikgSExTTCBTaGFkZXIgQ29tcGlsZXIgMTAuMQBJU0dOLAAAAAEAAAAIAAAAIAAAAAAAAAAAAAAAAwAAAAAAAAAHBwAAVEVYQ09PUkQAq6urT1NHTiwAAAABAAAACAAAACAAAAAAAAAAAAAAAAMAAAAAAAAADwAAAFNWX1RhcmdldACrq1NIRFJMAAAAQAAAABMAAABiEAADchAQAAAAAABlAAAD8iAQAAAAAAA2AAAFciAQAAAAAABGEhAAAAAAADYAAAWCIBAAAAAAAAFAAAAAAIA:PgAAAVNUQVR0AAAAAwAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 kha_Shaders.line_vertData0 = "s1264:AmNvbAAAcG9zAAEBJEdsb2JhbHMAAAFWaWV3UHJvamVjdGlvbgAAAAAAQAAAAAQERFhCQyjtXVhaBOUzv4CQc9qJ5e0BAAAAhAMAAAUAAAA0AAAA:AAAAEgBAACgAQAACAMAAFJERUbAAAAAAQAAAEgAAAABAAAAHAAAAAAE:v8AAQAAmAAAADwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAJEdsb2JhbHMAq6urPAAAAAEAAABgAAAAQAAAAAAAAAAAAAAAeAAAAAAAAABAAAAAAgAAAIgAAAAAAAAAVmlld1Byb2plY3Rpb24AqwMAAwAEAAQAAAAAAAAAAABNaWNyb3NvZnQgKFIpIEhMU0wgU2hhZGVyIENvbXBpbGVyIDEwLjEASVNHTkQAAAACAAAACAAAADgAAAAAAAAAAAAAAAMAAAAAAAAABwcAADgAAAABAAAAAAAAAAMAAAABAAAABwcAAFRFWENPT1JEAKurq09TR05QAAAAAgAAAAgAAAA4AAAAAAAAAAAAAAADAAAAAAAAAAcIAABBAAAAAAAAAAEAAAADAAAAAQAAAA8AAABURVhDT09SRABTVl9Qb3NpdGlvbgCrq6tTSERSYAEAAEAAAQBYAAAAWQAABEaOIAAAAAAABAAAAF8AAANyEBAAAAAAAF8AAANyEBAAAQAAAGUAAANyIBAAAAAAAGcAAATyIBAAAQAAAAEAAABoAAACAgAAADYAAAVyIBAAAAAAAEYSEAAAAAAANgAABXIAEAAAAAAARhIQAAEAAAA2AAAFggAQAAAAAAABQAAAAACAPxEAAAgSABAAAQAAAEYOEAAAAAAARo4gAAAAAAACAAAAEQAACCIAEAABAAAARg4QAAAAAABGjiAAAAAAAAMAAAAAAAAHEgAQAAEAAAAaABAAAQAAAAoAEAABAAAANgAABYIgEAABAAAAGgAQAAEAAAA4AAAHQiAQAAEAAAAKABAAAQAAAAFAAAAAAAA:EQAACBIgEAABAAAARg4QAAAAAABGjiAAAAAAAAAAAAARAAAIIiAQAAEAAABGDhAAAAAAAEaOIAAAAAAAAQAAAD4AAAFTVEFUdAAAAAsAAAACAAAAAAAAAAQAAAAGAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -52574,16 +56493,5 @@ zui_Popup.modalW = 400;
 zui_Popup.modalH = 160;
 zui_Themes.dark = { NAME : "Default Dark", WINDOW_BG_COL : -13421773, WINDOW_TINT_COL : -1, ACCENT_COL : -12303292, ACCENT_HOVER_COL : -11974327, ACCENT_SELECT_COL : -10461088, BUTTON_COL : -12171706, BUTTON_TEXT_COL : -1513499, BUTTON_HOVER_COL : -11974327, BUTTON_PRESSED_COL : -15000805, TEXT_COL : -1513499, LABEL_COL : -3618616, SEPARATOR_COL : -14211289, HIGHLIGHT_COL : -14656100, CONTEXT_COL : -14540254, PANEL_BG_COL : -12895429, FONT_SIZE : 13, ELEMENT_W : 100, ELEMENT_H : 24, ELEMENT_OFFSET : 4, ARROW_SIZE : 5, BUTTON_H : 22, CHECK_SIZE : 15, CHECK_SELECT_SIZE : 8, SCROLL_W : 6, TEXT_OFFSET : 8, TAB_W : 6, FILL_WINDOW_BG : false, FILL_BUTTON_BG : true, FILL_ACCENT_BG : false, LINK_STYLE : 0};
 zui_Themes.light = { NAME : "Default Light", WINDOW_BG_COL : -1052689, WINDOW_TINT_COL : -14540254, ACCENT_COL : -1118482, ACCENT_HOVER_COL : -4473925, ACCENT_SELECT_COL : -5592406, BUTTON_COL : -3355444, BUTTON_TEXT_COL : -14540254, BUTTON_HOVER_COL : -5000269, BUTTON_PRESSED_COL : -5131855, TEXT_COL : -6710887, LABEL_COL : -5592406, SEPARATOR_COL : -6710887, HIGHLIGHT_COL : -14656100, CONTEXT_COL : -5592406, PANEL_BG_COL : -5592406, FONT_SIZE : 26, ELEMENT_W : 200, ELEMENT_H : 48, ELEMENT_OFFSET : 8, ARROW_SIZE : 10, BUTTON_H : 44, CHECK_SIZE : 30, CHECK_SELECT_SIZE : 16, SCROLL_W : 12, TEXT_OFFSET : 16, TAB_W : 24, FILL_WINDOW_BG : false, FILL_BUTTON_BG : true, FILL_ACCENT_BG : false, LINK_STYLE : 0};
-zui_Zui.alwaysRedrawWindow = true;
-zui_Zui.keyRepeat = true;
-zui_Zui.touchControls = false;
-zui_Zui.keyRepeatTime = 0.0;
-zui_Zui.textToPaste = "";
-zui_Zui.textToCopy = "";
-zui_Zui.isCut = false;
-zui_Zui.isCopy = false;
-zui_Zui.isPaste = false;
-zui_Zui.copyFrame = 0;
-zui_Zui.comboFirst = true;
 Main.main();
 })(typeof exports != "undefined" ? exports : typeof window != "undefined" ? window : typeof self != "undefined" ? self : this, typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
