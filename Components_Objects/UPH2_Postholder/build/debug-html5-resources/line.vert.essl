@@ -1,0 +1,14 @@
+#version 100
+
+uniform mat4 ViewProjection;
+
+varying vec3 color;
+attribute vec3 col;
+attribute vec3 pos;
+
+void main()
+{
+    color = col;
+    gl_Position = ViewProjection * vec4(pos, 1.0);
+}
+

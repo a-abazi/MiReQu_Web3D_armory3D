@@ -689,9 +689,9 @@ class Beam_Control_v7 extends iron.Trait {
                 
                 var q = new Quat();
                 var q2 = new Quat();
-				var x = new Vec4(1,0,0,1); //new Vec4().add(arr_dir[i]); //
-				var y = new Vec4(0,1,0,1);
-                var z = new Vec4(0,0,1,1);
+				var x = new Vec4(1.,0,0,1.); //new Vec4().add(arr_dir[i]); //
+				var y = new Vec4(0,1.,0,1.);
+                var z = new Vec4(0,0,1.,1.);
 				var beam_dir = new Vec4().setFrom(arr_dir[i]);
 				
 				var psi = Math.atan2(beam_dir.y,beam_dir.x);

@@ -63,11 +63,11 @@ class PhotoDiode extends iron.Trait {
 		if (keyboard.down("space")){
 			var globalObj: Object = iron.Scene.global;
 			//trace(measureBeams(globalObj.properties.get("ArrayDetBeams")));
-			trace(measureBeams(globalObj.properties.get("ArrayDetBeams")));
+			trace(getMeasurement(globalObj.properties.get("ArrayDetBeams")));
 		}
 	}
 	
-	public function measureBeams(arrayDetectableBeams:Array<Map<String,Dynamic>>){
+	public function getMeasurement(arrayDetectableBeams:Array<Map<String,Dynamic>>){
 		var signal: Float = 0.;
 		var detectorSize = detectorSize;
 		var dettEff =  detectorEfficiency;

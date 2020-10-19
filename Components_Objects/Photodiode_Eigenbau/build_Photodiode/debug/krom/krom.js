@@ -1504,10 +1504,10 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 				}
 				var q = new iron_math_Quat();
 				var q2 = new iron_math_Quat();
-				var x2 = 1;
+				var x2 = 1.;
 				var y2 = 0;
 				var z2 = 0;
-				var w2 = 1;
+				var w2 = 1.;
 				if(w2 == null) {
 					w2 = 1.0;
 				}
@@ -1525,9 +1525,9 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 				var x_z = z2;
 				var x_w = w2;
 				var x3 = 0;
-				var y3 = 1;
+				var y3 = 1.;
 				var z3 = 0;
-				var w3 = 1;
+				var w3 = 1.;
 				if(w3 == null) {
 					w3 = 1.0;
 				}
@@ -1546,8 +1546,8 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 				var y_w = w3;
 				var x4 = 0;
 				var y4 = 0;
-				var z4 = 1;
-				var w4 = 1;
+				var z4 = 1.;
+				var w4 = 1.;
 				if(w4 == null) {
 					w4 = 1.0;
 				}
@@ -6088,6 +6088,8 @@ var arm_PlotInstance = function(x,y,w,h) {
 	this.message = "hello world";
 	this.time = 0;
 	this.checkTime = false;
+	this.axisItemsNames = [];
+	this.axisItemsObjects = [];
 };
 $hxClasses["arm.PlotInstance"] = arm_PlotInstance;
 arm_PlotInstance.__name__ = "arm.PlotInstance";
@@ -6101,8 +6103,8 @@ arm_PlotInstance.prototype = {
 	,comboYAxisHandle: null
 	,panelHandle: null
 	,globalObj: null
-	,axisItemsObject: null
-	,axistItemsNames: null
+	,axisItemsObjects: null
+	,axisItemsNames: null
 	,message: null
 	,time: null
 	,timeSteps: null
@@ -6119,26 +6121,27 @@ arm_PlotInstance.prototype = {
 			ui.text("Plot Window");
 			ui.text(this.message);
 			if(ui.panel(this.panelHandle,"Select Data")) {
-				this.axistItemsNames = this.getAxisItems();
+				this.getAxisItems();
 				ui.row([0.5,0.5]);
 				ui.text("x Axis");
-				ui.combo(this.comboXAxisHandle,this.axistItemsNames);
+				ui.combo(this.comboXAxisHandle,this.axisItemsNames);
 				if(this.comboXAxisHandle.changed) {
-					haxe_Log.trace("Combo value X changed this frame",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 275, className : "arm.PlotInstance", methodName : "plotWindow"});
-					haxe_Log.trace(this.comboXAxisHandle.position,{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 276, className : "arm.PlotInstance", methodName : "plotWindow"});
+					haxe_Log.trace("Combo value X changed this frame",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 277, className : "arm.PlotInstance", methodName : "plotWindow"});
+					haxe_Log.trace(this.comboXAxisHandle.position,{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 278, className : "arm.PlotInstance", methodName : "plotWindow"});
 				}
 				ui.row([0.5,0.5]);
 				ui.text("y Axis");
-				ui.combo(this.comboYAxisHandle,this.axistItemsNames);
+				ui.combo(this.comboYAxisHandle,this.axisItemsNames);
 				if(this.comboYAxisHandle.changed) {
-					haxe_Log.trace("Combo value Y changed this frame",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 283, className : "arm.PlotInstance", methodName : "plotWindow"});
-					haxe_Log.trace(this.comboYAxisHandle.position,{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 284, className : "arm.PlotInstance", methodName : "plotWindow"});
+					haxe_Log.trace("Combo value Y changed this frame",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 285, className : "arm.PlotInstance", methodName : "plotWindow"});
+					haxe_Log.trace(this.comboYAxisHandle.position,{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 286, className : "arm.PlotInstance", methodName : "plotWindow"});
 				}
 			}
 		}
 	}
 	,getAxisItems: function() {
-		var items = ["time (s)"];
+		var names = ["None","time (s)"];
+		var objects = ["None","time (s)"];
 		if(this.globalObj.properties != null) {
 			var _this = this.globalObj.properties;
 			if((__map_reserved["detekorObjectsArray"] != null ? _this.getReserved("detekorObjectsArray") : _this.h["detekorObjectsArray"]) != null) {
@@ -6151,12 +6154,14 @@ arm_PlotInstance.prototype = {
 					var _this2 = detObj.properties;
 					if((__map_reserved["nameDetektor"] != null ? _this2.getReserved("nameDetektor") : _this2.h["nameDetektor"]) != null) {
 						var _this3 = detObj.properties;
-						items.push(__map_reserved["nameDetektor"] != null ? _this3.getReserved("nameDetektor") : _this3.h["nameDetektor"]);
+						names.push(__map_reserved["nameDetektor"] != null ? _this3.getReserved("nameDetektor") : _this3.h["nameDetektor"]);
+						objects.push(detObj);
 					}
 				}
 			}
 		}
-		return items;
+		this.axisItemsObjects = objects;
+		this.axisItemsNames = names;
 	}
 	,__class__: arm_PlotInstance
 };
@@ -6628,10 +6633,10 @@ arm_PhotoDiode.prototype = $extend(iron_Trait.prototype,{
 		if(keyboard.down("space")) {
 			var globalObj = iron_Scene.global;
 			var _this = globalObj.properties;
-			haxe_Log.trace(this.measureBeams(__map_reserved["ArrayDetBeams"] != null ? _this.getReserved("ArrayDetBeams") : _this.h["ArrayDetBeams"]),{ fileName : "arm/PhotoDiode.hx", lineNumber : 66, className : "arm.PhotoDiode", methodName : "onUpdate"});
+			haxe_Log.trace(this.getMeasurement(__map_reserved["ArrayDetBeams"] != null ? _this.getReserved("ArrayDetBeams") : _this.h["ArrayDetBeams"]),{ fileName : "arm/PhotoDiode.hx", lineNumber : 66, className : "arm.PhotoDiode", methodName : "onUpdate"});
 		}
 	}
-	,measureBeams: function(arrayDetectableBeams) {
+	,getMeasurement: function(arrayDetectableBeams) {
 		var signal = 0.;
 		var detectorSize = this.detectorSize;
 		var dettEff = this.detectorEfficiency;
@@ -8295,6 +8300,9 @@ arm_RSP1D_$Base.prototype = $extend(iron_Trait.prototype,{
 		arg2_w = vec1.w;
 		var angle = Math.atan2(Math.sqrt(arg1_x * arg1_x + arg1_y * arg1_y + arg1_z * arg1_z),arg2_x * vec2.x + arg2_y * vec2.y + arg2_z * vec2.z);
 		return angle;
+	}
+	,getMeasurement: function(arrayDetectableBeams) {
+		return this.ringAngle;
 	}
 	,__class__: arm_RSP1D_$Base
 });
