@@ -22,7 +22,13 @@ class Spawner_KM100_Base_CPS532_C2_Laser extends iron.Trait {
 	var postHeight: Float = 0.75;
 
 	@prop
-	var objectName_PostHolder: String = "UPH2_Base";
+	var objectName_PostHolder: String = "UPH_Base";
+
+	@prop
+	var postName: String = "UPH_TR75";
+
+	@prop
+	var topName: String = "UPH_Top40";
 
 	@prop
 	var objectName_Component: String = "KM100_Base_CPS532_C2_Laser";
@@ -81,6 +87,11 @@ class Spawner_KM100_Base_CPS532_C2_Laser extends iron.Trait {
 		pMap["baseDist"] = baseDist;
 		pMap["postDist"] = postDist;
 		pMap["spawned"] = true;
+
+		
+		pMap["postName"] = postName;
+		pMap["topName"] = topName;
+		pMap["sLoc"] = object.transform.world.getLoc();
 
 		return pMap;
 	}

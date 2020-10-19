@@ -19,8 +19,8 @@ class KM100_Base_CPS532_C2_Laser extends iron.Trait {
 
 	@prop 
 	var laserName: String = "CPS532_C2_Laser";
-	@prop 
-	var adapterName: String = "AD11NT";
+	//@prop 
+	//var adapterName: String = "AD11NT";
 	@prop 
 	var frontName: String = "KM100_Front_CPS532_C2_Laser";
 	@prop 
@@ -91,12 +91,12 @@ class KM100_Base_CPS532_C2_Laser extends iron.Trait {
 		}
 
 		
-		adapter = spawnObject(adapterName,false);
-		var mM = front.getChildren()[0].transform.world;
-		adapter.transform.setMatrix(mM);
-		adapter.transform.scale = scale;
-		adapter.visible = visib;
-		rbSync(adapter);
+		//adapter = spawnObject(adapterName,false);
+		//var mM = front.getChildren()[0].transform.world;
+		//adapter.transform.setMatrix(mM);
+		//adapter.transform.scale = scale;
+		//adapter.visible = visib;
+		//rbSync(adapter);
 
 		laser = spawnObject(laserName,false);
 		var mM = front.getChildren()[0].transform.world;
@@ -126,7 +126,7 @@ class KM100_Base_CPS532_C2_Laser extends iron.Trait {
 		objList.push(screwBot);
 		objList.push(screwTop);
 		objList.push(front);
-		objList.push(adapter);
+		//objList.push(adapter);
 		objList.push(laser);
 
 		
@@ -267,14 +267,16 @@ class KM100_Base_CPS532_C2_Laser extends iron.Trait {
 		rbSync(front);
 
 		// update mirror to front of mirrorholder
+
 		var mM = front.getChildren()[0].transform.world;
 		laser.transform.setMatrix(mM);
 		laser.transform.scale = scale;
+		laser.visible = visib;
 		rbSync(laser);
 
-		adapter.transform.setMatrix(mM);
-		adapter.transform.scale = scale;
-		rbSync(adapter);
+		//adapter.transform.setMatrix(mM);
+		//adapter.transform.scale = scale;
+		//rbSync(adapter);
 		//Event.send("Calc_Beams"); // Event of the scene trait calc beams, makes a new calculation of the Beams
 	}
 	
