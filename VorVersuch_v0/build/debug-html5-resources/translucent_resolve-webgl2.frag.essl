@@ -1,0 +1,23 @@
+#version 300 es
+precision mediump float;
+precision highp int;
+
+uniform highp sampler2D gbuffer0;
+uniform highp vec2 texSize;
+uniform highp sampler2D gbuffer1;
+
+in highp vec2 texCoord;
+out highp vec4 fragColor;
+
+void main()
+{
+    highp vec4 accum = texelFetch(gbuffer0, ivec2(texCoord * texSize), 0);
+    highp float revealage = 1.0 - accum.w;
+    if (revealage == 0.0)
+    {
+        discard;
+    }
+    highp float f = texelFetch(gbuffer1, ivec2(texCoord * texSize), 0).x;
+    fragColor = vec4(accum.xyz / vec3(clamp(f, 9.9999997473787516355514526367188e-05, 5000.0)), revealage);
+}
+

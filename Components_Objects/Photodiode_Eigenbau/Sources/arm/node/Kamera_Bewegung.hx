@@ -8,6 +8,7 @@ package arm.node;
 
 	public function new() {
 		super();
+		name = "Kamera_Bewegung";
 		this.functionNodes = new Map();
 		this.functionOutputNodes = new Map();
 		notifyOnAdd(add);

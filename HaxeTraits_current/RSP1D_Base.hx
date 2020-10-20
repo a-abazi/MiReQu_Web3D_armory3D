@@ -299,4 +299,10 @@ class RSP1D_Base extends iron.Trait {
 		return angle;
 	}
 
+	public function getMeasurement(arrayDetectableBeams:Array<Map<String,Dynamic>>){
+
+		return ringAngle;
+		
+	}
+
 }

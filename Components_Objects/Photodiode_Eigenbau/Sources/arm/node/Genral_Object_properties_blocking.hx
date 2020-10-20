@@ -8,6 +8,7 @@ package arm.node;
 
 	public function new() {
 		super();
+		name = "Genral_Object_properties_blocking";
 		this.functionNodes = new Map();
 		this.functionOutputNodes = new Map();
 		notifyOnAdd(add);
