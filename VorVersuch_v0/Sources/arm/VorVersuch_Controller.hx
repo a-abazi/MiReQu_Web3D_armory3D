@@ -10,38 +10,48 @@ import armory.trait.physics.RigidBody;
 
 import arm.VorVersuch_Spawner.CompVV;
 
+import armory.trait.internal.CanvasScript;
+
 
 class VorVersuch_Controller extends iron.Trait {
 	public function new() {
 		super();
+		notifyOnInit(onInit);
 		notifyOnUpdate(onUpdate);
 	}
-		// notifyOnInit(function() {
-		// });
+	private function onInit(){
+		var canvas: CanvasScript = Scene.active.getTrait(CanvasScript);
+		if (canvas == null) canvas = Scene.active.camera.getTrait(CanvasScript);
+		var element = canvas.getElement("ButtonGroup");
+		if (element != null) element.visible = false;
+	}
 
-		private function onUpdate() {
-			var keyb =  Input.getKeyboard();
-	
-			if (keyb.started("1")){
-				fillSlot(0,LinPol);
-			}
-			if (keyb.started("2")){
-				fillSlot(1,WPHalf);
-			}
-			if (keyb.started("3")){
-				fillSlot(1,WPQuart);
-			}
-			if (keyb.started("4")){
-				fillSlot(2,Pbs);
-			}
-	
+	private function onUpdate() {
+		var keyb =  Input.getKeyboard();
+		var mouse = Input.getMouse();
+
+		
+		
+		if (keyb.started("1")){
+			fillSlot(0,LinPol);
 		}
+		if (keyb.started("2")){
+			fillSlot(1,WPHalf);
+		}
+		if (keyb.started("3")){
+			fillSlot(1,WPQuart);
+		}
+		if (keyb.started("4")){
+			fillSlot(2,Pbs);
+		}
+		
+	}
 	
+
 	function fillSlot(slotNum: Int, whatComp: CompVV){
 		callTraitFunction(object,"VorVersuch_Spawner","fillSlot",[slotNum,whatComp]);
 	}
 	
-
 	function callTraitFunction(object:Object, traitName:String, funName: String, funArguments:Array <Dynamic>):Dynamic{
 		var result: Dynamic;
 		// (Small helper) This function combines some dynamic haxe functions (especially Reflect) to call 

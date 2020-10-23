@@ -45,13 +45,13 @@ class VorVersuch_Spawner extends iron.Trait {
 			initProps(slot);
 		}
 
+		if (Scene.global.properties == null) initProps(Scene.global);
 		Scene.global.properties["slots"] = slots;
 
-		var array: Array <Dynamic> = Scene.global.properties["slots"];
 
 		fillSlot(0,Empty);
 		fillSlot(1,Empty);
-		//fillSlot(2,Empty);
+		fillSlot(2,Empty);
 	}
 
 	private function onUpdate() {

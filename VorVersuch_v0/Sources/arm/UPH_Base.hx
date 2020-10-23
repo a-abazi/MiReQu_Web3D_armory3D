@@ -308,6 +308,7 @@ class UPH_Base extends iron.Trait {
 				comp.transform.loc.add(compCorrV);
 			}
 			rbSync(comp);
+			object.properties["componentObject"] = comp;
 		}
 
 		

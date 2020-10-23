@@ -9,23 +9,6 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
-var EReg = function(r,opt) {
-	this.r = new RegExp(r,opt.split("u").join(""));
-};
-$hxClasses["EReg"] = EReg;
-EReg.__name__ = "EReg";
-EReg.prototype = {
-	r: null
-	,match: function(s) {
-		if(this.r.global) {
-			this.r.lastIndex = 0;
-		}
-		this.r.m = this.r.exec(s);
-		this.r.s = s;
-		return this.r.m != null;
-	}
-	,__class__: EReg
-};
 var HxOverrides = function() { };
 $hxClasses["HxOverrides"] = HxOverrides;
 HxOverrides.__name__ = "HxOverrides";
@@ -97,16 +80,6 @@ Lambda.array = function(it) {
 	}
 	return a;
 };
-Lambda.exists = function(it,f) {
-	var x = $getIterator(it);
-	while(x.hasNext()) {
-		var x1 = x.next();
-		if(f(x1)) {
-			return true;
-		}
-	}
-	return false;
-};
 var Main = function() { };
 $hxClasses["Main"] = Main;
 Main.__name__ = "Main";
@@ -158,19 +131,6 @@ Reflect.fields = function(o) {
 Reflect.isFunction = function(f) {
 	if(typeof(f) == "function") {
 		return !(f.__name__ || f.__ename__);
-	} else {
-		return false;
-	}
-};
-Reflect.compareMethods = function(f1,f2) {
-	if(f1 == f2) {
-		return true;
-	}
-	if(!Reflect.isFunction(f1) || !Reflect.isFunction(f2)) {
-		return false;
-	}
-	if(f1.scope == f2.scope && f1.method == f2.method) {
-		return f1.method != null;
 	} else {
 		return false;
 	}
@@ -431,7 +391,7 @@ iron_Trait.prototype = {
 	}
 	,__class__: iron_Trait
 };
-var arm_Beam_$Control_$v7 = function() {
+var arm_Beam_$Control_$v8 = function() {
 	this.delay = 1;
 	this.once = true;
 	this.time = 0.0;
@@ -474,10 +434,10 @@ var arm_Beam_$Control_$v7 = function() {
 	this.notifyOnInit($bind(this,this.onInit));
 	this.notifyOnUpdate($bind(this,this.onUpdate));
 };
-$hxClasses["arm.Beam_Control_v7"] = arm_Beam_$Control_$v7;
-arm_Beam_$Control_$v7.__name__ = "arm.Beam_Control_v7";
-arm_Beam_$Control_$v7.__super__ = iron_Trait;
-arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
+$hxClasses["arm.Beam_Control_v8"] = arm_Beam_$Control_$v8;
+arm_Beam_$Control_$v8.__name__ = "arm.Beam_Control_v8";
+arm_Beam_$Control_$v8.__super__ = iron_Trait;
+arm_Beam_$Control_$v8.prototype = $extend(iron_Trait.prototype,{
 	directSpawn: null
 	,directSpawn_LaserName: null
 	,beam_name: null
@@ -628,7 +588,7 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 		var laser_on = __map_reserved["Laser_on"] != null ? _this.getReserved("Laser_on") : _this.h["Laser_on"];
 		if(this.laserArray != null) {
 			if(this.laserArray.length < 1) {
-				haxe_Log.trace("no laser not defined",{ fileName : "arm/Beam_Control_v7.hx", lineNumber : 186, className : "arm.Beam_Control_v7", methodName : "onEventCB"});
+				haxe_Log.trace("no laser not defined",{ fileName : "arm/Beam_Control_v8.hx", lineNumber : 187, className : "arm.Beam_Control_v8", methodName : "onEventCB"});
 				return;
 			}
 		} else {
@@ -834,7 +794,7 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 		if(func != null) {
 			result = func.apply(trait,funArguments);
 		} else {
-			haxe_Log.trace("Error: dynamic function resulted in null value, Error in trait or function name",{ fileName : "arm/Beam_Control_v7.hx", lineNumber : 365, className : "arm.Beam_Control_v7", methodName : "callTraitFunction"});
+			haxe_Log.trace("Error: dynamic function resulted in null value, Error in trait or function name",{ fileName : "arm/Beam_Control_v8.hx", lineNumber : 366, className : "arm.Beam_Control_v8", methodName : "callTraitFunction"});
 			result = null;
 		}
 		return result;
@@ -1312,6 +1272,20 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 			}
 			if(tmp) {
 				childprops = this.callTraitFunction(source_object,this.Proptraitname,this.funName_BP,[arr_beams[i - 1],arr_pos[i],arr_dir[i]]);
+				var _this4 = source_object.properties;
+				var value = arr_beams[i - 1];
+				if(__map_reserved["PrevBeam"] != null) {
+					_this4.setReserved("PrevBeam",value);
+				} else {
+					_this4.h["PrevBeam"] = value;
+				}
+				var _this5 = source_object.properties;
+				var value1 = arr_beams[i];
+				if(__map_reserved["NextBeam"] != null) {
+					_this5.setReserved("NextBeam",value1);
+				} else {
+					_this5.h["NextBeam"] = value1;
+				}
 			}
 			var key1 = childprops.keys();
 			while(key1.hasNext()) {
@@ -1321,16 +1295,16 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 				}
 				var this1 = curr_beam.properties;
 				var v2 = __map_reserved[key2] != null ? childprops.getReserved(key2) : childprops.h[key2];
-				var _this4 = this1;
-				var value = v2;
+				var _this6 = this1;
+				var value2 = v2;
 				if(__map_reserved[key2] != null) {
-					_this4.setReserved(key2,value);
+					_this6.setReserved(key2,value2);
 				} else {
-					_this4.h[key2] = value;
+					_this6.h[key2] = value2;
 				}
 			}
-			var _this5 = curr_beam.properties;
-			if((__map_reserved["stokes_I"] != null ? _this5.getReserved("stokes_I") : _this5.h["stokes_I"]) < 0.005) {
+			var _this7 = curr_beam.properties;
+			if((__map_reserved["stokes_I"] != null ? _this7.getReserved("stokes_I") : _this7.h["stokes_I"]) < 0.005) {
 				curr_beam.visible = false;
 			}
 		}
@@ -1339,15 +1313,15 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 			var tmp1;
 			if(curr_beam1.properties != null) {
 				var key3 = this.arrName_subobjects;
-				var _this6 = curr_beam1.properties;
-				tmp1 = __map_reserved[key3] != null ? _this6.getReserved(key3) : _this6.h[key3];
+				var _this8 = curr_beam1.properties;
+				tmp1 = __map_reserved[key3] != null ? _this8.getReserved(key3) : _this8.h[key3];
 			} else {
 				tmp1 = false;
 			}
 			if(tmp1) {
 				var key4 = this.arrName_subobjects;
-				var _this7 = curr_beam1.properties;
-				var arr_subobjects1 = __map_reserved[key4] != null ? _this7.getReserved(key4) : _this7.h[key4];
+				var _this9 = curr_beam1.properties;
+				var arr_subobjects1 = __map_reserved[key4] != null ? _this9.getReserved(key4) : _this9.h[key4];
 				while(arr_subobjects1.length > 0) arr_subobjects1.pop().remove();
 			}
 			curr_beam1.remove();
@@ -2014,7 +1988,7 @@ arm_Beam_$Control_$v7.prototype = $extend(iron_Trait.prototype,{
 			return return_bool;
 		}
 	}
-	,__class__: arm_Beam_$Control_$v7
+	,__class__: arm_Beam_$Control_$v8
 });
 var arm_Color_$trait = function() {
 	var _gthis = this;
@@ -2153,8 +2127,198 @@ arm_DebugCamera.__super__ = iron_Trait;
 arm_DebugCamera.prototype = $extend(iron_Trait.prototype,{
 	__class__: arm_DebugCamera
 });
+var arm_DebugUI_$VorVersuch = function() {
+	this.plotter = new arm_Vorversuch_$MeasurementPlot();
+	this.traitResumer = new arm_ResumeTraitSelector();
+	this.spawner = new arm_VorVersuch_$Spawner();
+	this.virtInptBool = false;
+	this.handleSlot3 = new zui_Handle({ value : 90.});
+	this.handleSlot2 = new zui_Handle({ value : 90.});
+	this.handleSlot1 = new zui_Handle({ value : 90.});
+	this.vivItemNames = ["Virtual Input","Simulated","Real"];
+	this.vivComboHandle = new zui_Handle();
+	this.height = 1200;
+	this.width = 230;
+	this.pos_y = 20;
+	this.pos_x = 20;
+	var _gthis = this;
+	iron_Trait.call(this);
+	iron_data_Data.getFont("font_default.ttf",function(f) {
+		_gthis.ui = new zui_Zui({ font : f});
+	});
+	this.notifyOnRender2D($bind(this,this.onRender2D));
+};
+$hxClasses["arm.DebugUI_VorVersuch"] = arm_DebugUI_$VorVersuch;
+arm_DebugUI_$VorVersuch.__name__ = "arm.DebugUI_VorVersuch";
+arm_DebugUI_$VorVersuch.__super__ = iron_Trait;
+arm_DebugUI_$VorVersuch.prototype = $extend(iron_Trait.prototype,{
+	ui: null
+	,pos_x: null
+	,pos_y: null
+	,width: null
+	,height: null
+	,vivComboHandle: null
+	,vivItemNames: null
+	,handleSlot1: null
+	,handleSlot2: null
+	,handleSlot3: null
+	,canvas: null
+	,virtInptBool: null
+	,spawner: null
+	,traitResumer: null
+	,plotter: null
+	,onUpdate: function() {
+	}
+	,onRender2D: function(g) {
+		g.end();
+		this.ui.begin(g);
+		if(this.ui.window(zui_Handle.global.nest(1,null),this.pos_x,this.pos_y,this.width,this.height,false)) {
+			if(this.ui.panel(zui_Handle.global.nest(2,{ selected : true}),"Measurement Steps")) {
+				this.ui.row([0.5,0.5]);
+				if(this.ui.button("Reset")) {
+					this.mReset();
+				}
+				if(this.ui.button("Step 1")) {
+					this.mStep1();
+				}
+				this.ui.row([0.5,0.5]);
+				if(this.ui.button("Step 2")) {
+					this.mStep2();
+				}
+				if(this.ui.button("Step 3")) {
+					this.mStep3();
+				}
+				this.ui.row([0.5,0.5]);
+				if(this.ui.button("Step 4")) {
+					this.mStep4();
+				}
+				if(this.ui.button("Step 5")) {
+					this.mStep5();
+				}
+			}
+			if(this.ui.panel(zui_Handle.global.nest(3,{ selected : true}),"Virtual Input Angles")) {
+				this.virtInptBool = this.ui.check(zui_Handle.global.nest(4,null),"Virtual Input");
+				var angleSlot1 = this.ui.slider(this.handleSlot1,"Angle Slot 1",0.,360.,true);
+				var angleSlot2 = this.ui.slider(this.handleSlot2,"Angle Slot 2",0.,360.,true);
+				var angleSlot3 = this.ui.slider(this.handleSlot3,"Angle Slot 3",0.,360.,true);
+				if(this.virtInptBool) {
+					var angleArray = [angleSlot1,angleSlot2,angleSlot3];
+					var _this = iron_Scene.global.properties;
+					if(__map_reserved["inputAnglesArray"] != null) {
+						_this.setReserved("inputAnglesArray",angleArray);
+					} else {
+						_this.h["inputAnglesArray"] = angleArray;
+					}
+					if(this.handleSlot1.changed) {
+						this.updateRing(0,angleSlot1);
+					}
+					if(this.handleSlot2.changed) {
+						this.updateRing(1,angleSlot2);
+					}
+					if(this.handleSlot3.changed) {
+						this.updateRing(2,angleSlot3);
+					}
+				}
+			}
+			if(this.ui.panel(zui_Handle.global.nest(5,{ selected : true}),"Virtual Input Voltage")) {
+				this.ui.combo(this.vivComboHandle,this.vivItemNames);
+				if(this.vivComboHandle.position == 0) {
+					var voltage1 = this.ui.slider(zui_Handle.global.nest(6,{ value : 2.5}),"Voltage Diode 1",0.,5.,true);
+					var voltage2 = this.ui.slider(zui_Handle.global.nest(7,{ value : 2.5}),"Voltage Diode 2",0.,5.,true);
+					var voltArray = [voltage1,voltage2];
+					var _this1 = iron_Scene.global.properties;
+					if(__map_reserved["inputVoltArray"] != null) {
+						_this1.setReserved("inputVoltArray",voltArray);
+					} else {
+						_this1.h["inputVoltArray"] = voltArray;
+					}
+				}
+			}
+		}
+		this.ui.end();
+		g.begin(false);
+	}
+	,updateRing: function(slotNum,newAngle) {
+		var _this = iron_Scene.global.properties;
+		var slots = __map_reserved["slots"] != null ? _this.getReserved("slots") : _this.h["slots"];
+		var slotMarkObj = slots[slotNum];
+		if(slotMarkObj == null) {
+			return false;
+		}
+		var _this1 = slotMarkObj.properties;
+		if(__map_reserved["currComponentObj"] != null ? _this1.existsReserved("currComponentObj") : _this1.h.hasOwnProperty("currComponentObj")) {
+			var _this2 = slotMarkObj.properties;
+			var currUPH = __map_reserved["currComponentObj"] != null ? _this2.getReserved("currComponentObj") : _this2.h["currComponentObj"];
+			var _this3 = currUPH.properties;
+			if(__map_reserved["componentObject"] != null ? _this3.existsReserved("componentObject") : _this3.h.hasOwnProperty("componentObject")) {
+				var _this4 = currUPH.properties;
+				var currObj = __map_reserved["componentObject"] != null ? _this4.getReserved("componentObject") : _this4.h["componentObject"];
+				if(currObj == null) {
+					return false;
+				}
+				if(currObj.name == "RSP1D_Base") {
+					this.callTraitFunction(currObj,"RSP1D_Base","setAngle",[newAngle]);
+				}
+			}
+		}
+		return true;
+	}
+	,mReset: function() {
+		this.spawner.fillSlot(0,arm_CompVV.Empty);
+		this.spawner.fillSlot(1,arm_CompVV.Empty);
+		this.spawner.fillSlot(2,arm_CompVV.Empty);
+		this.plotter.closePlots();
+	}
+	,mStep1: function() {
+		this.spawner.fillSlot(0,arm_CompVV.LinPol);
+		this.spawner.fillSlot(1,arm_CompVV.Empty);
+		this.spawner.fillSlot(2,arm_CompVV.Empty);
+		this.plotter.plotThis("Winkel Polfilter (deg)","Spannung Photodiode (V)");
+	}
+	,mStep2: function() {
+		this.spawner.fillSlot(0,arm_CompVV.LinPol);
+		this.spawner.fillSlot(1,arm_CompVV.Empty);
+		this.spawner.fillSlot(2,arm_CompVV.LinPol);
+	}
+	,mStep3: function() {
+		this.spawner.fillSlot(0,arm_CompVV.LinPol);
+		this.spawner.fillSlot(1,arm_CompVV.LinPol);
+		this.spawner.fillSlot(2,arm_CompVV.LinPol);
+	}
+	,mStep4: function() {
+		this.spawner.fillSlot(0,arm_CompVV.LinPol);
+		this.spawner.fillSlot(1,arm_CompVV.WPHalf);
+		this.spawner.fillSlot(2,arm_CompVV.LinPol);
+	}
+	,mStep5: function() {
+		this.spawner.fillSlot(0,arm_CompVV.LinPol);
+		this.spawner.fillSlot(1,arm_CompVV.WPHalf);
+		this.spawner.fillSlot(2,arm_CompVV.Pbs);
+	}
+	,callTraitFunction: function(object,traitName,funName,funArguments) {
+		var result;
+		var cname = null;
+		if(cname == null) {
+			cname = $hxClasses["arm" + "." + traitName];
+		}
+		if(cname == null) {
+			cname = $hxClasses["arm" + ".node." + traitName];
+		}
+		var trait = object.getTrait(cname);
+		var func = Reflect.field(trait,funName);
+		if(func != null) {
+			result = func.apply(trait,funArguments);
+		} else {
+			haxe_Log.trace("Error: dynamic function resulted in null value, Error in trait or function name",{ fileName : "arm/DebugUI_VorVersuch.hx", lineNumber : 181, className : "arm.DebugUI_VorVersuch", methodName : "callTraitFunction"});
+			result = null;
+		}
+		return result;
+	}
+	,__class__: arm_DebugUI_$VorVersuch
+});
 var arm_KM100PM_$Base = function() {
 	this.objList = [];
+	this.visib = false;
 	this.screwTrans = 0.0005;
 	this.screwBotDist = 0.0;
 	this.screwTopDist = 0.0;
@@ -2192,6 +2356,7 @@ arm_KM100PM_$Base.prototype = $extend(iron_Trait.prototype,{
 	,pbs: null
 	,holder: null
 	,stage: null
+	,visib: null
 	,objList: null
 	,pauseUpdate: function() {
 		this.removeUpdate($bind(this,this.onUpdate));
@@ -2208,23 +2373,27 @@ arm_KM100PM_$Base.prototype = $extend(iron_Trait.prototype,{
 				object.properties = new haxe_ds_StringMap();
 			}
 		}
+		var _this = this.object.properties;
+		if(__map_reserved["spawned"] != null ? _this.getReserved("spawned") : _this.h["spawned"]) {
+			this.visib = true;
+		}
 		this.screwTop = this.spawnObject(this.screwName,false);
 		var mST = this.object.getChild("C_KM100PM_Screw_Top_Zero").transform.world;
 		this.screwTop.transform.setMatrix(mST);
 		this.screwTop.transform.scale = this.scale;
-		this.screwTop.visible = true;
+		this.screwTop.visible = this.visib;
 		this.rbSync(this.screwTop);
 		this.screwBot = this.spawnObject(this.screwName,false);
 		var mSB = this.object.getChild("C_KM100PM_Screw_Bottom_Zero").transform.world;
 		this.screwBot.transform.setMatrix(mSB);
 		this.screwBot.transform.scale = this.scale;
-		this.screwBot.visible = true;
+		this.screwBot.visible = this.visib;
 		this.rbSync(this.screwBot);
 		this.front = this.spawnObject(this.frontName,false);
 		var mF = this.object.getChild("C_KM100PM_Front").transform.world;
 		this.front.transform.setMatrix(mF);
 		this.front.transform.scale = this.scale;
-		this.front.visible = true;
+		this.front.visible = this.visib;
 		this.rbSync(this.front);
 		var _g = 0;
 		var _g1 = this.front.getChildren();
@@ -2237,25 +2406,26 @@ arm_KM100PM_$Base.prototype = $extend(iron_Trait.prototype,{
 		var mM = this.front.getChildren()[1].transform.world;
 		this.pbs.transform.setMatrix(mM);
 		this.pbs.transform.scale = this.scale;
-		this.pbs.visible = true;
+		this.pbs.visible = this.visib;
+		this.pbs.getChildren()[0].visible = this.visib;
 		this.rbSync(this.pbs);
 		this.holder = this.spawnObject(this.holderName,false);
 		var mM1 = this.front.getChildren()[0].transform.world;
 		this.holder.transform.setMatrix(mM1);
 		this.holder.transform.scale = this.scale;
-		this.holder.visible = true;
+		this.holder.visible = this.visib;
 		this.rbSync(this.holder);
 		this.stage = this.spawnObject(this.stageName,false);
 		var mM2 = this.front.getChildren()[2].transform.world;
 		this.stage.transform.setMatrix(mM2);
 		this.stage.transform.scale = this.scale;
-		this.stage.visible = true;
+		this.stage.visible = this.visib;
 		this.rbSync(this.stage);
-		var _this = this.object.getChild("C_KM100PM_Screw_Bottom_Limit").transform.world;
-		var x = _this.self._30;
-		var y = _this.self._31;
-		var z = _this.self._32;
-		var w = _this.self._33;
+		var _this1 = this.object.getChild("C_KM100PM_Screw_Bottom_Limit").transform.world;
+		var x = _this1.self._30;
+		var y = _this1.self._31;
+		var z = _this1.self._32;
+		var w = _this1.self._33;
 		if(w == null) {
 			w = 1.0;
 		}
@@ -2272,11 +2442,11 @@ arm_KM100PM_$Base.prototype = $extend(iron_Trait.prototype,{
 		var _this_y = y;
 		var _this_z = z;
 		var _this_w = w;
-		var _this1 = this.screwBot.getChildren()[0].transform.world;
-		var x1 = _this1.self._30;
-		var y1 = _this1.self._31;
-		var z1 = _this1.self._32;
-		var w1 = _this1.self._33;
+		var _this2 = this.screwBot.getChildren()[0].transform.world;
+		var x1 = _this2.self._30;
+		var y1 = _this2.self._31;
+		var z1 = _this2.self._32;
+		var w1 = _this2.self._33;
 		if(w1 == null) {
 			w1 = 1.0;
 		}
@@ -2294,11 +2464,11 @@ arm_KM100PM_$Base.prototype = $extend(iron_Trait.prototype,{
 		var p_z = z1;
 		var p_w = w1;
 		this.screwPosLim = Math.sqrt((p_x - _this_x) * (p_x - _this_x) + (p_y - _this_y) * (p_y - _this_y) + (p_z - _this_z) * (p_z - _this_z));
-		var _this2 = this.object.getChild("C_KM100PM_Screw_Bottom_Zero").transform.world;
-		var x2 = _this2.self._30;
-		var y2 = _this2.self._31;
-		var z2 = _this2.self._32;
-		var w2 = _this2.self._33;
+		var _this3 = this.object.getChild("C_KM100PM_Screw_Bottom_Zero").transform.world;
+		var x2 = _this3.self._30;
+		var y2 = _this3.self._31;
+		var z2 = _this3.self._32;
+		var w2 = _this3.self._33;
 		if(w2 == null) {
 			w2 = 1.0;
 		}
@@ -2315,11 +2485,11 @@ arm_KM100PM_$Base.prototype = $extend(iron_Trait.prototype,{
 		var _this_y1 = y2;
 		var _this_z1 = z2;
 		var _this_w1 = w2;
-		var _this3 = this.object.getChild("Z_KM100PM_Screw_Bottom_LimitNeg").transform.world;
-		var x3 = _this3.self._30;
-		var y3 = _this3.self._31;
-		var z3 = _this3.self._32;
-		var w3 = _this3.self._33;
+		var _this4 = this.object.getChild("Z_KM100PM_Screw_Bottom_LimitNeg").transform.world;
+		var x3 = _this4.self._30;
+		var y3 = _this4.self._31;
+		var z3 = _this4.self._32;
+		var w3 = _this4.self._33;
 		if(w3 == null) {
 			w3 = 1.0;
 		}
@@ -2357,33 +2527,33 @@ arm_KM100PM_$Base.prototype = $extend(iron_Trait.prototype,{
 				}
 			}
 			if(obj != this.object) {
-				var _this4 = obj.properties;
+				var _this5 = obj.properties;
 				var value = this.object;
 				if(__map_reserved["TraitObj"] != null) {
-					_this4.setReserved("TraitObj",value);
+					_this5.setReserved("TraitObj",value);
 				} else {
-					_this4.h["TraitObj"] = value;
+					_this5.h["TraitObj"] = value;
 				}
 			} else {
-				var _this5 = obj.properties;
+				var _this6 = obj.properties;
 				if(__map_reserved["TraitObj"] != null) {
-					_this5.setReserved("TraitObj","self");
+					_this6.setReserved("TraitObj","self");
 				} else {
-					_this5.h["TraitObj"] = "self";
+					_this6.h["TraitObj"] = "self";
 				}
-			}
-			var _this6 = obj.properties;
-			var value1 = "KM100PM" + "_Base";
-			if(__map_reserved["TraitName"] != null) {
-				_this6.setReserved("TraitName",value1);
-			} else {
-				_this6.h["TraitName"] = value1;
 			}
 			var _this7 = obj.properties;
-			if(__map_reserved["PauseResume"] != null) {
-				_this7.setReserved("PauseResume",true);
+			var value1 = "KM100PM" + "_Base";
+			if(__map_reserved["TraitName"] != null) {
+				_this7.setReserved("TraitName",value1);
 			} else {
-				_this7.h["PauseResume"] = true;
+				_this7.h["TraitName"] = value1;
+			}
+			var _this8 = obj.properties;
+			if(__map_reserved["PauseResume"] != null) {
+				_this8.setReserved("PauseResume",true);
+			} else {
+				_this8.h["PauseResume"] = true;
 			}
 		}
 		this.pauseUpdate();
@@ -5431,265 +5601,6 @@ arm_LinearPolarizer.prototype = $extend(iron_Trait.prototype,{
 	}
 	,__class__: arm_LinearPolarizer
 });
-var arm_MeasurementPlotMain = function() {
-	this.n_values = 200;
-	this.timediscretization = 0.05;
-	this.binwidth = 0.05;
-	this.plotsIndex = 0;
-	this.height = 200;
-	this.width = 250;
-	this.pos_y = 20;
-	this.pos_x = 250;
-	this.nameMeasurementObject = "MeasurementObject";
-	this.getDatafromServer = false;
-	var _gthis = this;
-	iron_Trait.call(this);
-	iron_data_Data.getFont("font_default.ttf",function(f) {
-		_gthis.ui = new arm_ZuiPlotLib({ font : f});
-		iron_Scene.active.notifyOnInit($bind(_gthis,_gthis.sceneInit));
-	});
-};
-$hxClasses["arm.MeasurementPlotMain"] = arm_MeasurementPlotMain;
-arm_MeasurementPlotMain.__name__ = "arm.MeasurementPlotMain";
-arm_MeasurementPlotMain.__super__ = iron_Trait;
-arm_MeasurementPlotMain.prototype = $extend(iron_Trait.prototype,{
-	getDatafromServer: null
-	,nameMeasurementObject: null
-	,ui: null
-	,pos_x: null
-	,pos_y: null
-	,width: null
-	,height: null
-	,plots: null
-	,plotsIndex: null
-	,time: null
-	,time2: null
-	,xVals: null
-	,yValsList: null
-	,yCCList: null
-	,binwidth: null
-	,timediscretization: null
-	,n_values: null
-	,currData: null
-	,sceneInit: function() {
-		this.time = 0.;
-		this.time2 = 0.;
-		this.xVals = [0];
-		this.plots = [];
-		var _g = 1;
-		var _g1 = this.n_values;
-		while(_g < _g1) {
-			var i = _g++;
-			this.xVals.push(this.xVals[i - 1] + this.timediscretization);
-		}
-		var globalObj = iron_Scene.global;
-		if(globalObj.properties == null) {
-			globalObj.properties = new haxe_ds_StringMap();
-		}
-		var _this = globalObj.properties;
-		var value = this.xVals;
-		if(__map_reserved["timeArray"] != null) {
-			_this.setReserved("timeArray",value);
-		} else {
-			_this.h["timeArray"] = value;
-		}
-		this.notifyOnRender2D($bind(this,this.render2DMain));
-	}
-	,onUpdate: function() {
-		var keyboard = iron_system_Input.getKeyboard();
-		if(keyboard.started("space")) {
-			haxe_Log.trace("Space Key",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 95, className : "arm.MeasurementPlotMain", methodName : "onUpdate"});
-			this.plotsIndex += 1;
-			this.plots.push(new arm_PlotInstance(this.pos_x + this.plotsIndex * 50,this.pos_y,this.width,this.height));
-		}
-	}
-	,render2DMain: function(g) {
-		g.end();
-		this.ui.begin(g);
-		if(this.ui.window(zui_Handle.global.nest(0,null),this.pos_x,this.pos_y,this.width,this.height,false)) {
-			if(this.ui.panel(zui_Handle.global.nest(1,{ selected : true}),"New Measurement")) {
-				this.ui.indent();
-				if(this.ui.button("Add New Measurement Window")) {
-					this.plotsIndex += 1;
-					this.plots.push(new arm_PlotInstance(this.pos_x + this.plotsIndex * 50,this.pos_y,800,600));
-				}
-				if(this.ui.button("Remove all Measurements Window")) {
-					var _g = 0;
-					var _g1 = this.plots;
-					while(_g < _g1.length) {
-						var plot = _g1[_g];
-						++_g;
-						this.plots = [];
-					}
-				}
-			}
-		}
-		var _g2 = 0;
-		var _g11 = this.plots;
-		while(_g2 < _g11.length) {
-			var plot1 = _g11[_g2];
-			++_g2;
-			if(plot1.checkTime) {
-				plot1.timeUpdate();
-			}
-			plot1.plotWindow(this.ui);
-		}
-		this.ui.end();
-		g.begin(false);
-	}
-	,render2DExamplePlot: function(g) {
-		g.end();
-		this.ui.begin(g);
-		var hwin = zui_Handle.global.nest(2,null);
-		this.time += 1 / iron_system_Time.frequency * iron_system_Time.scale;
-		this.time2 += 1 / iron_system_Time.frequency * iron_system_Time.scale;
-		if(this.time > this.timediscretization / 2) {
-			this.time = 0;
-			hwin.redraws = 1;
-			if(this.getDatafromServer) {
-				this.getCurrData();
-				if(this.currData != null) {
-					this.yValsList = [this.currData.C1,this.currData.C2];
-					this.yCCList = [this.currData.CC12];
-				}
-			} else {
-				this.yValsList = [[],[]];
-				var _g = 0;
-				var _g1 = this.xVals;
-				while(_g < _g1.length) {
-					var x = _g1[_g];
-					++_g;
-					this.yValsList[0].push(Math.sin(x + this.time2) + 1.);
-					this.yValsList[1].push(Math.cos(x + this.time2) + 1.);
-				}
-			}
-		} else {
-			hwin.redraws = 0;
-		}
-		var hcombo = zui_Handle.global.nest(3,null);
-		if(this.ui.window(hwin,this.pos_x,this.pos_y + 500,800,600,true)) {
-			if(this.ui.panel(zui_Handle.global.nest(4,{ selected : true}),"Choose Data")) {
-				this.ui.row([0.5,0.5]);
-				this.ui.text("x Axis");
-				this.ui.combo(hcombo,["Item 1","item 2"]);
-				if(hcombo.changed) {
-					haxe_Log.trace("Combo value changed this frame",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 184, className : "arm.MeasurementPlotMain", methodName : "render2DExamplePlot"});
-					haxe_Log.trace(hcombo.position,{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 185, className : "arm.MeasurementPlotMain", methodName : "render2DExamplePlot"});
-				}
-			}
-			if(!this.getDatafromServer && this.yValsList != null) {
-				this.ui.coordinateSystem(this.xVals,this.yValsList,600,300,3);
-			}
-		}
-		this.ui.end();
-		g.begin(false);
-	}
-	,getCurrData: function() {
-		var _gthis = this;
-		this.urlCallBack(function(response) {
-			_gthis.currData = JSON.parse(response);
-		});
-	}
-	,urlCallBack: function(callback) {
-		var url = "http://127.0.0.1:5000/dataget";
-		var http = new haxe_http_HttpJs(url);
-		http.onData = function(data) {
-			callback(data);
-		};
-		http.request();
-	}
-	,__class__: arm_MeasurementPlotMain
-});
-var arm_PlotInstance = function(x,y,w,h) {
-	this.globalObj = iron_Scene.global;
-	this.pos_x = x;
-	this.pos_y = y;
-	this.width = w;
-	this.height = h;
-	this.handle = new zui_Handle();
-	this.comboXAxisHandle = new zui_Handle();
-	this.comboYAxisHandle = new zui_Handle();
-	this.panelHandle = new zui_Handle({ selected : true});
-	this.message = "hello world";
-	this.time = 0;
-	this.checkTime = false;
-	this.axisItemsNames = [];
-	this.axisItemsObjects = [];
-};
-$hxClasses["arm.PlotInstance"] = arm_PlotInstance;
-arm_PlotInstance.__name__ = "arm.PlotInstance";
-arm_PlotInstance.prototype = {
-	pos_x: null
-	,pos_y: null
-	,width: null
-	,height: null
-	,handle: null
-	,comboXAxisHandle: null
-	,comboYAxisHandle: null
-	,panelHandle: null
-	,globalObj: null
-	,axisItemsObjects: null
-	,axisItemsNames: null
-	,message: null
-	,time: null
-	,timeSteps: null
-	,checkTime: null
-	,timeUpdate: function() {
-		this.time += 1 / iron_system_Time.frequency * iron_system_Time.scale;
-		if(this.time > this.timeSteps) {
-			this.time = 0;
-		}
-	}
-	,plotWindow: function(ui) {
-		if(ui.window(this.handle,this.pos_x,this.pos_y,this.width,this.height,true)) {
-			ui.row([0.5,0.5]);
-			ui.text("Plot Window");
-			ui.text(this.message);
-			if(ui.panel(this.panelHandle,"Select Data")) {
-				this.getAxisItems();
-				ui.row([0.5,0.5]);
-				ui.text("x Axis");
-				ui.combo(this.comboXAxisHandle,this.axisItemsNames);
-				if(this.comboXAxisHandle.changed) {
-					haxe_Log.trace("Combo value X changed this frame",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 277, className : "arm.PlotInstance", methodName : "plotWindow"});
-					haxe_Log.trace(this.comboXAxisHandle.position,{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 278, className : "arm.PlotInstance", methodName : "plotWindow"});
-				}
-				ui.row([0.5,0.5]);
-				ui.text("y Axis");
-				ui.combo(this.comboYAxisHandle,this.axisItemsNames);
-				if(this.comboYAxisHandle.changed) {
-					haxe_Log.trace("Combo value Y changed this frame",{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 285, className : "arm.PlotInstance", methodName : "plotWindow"});
-					haxe_Log.trace(this.comboYAxisHandle.position,{ fileName : "arm/MeasurementPlotMain.hx", lineNumber : 286, className : "arm.PlotInstance", methodName : "plotWindow"});
-				}
-			}
-		}
-	}
-	,getAxisItems: function() {
-		var names = ["None","time (s)"];
-		var objects = ["None","time (s)"];
-		if(this.globalObj.properties != null) {
-			var _this = this.globalObj.properties;
-			if((__map_reserved["detekorObjectsArray"] != null ? _this.getReserved("detekorObjectsArray") : _this.h["detekorObjectsArray"]) != null) {
-				var _this1 = this.globalObj.properties;
-				var detObjList = __map_reserved["detekorObjectsArray"] != null ? _this1.getReserved("detekorObjectsArray") : _this1.h["detekorObjectsArray"];
-				var _g = 0;
-				while(_g < detObjList.length) {
-					var detObj = detObjList[_g];
-					++_g;
-					var _this2 = detObj.properties;
-					if((__map_reserved["nameDetektor"] != null ? _this2.getReserved("nameDetektor") : _this2.h["nameDetektor"]) != null) {
-						var _this3 = detObj.properties;
-						names.push(__map_reserved["nameDetektor"] != null ? _this3.getReserved("nameDetektor") : _this3.h["nameDetektor"]);
-						objects.push(detObj);
-					}
-				}
-			}
-		}
-		this.axisItemsObjects = objects;
-		this.axisItemsNames = names;
-	}
-	,__class__: arm_PlotInstance
-};
 var arm_NiceScale = function(min,max) {
 	this.maxTicks = 10;
 	this.minPoint = min;
@@ -5787,7 +5698,6 @@ var arm_PhotoDiode = function() {
 	this.detectorEfficiency = 0.85;
 	iron_Trait.call(this);
 	this.notifyOnInit($bind(this,this.onInit));
-	this.notifyOnUpdate($bind(this,this.onUpdate));
 };
 $hxClasses["arm.PhotoDiode"] = arm_PhotoDiode;
 arm_PhotoDiode.__name__ = "arm.PhotoDiode";
@@ -7417,6 +7327,18 @@ arm_RSP1D_$Base.prototype = $extend(iron_Trait.prototype,{
 			_this.h["ringAngle"] = value;
 		}
 	}
+	,setAngle: function(newRingAngle) {
+		this.ringAngle = newRingAngle / 180. * Math.PI;
+		var v = this.ringAngle;
+		var _this = this.object.properties;
+		var value = v;
+		if(__map_reserved["ringAngle"] != null) {
+			_this.setReserved("ringAngle",value);
+		} else {
+			_this.h["ringAngle"] = value;
+		}
+		this.updateParts();
+	}
 	,spawnXZPlane: function(loc,rot) {
 		var _gthis = this;
 		var object;
@@ -7564,12 +7486,14 @@ arm_RSP1D_$Base.prototype = $extend(iron_Trait.prototype,{
 var arm_ResumeTraitSelector = function() {
 	iron_Trait.call(this);
 	this.notifyOnUpdate($bind(this,this.onUpdate));
+	this.active = true;
 };
 $hxClasses["arm.ResumeTraitSelector"] = arm_ResumeTraitSelector;
 arm_ResumeTraitSelector.__name__ = "arm.ResumeTraitSelector";
 arm_ResumeTraitSelector.__super__ = iron_Trait;
 arm_ResumeTraitSelector.prototype = $extend(iron_Trait.prototype,{
-	onUpdate: function() {
+	active: null
+	,onUpdate: function() {
 		var mouse = iron_system_Input.getMouse();
 		if(mouse.started("left") || mouse.started("right")) {
 			var physics = armory_trait_physics_bullet_PhysicsWorld.active;
@@ -7596,6 +7520,15 @@ arm_ResumeTraitSelector.prototype = $extend(iron_Trait.prototype,{
 			}
 		}
 	}
+	,stop: function() {
+		this.removeUpdate($bind(this,this.onUpdate));
+		this.active = false;
+	}
+	,resume: function() {
+		if(!this.active) {
+			this.notifyOnUpdate($bind(this,this.onUpdate));
+		}
+	}
 	,callTraitFunction: function(object,traitName,funName,funArguments) {
 		var result;
 		var cname = null;
@@ -7610,7 +7543,7 @@ arm_ResumeTraitSelector.prototype = $extend(iron_Trait.prototype,{
 		if(func != null) {
 			result = func.apply(trait,funArguments);
 		} else {
-			haxe_Log.trace("Error: dynamic function resulted in null value, Error in trait or function name",{ fileName : "arm/ResumeTraitSelector.hx", lineNumber : 61, className : "arm.ResumeTraitSelector", methodName : "callTraitFunction"});
+			haxe_Log.trace("Error: dynamic function resulted in null value, Error in trait or function name",{ fileName : "arm/ResumeTraitSelector.hx", lineNumber : 73, className : "arm.ResumeTraitSelector", methodName : "callTraitFunction"});
 			result = null;
 		}
 		return result;
@@ -8627,6 +8560,14 @@ arm_UPH_$Base.prototype = $extend(iron_Trait.prototype,{
 				_this51.z += v7.z;
 			}
 			this.rbSync(this.comp);
+			var v8 = this.comp;
+			var _this52 = this.object.properties;
+			var value = v8;
+			if(__map_reserved["componentObject"] != null) {
+				_this52.setReserved("componentObject",value);
+			} else {
+				_this52.h["componentObject"] = value;
+			}
 		}
 		this.updateParts();
 		this.objList.push(this.object);
@@ -8645,32 +8586,32 @@ arm_UPH_$Base.prototype = $extend(iron_Trait.prototype,{
 				}
 			}
 			if(obj != this.object) {
-				var _this52 = obj.properties;
-				var value = this.object;
-				if(__map_reserved["TraitObj"] != null) {
-					_this52.setReserved("TraitObj",value);
-				} else {
-					_this52.h["TraitObj"] = value;
-				}
-			} else {
 				var _this53 = obj.properties;
+				var value1 = this.object;
 				if(__map_reserved["TraitObj"] != null) {
-					_this53.setReserved("TraitObj","self");
+					_this53.setReserved("TraitObj",value1);
 				} else {
-					_this53.h["TraitObj"] = "self";
+					_this53.h["TraitObj"] = value1;
 				}
-			}
-			var _this54 = obj.properties;
-			if(__map_reserved["TraitName"] != null) {
-				_this54.setReserved("TraitName","UPH_Base");
 			} else {
-				_this54.h["TraitName"] = "UPH_Base";
+				var _this54 = obj.properties;
+				if(__map_reserved["TraitObj"] != null) {
+					_this54.setReserved("TraitObj","self");
+				} else {
+					_this54.h["TraitObj"] = "self";
+				}
 			}
 			var _this55 = obj.properties;
-			if(__map_reserved["PauseResume"] != null) {
-				_this55.setReserved("PauseResume",true);
+			if(__map_reserved["TraitName"] != null) {
+				_this55.setReserved("TraitName","UPH_Base");
 			} else {
-				_this55.h["PauseResume"] = true;
+				_this55.h["TraitName"] = "UPH_Base";
+			}
+			var _this56 = obj.properties;
+			if(__map_reserved["PauseResume"] != null) {
+				_this56.setReserved("PauseResume",true);
+			} else {
+				_this56.h["PauseResume"] = true;
 			}
 		}
 		this.pauseUpdate();
@@ -8805,7 +8746,7 @@ arm_UPH_$Base.prototype = $extend(iron_Trait.prototype,{
 					this.transBaseBy(distold - distnew);
 					this.hitVec = newHitVec;
 				} else {
-					haxe_Log.trace("xyPlane not detected by rayCastmethod",{ fileName : "arm/UPH_Base.hx", lineNumber : 426, className : "arm.UPH_Base", methodName : "onUpdate"});
+					haxe_Log.trace("xyPlane not detected by rayCastmethod",{ fileName : "arm/UPH_Base.hx", lineNumber : 427, className : "arm.UPH_Base", methodName : "onUpdate"});
 				}
 			} else if((this.movingObj == this.object || this.movingObj == this.top) && this.mState == 2) {
 				if(this.hitVec == null) {
@@ -8833,7 +8774,7 @@ arm_UPH_$Base.prototype = $extend(iron_Trait.prototype,{
 					this.rbSync(this.object);
 					this.updateParts();
 				} else {
-					haxe_Log.trace("xyPlane not detected by rayCastmethod",{ fileName : "arm/UPH_Base.hx", lineNumber : 444, className : "arm.UPH_Base", methodName : "onUpdate"});
+					haxe_Log.trace("xyPlane not detected by rayCastmethod",{ fileName : "arm/UPH_Base.hx", lineNumber : 445, className : "arm.UPH_Base", methodName : "onUpdate"});
 				}
 			}
 		}
@@ -9114,8 +9055,8 @@ arm_UPH_$Base.prototype = $extend(iron_Trait.prototype,{
 				var p_w = w1;
 				var baseDist = Math.sqrt((p_x - _this_x) * (p_x - _this_x) + (p_y - _this_y) * (p_y - _this_y) + (p_z - _this_z) * (p_z - _this_z));
 				if(baseDist + multiplier * this.baseTrans * scalefactor > 0) {
-					haxe_Log.trace(baseDist,{ fileName : "arm/UPH_Base.hx", lineNumber : 562, className : "arm.UPH_Base", methodName : "transBase"});
-					haxe_Log.trace(multiplier * this.baseTrans,{ fileName : "arm/UPH_Base.hx", lineNumber : 563, className : "arm.UPH_Base", methodName : "transBase"});
+					haxe_Log.trace(baseDist,{ fileName : "arm/UPH_Base.hx", lineNumber : 563, className : "arm.UPH_Base", methodName : "transBase"});
+					haxe_Log.trace(multiplier * this.baseTrans,{ fileName : "arm/UPH_Base.hx", lineNumber : 564, className : "arm.UPH_Base", methodName : "transBase"});
 					this.object.getChildren()[3].transform.translate(0,multiplier * this.baseTrans,0);
 					this.rbSync(this.object);
 				}
@@ -9164,7 +9105,7 @@ arm_UPH_$Base.prototype = $extend(iron_Trait.prototype,{
 				var p_w1 = w3;
 				var baseDist1 = Math.sqrt((p_x1 - _this_x1) * (p_x1 - _this_x1) + (p_y1 - _this_y1) * (p_y1 - _this_y1) + (p_z1 - _this_z1) * (p_z1 - _this_z1));
 				if(baseDist1 - multiplier * this.baseTrans * scalefactor > 0) {
-					haxe_Log.trace(baseDist1,{ fileName : "arm/UPH_Base.hx", lineNumber : 571, className : "arm.UPH_Base", methodName : "transBase"});
+					haxe_Log.trace(baseDist1,{ fileName : "arm/UPH_Base.hx", lineNumber : 572, className : "arm.UPH_Base", methodName : "transBase"});
 					this.object.getChildren()[3].transform.translate(0,multiplier * this.baseTrans,0);
 					this.rbSync(this.object);
 				}
@@ -9485,12 +9426,12 @@ arm_UPH_$Base.prototype = $extend(iron_Trait.prototype,{
 		if(func != null) {
 			result = func.apply(trait,funArguments);
 		} else {
-			haxe_Log.trace("Error: dynamic function resulted in null value, Error in trait or function name",{ fileName : "arm/UPH_Base.hx", lineNumber : 781, className : "arm.UPH_Base", methodName : "callTraitFunction"});
-			haxe_Log.trace("funName: " + (funName == null ? "null" : "" + funName),{ fileName : "arm/UPH_Base.hx", lineNumber : 782, className : "arm.UPH_Base", methodName : "callTraitFunction"});
-			haxe_Log.trace("traitname: " + (traitName == null ? "null" : "" + traitName),{ fileName : "arm/UPH_Base.hx", lineNumber : 783, className : "arm.UPH_Base", methodName : "callTraitFunction"});
-			haxe_Log.trace("cname: " + Std.string(cname),{ fileName : "arm/UPH_Base.hx", lineNumber : 784, className : "arm.UPH_Base", methodName : "callTraitFunction"});
-			haxe_Log.trace("trait: " + Std.string(trait),{ fileName : "arm/UPH_Base.hx", lineNumber : 785, className : "arm.UPH_Base", methodName : "callTraitFunction"});
-			haxe_Log.trace("arm" + "." + traitName,{ fileName : "arm/UPH_Base.hx", lineNumber : 786, className : "arm.UPH_Base", methodName : "callTraitFunction"});
+			haxe_Log.trace("Error: dynamic function resulted in null value, Error in trait or function name",{ fileName : "arm/UPH_Base.hx", lineNumber : 782, className : "arm.UPH_Base", methodName : "callTraitFunction"});
+			haxe_Log.trace("funName: " + (funName == null ? "null" : "" + funName),{ fileName : "arm/UPH_Base.hx", lineNumber : 783, className : "arm.UPH_Base", methodName : "callTraitFunction"});
+			haxe_Log.trace("traitname: " + (traitName == null ? "null" : "" + traitName),{ fileName : "arm/UPH_Base.hx", lineNumber : 784, className : "arm.UPH_Base", methodName : "callTraitFunction"});
+			haxe_Log.trace("cname: " + Std.string(cname),{ fileName : "arm/UPH_Base.hx", lineNumber : 785, className : "arm.UPH_Base", methodName : "callTraitFunction"});
+			haxe_Log.trace("trait: " + Std.string(trait),{ fileName : "arm/UPH_Base.hx", lineNumber : 786, className : "arm.UPH_Base", methodName : "callTraitFunction"});
+			haxe_Log.trace("arm" + "." + traitName,{ fileName : "arm/UPH_Base.hx", lineNumber : 787, className : "arm.UPH_Base", methodName : "callTraitFunction"});
 			result = null;
 		}
 		return result;
@@ -9523,53 +9464,6 @@ arm_UPH_$Base.prototype = $extend(iron_Trait.prototype,{
 		}
 	}
 	,__class__: arm_UPH_$Base
-});
-var arm_VorVersuch_$Controller = function() {
-	iron_Trait.call(this);
-	this.notifyOnUpdate($bind(this,this.onUpdate));
-};
-$hxClasses["arm.VorVersuch_Controller"] = arm_VorVersuch_$Controller;
-arm_VorVersuch_$Controller.__name__ = "arm.VorVersuch_Controller";
-arm_VorVersuch_$Controller.__super__ = iron_Trait;
-arm_VorVersuch_$Controller.prototype = $extend(iron_Trait.prototype,{
-	onUpdate: function() {
-		var keyb = iron_system_Input.getKeyboard();
-		if(keyb.started("1")) {
-			this.fillSlot(0,arm_CompVV.LinPol);
-		}
-		if(keyb.started("2")) {
-			this.fillSlot(1,arm_CompVV.WPHalf);
-		}
-		if(keyb.started("3")) {
-			this.fillSlot(1,arm_CompVV.WPQuart);
-		}
-		if(keyb.started("4")) {
-			this.fillSlot(2,arm_CompVV.Pbs);
-		}
-	}
-	,fillSlot: function(slotNum,whatComp) {
-		this.callTraitFunction(this.object,"VorVersuch_Spawner","fillSlot",[slotNum,whatComp]);
-	}
-	,callTraitFunction: function(object,traitName,funName,funArguments) {
-		var result;
-		var cname = null;
-		if(cname == null) {
-			cname = $hxClasses["arm" + "." + traitName];
-		}
-		if(cname == null) {
-			cname = $hxClasses["arm" + ".node." + traitName];
-		}
-		var trait = object.getTrait(cname);
-		var func = Reflect.field(trait,funName);
-		if(func != null) {
-			result = func.apply(trait,funArguments);
-		} else {
-			haxe_Log.trace("Error: dynamic function resulted in null value, Error in trait or function name",{ fileName : "arm/VorVersuch_Controller.hx", lineNumber : 63, className : "arm.VorVersuch_Controller", methodName : "callTraitFunction"});
-			result = null;
-		}
-		return result;
-	}
-	,__class__: arm_VorVersuch_$Controller
 });
 var arm_CompVV = $hxEnums["arm.CompVV"] = { __ename__ : true, __constructs__ : ["Empty","LinPol","WPHalf","WPQuart","Pbs"]
 	,Empty: {_hx_index:0,__enum__:"arm.CompVV",toString:$estr}
@@ -9609,6 +9503,14 @@ arm_VorVersuch_$Spawner.prototype = $extend(iron_Trait.prototype,{
 				}
 			}
 		}
+		if(iron_Scene.global.properties == null) {
+			var object = iron_Scene.global;
+			if(object != null) {
+				if(object.properties == null) {
+					object.properties = new haxe_ds_StringMap();
+				}
+			}
+		}
 		var v = this.slots;
 		var _this = iron_Scene.global.properties;
 		var value = v;
@@ -9617,10 +9519,9 @@ arm_VorVersuch_$Spawner.prototype = $extend(iron_Trait.prototype,{
 		} else {
 			_this.h["slots"] = value;
 		}
-		var _this1 = iron_Scene.global.properties;
-		var array = __map_reserved["slots"] != null ? _this1.getReserved("slots") : _this1.h["slots"];
 		this.fillSlot(0,arm_CompVV.Empty);
 		this.fillSlot(1,arm_CompVV.Empty);
+		this.fillSlot(2,arm_CompVV.Empty);
 	}
 	,onUpdate: function() {
 		var keyb = iron_system_Input.getKeyboard();
@@ -10016,6 +9917,89 @@ arm_VorVersuch_$Spawner.prototype = $extend(iron_Trait.prototype,{
 	}
 	,__class__: arm_VorVersuch_$Spawner
 });
+var arm_Vorversuch_$MeasurementPlot = function() {
+	this.plotActive = false;
+	this.height = 400;
+	this.width = 500;
+	this.pos_y = 20;
+	this.pos_x = 250;
+	var _gthis = this;
+	iron_Trait.call(this);
+	iron_data_Data.getFont("font_default.ttf",function(f) {
+		_gthis.ui = new arm_ZuiPlotLib({ font : f});
+		iron_Scene.active.notifyOnInit($bind(_gthis,_gthis.sceneInit));
+	});
+};
+$hxClasses["arm.Vorversuch_MeasurementPlot"] = arm_Vorversuch_$MeasurementPlot;
+arm_Vorversuch_$MeasurementPlot.__name__ = "arm.Vorversuch_MeasurementPlot";
+arm_Vorversuch_$MeasurementPlot.__super__ = iron_Trait;
+arm_Vorversuch_$MeasurementPlot.prototype = $extend(iron_Trait.prototype,{
+	ui: null
+	,pos_x: null
+	,pos_y: null
+	,width: null
+	,height: null
+	,plot: null
+	,plotActive: null
+	,sceneInit: function() {
+		var globalObj = iron_Scene.global;
+		if(globalObj.properties == null) {
+			globalObj.properties = new haxe_ds_StringMap();
+		}
+		this.notifyOnRender2D($bind(this,this.render2DMain));
+	}
+	,render2DMain: function(g) {
+		g.end();
+		this.ui.begin(g);
+		if(this.plotActive) {
+			this.plot.plotWindow(this.ui);
+		}
+		this.ui.end();
+		g.begin(false);
+	}
+	,plotThis: function(xlabel,ylabel) {
+		this.plot = new arm_PlotInstanceAngle(this.pos_x,this.pos_y,this.width,this.height,xlabel,ylabel);
+		this.plotActive = true;
+	}
+	,closePlots: function() {
+		this.plotActive = false;
+	}
+	,__class__: arm_Vorversuch_$MeasurementPlot
+});
+var arm_PlotInstanceAngle = function(x,y,w,h,xlabel,ylabel) {
+	this.globalObj = iron_Scene.global;
+	this.pos_x = x;
+	this.pos_y = y;
+	this.width = w;
+	this.height = h;
+	this.xlabel = xlabel;
+	this.ylabel = ylabel;
+	this.handle = new zui_Handle();
+	this.message = "hello world";
+	this.angles = [0,20,60,80];
+	this.voltages = [[0,.1,.2,.1,.1]];
+};
+$hxClasses["arm.PlotInstanceAngle"] = arm_PlotInstanceAngle;
+arm_PlotInstanceAngle.__name__ = "arm.PlotInstanceAngle";
+arm_PlotInstanceAngle.prototype = {
+	pos_x: null
+	,pos_y: null
+	,width: null
+	,height: null
+	,handle: null
+	,globalObj: null
+	,message: null
+	,angles: null
+	,voltages: null
+	,xlabel: null
+	,ylabel: null
+	,plotWindow: function(ui) {
+		if(ui.window(this.handle,this.pos_x,this.pos_y,this.width,this.height,false)) {
+			ui.tstAngleCS(this.angles,this.voltages,this.width * 0.9,this.height * 0.8,3,this.xlabel,this.ylabel);
+		}
+	}
+	,__class__: arm_PlotInstanceAngle
+};
 var arm_Waveplate_$half_$v2 = function() {
 	var _gthis = this;
 	iron_Trait.call(this);
@@ -12586,6 +12570,94 @@ arm_ZuiPlotLib.prototype = $extend(zui_Zui.prototype,{
 		this.g.drawLine(this._x + x1 * this.ops.scaleFactor,this._y + y1 * this.ops.scaleFactor,this._x + x2 * this.ops.scaleFactor,this._y + y2 * this.ops.scaleFactor,strength);
 		this.g.set_color(-1);
 	}
+	,tstAngleCS: function(xVals,yValsList,width,height,strength,xlabel,ylabel) {
+		var x0 = 80. * this.ops.scaleFactor;
+		var y0 = 40. * this.ops.scaleFactor;
+		var xl = width * this.ops.scaleFactor - x0;
+		var yl = height * this.ops.scaleFactor - y0;
+		var fontSize = 30;
+		var origin_x = this._x + x0;
+		var origin_y = this._y + y0 + yl;
+		var colors = [-65536,-16776961,-16711936];
+		this.g.set_color(-1);
+		if(!this.enabled) {
+			this.fadeColor();
+		}
+		var xDmin = 0;
+		var xDmax = 360;
+		var yDmin = 0;
+		var yDmax = 0.3;
+		var _g = 0;
+		while(_g < yValsList.length) {
+			var yVals = yValsList[_g];
+			++_g;
+			var _g1 = 0;
+			while(_g1 < yVals.length) {
+				var value = yVals[_g1];
+				++_g1;
+				if(yDmax < value) {
+					yDmax = value;
+				}
+			}
+		}
+		var xA = xl * 0.05;
+		var yA = yl * 0.05;
+		var xScale = (xl - 2 * xA) / (xDmax - xDmin);
+		var yScale = (yl - 2 * yA) / (yDmax - yDmin);
+		var xTicks = [0,45,90,135,180,225,270,315,360];
+		var xTickMap = new haxe_ds_StringMap();
+		var yTickMap = new haxe_ds_StringMap();
+		var _g11 = 0;
+		while(_g11 < xTicks.length) {
+			var tick = xTicks[_g11];
+			++_g11;
+			var v = this._x + x0 + xA + xScale * tick;
+			var key = tick == null ? "null" : "" + tick;
+			if(__map_reserved[key] != null) {
+				xTickMap.setReserved(key,v);
+			} else {
+				xTickMap.h[key] = v;
+			}
+		}
+		var maxNYTicks = Math.floor((yl - 2 * yA) / fontSize);
+		var yScaleTicks = new arm_NiceScale(yDmin,yDmax);
+		yScaleTicks.setMaxTicks(maxNYTicks);
+		var yTicks = yScaleTicks.getTicks();
+		var _g2 = 0;
+		while(_g2 < yTicks.length) {
+			var tick1 = yTicks[_g2];
+			++_g2;
+			if(yScale * tick1 < yl - 2 * yA) {
+				var v1 = this._x + x0 + yA + yScale * tick1;
+				var key1 = tick1 == null ? "null" : "" + tick1;
+				if(__map_reserved[key1] != null) {
+					yTickMap.setReserved(key1,v1);
+				} else {
+					yTickMap.h[key1] = v1;
+				}
+			}
+		}
+		this.drawAxes(origin_x,origin_y,xl,yl,strength,xTickMap,yTickMap,xlabel,ylabel);
+		var endI = xVals.length;
+		var colorI = 0;
+		var _g3 = 0;
+		while(_g3 < yValsList.length) {
+			var yVals1 = yValsList[_g3];
+			++_g3;
+			this.g.set_color(colors[colorI]);
+			var _g31 = 0;
+			var _g4 = endI;
+			while(_g31 < _g4) {
+				var i = _g31++;
+				var posX = this._x + x0 + xA + xScale * xVals[i];
+				var posY = this._y + y0 - yA + yl - yScale * yVals1[i];
+				this.drawMarker(posX,posY,5);
+			}
+			++colorI;
+		}
+		this.g.set_color(-1);
+		this._y += y0 + yl + fontSize * 2.5;
+	}
 	,coordinateSystem: function(xVals,yValsList,width,height,strength) {
 		var x0 = 80. * this.ops.scaleFactor;
 		var y0 = 40. * this.ops.scaleFactor;
@@ -13057,6 +13129,67 @@ arm_node_Genral_$Object_$properties_$blocking_$005.prototype = $extend(armory_lo
 	}
 	,__class__: arm_node_Genral_$Object_$properties_$blocking_$005
 });
+var arm_node_TestNode_$AccesBeams = function() {
+	armory_logicnode_LogicTree.call(this);
+	this.name = "TestNode_AccesBeams";
+	this.functionNodes = new haxe_ds_StringMap();
+	this.functionOutputNodes = new haxe_ds_StringMap();
+	this.notifyOnAdd($bind(this,this.add));
+};
+$hxClasses["arm.node.TestNode_AccesBeams"] = arm_node_TestNode_$AccesBeams;
+arm_node_TestNode_$AccesBeams.__name__ = "arm.node.TestNode_AccesBeams";
+arm_node_TestNode_$AccesBeams.__super__ = armory_logicnode_LogicTree;
+arm_node_TestNode_$AccesBeams.prototype = $extend(armory_logicnode_LogicTree.prototype,{
+	functionNodes: null
+	,functionOutputNodes: null
+	,add: function() {
+		var _Print_002 = new armory_logicnode_PrintNode(this);
+		var _Print_003 = new armory_logicnode_PrintNode(this);
+		var _Print = new armory_logicnode_PrintNode(this);
+		var _Print_001 = new armory_logicnode_PrintNode(this);
+		var _OnKeyboard = new armory_logicnode_OnKeyboardNode(this);
+		_OnKeyboard.property0 = "Down";
+		_OnKeyboard.property1 = "space";
+		_OnKeyboard.addOutputs([_Print_001]);
+		_Print_001.addInput(_OnKeyboard,0);
+		_Print_001.addInput(new armory_logicnode_StringNode(this,"PrevBeam:"),0);
+		_Print_001.addOutputs([_Print]);
+		_Print.addInput(_Print_001,0);
+		var _GetProperty_001 = new armory_logicnode_GetPropertyNode(this);
+		var _GetProperty = new armory_logicnode_GetPropertyNode(this);
+		var _Self = new armory_logicnode_SelfNode(this);
+		_Self.addOutputs([_GetProperty]);
+		_GetProperty.addInput(_Self,0);
+		_GetProperty.addInput(new armory_logicnode_StringNode(this,"PrevBeam"),0);
+		_GetProperty.addOutputs([_GetProperty_001]);
+		_GetProperty.addOutputs([new armory_logicnode_StringNode(this,"")]);
+		_GetProperty_001.addInput(_GetProperty,0);
+		_GetProperty_001.addInput(new armory_logicnode_StringNode(this,"stokes_psi"),0);
+		_GetProperty_001.addOutputs([_Print]);
+		_GetProperty_001.addOutputs([new armory_logicnode_StringNode(this,"")]);
+		_Print.addInput(_GetProperty_001,0);
+		_Print.addOutputs([_Print_003]);
+		_Print_003.addInput(_Print,0);
+		_Print_003.addInput(new armory_logicnode_StringNode(this,"NextBeam"),0);
+		_Print_003.addOutputs([_Print_002]);
+		_Print_002.addInput(_Print_003,0);
+		var _GetProperty_003 = new armory_logicnode_GetPropertyNode(this);
+		var _GetProperty_002 = new armory_logicnode_GetPropertyNode(this);
+		var _Self_001 = new armory_logicnode_SelfNode(this);
+		_Self_001.addOutputs([_GetProperty_002]);
+		_GetProperty_002.addInput(_Self_001,0);
+		_GetProperty_002.addInput(new armory_logicnode_StringNode(this,"NextBeam"),0);
+		_GetProperty_002.addOutputs([_GetProperty_003]);
+		_GetProperty_002.addOutputs([new armory_logicnode_StringNode(this,"")]);
+		_GetProperty_003.addInput(_GetProperty_002,0);
+		_GetProperty_003.addInput(new armory_logicnode_StringNode(this,"stokes_psi"),0);
+		_GetProperty_003.addOutputs([_Print_002]);
+		_GetProperty_003.addOutputs([new armory_logicnode_StringNode(this,"")]);
+		_Print_002.addInput(_GetProperty_003,0);
+		_Print_002.addOutputs([new armory_logicnode_NullNode(this)]);
+	}
+	,__class__: arm_node_TestNode_$AccesBeams
+});
 var armory_data_Config = function() { };
 $hxClasses["armory.data.Config"] = armory_data_Config;
 armory_data_Config.__name__ = "armory.data.Config";
@@ -13231,6 +13364,32 @@ armory_logicnode_FunctionOutputNode.prototype = $extend(armory_logicnode_LogicNo
 	}
 	,__class__: armory_logicnode_FunctionOutputNode
 });
+var armory_logicnode_GetPropertyNode = function(tree) {
+	armory_logicnode_LogicNode.call(this,tree);
+};
+$hxClasses["armory.logicnode.GetPropertyNode"] = armory_logicnode_GetPropertyNode;
+armory_logicnode_GetPropertyNode.__name__ = "armory.logicnode.GetPropertyNode";
+armory_logicnode_GetPropertyNode.__super__ = armory_logicnode_LogicNode;
+armory_logicnode_GetPropertyNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
+	get: function(from) {
+		var object = this.inputs[0].get();
+		var property = this.inputs[1].get();
+		if(from == 0) {
+			if(object == null || object.properties == null) {
+				return null;
+			}
+			var _this = object.properties;
+			if(__map_reserved[property] != null) {
+				return _this.getReserved(property);
+			} else {
+				return _this.h[property];
+			}
+		} else {
+			return property;
+		}
+	}
+	,__class__: armory_logicnode_GetPropertyNode
+});
 var armory_logicnode_LogicNodeInput = function(node,from) {
 	this.node = node;
 	this.from = from;
@@ -13281,6 +13440,50 @@ armory_logicnode_OnInitNode.prototype = $extend(armory_logicnode_LogicNode.proto
 		this.runOutput(0);
 	}
 	,__class__: armory_logicnode_OnInitNode
+});
+var armory_logicnode_OnKeyboardNode = function(tree) {
+	armory_logicnode_LogicNode.call(this,tree);
+	tree.notifyOnUpdate($bind(this,this.update));
+};
+$hxClasses["armory.logicnode.OnKeyboardNode"] = armory_logicnode_OnKeyboardNode;
+armory_logicnode_OnKeyboardNode.__name__ = "armory.logicnode.OnKeyboardNode";
+armory_logicnode_OnKeyboardNode.__super__ = armory_logicnode_LogicNode;
+armory_logicnode_OnKeyboardNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
+	property0: null
+	,property1: null
+	,update: function() {
+		var keyboard = iron_system_Input.getKeyboard();
+		var b = false;
+		switch(this.property0) {
+		case "Down":
+			b = keyboard.down(this.property1);
+			break;
+		case "Released":
+			b = keyboard.released(this.property1);
+			break;
+		case "Started":
+			b = keyboard.started(this.property1);
+			break;
+		}
+		if(b) {
+			this.runOutput(0);
+		}
+	}
+	,__class__: armory_logicnode_OnKeyboardNode
+});
+var armory_logicnode_PrintNode = function(tree) {
+	armory_logicnode_LogicNode.call(this,tree);
+};
+$hxClasses["armory.logicnode.PrintNode"] = armory_logicnode_PrintNode;
+armory_logicnode_PrintNode.__name__ = "armory.logicnode.PrintNode";
+armory_logicnode_PrintNode.__super__ = armory_logicnode_LogicNode;
+armory_logicnode_PrintNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
+	run: function(from) {
+		var value = this.inputs[1].get();
+		haxe_Log.trace(this.tree.name + ": " + Std.string(value),{ fileName : "Sources/armory/logicnode/PrintNode.hx", lineNumber : 13, className : "armory.logicnode.PrintNode", methodName : "run"});
+		this.runOutput(0);
+	}
+	,__class__: armory_logicnode_PrintNode
 });
 var armory_logicnode_QuaternionNode = function(tree,x,y,z,w) {
 	this.value = new iron_math_Quat();
@@ -17314,8 +17517,8 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 		if(!this.visible) {
 			return;
 		}
-		var hwin = zui_Handle.global.nest(5,null);
-		var htab = zui_Handle.global.nest(6,{ position : 0});
+		var hwin = zui_Handle.global.nest(8,null);
+		var htab = zui_Handle.global.nest(9,{ position : 0});
 		var ww = 280 * this.scaleFactor | 0;
 		var wx = kha_System.windowWidth() - ww;
 		var wy = 0;
@@ -17328,7 +17531,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 		if(this.ui.window(hwin,wx,wy,ww,wh,true)) {
 			var tmp = this.ui.tab(htab,"");
 			if(this.ui.tab(htab,"Scene")) {
-				if(this.ui.panel(zui_Handle.global.nest(7,{ selected : true}),"Outliner")) {
+				if(this.ui.panel(zui_Handle.global.nest(10,{ selected : true}),"Outliner")) {
 					this.ui.indent();
 					var lineCounter = 0;
 					var drawList = null;
@@ -17391,7 +17594,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					while(_g2 < _g11.length) {
 						var c = _g11[_g2];
 						++_g2;
-						var tmp1 = zui_Handle.global.nest(8,null);
+						var tmp1 = zui_Handle.global.nest(11,null);
 						drawList(tmp1,c);
 					}
 					this.ui.unindent();
@@ -17399,10 +17602,10 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 				if(this.selectedObject == null) {
 					this.selectedType = "";
 				}
-				if(this.ui.panel(zui_Handle.global.nest(9,{ selected : true}),"Properties " + this.selectedType)) {
+				if(this.ui.panel(zui_Handle.global.nest(12,{ selected : true}),"Properties " + this.selectedType)) {
 					this.ui.indent();
 					if(this.selectedObject != null) {
-						var h = zui_Handle.global.nest(10,null);
+						var h = zui_Handle.global.nest(13,null);
 						h.selected = this.selectedObject.visible;
 						this.selectedObject.visible = this.ui.check(h,"Visible");
 						var localPos = this.selectedObject.transform.loc;
@@ -17460,31 +17663,31 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("World Loc");
 						this.ui.enabled = false;
-						h = zui_Handle.global.nest(11,null);
+						h = zui_Handle.global.nest(14,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos_x) + "";
 						f = parseFloat(this.ui.textInput(h,"X"));
-						h = zui_Handle.global.nest(12,null);
+						h = zui_Handle.global.nest(15,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos_y) + "";
 						f = parseFloat(this.ui.textInput(h,"Y"));
-						h = zui_Handle.global.nest(13,null);
+						h = zui_Handle.global.nest(16,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos_z) + "";
 						f = parseFloat(this.ui.textInput(h,"Z"));
 						this.ui.enabled = true;
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Local Loc");
-						h = zui_Handle.global.nest(14,null);
+						h = zui_Handle.global.nest(17,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.x) + "";
 						f = parseFloat(this.ui.textInput(h,"X"));
 						if(this.ui.changed) {
 							localPos.x = f;
 						}
-						h = zui_Handle.global.nest(15,null);
+						h = zui_Handle.global.nest(18,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.y) + "";
 						f = parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							localPos.y = f;
 						}
-						h = zui_Handle.global.nest(16,null);
+						h = zui_Handle.global.nest(19,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.z) + "";
 						f = parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -17492,7 +17695,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Rotation");
-						h = zui_Handle.global.nest(17,null);
+						h = zui_Handle.global.nest(20,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot_x) + "";
 						f = parseFloat(this.ui.textInput(h,"X"));
 						var changed = false;
@@ -17500,14 +17703,14 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 							changed = true;
 							rot_x = f;
 						}
-						h = zui_Handle.global.nest(18,null);
+						h = zui_Handle.global.nest(21,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot_y) + "";
 						f = parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							changed = true;
 							rot_y = f;
 						}
-						h = zui_Handle.global.nest(19,null);
+						h = zui_Handle.global.nest(22,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot_z) + "";
 						f = parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -17540,19 +17743,19 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Scale");
-						h = zui_Handle.global.nest(20,null);
+						h = zui_Handle.global.nest(23,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.x) + "";
 						f = parseFloat(this.ui.textInput(h,"X"));
 						if(this.ui.changed) {
 							scale.x = f;
 						}
-						h = zui_Handle.global.nest(21,null);
+						h = zui_Handle.global.nest(24,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.y) + "";
 						f = parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							scale.y = f;
 						}
-						h = zui_Handle.global.nest(22,null);
+						h = zui_Handle.global.nest(25,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.z) + "";
 						f = parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -17560,19 +17763,19 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						this.ui.row(armory_trait_internal_DebugConsole.row4);
 						this.ui.text("Dimensions");
-						h = zui_Handle.global.nest(23,null);
+						h = zui_Handle.global.nest(26,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.x) + "";
 						f = parseFloat(this.ui.textInput(h,"X"));
 						if(this.ui.changed) {
 							dim.x = f;
 						}
-						h = zui_Handle.global.nest(24,null);
+						h = zui_Handle.global.nest(27,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.y) + "";
 						f = parseFloat(this.ui.textInput(h,"Y"));
 						if(this.ui.changed) {
 							dim.y = f;
 						}
-						h = zui_Handle.global.nest(25,null);
+						h = zui_Handle.global.nest(28,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.z) + "";
 						f = parseFloat(this.ui.textInput(h,"Z"));
 						if(this.ui.changed) {
@@ -17604,7 +17807,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 							if(iron_Scene.active.world != null) {
 								var p = iron_Scene.active.world.probe;
 								var tmp2 = this.ui;
-								var tmp3 = zui_Handle.global.nest(26,{ value : p.raw.strength});
+								var tmp3 = zui_Handle.global.nest(29,{ value : p.raw.strength});
 								p.raw.strength = tmp2.slider(tmp3,"Env Strength",0.0,5.0,true);
 							} else {
 								this.ui.text("This scene has no world data to edit.");
@@ -17612,14 +17815,14 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						} else if(((this.selectedObject) instanceof iron_object_LightObject)) {
 							this.selectedType = "(Light)";
 							var light = js_Boot.__cast(this.selectedObject , iron_object_LightObject);
-							var lightHandle = zui_Handle.global.nest(27,null);
+							var lightHandle = zui_Handle.global.nest(30,null);
 							lightHandle.value = light.data.raw.strength / 10;
 							var tmp4 = this.ui.slider(lightHandle,"Strength",0.0,5.0,true);
 							light.data.raw.strength = tmp4 * 10;
 						} else if(((this.selectedObject) instanceof iron_object_CameraObject)) {
 							this.selectedType = "(Camera)";
 							var cam = js_Boot.__cast(this.selectedObject , iron_object_CameraObject);
-							var fovHandle = zui_Handle.global.nest(28,null);
+							var fovHandle = zui_Handle.global.nest(31,null);
 							fovHandle.value = (cam.data.raw.fov * 100 | 0) / 100;
 							cam.data.raw.fov = this.ui.slider(fovHandle,"Field of View",0.3,2.0,true);
 							if(this.ui.changed) {
@@ -17635,7 +17838,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			var avg = Math.round(this.frameTimeAvg * 10000) / 10;
 			var fpsAvg = avg > 0 ? Math.round(1000 / avg) : 0;
 			if(this.ui.tab(htab,"" + avg + " ms")) {
-				if(this.ui.panel(zui_Handle.global.nest(29,{ selected : true}),"Performance")) {
+				if(this.ui.panel(zui_Handle.global.nest(32,{ selected : true}),"Performance")) {
 					if(this.graph != null) {
 						this.ui.image(this.graph);
 					}
@@ -17657,7 +17860,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					this.ui.text(Math.round(this.physTimeAvg * 10000) / 10 + " ms",2);
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(30,{ selected : false}),"Draw")) {
+				if(this.ui.panel(zui_Handle.global.nest(33,{ selected : false}),"Draw")) {
 					this.ui.indent();
 					this.ui.row(armory_trait_internal_DebugConsole.lrow);
 					var numMeshes = iron_Scene.active.meshes.length;
@@ -17677,7 +17880,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					this.ui.text(iron_RenderPath.culled + " / " + numMeshes * 2,2);
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(31,{ selected : false}),"Render Targets")) {
+				if(this.ui.panel(zui_Handle.global.nest(34,{ selected : false}),"Render Targets")) {
 					this.ui.indent();
 					var _this8 = iron_RenderPath.active.renderTargets;
 					var rt = new haxe_ds__$StringMap_StringMapIterator(_this8,_this8.arrayKeys());
@@ -17690,7 +17893,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					}
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(32,{ selected : false}),"Cached Materials")) {
+				if(this.ui.panel(zui_Handle.global.nest(35,{ selected : false}),"Cached Materials")) {
 					this.ui.indent();
 					var _this9 = iron_data_Data.cachedMaterials;
 					var c5 = new haxe_ds__$StringMap_StringMapIterator(_this9,_this9.arrayKeys());
@@ -17700,7 +17903,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					}
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(33,{ selected : false}),"Cached Shaders")) {
+				if(this.ui.panel(zui_Handle.global.nest(36,{ selected : false}),"Cached Shaders")) {
 					this.ui.indent();
 					var _this10 = iron_data_Data.cachedShaders;
 					var c7 = new haxe_ds__$StringMap_StringMapIterator(_this10,_this10.arrayKeys());
@@ -17712,9 +17915,9 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 				}
 			}
 			if(this.ui.tab(htab,armory_trait_internal_DebugConsole.lastTraces[0] == "" ? "Console" : HxOverrides.substr(armory_trait_internal_DebugConsole.lastTraces[0],0,20))) {
-				if(this.ui.panel(zui_Handle.global.nest(34,{ selected : false}),"Script")) {
+				if(this.ui.panel(zui_Handle.global.nest(37,{ selected : false}),"Script")) {
 					this.ui.indent();
-					var t2 = this.ui.textInput(zui_Handle.global.nest(35,null));
+					var t2 = this.ui.textInput(zui_Handle.global.nest(38,null));
 					if(this.ui.button("Run")) {
 						try {
 							haxe_Log.trace("> " + t2,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 512, className : "armory.trait.internal.DebugConsole", methodName : "render2D"});
@@ -17725,7 +17928,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					}
 					this.ui.unindent();
 				}
-				if(this.ui.panel(zui_Handle.global.nest(36,{ selected : true}),"Log")) {
+				if(this.ui.panel(zui_Handle.global.nest(39,{ selected : true}),"Log")) {
 					this.ui.indent();
 					if(this.ui.button("Clear")) {
 						armory_trait_internal_DebugConsole.lastTraces[0] = "";
@@ -17752,7 +17955,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			}
 			this.ui.separator();
 		}
-		var handleWinTrait = zui_Handle.global.nest(37,null);
+		var handleWinTrait = zui_Handle.global.nest(40,null);
 		var _g6 = 0;
 		var _g15 = this.selectedTraits;
 		while(_g6 < _g15.length) {
@@ -17784,7 +17987,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			this.ui.text("Object:");
 			this.ui.text(trait.object.name,2);
 			this.ui.separator();
-			if(this.ui.panel(zui_Handle.global.nest(38,null).nest(objectID).nest(traitIndex),"Attributes")) {
+			if(this.ui.panel(zui_Handle.global.nest(41,null).nest(objectID).nest(traitIndex),"Attributes")) {
 				this.ui.indent();
 				var _g7 = 0;
 				var _g16 = Reflect.fields(trait);
@@ -21674,196 +21877,6 @@ haxe_ds__$StringMap_StringMapIterator.prototype = {
 	}
 	,__class__: haxe_ds__$StringMap_StringMapIterator
 };
-var haxe_http_HttpBase = function(url) {
-	this.url = url;
-	this.headers = [];
-	this.params = [];
-	this.emptyOnData = $bind(this,this.onData);
-};
-$hxClasses["haxe.http.HttpBase"] = haxe_http_HttpBase;
-haxe_http_HttpBase.__name__ = "haxe.http.HttpBase";
-haxe_http_HttpBase.prototype = {
-	url: null
-	,responseBytes: null
-	,responseAsString: null
-	,postData: null
-	,postBytes: null
-	,headers: null
-	,params: null
-	,emptyOnData: null
-	,onData: function(data) {
-	}
-	,onBytes: function(data) {
-	}
-	,onError: function(msg) {
-	}
-	,onStatus: function(status) {
-	}
-	,hasOnData: function() {
-		return !Reflect.compareMethods($bind(this,this.onData),this.emptyOnData);
-	}
-	,success: function(data) {
-		this.responseBytes = data;
-		this.responseAsString = null;
-		if(this.hasOnData()) {
-			this.onData(this.get_responseData());
-		}
-		this.onBytes(this.responseBytes);
-	}
-	,get_responseData: function() {
-		if(this.responseAsString == null && this.responseBytes != null) {
-			this.responseAsString = this.responseBytes.getString(0,this.responseBytes.length,haxe_io_Encoding.UTF8);
-		}
-		return this.responseAsString;
-	}
-	,__class__: haxe_http_HttpBase
-	,__properties__: {get_responseData:"get_responseData"}
-};
-var haxe_http_HttpJs = function(url) {
-	this.async = true;
-	this.withCredentials = false;
-	haxe_http_HttpBase.call(this,url);
-};
-$hxClasses["haxe.http.HttpJs"] = haxe_http_HttpJs;
-haxe_http_HttpJs.__name__ = "haxe.http.HttpJs";
-haxe_http_HttpJs.__super__ = haxe_http_HttpBase;
-haxe_http_HttpJs.prototype = $extend(haxe_http_HttpBase.prototype,{
-	async: null
-	,withCredentials: null
-	,req: null
-	,request: function(post) {
-		var _gthis = this;
-		this.responseAsString = null;
-		this.responseBytes = null;
-		var r = this.req = js_Browser.createXMLHttpRequest();
-		var onreadystatechange = function(_) {
-			if(r.readyState != 4) {
-				return;
-			}
-			var s;
-			try {
-				s = r.status;
-			} catch( e ) {
-				var e1 = ((e) instanceof js__$Boot_HaxeError) ? e.val : e;
-				s = null;
-			}
-			if(s == 0 && typeof(window) != "undefined") {
-				var protocol = window.location.protocol.toLowerCase();
-				var rlocalProtocol = new EReg("^(?:about|app|app-storage|.+-extension|file|res|widget):$","");
-				var isLocal = rlocalProtocol.match(protocol);
-				if(isLocal) {
-					s = r.response != null ? 200 : 404;
-				}
-			}
-			if(s == undefined) {
-				s = null;
-			}
-			if(s != null) {
-				_gthis.onStatus(s);
-			}
-			if(s != null && s >= 200 && s < 400) {
-				_gthis.req = null;
-				var onreadystatechange1 = haxe_io_Bytes.ofData(r.response);
-				_gthis.success(onreadystatechange1);
-			} else if(s == null) {
-				_gthis.req = null;
-				_gthis.onError("Failed to connect or resolve host");
-			} else if(s == null) {
-				_gthis.req = null;
-				_gthis.responseBytes = haxe_io_Bytes.ofData(r.response);
-				_gthis.onError("Http Error #" + r.status);
-			} else {
-				switch(s) {
-				case 12007:
-					_gthis.req = null;
-					_gthis.onError("Unknown host");
-					break;
-				case 12029:
-					_gthis.req = null;
-					_gthis.onError("Failed to connect to host");
-					break;
-				default:
-					_gthis.req = null;
-					_gthis.responseBytes = haxe_io_Bytes.ofData(r.response);
-					_gthis.onError("Http Error #" + r.status);
-				}
-			}
-		};
-		if(this.async) {
-			r.onreadystatechange = onreadystatechange;
-		}
-		var uri;
-		var _g = this.postBytes;
-		var _g1 = this.postData;
-		if(_g1 == null) {
-			if(_g == null) {
-				uri = null;
-			} else {
-				var bytes = _g;
-				uri = new Blob([bytes.b.bufferValue]);
-			}
-		} else if(_g == null) {
-			var str = _g1;
-			uri = str;
-		} else {
-			uri = null;
-		}
-		if(uri != null) {
-			post = true;
-		} else {
-			var _g2 = 0;
-			var _g3 = this.params;
-			while(_g2 < _g3.length) {
-				var p = _g3[_g2];
-				++_g2;
-				if(uri == null) {
-					uri = "";
-				} else {
-					uri = Std.string(uri) + "&";
-				}
-				var s1 = p.name;
-				var value = Std.string(uri) + encodeURIComponent(s1) + "=";
-				var s2 = p.value;
-				uri = value + encodeURIComponent(s2);
-			}
-		}
-		try {
-			if(post) {
-				r.open("POST",this.url,this.async);
-			} else if(uri != null) {
-				var question = this.url.split("?").length <= 1;
-				r.open("GET",this.url + (question ? "?" : "&") + Std.string(uri),this.async);
-				uri = null;
-			} else {
-				r.open("GET",this.url,this.async);
-			}
-			r.responseType = "arraybuffer";
-		} catch( e2 ) {
-			var e3 = ((e2) instanceof js__$Boot_HaxeError) ? e2.val : e2;
-			this.req = null;
-			this.onError(e3.toString());
-			return;
-		}
-		r.withCredentials = this.withCredentials;
-		if(!Lambda.exists(this.headers,function(h) {
-			return h.name == "Content-Type";
-		}) && post && this.postData == null) {
-			r.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-		}
-		var _g21 = 0;
-		var _g31 = this.headers;
-		while(_g21 < _g31.length) {
-			var h1 = _g31[_g21];
-			++_g21;
-			r.setRequestHeader(h1.name,h1.value);
-		}
-		r.send(uri);
-		if(!this.async) {
-			onreadystatechange(null);
-		}
-	}
-	,__class__: haxe_http_HttpJs
-});
 var haxe_io_Bytes = function(data) {
 	this.length = data.byteLength;
 	this.b = new Uint8Array(data);
@@ -37112,18 +37125,6 @@ js_Boot.__isNativeObj = function(o) {
 };
 js_Boot.__resolveNativeClass = function(name) {
 	return $global[name];
-};
-var js_Browser = function() { };
-$hxClasses["js.Browser"] = js_Browser;
-js_Browser.__name__ = "js.Browser";
-js_Browser.createXMLHttpRequest = function() {
-	if(typeof XMLHttpRequest != "undefined") {
-		return new XMLHttpRequest();
-	}
-	if(typeof ActiveXObject != "undefined") {
-		return new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	throw new js__$Boot_HaxeError("Unable to create XMLHttpRequest object.");
 };
 var js_lib__$ArrayBuffer_ArrayBufferCompat = function() { };
 $hxClasses["js.lib._ArrayBuffer.ArrayBufferCompat"] = js_lib__$ArrayBuffer_ArrayBufferCompat;
@@ -55218,7 +55219,7 @@ zui_Ext.colorWheel = function(ui,handle,alpha,w,colorPreview) {
 	if(colorPreview) {
 		ui.text("",2,handle.color);
 	}
-	var pos = zui_Ext.inlineRadio(ui,zui_Handle.global.nest(39,null),["RGB","HSV","Hex"]);
+	var pos = zui_Ext.inlineRadio(ui,zui_Handle.global.nest(0,null),["RGB","HSV","Hex"]);
 	var h0 = handle.nest(0).nest(0);
 	var h1 = handle.nest(0).nest(1);
 	var h2 = handle.nest(0).nest(2);
@@ -55854,11 +55855,10 @@ if(ArrayBuffer.prototype.slice == null) {
 Main.projectName = "VorVersuch";
 Main.projectVersion = "1.0";
 Main.projectPackage = "arm";
-arm_Beam_$Control_$v7.__meta__ = { fields : { directSpawn : { prop : null}, directSpawn_LaserName : { prop : null}, beam_name : { prop : null}, pol_arrow_name : { prop : null}, pol_torus_name : { prop : null}, singlePolArrow : { prop : null}, rayNumber : { prop : null}, beamNumber : { prop : null}, max_arrows : { prop : null}, updateTime : { prop : null}, laser_on : { prop : null}, pol_on : { prop : null}, timer_on : { prop : null}, mask : { prop : null}, beamdiameter : { prop : null}, arrow_diameter : { prop : null}, arrow_length : { prop : null}, arrow_dist : { prop : null}}};
+arm_Beam_$Control_$v8.__meta__ = { fields : { directSpawn : { prop : null}, directSpawn_LaserName : { prop : null}, beam_name : { prop : null}, pol_arrow_name : { prop : null}, pol_torus_name : { prop : null}, singlePolArrow : { prop : null}, rayNumber : { prop : null}, beamNumber : { prop : null}, max_arrows : { prop : null}, updateTime : { prop : null}, laser_on : { prop : null}, pol_on : { prop : null}, timer_on : { prop : null}, mask : { prop : null}, beamdiameter : { prop : null}, arrow_diameter : { prop : null}, arrow_length : { prop : null}, arrow_dist : { prop : null}}};
 arm_KM100PM_$Base.__meta__ = { fields : { pbsName : { prop : null}, frontName : { prop : null}, screwName : { prop : null}, holderName : { prop : null}, stageName : { prop : null}}};
 arm_KM100_$Base_$CPS532_$C2_$Laser.__meta__ = { fields : { laserName : { prop : null}, frontName : { prop : null}, screwName : { prop : null}, outputName : { prop : null}}};
 arm_LDM56_$Base.__meta__ = { fields : { plateName : { prop : null}, mScrewName : { prop : null}, screwName : { prop : null}, postName : { prop : null}, topName : { prop : null}, laserName : { prop : null}, outputName : { prop : null}, defaultControls : { prop : null}}};
-arm_MeasurementPlotMain.__meta__ = { fields : { getDatafromServer : { prop : null}, nameMeasurementObject : { prop : null}}};
 arm_PhotoDiode.__meta__ = { fields : { String_Beam_Ray_Traits : { prop : null}, changes_prop : { prop : null}, blocksBeam : { prop : null}, nameDetektor : { prop : null}, detectorSize : { prop : null}}};
 arm_PumpLaser.__meta__ = { fields : { String_Beam_Ray_Traits : { prop : null}, wl : { prop : null}, stokes_I : { prop : null}, stokes_p : { prop : null}, stokes_psi : { prop : null}, stokes_chi : { prop : null}, beamsize_x : { prop : null}, beamsize_y : { prop : null}, changes_prop : { prop : null}, blocksBeam : { prop : null}}};
 arm_RSP1D_$Base.__meta__ = { fields : { opticName : { prop : null}, ringName : { prop : null}}};

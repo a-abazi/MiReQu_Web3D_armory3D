@@ -10,9 +10,12 @@ import iron.Trait;
 
 // This Trait resumes the traits of specifc objects when they, or some speficied children of them are clicked
 class ResumeTraitSelector extends iron.Trait {
+
+	var active: Bool;
 	public function new() {
 		super();
 		notifyOnUpdate(onUpdate);
+		active = true;
 	}
 
 	function onUpdate(){
@@ -39,6 +42,15 @@ class ResumeTraitSelector extends iron.Trait {
 					}
 				}
 			} 
+	}
+
+	public function stop() {
+		removeUpdate(onUpdate);
+		active = false;
+	}
+
+	public function resume(){
+		if (!active) notifyOnUpdate(onUpdate);		
 	}
 
 	function callTraitFunction(object:Object, traitName:String, funName: String, funArguments:Array <Dynamic>):Dynamic{

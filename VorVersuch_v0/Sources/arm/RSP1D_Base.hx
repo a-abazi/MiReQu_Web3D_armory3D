@@ -262,6 +262,12 @@ class RSP1D_Base extends iron.Trait {
 		object.properties["ringAngle"] 	= ringAngle  ;
 	}
 
+	public function setAngle(newRingAngle: Float){
+		ringAngle = (newRingAngle / 180.)*Math.PI;
+		allVariablesToProbs(object);
+		updateParts();
+	}
+
 	
 	function spawnXZPlane(loc: Vec4, rot: Quat):Object{
 		// helping function to spawn invisible plane in XY

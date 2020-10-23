@@ -59,64 +59,58 @@
 -D kha_version=1810
 -D kha_project_name=VorVersuch
 -js krom\krom.js.temp
-arm.LDM56_Base
---macro keep('arm.LDM56_Base')
-arm.node.Genral_Object_properties_blocking
---macro keep('arm.node.Genral_Object_properties_blocking')
-arm.PolBeamSplitter_v1
---macro keep('arm.PolBeamSplitter_v1')
-armory.trait.internal.Bridge
---macro keep('armory.trait.internal.Bridge')
-arm.node.Genral_Object_properties_blocking_001
---macro keep('arm.node.Genral_Object_properties_blocking_001')
+arm.DebugUI_VorVersuch
+--macro keep('arm.DebugUI_VorVersuch')
 arm.Spawner_KM100_Base_CPS532_C2_Laser
 --macro keep('arm.Spawner_KM100_Base_CPS532_C2_Laser')
 arm.Spawner_PD
 --macro keep('arm.Spawner_PD')
-arm.PumpLaser
---macro keep('arm.PumpLaser')
-arm.RSP1D_Base
---macro keep('arm.RSP1D_Base')
-arm.VorVersuch_Spawner
---macro keep('arm.VorVersuch_Spawner')
-arm.PhotoDiode
---macro keep('arm.PhotoDiode')
-arm.Beam_Control_v7
---macro keep('arm.Beam_Control_v7')
-arm.KM100PM_Base
---macro keep('arm.KM100PM_Base')
-armory.trait.physics.bullet.RigidBody
---macro keep('armory.trait.physics.bullet.RigidBody')
-arm.UPH_Base
---macro keep('arm.UPH_Base')
-arm.KM100_Base_CPS532_C2_Laser
---macro keep('arm.KM100_Base_CPS532_C2_Laser')
-arm.DebugCamera
---macro keep('arm.DebugCamera')
-arm.MeasurementPlotMain
---macro keep('arm.MeasurementPlotMain')
-arm.VorVersuch_Controller
---macro keep('arm.VorVersuch_Controller')
 armory.trait.internal.DebugConsole
 --macro keep('armory.trait.internal.DebugConsole')
-arm.Waveplate_half_v2
---macro keep('arm.Waveplate_half_v2')
-arm.node.Genral_Object_properties_blocking_003
---macro keep('arm.node.Genral_Object_properties_blocking_003')
-arm.ResumeTraitSelector
---macro keep('arm.ResumeTraitSelector')
-arm.Color_trait
---macro keep('arm.Color_trait')
-arm.LinearPolarizer
---macro keep('arm.LinearPolarizer')
-arm.node.Genral_Object_properties_blocking_005
---macro keep('arm.node.Genral_Object_properties_blocking_005')
-arm.node.Genral_Object_properties_blocking_004
---macro keep('arm.node.Genral_Object_properties_blocking_004')
-arm.Waveplate_quarter_v2
---macro keep('arm.Waveplate_quarter_v2')
-armory.trait.internal.CanvasScript
---macro keep('armory.trait.internal.CanvasScript')
+arm.UPH_Base
+--macro keep('arm.UPH_Base')
+arm.KM100PM_Base
+--macro keep('arm.KM100PM_Base')
+arm.node.TestNode_AccesBeams
+--macro keep('arm.node.TestNode_AccesBeams')
+arm.LDM56_Base
+--macro keep('arm.LDM56_Base')
+arm.PumpLaser
+--macro keep('arm.PumpLaser')
 armory.trait.physics.bullet.PhysicsWorld
 --macro keep('armory.trait.physics.bullet.PhysicsWorld')
+arm.PolBeamSplitter_v1
+--macro keep('arm.PolBeamSplitter_v1')
+arm.LinearPolarizer
+--macro keep('arm.LinearPolarizer')
+arm.DebugCamera
+--macro keep('arm.DebugCamera')
+arm.node.Genral_Object_properties_blocking_005
+--macro keep('arm.node.Genral_Object_properties_blocking_005')
+arm.KM100_Base_CPS532_C2_Laser
+--macro keep('arm.KM100_Base_CPS532_C2_Laser')
+arm.Beam_Control_v8
+--macro keep('arm.Beam_Control_v8')
+arm.Waveplate_quarter_v2
+--macro keep('arm.Waveplate_quarter_v2')
+armory.trait.physics.bullet.RigidBody
+--macro keep('armory.trait.physics.bullet.RigidBody')
+arm.node.Genral_Object_properties_blocking_003
+--macro keep('arm.node.Genral_Object_properties_blocking_003')
+arm.node.Genral_Object_properties_blocking
+--macro keep('arm.node.Genral_Object_properties_blocking')
+arm.Waveplate_half_v2
+--macro keep('arm.Waveplate_half_v2')
+arm.node.Genral_Object_properties_blocking_001
+--macro keep('arm.node.Genral_Object_properties_blocking_001')
+arm.Color_trait
+--macro keep('arm.Color_trait')
+arm.RSP1D_Base
+--macro keep('arm.RSP1D_Base')
+arm.PhotoDiode
+--macro keep('arm.PhotoDiode')
+arm.node.Genral_Object_properties_blocking_004
+--macro keep('arm.node.Genral_Object_properties_blocking_004')
+armory.trait.internal.Bridge
+--macro keep('armory.trait.internal.Bridge')
 -main Main

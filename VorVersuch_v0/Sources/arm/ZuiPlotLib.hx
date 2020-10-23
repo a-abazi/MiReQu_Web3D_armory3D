@@ -25,6 +25,83 @@ class ZuiPlotLib extends Zui {
         g.color = 0xffffffff;
     }
     
+    public function tstAngleCS(xVals : Array<Float>, yValsList: Array<Array<Dynamic>> ,width: Float,height: Float, strength: Float, xlabel :String, ylabel:String ) {
+        var x0 = 80.* SCALE();
+        var y0 = 40.* SCALE();
+
+        var xl = width * SCALE() - x0;
+        var yl = height * SCALE() - y0;
+
+        var fontSize = 30;
+
+        var origin_x = _x+x0;
+        var origin_y = _y+y0+yl;
+
+        var colors = [Color.Red, Color.Blue, Color.Green];
+
+        g.color = Color.White;
+        if (!enabled) fadeColor();
+        
+        //calculate scaling, pixel to data
+        var xDmin = 0;
+        var xDmax = 360;
+
+        var yDmin = 0;
+        var yDmax = 0.3;
+        
+        for (yVals in yValsList){
+            for (value in yVals){
+                if (yDmax< value) yDmax = value; 
+            }
+        }
+
+        var xA = xl * 0.05; //distance from lines to min Value and Max Value
+        var yA = yl * 0.05;
+
+        var xScale = (xl - 2*xA) * 1 / (xDmax - xDmin);
+        var yScale = (yl - 2*yA) * 1 / (yDmax - yDmin);
+        
+        //calc ticks
+        var xTicks:Array<Float> = [0,45,90,135,180,225,270,315,360];
+        var xTickMap = new Map<String, Float>();
+        var yTickMap = new Map<String, Float>();
+        for (tick in xTicks){
+            xTickMap[Std.string(tick)] = _x + x0 + xA +  (xScale * tick);
+        }
+
+        var maxNYTicks = Math.floor((yl - 2*yA)/ (fontSize));
+        var yScaleTicks = new NiceScale(yDmin,yDmax);
+        yScaleTicks.setMaxTicks(maxNYTicks);
+        var yTicks = yScaleTicks.getTicks();
+        for (tick in yTicks){
+            if ((yScale * tick)< (yl-2*yA)){ 
+                yTickMap[Std.string(tick)] = _x + x0+ yA +  (yScale * tick);
+            }
+        }
+
+        // TODO: CALC MAX Ticks
+        drawAxes(origin_x,origin_y,xl,yl,strength,xTickMap, yTickMap,xlabel, ylabel);
+
+        //draw measurement points
+        var endI = xVals.length;
+        var colorI = 0;
+        for (yVals in yValsList){
+            g.color = colors[colorI];
+            for (i in 0...endI){
+                var posX = _x + x0 + xA +  (xScale * xVals[i]);
+                var posY = _y + y0 - yA + yl - (yScale * yVals[i]);
+
+                drawMarker(posX, posY ,5);
+            }
+            colorI +=1;
+        }
+        g.color = 0xffffffff;
+        
+        _y += y0+yl + fontSize * 2.5 ;
+
+
+        }
+
 
     public function coordinateSystem(xVals : Array<Float>, yValsList: Array<Array<Dynamic>> ,width: Float,height: Float, strength: Float ) {
         var x0 = 80.* SCALE();

@@ -46,6 +46,7 @@ class KM100PM_Base extends iron.Trait {
 	var pbs: Object;
 	var holder: Object;
 	var stage: Object;
+	var visib: Bool =  false;
 
 	var objList: Array<Object> = [];
 
@@ -69,25 +70,29 @@ class KM100PM_Base extends iron.Trait {
 	function onInit() {
 		initProps(object);
 
+		if (object.properties["spawned"]){
+			visib = true;
+			}
+
 		screwTop = spawnObject(screwName,false);
 		var mST = object.getChild("C_KM100PM_Screw_Top_Zero").transform.world;
 		screwTop.transform.setMatrix(mST);
 		screwTop.transform.scale = scale;
-		screwTop.visible = true;
+		screwTop.visible = visib;
 		rbSync(screwTop);
 
 		screwBot = spawnObject(screwName,false);
 		var mSB = object.getChild("C_KM100PM_Screw_Bottom_Zero").transform.world;
 		screwBot.transform.setMatrix(mSB);
 		screwBot.transform.scale = scale;
-		screwBot.visible = true;
+		screwBot.visible = visib;
 		rbSync(screwBot);
 
 		front = spawnObject(frontName,false);
 		var mF = object.getChild("C_KM100PM_Front").transform.world;
 		front.transform.setMatrix(mF);
 		front.transform.scale = scale;
-		front.visible = true;
+		front.visible = visib;
 		rbSync(front);
 		
 
@@ -99,21 +104,23 @@ class KM100PM_Base extends iron.Trait {
 		var mM = front.getChildren()[1].transform.world;
 		pbs.transform.setMatrix(mM);
 		pbs.transform.scale = scale;
-		pbs.visible = true;
+		pbs.visible = visib;
+		pbs.getChildren()[0].visible = visib;
 		rbSync(pbs);
+		
 
 		holder = spawnObject(holderName,false);
 		var mM = front.getChildren()[0].transform.world;
 		holder.transform.setMatrix(mM);
 		holder.transform.scale = scale;
-		holder.visible = true;
+		holder.visible = visib;
 		rbSync(holder);
 
 		stage = spawnObject(stageName,false);
 		var mM = front.getChildren()[2].transform.world;
 		stage.transform.setMatrix(mM);
 		stage.transform.scale = scale;
-		stage.visible = true;
+		stage.visible = visib;
 		rbSync(stage);
 
 
