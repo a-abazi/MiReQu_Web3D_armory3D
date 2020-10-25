@@ -1,0 +1,9 @@
+A node of type LNArrayObjectNode in tree "Annotationen" failed to be updated, because update isn't implemented (anymore?) for this version of the node
+A node of type LNMathNode in tree "AA_Kamera_Bewegung.001" failed to be updated, because the node's update procedure itself failed.
+A node of type LNMathNode in tree "Annotationen.001" failed to be updated, because the node's update procedure itself failed.
+A node of type LNArrayObjectNode in tree "AA_Kamera_Bewegung" failed to be updated, because update isn't implemented (anymore?) for this version of the node
+A node of type LNMathNode in tree "BspControl.002" failed to be updated, because the node's update procedure itself failed.
+A node of type LNMathNode in tree "AA_Kamera_Bewegung" failed to be updated, because the node's update procedure itself failed.
+A node of type LNMathNode in tree "Annotationen" failed to be updated, because the node's update procedure itself failed.
+A node of type LNArrayObjectNode in tree "Annotationen.001" failed to be updated, because update isn't implemented (anymore?) for this version of the node
+A node of type LNArrayObjectNode in tree "AA_Kamera_Bewegung.001" failed to be updated, because update isn't implemented (anymore?) for this version of the node

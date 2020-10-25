@@ -28,18 +28,25 @@ void main()
     highp float metallic = 1.0;
     highp float occlusion = 1.0;
     highp float specular = 1.0;
+    highp float emission = 0.0;
     n /= vec3((abs(n.x) + abs(n.y)) + abs(n.z));
-    highp vec2 _93;
+    highp vec2 _94;
     if (n.z >= 0.0)
     {
-        _93 = n.xy;
+        _94 = n.xy;
     }
     else
     {
-        _93 = octahedronWrap(n.xy);
+        _94 = octahedronWrap(n.xy);
     }
-    n = vec3(_93.x, _93.y, n.z);
-    fragColor[0] = vec4(n.xy, roughness, packFloatInt16(metallic, 0u));
+    n = vec3(_94.x, _94.y, n.z);
+    uint matid = 0u;
+    if (emission > 0.0)
+    {
+        basecol *= emission;
+        matid = 1u;
+    }
+    fragColor[0] = vec4(n.xy, roughness, packFloatInt16(metallic, matid));
     fragColor[1] = vec4(basecol, packFloat2(occlusion, specular));
 }
 

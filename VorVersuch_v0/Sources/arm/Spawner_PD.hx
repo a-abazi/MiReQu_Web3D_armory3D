@@ -33,6 +33,9 @@ class Spawner_PD extends iron.Trait {
 	
 	@prop
 	var objectName_Component: String = "PD";
+
+	@prop
+	var nameDetektor: String = "Detektor1";
 	
 	var baseAngle: Float;
 	var postAngle: Float;
@@ -56,8 +59,11 @@ class Spawner_PD extends iron.Trait {
 			var loc = object.transform.loc;
 			convertPropsToVars();
 			var pMap = createPropMapPost();
+			var cMap = createPropMapComp();
 			pMap["componentObjectName"] = objectName_Component;
 			pMap["Component_corrV"] = calcCorrV(objectName_Component);
+			pMap["Component_map"] = cMap;
+
 			spawnedObjectPost = spawnObject(objectName_PostHolder, true, loc , pMap);
 			rbSync(spawnedObjectPost);
 			
@@ -107,11 +113,11 @@ class Spawner_PD extends iron.Trait {
 		return corrV;
 	}
 
-	private function createPropMapComp(postObject: Object):Map<String,Dynamic>{
+	private function createPropMapComp():Map<String,Dynamic>{
 		var cMap: Map<String,Dynamic> = [];
 
-		cMap["postObject"] = postObject;
 		cMap["spawned"] = true;
+		cMap["nameDetektor"] = nameDetektor;
 
 		return cMap;
 	}

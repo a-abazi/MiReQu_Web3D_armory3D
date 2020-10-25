@@ -3,6 +3,8 @@ precision mediump float;
 precision highp int;
 
 uniform highp vec4 casData[20];
+uniform highp mat4 LWVPSpot0;
+uniform highp sampler2DShadow shadowMapSpot[1];
 uniform highp sampler2D gbuffer0;
 uniform highp sampler2D gbuffer1;
 uniform highp sampler2D gbufferD;
@@ -16,6 +18,11 @@ uniform highp vec3 sunDir;
 uniform highp sampler2DShadow shadowMap;
 uniform highp float shadowsBias;
 uniform highp vec3 sunCol;
+uniform highp vec3 pointPos;
+uniform highp vec3 pointCol;
+uniform highp float pointBias;
+uniform highp vec2 spotData;
+uniform highp vec3 spotDir;
 
 in highp vec2 texCoord;
 in highp vec3 viewRay;
@@ -107,24 +114,24 @@ highp mat4 getCascadeMat(highp float d, inout int casi, inout int casIndex)
 
 highp float PCF(highp sampler2DShadow shadowMap_1, highp vec2 uv, highp float compare, highp vec2 smSize)
 {
-    highp vec3 _242 = vec3(uv + (vec2(-1.0) / smSize), compare);
-    highp float result = texture(shadowMap_1, vec3(_242.xy, _242.z));
-    highp vec3 _251 = vec3(uv + (vec2(-1.0, 0.0) / smSize), compare);
-    result += texture(shadowMap_1, vec3(_251.xy, _251.z));
-    highp vec3 _262 = vec3(uv + (vec2(-1.0, 1.0) / smSize), compare);
-    result += texture(shadowMap_1, vec3(_262.xy, _262.z));
-    highp vec3 _273 = vec3(uv + (vec2(0.0, -1.0) / smSize), compare);
-    result += texture(shadowMap_1, vec3(_273.xy, _273.z));
-    highp vec3 _281 = vec3(uv, compare);
-    result += texture(shadowMap_1, vec3(_281.xy, _281.z));
-    highp vec3 _292 = vec3(uv + (vec2(0.0, 1.0) / smSize), compare);
-    result += texture(shadowMap_1, vec3(_292.xy, _292.z));
-    highp vec3 _303 = vec3(uv + (vec2(1.0, -1.0) / smSize), compare);
-    result += texture(shadowMap_1, vec3(_303.xy, _303.z));
-    highp vec3 _314 = vec3(uv + (vec2(1.0, 0.0) / smSize), compare);
-    result += texture(shadowMap_1, vec3(_314.xy, _314.z));
-    highp vec3 _325 = vec3(uv + (vec2(1.0) / smSize), compare);
-    result += texture(shadowMap_1, vec3(_325.xy, _325.z));
+    highp vec3 _277 = vec3(uv + (vec2(-1.0) / smSize), compare);
+    highp float result = texture(shadowMap_1, vec3(_277.xy, _277.z));
+    highp vec3 _286 = vec3(uv + (vec2(-1.0, 0.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_286.xy, _286.z));
+    highp vec3 _297 = vec3(uv + (vec2(-1.0, 1.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_297.xy, _297.z));
+    highp vec3 _308 = vec3(uv + (vec2(0.0, -1.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_308.xy, _308.z));
+    highp vec3 _316 = vec3(uv, compare);
+    result += texture(shadowMap_1, vec3(_316.xy, _316.z));
+    highp vec3 _327 = vec3(uv + (vec2(0.0, 1.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_327.xy, _327.z));
+    highp vec3 _338 = vec3(uv + (vec2(1.0, -1.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_338.xy, _338.z));
+    highp vec3 _349 = vec3(uv + (vec2(1.0, 0.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_349.xy, _349.z));
+    highp vec3 _360 = vec3(uv + (vec2(1.0) / smSize), compare);
+    result += texture(shadowMap_1, vec3(_360.xy, _360.z));
     return result / 9.0;
 }
 
@@ -133,37 +140,37 @@ highp float shadowTestCascade(highp sampler2DShadow shadowMap_1, highp vec3 eye_
     highp float d = distance(eye_1, p);
     int param;
     int param_1;
-    highp mat4 _421 = getCascadeMat(d, param, param_1);
+    highp mat4 _487 = getCascadeMat(d, param, param_1);
     int casi = param;
     int casIndex = param_1;
-    highp mat4 LWVP = _421;
+    highp mat4 LWVP = _487;
     highp vec4 lPos = LWVP * vec4(p, 1.0);
-    highp vec3 _436 = lPos.xyz / vec3(lPos.w);
-    lPos = vec4(_436.x, _436.y, _436.z, lPos.w);
+    highp vec3 _502 = lPos.xyz / vec3(lPos.w);
+    lPos = vec4(_502.x, _502.y, _502.z, lPos.w);
     highp float visibility = 1.0;
     if (lPos.w > 0.0)
     {
         visibility = PCF(shadowMap_1, lPos.xy, lPos.z - shadowsBias_1, vec2(4096.0, 1024.0));
     }
     highp float nextSplit = casData[16][casi];
-    highp float _462;
+    highp float _527;
     if (casi == 0)
     {
-        _462 = nextSplit;
+        _527 = nextSplit;
     }
     else
     {
-        _462 = nextSplit - (casData[16][casi - 1]);
+        _527 = nextSplit - casData[16][casi - 1];
     }
-    highp float splitSize = _462;
+    highp float splitSize = _527;
     highp float splitDist = (nextSplit - d) / splitSize;
     if ((splitDist <= 0.1500000059604644775390625) && (casi != 3))
     {
         int casIndex2 = casIndex + 4;
         highp mat4 LWVP2 = mat4(vec4(casData[casIndex2]), vec4(casData[casIndex2 + 1]), vec4(casData[casIndex2 + 2]), vec4(casData[casIndex2 + 3]));
         highp vec4 lPos2 = LWVP2 * vec4(p, 1.0);
-        highp vec3 _540 = lPos2.xyz / vec3(lPos2.w);
-        lPos2 = vec4(_540.x, _540.y, _540.z, lPos2.w);
+        highp vec3 _605 = lPos2.xyz / vec3(lPos2.w);
+        lPos2 = vec4(_605.x, _605.y, _605.z, lPos2.w);
         highp float visibility2 = 1.0;
         if (lPos2.w > 0.0)
         {
@@ -175,21 +182,94 @@ highp float shadowTestCascade(highp sampler2DShadow shadowMap_1, highp vec3 eye_
     return visibility;
 }
 
+highp float attenuate(highp float dist)
+{
+    return 1.0 / (dist * dist);
+}
+
+highp float shadowTest(highp sampler2DShadow shadowMap_1, highp vec3 lPos, highp float shadowsBias_1)
+{
+    bool _371 = lPos.x < 0.0;
+    bool _377;
+    if (!_371)
+    {
+        _377 = lPos.y < 0.0;
+    }
+    else
+    {
+        _377 = _371;
+    }
+    bool _383;
+    if (!_377)
+    {
+        _383 = lPos.x > 1.0;
+    }
+    else
+    {
+        _383 = _377;
+    }
+    bool _389;
+    if (!_383)
+    {
+        _389 = lPos.y > 1.0;
+    }
+    else
+    {
+        _389 = _383;
+    }
+    if (_389)
+    {
+        return 1.0;
+    }
+    return PCF(shadowMap_1, lPos.xy, lPos.z - shadowsBias_1, vec2(1024.0));
+}
+
+highp vec3 sampleLight(highp vec3 p, highp vec3 n, highp vec3 v, highp float dotNV, highp vec3 lp, highp vec3 lightCol, highp vec3 albedo, highp float rough, highp float spec, highp vec3 f0, int index, highp float bias, bool receiveShadow, bool isSpot, highp float spotA, highp float spotB, highp vec3 spotDir_1)
+{
+    highp vec3 ld = lp - p;
+    highp vec3 l = normalize(ld);
+    highp vec3 h = normalize(v + l);
+    highp float dotNH = dot(n, h);
+    highp float dotVH = dot(v, h);
+    highp float dotNL = dot(n, l);
+    highp vec3 direct = lambertDiffuseBRDF(albedo, dotNL) + (specularBRDF(f0, rough, dotNL, dotNH, dotNV, dotVH) * spec);
+    direct *= attenuate(distance(p, lp));
+    direct *= lightCol;
+    if (isSpot)
+    {
+        highp float spotEffect = dot(spotDir_1, l);
+        if (spotEffect < spotA)
+        {
+            direct *= smoothstep(spotB, spotA, spotEffect);
+        }
+        if (receiveShadow)
+        {
+            highp vec4 lPos = LWVPSpot0 * vec4(p + ((n * bias) * 10.0), 1.0);
+            direct *= shadowTest(shadowMapSpot[0], lPos.xyz / vec3(lPos.w), bias);
+        }
+        return direct;
+    }
+    if (receiveShadow)
+    {
+    }
+    return direct;
+}
+
 void main()
 {
     highp vec4 g0 = textureLod(gbuffer0, texCoord, 0.0);
     highp vec3 n;
     n.z = (1.0 - abs(g0.x)) - abs(g0.y);
-    highp vec2 _709;
+    highp vec2 _864;
     if (n.z >= 0.0)
     {
-        _709 = g0.xy;
+        _864 = g0.xy;
     }
     else
     {
-        _709 = octahedronWrap(g0.xy);
+        _864 = octahedronWrap(g0.xy);
     }
-    n = vec3(_709.x, _709.y, n.z);
+    n = vec3(_864.x, _864.y, n.z);
     n = normalize(n);
     highp float roughness = g0.z;
     highp float param;
@@ -209,8 +289,14 @@ void main()
     envl *= albedo;
     envl *= (envmapStrength * occspec.x);
     fragColor = vec4(envl.x, envl.y, envl.z, fragColor.w);
-    highp vec3 _815 = fragColor.xyz * textureLod(ssaotex, texCoord, 0.0).x;
-    fragColor = vec4(_815.x, _815.y, _815.z, fragColor.w);
+    highp vec3 _970 = fragColor.xyz * textureLod(ssaotex, texCoord, 0.0).x;
+    fragColor = vec4(_970.x, _970.y, _970.z, fragColor.w);
+    if (matid == 1u)
+    {
+        highp vec3 _981 = fragColor.xyz + g1.xyz;
+        fragColor = vec4(_981.x, _981.y, _981.z, fragColor.w);
+        albedo = vec3(0.0);
+    }
     highp vec3 sh = normalize(v + sunDir);
     highp float sdotNH = dot(n, sh);
     highp float sdotVH = dot(v, sh);
@@ -218,8 +304,17 @@ void main()
     highp float svisibility = 1.0;
     highp vec3 sdirect = lambertDiffuseBRDF(albedo, sdotNL) + (specularBRDF(f0, roughness, sdotNL, sdotNH, dotNV, sdotVH) * occspec.y);
     svisibility = shadowTestCascade(shadowMap, eye, p + ((n * shadowsBias) * 10.0), shadowsBias);
-    highp vec3 _872 = fragColor.xyz + ((sdirect * svisibility) * sunCol);
-    fragColor = vec4(_872.x, _872.y, _872.z, fragColor.w);
+    highp vec3 _1037 = fragColor.xyz + ((sdirect * svisibility) * sunCol);
+    fragColor = vec4(_1037.x, _1037.y, _1037.z, fragColor.w);
+    int param_2 = 0;
+    highp float param_3 = pointBias;
+    bool param_4 = true;
+    bool param_5 = true;
+    highp float param_6 = spotData.x;
+    highp float param_7 = spotData.y;
+    highp vec3 param_8 = spotDir;
+    highp vec3 _1073 = fragColor.xyz + sampleLight(p, n, v, dotNV, pointPos, pointCol, albedo, roughness, occspec.y, f0, param_2, param_3, param_4, param_5, param_6, param_7, param_8);
+    fragColor = vec4(_1073.x, _1073.y, _1073.z, fragColor.w);
     fragColor.w = 1.0;
 }
 

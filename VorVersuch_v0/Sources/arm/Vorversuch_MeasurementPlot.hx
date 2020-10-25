@@ -1,5 +1,6 @@
 package arm;
 
+import arm.node.AA_Kamera_Bewegung;
 import iron.Scene;
 import iron.object.DecalObject;
 import zui.Zui.Handle;
@@ -33,6 +34,10 @@ class Vorversuch_MeasurementPlot extends iron.Trait {
     var plot: PlotInstanceAngle;
     var plotActive: Bool = false;
 
+    var gPropX: String;
+    var gPropY: String;
+    var indexY: Int;
+    var indexX: Int;
 
     public function new() {
         super();
@@ -50,7 +55,17 @@ class Vorversuch_MeasurementPlot extends iron.Trait {
         if (globalObj.properties == null) globalObj.properties = new Map();
 
         notifyOnRender2D(render2DMain);
+        notifyOnUpdate(onUpdate);
 		
+    }
+
+    function onUpdate() {
+        if (plotActive) {
+            var valX: Float = Scene.global.properties.get(gPropX)[indexX];
+            var valY: Float = Scene.global.properties.get(gPropY)[indexY];
+            if (Std.is(valX,Float)) plot.angles[plot.angles.length-1] = valX;
+            if (Std.is(valY,Float)) plot.voltages[0][plot.angles.length-1] = valY;
+        }
     }
 
     function render2DMain(g:kha.graphics2.Graphics) {
@@ -64,9 +79,14 @@ class Vorversuch_MeasurementPlot extends iron.Trait {
         g.begin(false);
     }
     
-    public function plotThis(xlabel: String, ylabel: String){
+    public function plotThis(xlabel: String, ylabel: String, gPropX:String,gPropY:String,indexX:Int,indexY:Int){
         plot = new PlotInstanceAngle(pos_x,pos_y,width,height,xlabel,ylabel);
         plotActive = true;
+        this.gPropY = gPropY;
+        this.gPropX = gPropX;
+        this.indexX = indexX;
+        this.indexY = indexY;
+        
     }
 
     public function closePlots() {
@@ -86,8 +106,8 @@ class PlotInstanceAngle{
     var globalObj: Object = iron.Scene.global;
     
     var message: String;
-    var angles: Array<Float>;
-    var voltages: Array<Array <Float>>;
+    public var angles: Array<Float>;
+    public var voltages: Array<Array <Float>>;
     var xlabel: String;
     var ylabel: String;
 
@@ -101,15 +121,20 @@ class PlotInstanceAngle{
         handle = new Handle();
         message = "hello world";
 
-        angles = [0,20,60,80];
-        voltages =  [[0,.1,.2,.1,.1]];
+        angles = [null];
+        voltages =  [[null]];
     }
 
     public function plotWindow(ui: ZuiPlotLib){
         
+        handle.redraws = 1;
         if (ui.window(handle, pos_x, pos_y, width, height ,false)) {
-            ui.tstAngleCS(angles, voltages, width*0.9, height*0.8,3, xlabel, ylabel);
+            ui.tstAngleCS(angles, voltages, width*0.9, height*0.7,3, xlabel, ylabel);
+            if (ui.button("Measure")){
+                angles.push(null);
+                voltages[0].push(null);
 
+            }
          
         }
     }
@@ -117,3 +142,4 @@ class PlotInstanceAngle{
     
 
 }
+

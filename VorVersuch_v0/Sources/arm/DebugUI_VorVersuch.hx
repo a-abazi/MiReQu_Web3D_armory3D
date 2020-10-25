@@ -1,6 +1,7 @@
 package arm;
 
 
+import js.lib.webassembly.Global;
 import iron.Scene;
 import zui.Zui.Handle;
 import iron.object.Object;
@@ -11,7 +12,10 @@ import iron.math.Vec4;
 import arm.VorVersuch_Spawner.VorVersuch_Spawner;
 import arm.ResumeTraitSelector.ResumeTraitSelector;
 import arm.Vorversuch_MeasurementPlot.Vorversuch_MeasurementPlot;
+import arm.PhotoDiode.PhotoDiode;
 import zui.*;
+
+
 
 class DebugUI_VorVersuch extends iron.Trait {
 
@@ -34,6 +38,7 @@ class DebugUI_VorVersuch extends iron.Trait {
 
 	var canvas: CanvasScript;
 	var virtInptBool: Bool = false;
+	var globalObj: Object;
 
 	public var spawner = new VorVersuch_Spawner.VorVersuch_Spawner();
 	public var traitResumer = new ResumeTraitSelector.ResumeTraitSelector();
@@ -46,13 +51,33 @@ class DebugUI_VorVersuch extends iron.Trait {
 		iron.data.Data.getFont("font_default.ttf", function(f:kha.Font) {
 			ui = new Zui({font: f});
 		});
+
+		notifyOnInit(onInit);
 		notifyOnRender2D(onRender2D);
-		//notifyOnUpdate(onUpdate);
+		notifyOnUpdate(onUpdate);
 	}
 
+	function onInit() {
+		globalObj = iron.Scene.global;
+		initProps(globalObj);
+		var angleArray =  [0,0,0];
+		globalObj.properties.set("inputAnglesArray",angleArray);
+		var voltArray =  [0,0];
+		globalObj.properties.set("inputVoltArray",voltArray);
+	}
 
 	function onUpdate(){
 		//if (virtInptBool) updateRings();
+		
+		if (vivComboHandle.position == 1){
+			var det1: Object = globalObj.properties.get("Detektor1");
+			var det2: Object = globalObj.properties.get("Detektor1");
+
+			var voltArray =  [callTraitFunction(det1,"PhotoDiode","getMeasurement",[globalObj.properties.get("ArrayDetBeams")]),
+								callTraitFunction(det2,"PhotoDiode","getMeasurement",[globalObj.properties.get("ArrayDetBeams")])];
+			globalObj.properties.set("inputVoltArray",voltArray);
+
+		}
 	}	
 
 	function onRender2D(g:kha.graphics2.Graphics) {
@@ -94,11 +119,11 @@ class DebugUI_VorVersuch extends iron.Trait {
 			if (ui.panel(Id.handle({selected: true}), "Virtual Input Voltage")) {
 				ui.combo(vivComboHandle, vivItemNames);
 				if (vivComboHandle.position == 0){
-				var voltage1:Float = ui.slider(Id.handle({value: 2.5}), "Voltage Diode 1", 0., 5., true);
-				var voltage2:Float = ui.slider(Id.handle({value: 2.5}), "Voltage Diode 2", 0., 5., true);
-				
-				var voltArray =  [voltage1,voltage2];
-				iron.Scene.global.properties.set("inputVoltArray",voltArray);
+					var voltage1:Float = ui.slider(Id.handle({value: 2.5}), "Voltage Diode 1", 0., 5., true);
+					var voltage2:Float = ui.slider(Id.handle({value: 2.5}), "Voltage Diode 2", 0., 5., true);
+					
+					var voltArray =  [voltage1,voltage2];
+					iron.Scene.global.properties.set("inputVoltArray",voltArray);
 				}
 			}
 		}
@@ -136,7 +161,7 @@ class DebugUI_VorVersuch extends iron.Trait {
 		spawner.fillSlot(0,LinPol);
 		spawner.fillSlot(1,Empty);
 		spawner.fillSlot(2,Empty);
-		plotter.plotThis("Winkel Polfilter (deg)", "Spannung Photodiode (V)");
+		plotter.plotThis("Winkel Polfilter (deg)", "Spannung Photodiode (V)","inputAnglesArray","inputVoltArray",0,0);
 	}
 	
 	function mStep2() {
@@ -184,4 +209,10 @@ class DebugUI_VorVersuch extends iron.Trait {
 
 		return result;
 	}
+
+	inline function initProps(object:Object){
+		if (object == null) return;
+		if (object.properties == null) object.properties = new Map();
+	}
+
 }

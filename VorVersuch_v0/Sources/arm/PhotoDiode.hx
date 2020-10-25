@@ -19,15 +19,14 @@ class PhotoDiode extends iron.Trait {
 	@prop
 	var blocksBeam: Bool = true;
 	@prop
-	var nameDetektor: String = "SpannungPhotodiode1Sim";
-	@prop
 	var detectorSize: Float = 1.; // in mm
 	
-	
+	var nameDetektor: String ;
+
 	public function new() {
 		super();
 		notifyOnInit(onInit);
-		//notifyOnUpdate(onUpdate);
+		notifyOnUpdate(onUpdate);
 	}
 
 
@@ -47,15 +46,16 @@ class PhotoDiode extends iron.Trait {
 		object.properties.set("blocksBeam",blocksBeam);
 		//object.properties.set("detectorSize",detectorSize);
 		//object.properties.set("detectorEfficiency",detectorEfficiency);
-		object.properties.set("nameDetektor", nameDetektor);
-		trace(nameDetektor);
+		
+		//trace(nameDetektor);
 
 		if (globalObj.properties["detekorObjectsArray"] == null){
 			globalObj.properties["detekorObjectsArray"] = [object];
 		}
 		else globalObj.properties["detekorObjectsArray"].push(object);
-			
-			
+		nameDetektor = object.properties.get("nameDetektor");
+		globalObj.properties.set(nameDetektor,object);
+		
 	}
 
 	function onUpdate(){
@@ -72,6 +72,7 @@ class PhotoDiode extends iron.Trait {
 		var signal: Float = 0.;
 		var detectorSize = detectorSize;
 		var dettEff =  detectorEfficiency;
+		//trace(arrayDetectableBeams.length);
 		for (map in arrayDetectableBeams) {
 			if (map["pos"] != null){
 				var beamPos:Vec4 = map["pos"];
@@ -88,6 +89,5 @@ class PhotoDiode extends iron.Trait {
 			}
 		}
 		return signal;
-		
 	}
 }
