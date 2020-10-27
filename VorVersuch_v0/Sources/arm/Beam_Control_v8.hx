@@ -730,7 +730,8 @@ class Beam_Control_v8 extends iron.Trait {
             
                 // Define Transform for individual Objects
                 for (j in 0...numArrows){
-                    if (!singlePolArrow) arrow_num_total++;
+					// if (!singlePolArrow) arrow_num_total++; TODO: Rewrite Errror Correction
+					arrow_num_total++;
                     var matrix: Mat4 = Mat4.identity(); 
                     var spawnChildren: Bool = false;
                     var loc = new Vec4().add(arr_dir[i]);
