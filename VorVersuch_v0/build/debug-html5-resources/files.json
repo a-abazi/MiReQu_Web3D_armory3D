@@ -3,6 +3,7 @@
 		{
 			"name": "Arrows_pol_001_mesh_frag",
 			"files": [
+				"Arrows_pol_001_mesh.frag.essl",
 				"Arrows_pol_001_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -27,6 +28,7 @@
 		{
 			"name": "Arrows_pol_mesh_frag",
 			"files": [
+				"Arrows_pol_mesh.frag.essl",
 				"Arrows_pol_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -51,6 +53,7 @@
 		{
 			"name": "BA2_mesh_frag",
 			"files": [
+				"BA2_mesh.frag.essl",
 				"BA2_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -164,6 +167,7 @@
 		{
 			"name": "CPS532_C2_Laser_mesh_frag",
 			"files": [
+				"CPS532_C2_Laser_mesh.frag.essl",
 				"CPS532_C2_Laser_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -197,6 +201,7 @@
 		{
 			"name": "KM100_Base_001_mesh_frag",
 			"files": [
+				"KM100_Base_001_mesh.frag.essl",
 				"KM100_Base_001_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -230,6 +235,7 @@
 		{
 			"name": "KM100_Base_002_mesh_frag",
 			"files": [
+				"KM100_Base_002_mesh.frag.essl",
 				"KM100_Base_002_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -263,6 +269,7 @@
 		{
 			"name": "KM100_Screw_002_mesh_frag",
 			"files": [
+				"KM100_Screw_002_mesh.frag.essl",
 				"KM100_Screw_002_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -296,6 +303,7 @@
 		{
 			"name": "KM100_Screw_mesh_frag",
 			"files": [
+				"KM100_Screw_mesh.frag.essl",
 				"KM100_Screw_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -329,6 +337,7 @@
 		{
 			"name": "KM100_Top_mesh_frag",
 			"files": [
+				"KM100_Top_mesh.frag.essl",
 				"KM100_Top_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -362,6 +371,7 @@
 		{
 			"name": "LDM56_Textur_mesh_frag",
 			"files": [
+				"LDM56_Textur_mesh.frag.essl",
 				"LDM56_Textur_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -395,6 +405,7 @@
 		{
 			"name": "Laser_Jonas_mesh_frag",
 			"files": [
+				"Laser_Jonas_mesh.frag.essl",
 				"Laser_Jonas_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -428,6 +439,7 @@
 		{
 			"name": "Laser_mesh_frag",
 			"files": [
+				"Laser_mesh.frag.essl",
 				"Laser_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -457,6 +469,7 @@
 		{
 			"name": "Material_002_mesh_frag",
 			"files": [
+				"Material_002_mesh.frag.essl",
 				"Material_002_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -481,6 +494,7 @@
 		{
 			"name": "Metal_PBS_001_mesh_frag",
 			"files": [
+				"Metal_PBS_001_mesh.frag.essl",
 				"Metal_PBS_001_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -505,6 +519,7 @@
 		{
 			"name": "Photodiode_mesh_frag",
 			"files": [
+				"Photodiode_mesh.frag.essl",
 				"Photodiode_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -538,6 +553,7 @@
 		{
 			"name": "Platte_001_mesh_frag",
 			"files": [
+				"Platte_001_mesh.frag.essl",
 				"Platte_001_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -571,6 +587,7 @@
 		{
 			"name": "Post_002_mesh_frag",
 			"files": [
+				"Post_002_mesh.frag.essl",
 				"Post_002_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -604,6 +621,7 @@
 		{
 			"name": "Post_mesh_frag",
 			"files": [
+				"Post_mesh.frag.essl",
 				"Post_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -637,6 +655,7 @@
 		{
 			"name": "Schraube_002_mesh_frag",
 			"files": [
+				"Schraube_002_mesh.frag.essl",
 				"Schraube_002_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -670,6 +689,7 @@
 		{
 			"name": "Schraube_mesh_frag",
 			"files": [
+				"Schraube_mesh.frag.essl",
 				"Schraube_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -703,6 +723,7 @@
 		{
 			"name": "To_Do_Pfeile_003_mesh_frag",
 			"files": [
+				"To_Do_Pfeile_003_mesh.frag.essl",
 				"To_Do_Pfeile_003_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -727,6 +748,7 @@
 		{
 			"name": "UPH_Base_mesh_frag",
 			"files": [
+				"UPH_Base_mesh.frag.essl",
 				"UPH_Base_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -760,6 +782,7 @@
 		{
 			"name": "UPH_Top_002_mesh_frag",
 			"files": [
+				"UPH_Top_002_mesh.frag.essl",
 				"UPH_Top_002_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -793,6 +816,7 @@
 		{
 			"name": "UPH_Top_mesh_frag",
 			"files": [
+				"UPH_Top_mesh.frag.essl",
 				"UPH_Top_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -824,97 +848,9 @@
 			"types": []
 		},
 		{
-			"name": "World_World_frag",
-			"files": [
-				"World_World.frag.essl",
-				"World_World-webgl2.frag.essl"
-			],
-			"file_sizes": [
-				1
-			],
-			"type": "shader",
-			"inputs": [
-				{
-					"name": "normal",
-					"type": "vec3"
-				}
-			],
-			"outputs": [
-				{
-					"name": "fragColor",
-					"type": "vec4"
-				}
-			],
-			"uniforms": [],
-			"types": []
-		},
-		{
-			"name": "World_World_vert",
-			"files": [
-				"World_World.vert.essl",
-				"World_World-webgl2.vert.essl"
-			],
-			"file_sizes": [
-				1
-			],
-			"type": "shader",
-			"inputs": [
-				{
-					"name": "nor",
-					"type": "vec3"
-				},
-				{
-					"name": "pos",
-					"type": "vec3"
-				},
-				{
-					"name": "gl_VertexID",
-					"type": "int"
-				},
-				{
-					"name": "gl_InstanceID",
-					"type": "int"
-				}
-			],
-			"outputs": [
-				{
-					"name": "normal",
-					"type": "vec3"
-				}
-			],
-			"uniforms": [
-				{
-					"name": "SMVP",
-					"type": "mat4"
-				}
-			],
-			"types": [
-				{
-					"name": "gl_PerVertex",
-					"members": [
-						{
-							"type": "vec4",
-							"name": "gl_Position"
-						},
-						{
-							"type": "float",
-							"name": "gl_PointSize"
-						},
-						{
-							"type": "float[]",
-							"name": "gl_ClipDistance"
-						},
-						{
-							"type": "float[]",
-							"name": "gl_CullDistance"
-						}
-					]
-				}
-			]
-		},
-		{
 			"name": "_0_128_0_mesh_frag",
 			"files": [
+				"_0_128_0_mesh.frag.essl",
 				"_0_128_0_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -939,6 +875,7 @@
 		{
 			"name": "_192_192_192_mesh_frag",
 			"files": [
+				"_192_192_192_mesh.frag.essl",
 				"_192_192_192_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -963,6 +900,7 @@
 		{
 			"name": "_64_64_64_001_mesh_frag",
 			"files": [
+				"_64_64_64_001_mesh.frag.essl",
 				"_64_64_64_001_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -987,6 +925,7 @@
 		{
 			"name": "armdefault_mesh_frag",
 			"files": [
+				"armdefault_mesh.frag.essl",
 				"armdefault_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -1272,6 +1211,7 @@
 		{
 			"name": "deferred_light_frag",
 			"files": [
+				"deferred_light.frag.essl",
 				"deferred_light-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -1395,6 +1335,7 @@
 		{
 			"name": "lambert369SG_002_mesh_frag",
 			"files": [
+				"lambert369SG_002_mesh.frag.essl",
 				"lambert369SG_002_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -1428,6 +1369,7 @@
 		{
 			"name": "lambert418SG_mesh_frag",
 			"files": [
+				"lambert418SG_mesh.frag.essl",
 				"lambert418SG_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -1461,6 +1403,7 @@
 		{
 			"name": "lambert423SG_mesh_frag",
 			"files": [
+				"lambert423SG_mesh.frag.essl",
 				"lambert423SG_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [
@@ -1494,6 +1437,7 @@
 		{
 			"name": "lambert424SG_mesh_frag",
 			"files": [
+				"lambert424SG_mesh.frag.essl",
 				"lambert424SG_mesh-webgl2.frag.essl"
 			],
 			"file_sizes": [

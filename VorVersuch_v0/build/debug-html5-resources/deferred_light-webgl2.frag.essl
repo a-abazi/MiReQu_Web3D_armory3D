@@ -160,7 +160,7 @@ highp float shadowTestCascade(highp sampler2DShadow shadowMap_1, highp vec3 eye_
     }
     else
     {
-        _527 = nextSplit - casData[16][casi - 1];
+        _527 = nextSplit - (casData[16][casi - 1]);
     }
     highp float splitSize = _527;
     highp float splitDist = (nextSplit - d) / splitSize;
@@ -291,10 +291,10 @@ void main()
     fragColor = vec4(envl.x, envl.y, envl.z, fragColor.w);
     highp vec3 _970 = fragColor.xyz * textureLod(ssaotex, texCoord, 0.0).x;
     fragColor = vec4(_970.x, _970.y, _970.z, fragColor.w);
-    if (matid == 1u)
+    if (g0.w == 1.0)
     {
-        highp vec3 _981 = fragColor.xyz + g1.xyz;
-        fragColor = vec4(_981.x, _981.y, _981.z, fragColor.w);
+        highp vec3 _982 = fragColor.xyz + g1.xyz;
+        fragColor = vec4(_982.x, _982.y, _982.z, fragColor.w);
         albedo = vec3(0.0);
     }
     highp vec3 sh = normalize(v + sunDir);
@@ -304,8 +304,8 @@ void main()
     highp float svisibility = 1.0;
     highp vec3 sdirect = lambertDiffuseBRDF(albedo, sdotNL) + (specularBRDF(f0, roughness, sdotNL, sdotNH, dotNV, sdotVH) * occspec.y);
     svisibility = shadowTestCascade(shadowMap, eye, p + ((n * shadowsBias) * 10.0), shadowsBias);
-    highp vec3 _1037 = fragColor.xyz + ((sdirect * svisibility) * sunCol);
-    fragColor = vec4(_1037.x, _1037.y, _1037.z, fragColor.w);
+    highp vec3 _1038 = fragColor.xyz + ((sdirect * svisibility) * sunCol);
+    fragColor = vec4(_1038.x, _1038.y, _1038.z, fragColor.w);
     int param_2 = 0;
     highp float param_3 = pointBias;
     bool param_4 = true;
@@ -313,8 +313,8 @@ void main()
     highp float param_6 = spotData.x;
     highp float param_7 = spotData.y;
     highp vec3 param_8 = spotDir;
-    highp vec3 _1073 = fragColor.xyz + sampleLight(p, n, v, dotNV, pointPos, pointCol, albedo, roughness, occspec.y, f0, param_2, param_3, param_4, param_5, param_6, param_7, param_8);
-    fragColor = vec4(_1073.x, _1073.y, _1073.z, fragColor.w);
+    highp vec3 _1074 = fragColor.xyz + sampleLight(p, n, v, dotNV, pointPos, pointCol, albedo, roughness, occspec.y, f0, param_2, param_3, param_4, param_5, param_6, param_7, param_8);
+    fragColor = vec4(_1074.x, _1074.y, _1074.z, fragColor.w);
     fragColor.w = 1.0;
 }
 

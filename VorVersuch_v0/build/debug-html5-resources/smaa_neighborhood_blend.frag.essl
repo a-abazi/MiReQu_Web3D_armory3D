@@ -52,6 +52,7 @@ highp vec4 SMAANeighborhoodBlendingPS(highp vec2 texcoord, highp vec4 offset_1)
         color_1 += (textureLodA(colorTex, param_2, param_3) * blendingWeight.y);
         return color_1;
     }
+    return vec4(0.0);
 }
 
 void main()

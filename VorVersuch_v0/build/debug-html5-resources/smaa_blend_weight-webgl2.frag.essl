@@ -204,7 +204,9 @@ highp float SMAASearchXLeft(inout highp vec2 texcoord, highp float end)
     highp vec2 e = vec2(0.0, 1.0);
     for (;;)
     {
-        bool _614 = texcoord.x > end;
+        highp float _612 = texcoord.x;
+        highp float _613 = end;
+        bool _614 = _612 > _613;
         bool _621;
         if (_614)
         {
@@ -247,7 +249,9 @@ highp float SMAASearchXRight(inout highp vec2 texcoord, highp float end)
     highp vec2 e = vec2(0.0, 1.0);
     for (;;)
     {
-        bool _667 = texcoord.x < end;
+        highp float _665 = texcoord.x;
+        highp float _666 = end;
+        bool _667 = _665 < _666;
         bool _673;
         if (_667)
         {
@@ -320,7 +324,9 @@ highp float SMAASearchYUp(inout highp vec2 texcoord, highp float end)
     highp vec2 e = vec2(1.0, 0.0);
     for (;;)
     {
-        bool _716 = texcoord.y > end;
+        highp float _714 = texcoord.y;
+        highp float _715 = end;
+        bool _716 = _714 > _715;
         bool _722;
         if (_716)
         {
@@ -363,7 +369,9 @@ highp float SMAASearchYDown(inout highp vec2 texcoord, highp float end)
     highp vec2 e = vec2(1.0, 0.0);
     for (;;)
     {
-        bool _765 = texcoord.y < end;
+        highp float _763 = texcoord.y;
+        highp float _764 = end;
+        bool _765 = _763 < _764;
         bool _771;
         if (_765)
         {

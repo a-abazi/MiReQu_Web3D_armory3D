@@ -85,7 +85,8 @@ class PhotoDiode extends iron.Trait {
 				var sigmaGaus = beamSize*beamSize+detectorSize*detectorSize;
 				
 				// signal is a gaussian of beamIntensity now only one Dimensional TODO: make 2D
-				signal += beamIntensity * dettEff / (Math.sqrt(2*Math.PI)*Math.sqrt(sigmaGaus)) * Math.exp(-1*beamDist*beamDist/(2*sigmaGaus));
+				//signal += beamIntensity * dettEff / (Math.sqrt(2*Math.PI)*Math.sqrt(sigmaGaus)) * Math.exp(-1*beamDist*beamDist/(2*sigmaGaus));
+				if (beamDist<3) signal+=beamIntensity*5;
 			}
 		}
 		return signal;

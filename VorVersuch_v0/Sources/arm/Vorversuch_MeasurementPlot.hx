@@ -38,6 +38,7 @@ class Vorversuch_MeasurementPlot extends iron.Trait {
     var gPropY: String;
     var indexY: Int;
     var indexX: Int;
+    var bothY: Bool;
 
     public function new() {
         super();
@@ -61,10 +62,20 @@ class Vorversuch_MeasurementPlot extends iron.Trait {
 
     function onUpdate() {
         if (plotActive) {
-            var valX: Float = Scene.global.properties.get(gPropX)[indexX];
-            var valY: Float = Scene.global.properties.get(gPropY)[indexY];
-            if (Std.is(valX,Float)) plot.angles[plot.angles.length-1] = valX;
-            if (Std.is(valY,Float)) plot.voltages[0][plot.angles.length-1] = valY;
+            if (bothY){
+                var valX: Float = Scene.global.properties.get(gPropX)[indexX];
+                var valY: Float = Scene.global.properties.get(gPropY)[indexY];
+                var valY2: Float = Scene.global.properties.get(gPropY)[indexY+1];
+                if (Std.is(valX,Float)) plot.angles[plot.angles.length-1] = valX;
+                if (Std.is(valY,Float)) plot.voltages[0][plot.angles.length-1] = valY;
+                if (Std.is(valY2,Float)) plot.voltages[1][plot.angles.length-1] = valY2;
+            }
+            else{
+                var valX: Float = Scene.global.properties.get(gPropX)[indexX];
+                var valY: Float = Scene.global.properties.get(gPropY)[indexY];
+                if (Std.is(valX,Float)) plot.angles[plot.angles.length-1] = valX;
+                if (Std.is(valY,Float)) plot.voltages[0][plot.angles.length-1] = valY;
+            }
         }
     }
 
@@ -79,14 +90,14 @@ class Vorversuch_MeasurementPlot extends iron.Trait {
         g.begin(false);
     }
     
-    public function plotThis(xlabel: String, ylabel: String, gPropX:String,gPropY:String,indexX:Int,indexY:Int){
-        plot = new PlotInstanceAngle(pos_x,pos_y,width,height,xlabel,ylabel);
+    public function plotThis(xlabel: String, ylabel: String, gPropX:String,gPropY:String,indexX:Int,indexY:Int,bothY:Bool=false){
+        plot = new PlotInstanceAngle(pos_x,pos_y,width,height,xlabel,ylabel,bothY);
         plotActive = true;
         this.gPropY = gPropY;
         this.gPropX = gPropX;
         this.indexX = indexX;
         this.indexY = indexY;
-        
+        this.bothY = bothY;
     }
 
     public function closePlots() {
@@ -101,7 +112,7 @@ class PlotInstanceAngle{
     public var width: Int;
     public var height: Int;
     public var handle: Handle;
-
+    public var bothY:Bool;
     
     var globalObj: Object = iron.Scene.global;
     
@@ -111,7 +122,7 @@ class PlotInstanceAngle{
     var xlabel: String;
     var ylabel: String;
 
-    public function new(x,y,w,h,xlabel,ylabel) {
+    public function new(x,y,w,h,xlabel,ylabel,bothY) {
         pos_x = x;
         pos_y = y;
         width = w;
@@ -120,9 +131,10 @@ class PlotInstanceAngle{
         this.ylabel = ylabel;
         handle = new Handle();
         message = "hello world";
-
+        this.bothY = bothY;
         angles = [null];
-        voltages =  [[null]];
+        if (bothY) voltages =  [[null],[null]];
+        else voltages =  [[null]];
     }
 
     public function plotWindow(ui: ZuiPlotLib){
@@ -133,6 +145,7 @@ class PlotInstanceAngle{
             if (ui.button("Measure")){
                 angles.push(null);
                 voltages[0].push(null);
+                if (bothY) voltages[1].push(null);
 
             }
          

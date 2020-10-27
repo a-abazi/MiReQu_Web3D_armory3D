@@ -254,9 +254,15 @@ class Beam_Control_v8 extends iron.Trait {
 				
 				// call the main method on specific Array of one Ray
 				blocked = calc_pos_dir(main_Array);
+				//trace("Ray:"+Std.string(i)+" pos Calculated"); // Debug by Hand
 				blocked = spawnBeams(main_Array, blocked);
-				blocked = polControl(main_Array, array_Pols); //ToDO: Manage properties of subsources so this works again, now the subRays have no properties
+				//trace("Ray:"+Std.string(i)+" Beams Spawned"); // Debug by Hand
+				//trace("Ray:"+Std.string(i)+" Pol starts now"); // Debug by Hand
+				blocked = polControl(main_Array, array_Pols); 
+				//trace("Ray:"+Std.string(i)+" Pol finished");  // Debug by Hand
+				//trace("Ray:"+Std.string(indx)+" pols Spawned"); // Debug by Hand
 				getDetectableBeams(main_Array,i);
+				//trace("Ray:"+Std.string(i)+" Beams Detected"); // Debug by Hand
 
 				var curr_beams: Array<Object> = main_Array_beams[i];
 				var curr_sources: Array<Object> = main_Array_sor[i];
@@ -295,6 +301,7 @@ class Beam_Control_v8 extends iron.Trait {
 						}
 					}
 				}
+				//trace("Ray:"+Std.string(i)+" searched for New Beams");
 			}
 		}
 		// overwrite property of all beams that should be detectable, i.e. last beam objects in the array
@@ -605,8 +612,7 @@ class Beam_Control_v8 extends iron.Trait {
 		var return_bool: Bool = true;
 
         var objectName: String = pol_arrow_name;
-        var arrow_num_total: Int = 0;
-
+		var arrow_num_total: Int = 0;
 		var global_object: Object = iron.Scene.global;
 
 		if (global_object == null) return return_bool;
@@ -632,12 +638,15 @@ class Beam_Control_v8 extends iron.Trait {
             for (i in 0...arr_pos.length) {
 				//if (i>=arr_beams.length && blocked) break;
                 var beam: Object = arr_beams[i];
-				
+				//trace("Beam "+Std.string(i)+" Pol starts now");  // Debug by Hand
 				var beam_length: Float;
 				var numArrows: Int;
 				
-                if (beam == null) continue;
-				if (beam.properties == null) beam.properties = new Map();
+				if (beam == null) break;
+				
+				//if (beam.properties == null) beam.properties = new Map();
+				if (beam.properties == null) break;
+				
                 var arrayofBeam: Array<Object> = beam.properties.get(arrName_subobjects);
 				
 				var stokes_I:   Float = beam.properties.get("stokes_I");
@@ -645,7 +654,7 @@ class Beam_Control_v8 extends iron.Trait {
 				var stokes_psi: Float = beam.properties.get("stokes_psi");
 				var stokes_chi: Float = beam.properties.get("stokes_chi");
 				
-
+				//trace("got Stokes");  // Debug by Hand
 				
 				var pol_dir = new Vec4(0,Math.cos(stokes_psi),Math.sin(stokes_psi),1);
 				pol_dir.normalize();
@@ -695,6 +704,7 @@ class Beam_Control_v8 extends iron.Trait {
 					objectName = pol_arrow_name;
 					scale = new Vec4(arrow_diameter,arrow_length * stokes_I,arrow_diameter ,1);
 				}
+				//trace("calc Stokes");  // Debug by Hand
                 // Define Transform for Array
                 
                 var q = new Quat();
@@ -715,11 +725,12 @@ class Beam_Control_v8 extends iron.Trait {
                 for (k in 0...(arrayofBeam.length-numArrows)) {
                     if (arrayofBeam[arrayofBeam.length-k]!= null ) arrayofBeam.pop().remove();
                     else arrayofBeam.pop();
-                }
+				}
+				//trace("Calc Dir Finished");  // Debug by Hand
             
                 // Define Transform for individual Objects
                 for (j in 0...numArrows){
-                    arrow_num_total++;
+                    if (!singlePolArrow) arrow_num_total++;
                     var matrix: Mat4 = Mat4.identity(); 
                     var spawnChildren: Bool = false;
                     var loc = new Vec4().add(arr_dir[i]);
@@ -799,37 +810,75 @@ class Beam_Control_v8 extends iron.Trait {
                         var rigidBody = object.getTrait(RigidBody);
                         if (rigidBody != null){rigidBody.syncTransform();
                         }
-                    }
-                }
-
+					}
+					//trace("Spawning Finished,  pol"+ Std.string(j));  // Debug by Hand
+				}
+				//trace("Beam "+Std.string(i)+" Pol finished now");  // Debug by Hand
                 beam.properties.set(arrName_subobjects,arrayofBeam);   
 			}
-			
-            // Error Correction
+			//trace("Error Correction Starts");  // Debug by Hand
+
+			// Error Correction TODO: write outside of pol loop, multiple beam arrays always trigger this because calculation for numArrows is only done per beam array 
+			var counterA = 0; // TODO: Counter to prevent Infinite Loop fix this!!! Happens when beams are despawned
             while (arr_all_arrows.length>arrow_num_total){
+				trace("Arrows + "+Std.string(arr_all_arrows.length));
+				trace("Allowed Arrows"+Std.string(arrow_num_total));
+				counterA++;
                 for (arrow in arr_all_arrows){
-					
-					if (arrow == null) return return_bool;
-					if (arrow.properties == null) arrow.properties = new Map();
-                    var parent: Object = arrow.properties.get("parent");
-                    if (arr_beams.indexOf(parent) == -1){
+					trace("ErrorCorrection Arrow " + Std.string(arrow.uid));
+					if (arrow == null){
+                        arr_all_arrows.remove(arrow);
+						continue;
+					}
+					if (arrow.properties == null){
                         arrow.remove();
                         arr_all_arrows.remove(arrow);
-                    }
-                    else if (parent == null) {
+						continue;
+					}
+                    var parent: Object = arrow.properties.get("parent");
+                    if (parent == null) {
+                        arrow.remove();
+                        arr_all_arrows.remove(arrow);
+					}
+					else if (arr_beams.indexOf(parent) == -1){
                         arrow.remove();
                         arr_all_arrows.remove(arrow);
                     }
                     else {
-                        if (parent.properties == null) parent.properties = new Map();
+                        if (parent.properties == null) {
+							arrow.remove();
+							arr_all_arrows.remove(arrow);
+							continue;
+						}
                         var arrayofBeam: Array<Object> = parent.properties.get(arrName_subobjects);
                         if (arrayofBeam.indexOf(arrow) == -1){
                             arrow.remove();
                             arr_all_arrows.remove(arrow);
-                        }
-                    }
-                } 
-            }
+						}
+						//else{
+						//	arrow.remove();
+						//	arrayofBeam.remove(arrow);
+                        //    arr_all_arrows.remove(arrow);
+						//}
+					
+					}
+				}
+				if (counterA>max_arrows){
+					trace("bruteForce");
+					var arrow = arr_all_arrows[arr_all_arrows.length-1];
+					if (arrow == null) arr_all_arrows.remove(arrow);
+					
+					var parent: Object = arrow.properties.get("parent");
+					if (parent !=null){
+						var arrayofBeam: Array<Object> = parent.properties.get(arrName_subobjects);
+						if (arrayofBeam!= null) arrayofBeam.remove(arrow);
+					}
+					arrow.remove();
+					arr_all_arrows.remove(arrow);
+				}
+			}
+			//trace("Error Correction Finished"); // Debug by Hand
+			//trace("Spawning Finished, All pols"); // Debug by Hand
         return return_bool;
         }    
     }        

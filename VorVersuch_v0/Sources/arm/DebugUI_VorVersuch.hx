@@ -71,7 +71,7 @@ class DebugUI_VorVersuch extends iron.Trait {
 		
 		if (vivComboHandle.position == 1){
 			var det1: Object = globalObj.properties.get("Detektor1");
-			var det2: Object = globalObj.properties.get("Detektor1");
+			var det2: Object = globalObj.properties.get("Detektor2");
 
 			var voltArray =  [callTraitFunction(det1,"PhotoDiode","getMeasurement",[globalObj.properties.get("ArrayDetBeams")]),
 								callTraitFunction(det2,"PhotoDiode","getMeasurement",[globalObj.properties.get("ArrayDetBeams")])];
@@ -158,6 +158,7 @@ class DebugUI_VorVersuch extends iron.Trait {
 	}
 
 	function mStep1() {
+		plotter.closePlots();
 		spawner.fillSlot(0,LinPol);
 		spawner.fillSlot(1,Empty);
 		spawner.fillSlot(2,Empty);
@@ -165,24 +166,31 @@ class DebugUI_VorVersuch extends iron.Trait {
 	}
 	
 	function mStep2() {
+		plotter.closePlots();
 		spawner.fillSlot(0,LinPol);
 		spawner.fillSlot(1,Empty);
 		spawner.fillSlot(2,LinPol);
+		plotter.plotThis("Winkel Polfilter 2 (deg)", "Spannung Photodiode (V)","inputAnglesArray","inputVoltArray",2,0);
 	}
 	function mStep3() {
+		plotter.closePlots();
 		spawner.fillSlot(0,LinPol);
 		spawner.fillSlot(1,LinPol);
 		spawner.fillSlot(2,LinPol);
 	}
 	function mStep4() {
+		plotter.closePlots();
 		spawner.fillSlot(0,LinPol);
 		spawner.fillSlot(1,WPHalf);
 		spawner.fillSlot(2,LinPol);
+		plotter.plotThis("Winkel Lambda/2 Platte (deg)", "Spannung Photodiode (V)","inputAnglesArray","inputVoltArray",1,0);
 	}
 	function mStep5() {
+		plotter.closePlots();
 		spawner.fillSlot(0,LinPol);
 		spawner.fillSlot(1,WPHalf);
 		spawner.fillSlot(2,Pbs);
+		plotter.plotThis("Winkel Lambda/2 Platte (deg)", "Spannung Photodiode (V)","inputAnglesArray","inputVoltArray",1,0,true);
 	}
 
 	function callTraitFunction(object:Object, traitName:String, funName: String, funArguments:Array <Dynamic>):Dynamic{
