@@ -9,6 +9,7 @@ import zui.*;
 
 import kha.graphics2.Graphics;
 import kha.graphics4.Graphics2.TextShaderPainter;
+import kha.graphics2.GraphicsExtension;
 
 import arm.NiceScale;
 
@@ -24,7 +25,94 @@ class ZuiPlotLib extends Zui {
         g.drawLine(_x + x1 * SCALE(),_y + y1* SCALE(),_x + x2* SCALE(),_y + y2* SCALE(),strength);
         g.color = 0xffffffff;
     }
+
+    public function polarCoordinateSystem(xVals : Array<Float>, yValsList: Array<Array<Dynamic>> ,width: Float,height: Float, strength: Float, xlabel :String, ylabel:String) {
+        var gE = GraphicsExtension;
+
+        var x0 = 80.* SCALE();
+        var y0 = 40.* SCALE();
+
+        var xl = width * SCALE() - x0;
+        var yl = height * SCALE() - y0;
+
+        var fontSize = 30;
+
+        var origin_x = _x+x0;
+        var origin_y = _y+y0+yl;
+
+        var colors = [Color.Red, Color.Blue, Color.Green];
+
+        
+
+        g.color = Color.White;
+        if (!enabled) fadeColor();
+        
+        //calculate scaling, pixel to data
+        var xDmin = 0;
+        var xDmax = 360;
+
+        var yDmin = 0;
+        var yDmax = 0.3;
+        
+        for (yVals in yValsList){
+            for (value in yVals){
+                if (yDmax< value) yDmax = value; 
+            }
+        }
+
+        var xA = xl * 0.05; //distance from lines to min Value and Max Value
+        var yA = yl * 0.05;
+
+        var xScale = (xl - 2*xA) * 1 / (xDmax - xDmin);
+        var yScale = (yl - 2*yA) * 1 / (yDmax - yDmin);
+        
+        //calc ticks
+        var xTicks:Array<Float> = [0,45,90,135,180,225,270,315,360];
+        var xTickMap = new Map<String, Float>();
+        var yTickMap = new Map<String, Float>();
+        for (tick in xTicks){
+            xTickMap[Std.string(tick)] = _x + x0 + xA +  (xScale * tick);
+        }
+
+        var maxNYTicks = Math.floor((yl - 2*yA)/ (fontSize));
+        var yScaleTicks = new NiceScale(yDmin,yDmax);
+        yScaleTicks.setMaxTicks(maxNYTicks);
+        var yTicks = yScaleTicks.getTicks();
+        for (tick in yTicks){
+            if ((yScale * tick)< (yl-2*yA)){ 
+                yTickMap[Std.string(tick)] = _x + x0+ yA +  (yScale * tick);
+            }
+        }
+
+        // TODO: CALC MAX Ticks
+        //drawAxes(origin_x,origin_y,xl,yl,strength,xTickMap, yTickMap,xlabel, ylabel);
+        g.color = Color.Orange;
+        gE.drawArc(g, _x + x0, _y + y0,300,0.,Math.PI/8.,20);
+        g.color = Color.Red;
+        gE.drawArc(g, _x + x0, _y + y0,280,0.,Math.PI/8.,20);
+        g.color = Color.White;
+        gE.drawArc(g, _x + x0, _y + y0,260,0.,Math.PI/8.,20);
+
+        //draw measurement points
+        var endI = xVals.length;
+        var colorI = 0;
+        for (yVals in yValsList){
+            g.color = colors[colorI];
+            for (i in 0...endI){
+                var posX = _x + x0 + xA +  (xScale * xVals[i]);
+                var posY = _y + y0 - yA + yl - (yScale * yVals[i]);
+
+                drawMarker(posX, posY ,1,"point");
+            }
+            colorI +=1;
+        }
+        g.color = 0xffffffff;
+        
+        _y += y0+yl + fontSize * 2.5 ;
+        
+    }
     
+
     public function tstAngleCS(xVals : Array<Float>, yValsList: Array<Array<Dynamic>> ,width: Float,height: Float, strength: Float, xlabel :String, ylabel:String ) {
         var x0 = 80.* SCALE();
         var y0 = 40.* SCALE();
@@ -38,6 +126,8 @@ class ZuiPlotLib extends Zui {
         var origin_y = _y+y0+yl;
 
         var colors = [Color.Red, Color.Blue, Color.Green];
+
+        
 
         g.color = Color.White;
         if (!enabled) fadeColor();
@@ -106,7 +196,8 @@ class ZuiPlotLib extends Zui {
     public function coordinateSystem(xVals : Array<Float>, yValsList: Array<Array<Dynamic>> ,width: Float,height: Float, strength: Float ) {
         var x0 = 80.* SCALE();
         var y0 = 40.* SCALE();
-
+        var gE = GraphicsExtension;
+        
         var xl = width * SCALE() - x0;
         var yl = height * SCALE() - y0;
 
@@ -174,14 +265,17 @@ class ZuiPlotLib extends Zui {
             colorI +=1;
         }
         g.color = 0xffffffff;
-        
+
+        g.set_opacity(0.3);
+        gE.fillCircle(g,x0,y0,100);
+        g.set_opacity(1.);
+
         _y += y0+yl + fontSize * 2.5 ;
 
 
         }
 
-    
-    
+
     private function drawAxes(oX:Float, oY:Float, xl:Float, yl:Float, strength:Float, xTickMap: Map<String,Float>, yTickMap: Map<String,Float>, labelx:String="",labely:String="",
         fontSize = 30 ): Bool {
         
@@ -203,6 +297,8 @@ class ZuiPlotLib extends Zui {
         g.drawString(labelx,oX + xl/2 - fontShiftx, oY+strength+fontSize *1.25);
         g.pipeline = null;
         
+        
+
         g.rotate(-Math.PI/2,oX,oY); 
         g.fillRect( oX- strength/2,oY-strength/2, yl,strength);
         g.fillRect( oX- strength/2,oY-strength/2 + xl -strength, yl,strength);
@@ -240,6 +336,10 @@ class ZuiPlotLib extends Zui {
             var a = size;
             var ri = a/ (2 * Math.sqrt(3));
             g.fillTriangle(posX - a/2, posY + ri, posX + a/2, posY+ri, posX, posY-(ri*2) );
+        }
+        if (style =="point"){
+            var gE = GraphicsExtension;
+            gE.fillCircle(g,posX,posY,size);
         }
     }
 

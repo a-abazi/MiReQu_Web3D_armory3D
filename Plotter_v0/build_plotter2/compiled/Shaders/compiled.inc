@@ -4,6 +4,7 @@
 #define _Deferred
 #define _ShadowMap
 #define _CSM
+#define _Legacy
 #define _SinglePoint
 #define _SMAA
 #define _SSAO
