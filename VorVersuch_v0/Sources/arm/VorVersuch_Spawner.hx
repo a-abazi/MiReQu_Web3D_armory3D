@@ -100,6 +100,8 @@ class VorVersuch_Spawner extends iron.Trait {
 				cMap["spawned"] = true;
 				cMap["ringAngle"] = 0.;
 				cMap["opticName"] = "LP";
+				cMap["SlotBool"] = true;
+				cMap["SlotNum"] = slotNum;
 
 				pMap["componentObjectName"] = "RSP1D_Base";
 				pMap["Component_corrV"] = calcCorrV_RSP1D();
@@ -114,6 +116,8 @@ class VorVersuch_Spawner extends iron.Trait {
 				var cMap: Map<String,Dynamic> = [];
 	
 				cMap["spawned"] = true;
+				cMap["SlotBool"] = true;
+				cMap["SlotNum"] = slotNum;
 
 				pMap["componentObjectName"] = "KM100PM_Base";
 				pMap["Component_map"] = cMap;
@@ -129,6 +133,8 @@ class VorVersuch_Spawner extends iron.Trait {
 				cMap["spawned"] = true;
 				cMap["ringAngle"] = 0.;
 				cMap["opticName"] = "WPH";
+				cMap["SlotBool"] = true;
+				cMap["SlotNum"] = slotNum;
 
 				pMap["componentObjectName"] = "RSP1D_Base";
 				pMap["Component_corrV"] = calcCorrV_RSP1D();
@@ -145,6 +151,8 @@ class VorVersuch_Spawner extends iron.Trait {
 				cMap["spawned"] = true;
 				cMap["ringAngle"] = 0.;
 				cMap["opticName"] = "WPQ";
+				cMap["SlotBool"] = true;
+				cMap["SlotNum"] = slotNum;
 
 				pMap["componentObjectName"] = "RSP1D_Base";
 				pMap["Component_corrV"] = calcCorrV_RSP1D();

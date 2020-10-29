@@ -17,8 +17,8 @@ class NicePlots extends iron.Trait {
     var ui:ZuiPlotLib;
 
 
-    var pos_x = 200;
-    var pos_y = 200;
+    var pos_x = 1920-670;
+    var pos_y = 50;
     var width = 650;
     var height = 1200;
 
@@ -32,7 +32,7 @@ class NicePlots extends iron.Trait {
     
     var binwidth = 0.05; // in s
     var timediscretization = .05;
-    var n_values = 360;
+    var n_values = 90;
 
 	public function new() {
 		super();
@@ -53,7 +53,7 @@ class NicePlots extends iron.Trait {
         xVals = [0];
         
         for (i in 1...n_values){
-            xVals.push(xVals[i-1]+ 1.);
+            xVals.push(xVals[i-1]+ 4.);
         }
 		notifyOnRender2D(render2D);
 	}
@@ -77,8 +77,8 @@ class NicePlots extends iron.Trait {
 			hwin.redraws = 1;
 			yValsList = [[],[]];
 			for (x in xVals){
-				yValsList[0].push(Math.sin(x/180.*Math.PI+time2)+1.);
-				yValsList[1].push(Math.cos(x/180.*Math.PI+time2)+1.);
+				yValsList[0].push(time2/2000.*x* ((Math.sin(x/180.*Math.PI+time2)+1.)+0.05*Math.random())); //time2*x*
+				yValsList[1].push(time2/2000.*x* ((Math.cos(x/180.*Math.PI+time2)+1.)+0.05*Math.random())); //time2*x*
 			}
 		
 			
@@ -95,7 +95,7 @@ class NicePlots extends iron.Trait {
 	
 		if( yValsList!= null){
 			//ui.coordinateSystem(xVals,yValsList,600,300,3);
-			ui.polarCoordinateSystem(xVals,yValsList,600,300,3,"TestLabelX","TestLabelY");
+			ui.polarCoordinateSystem(xVals,yValsList,400,3,"","Spannung [V]");
 			
 		}
 		}
@@ -105,9 +105,6 @@ class NicePlots extends iron.Trait {
 		g.begin(false);
 	}
 
-	function measureNow(){
-		trace("measureNow Dummy");
-	}
 
 	
 }

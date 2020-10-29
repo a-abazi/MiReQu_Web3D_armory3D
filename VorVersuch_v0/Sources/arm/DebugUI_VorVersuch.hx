@@ -29,6 +29,7 @@ class DebugUI_VorVersuch extends iron.Trait {
 
 
 	var vivComboHandle = new Handle();
+	
 	var vivItemNames = ["Virtual Input", "Simulated", "Real"];
 
 	var handleSlot1 = new Handle({value: 90.});
@@ -64,6 +65,7 @@ class DebugUI_VorVersuch extends iron.Trait {
 		globalObj.properties.set("inputAnglesArray",angleArray);
 		var voltArray =  [0,0];
 		globalObj.properties.set("inputVoltArray",voltArray);
+		vivComboHandle.position = 1;
 	}
 
 	function onUpdate(){
@@ -100,7 +102,7 @@ class DebugUI_VorVersuch extends iron.Trait {
 				if (ui.button("Step 5")) mStep5();
 
 			}
-			if (ui.panel(Id.handle({selected: true}), "Virtual Input Angles")) {
+			if (ui.panel(Id.handle({selected: false}), "Virtual Input Angles")) {
 				virtInptBool = ui.check(Id.handle(), "Virtual Input");
 				var angleSlot1:Float = ui.slider(handleSlot1, "Angle Slot 1", 0., 360., true);
                 var angleSlot2:Float = ui.slider(handleSlot2, "Angle Slot 2", 0., 360., true);
@@ -116,7 +118,7 @@ class DebugUI_VorVersuch extends iron.Trait {
 				
 			}
 
-			if (ui.panel(Id.handle({selected: true}), "Virtual Input Voltage")) {
+			if (ui.panel(Id.handle({selected: false}), "Virtual Input Voltage")) {
 				ui.combo(vivComboHandle, vivItemNames);
 				if (vivComboHandle.position == 0){
 					var voltage1:Float = ui.slider(Id.handle({value: 2.5}), "Voltage Diode 1", 0., 5., true);

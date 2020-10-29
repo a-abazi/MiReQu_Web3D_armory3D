@@ -259,7 +259,14 @@ class RSP1D_Base extends iron.Trait {
 	}
 	
 	inline function allVariablesToProbs(object:Object){
-		object.properties["ringAngle"] 	= ringAngle  ;
+		object.properties["ringAngle"] 	= ringAngle;
+
+		if (object.properties.exists("SlotNum")){
+			var angleArray =  iron.Scene.global.properties.get("inputAnglesArray");
+			angleArray[object.properties.get("SlotNum")] = ringAngle * 180. /Math.PI;
+			iron.Scene.global.properties.set("inputAnglesArray",angleArray);
+		}
+
 	}
 
 	public function setAngle(newRingAngle: Float){

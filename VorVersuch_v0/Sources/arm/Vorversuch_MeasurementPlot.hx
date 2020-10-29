@@ -1,5 +1,6 @@
 package arm;
 
+import haxe.io.Input;
 import arm.node.AA_Kamera_Bewegung;
 import iron.Scene;
 import iron.object.DecalObject;
@@ -10,6 +11,7 @@ import kha.Color;
 import haxe.Json;
 import kha.System;
 
+import iron.system.Input;
 
 import iron.object.Object;
 
@@ -26,10 +28,10 @@ class Vorversuch_MeasurementPlot extends iron.Trait {
     var ui:ZuiPlotLib;
 
 
-    public var pos_x = 250;
+    public var pos_x = 1920-600;
     public var pos_y = 20;
     public var width = 500;
-    public var height = 400;
+    public var height = 500;
 
     var plot: PlotInstanceAngle;
     var plotActive: Bool = false;
@@ -46,6 +48,7 @@ class Vorversuch_MeasurementPlot extends iron.Trait {
         // Load font for UI labels
         iron.data.Data.getFont("font_default.ttf", function(f:kha.Font) {
             ui = new ZuiPlotLib({font: f});
+			ui.ops.theme.WINDOW_BG_COL = 0;
             iron.Scene.active.notifyOnInit(sceneInit);
         });
     }
@@ -61,6 +64,7 @@ class Vorversuch_MeasurementPlot extends iron.Trait {
     }
 
     function onUpdate() {
+        var keyBoard = Input.getKeyboard();
         if (plotActive) {
             if (bothY){
                 var valX: Float = Scene.global.properties.get(gPropX)[indexX];
@@ -76,7 +80,14 @@ class Vorversuch_MeasurementPlot extends iron.Trait {
                 if (Std.is(valX,Float)) plot.angles[plot.angles.length-1] = valX;
                 if (Std.is(valY,Float)) plot.voltages[0][plot.angles.length-1] = valY;
             }
+            
+            if (keyBoard.started("m")){
+                plot.angles.push(null);
+                plot.voltages[0].push(null);
+                if (bothY) plot.voltages[1].push(null);
+            }
         }
+
     }
 
     function render2DMain(g:kha.graphics2.Graphics) {
@@ -141,7 +152,8 @@ class PlotInstanceAngle{
         
         handle.redraws = 1;
         if (ui.window(handle, pos_x, pos_y, width, height ,false)) {
-            ui.tstAngleCS(angles, voltages, width*0.9, height*0.7,3, xlabel, ylabel);
+            //ui.tstAngleCS(angles, voltages, width*0.9, height*0.7,3, xlabel, ylabel);
+            ui.polarCoordinateSystem(angles,voltages, Math.sqrt(width*width+height*height)/2.,3,"","Spannung [V]" );
             if (ui.button("Measure")){
                 angles.push(null);
                 voltages[0].push(null);

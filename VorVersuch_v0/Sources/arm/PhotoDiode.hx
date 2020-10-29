@@ -26,7 +26,7 @@ class PhotoDiode extends iron.Trait {
 	public function new() {
 		super();
 		notifyOnInit(onInit);
-		notifyOnUpdate(onUpdate);
+		//notifyOnUpdate(onUpdate);
 	}
 
 
