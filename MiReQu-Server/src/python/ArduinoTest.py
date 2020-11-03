@@ -9,7 +9,7 @@ def posRead(serial):
     return  string  # convert string to float
 
 
-ser = serial.Serial('COM5', 9600)
+ser = serial.Serial('COM3', 9600)
 time.sleep(.1)
 ser.write("<check>".encode("utf8"))
 print("arduino at port is " + posRead(ser))

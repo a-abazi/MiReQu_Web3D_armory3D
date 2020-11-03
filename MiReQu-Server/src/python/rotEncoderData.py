@@ -10,8 +10,21 @@ class rotEncoderInterface():
         print("arduino at USB port " +comPort+" is " + self.posRead())
         time.sleep(.01)
 
-    def getPos(self):
+    def getPos00(self):
         self.ser.write("<get00>".encode("utf8"))
+        return int(self.posRead())
+    def getPos01(self):
+        self.ser.write("<get01>".encode("utf8"))
+        return int(self.posRead())
+    def getPos02(self):
+        self.ser.write("<get02>".encode("utf8"))
+        return int(self.posRead())
+
+    def getSens01(self):
+        self.ser.write("<agt01>".encode("utf8"))
+        return int(self.posRead())
+    def getSens02(self):
+        self.ser.write("<agt02>".encode("utf8"))
         return int(self.posRead())
 
     def posRead(self):
@@ -25,8 +38,11 @@ class rotEncoderInterface():
 
 
 if __name__ == '__main__':
-    rEncoder = rotEncoderInterface("COM5")
-    for i in range(100):
-        print(rEncoder.getPos())
+    rEncoder = rotEncoderInterface("COM3")
+    for i in range(1000):
+        print("RotEncoder:")
+        print(rEncoder.getPos00(),rEncoder.getPos01(),rEncoder.getPos02())
+        print("Voltage:")
+        print(rEncoder.getSens01()/1023.*5.,rEncoder.getSens02()/1023.*5.)
         time.sleep(0.1)
     rEncoder.close()
