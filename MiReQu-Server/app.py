@@ -42,7 +42,7 @@ ccStream = CoincidencesNoUI(tagger)
 rEncoder = rotEncoderInterface("COM4")
 
 
-group = "BA-A-01"
+group = "BA-A-01" # GruppenNamen im Praktikum
 type = "Web3D"  # or "MR"
 exportpath = "c:/ExportMiReQu/"
 

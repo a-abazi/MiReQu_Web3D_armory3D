@@ -127,6 +127,10 @@ class Beam_Control_v8 extends iron.Trait {
 		object.properties.set("Laser_on",laser_on);
 		object.properties.set("Pol_on",  pol_on);
 
+		object.properties.set("beamdiameter", beamdiameter);
+		object.properties.set("arrow_diameter", arrow_diameter);
+		object.properties.set("arrow_length", arrow_length);
+
 		object.properties.set("beamNumber", beamNumber);
 		object.properties.set("updateTime", updateTime);
 		object.properties.set(nameArrayDetectableBeams,arrayDetectableBeams);
@@ -181,6 +185,10 @@ class Beam_Control_v8 extends iron.Trait {
 		if (object == null) return;
 		if (object.properties == null) object.properties = new Map();
 		var laser_on: Bool = object.properties.get("Laser_on");
+		beamdiameter = object.properties.get("beamdiameter");
+		arrow_diameter = object.properties.get("arrow_diameter");
+		arrow_length = object.properties.get("arrow_length");
+		
 		
 		if (laserArray !=null){
 			if (laserArray.length < 1) {
