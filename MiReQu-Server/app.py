@@ -1,6 +1,7 @@
 # docs @ http://flask.pocoo.org/docs/1.0/quickstart/
 from src.python.timeTaggerData import CoincidencesNoUI
 from src.python.rotEncoderData import rotEncoderInterface
+from src.python.ExportManager import ExportManager
 
 
 from flask import Flask, jsonify, request, render_template
@@ -12,7 +13,8 @@ import numpy as np
 # all required TimeTagger dependencies
 from TimeTagger import Coincidences, Counter, Correlation, createTimeTagger, freeTimeTagger
 
-from PySide2.QtWidgets import QApplication, QFileDialog
+
+" Start Server from Terminal with >>> flask run --host=192.168.2.100"
 
 app = Flask(__name__)
 CORS(app)
@@ -25,8 +27,14 @@ os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
 tagger = createTimeTagger()
 
 ccStream = CoincidencesNoUI(tagger)
-rEncoder = rotEncoderInterface("COM5")
+rEncoder = rotEncoderInterface("COM4")
 
+
+group = "BA-A-01"
+type = "Web3D"  # or "MR"
+exportpath = "c:/ExportMiReQu/"
+
+exportManager = ExportManager(group,type,exportpath)
 
 @app.route('/datagettimetagger', methods=['GET', 'POST'])
 def dataGetTimetagger():
@@ -42,7 +50,7 @@ def dataGetTimetagger():
             'C1': np.flip(ccStream.counter.getData()[0]* ccStream.getCouterNormalizationFactor()).tolist(),
             'C2': np.flip(ccStream.counter.getData()[1]* ccStream.getCouterNormalizationFactor()).tolist(),
             'CC12': np.flip(ccStream.counter.getData()[2] * ccStream.getCouterNormalizationFactor()).tolist(),
-            'CR12': ccStream.correlation.getData().tolist()
+            #'CR12': ccStream.correlation.getData().tolist()
         }
         return jsonify(message)  # serialize and use JSON headers
 
@@ -58,8 +66,52 @@ def dataGetRot():
     # GET request
     else:
         message = {
-            'p00': rEncoder.getPos(),
+            'p00': rEncoder.getPos00(),
+            'p01': rEncoder.getPos01(),
+            'p02': rEncoder.getPos02(),
         }
         return jsonify(message)  # serialize and use JSON headers
 
+@app.route('/datagetsensors', methods=['GET', 'POST'])
+def dataGetSens():
+    # POST request
+    if request.method == 'POST':
+        print('Incoming..')
+        print(request.get_json())  # parse as JSON
+        return 'OK', 200
 
+    # GET request
+    else:
+        message = {
+            's01': rEncoder.getSens01(),
+            's02': rEncoder.getSens02(),
+        }
+        return jsonify(message)  # serialize and use JSON headers
+
+@app.route('/dataposttmp', methods=['GET', 'POST'])
+def dataPostTemp():
+    # POST request
+    if request.method == 'POST':
+        print('Incoming..')
+        print(request.get_json())  # parse as JSON
+        exportManager.saveTmp(request.get_json())
+        return 'OK', 200
+
+    # GET request
+    else:
+        message = "this is used to recieve the temporary data"
+        return jsonify(message)  # serialize and use JSON headers
+
+@app.route('/datapostexport', methods=['GET', 'POST'])
+def dataPostExport():
+    # POST request
+    if request.method == 'POST':
+        print('Incoming..')
+        print(request.get_json())  # parse as JSON
+        exportManager.export(request.get_json())
+        return 'OK', 200
+
+    # GET request
+    else:
+        message = "this is used to recieve the export"
+        return jsonify(message)  # serialize and use JSON headers
