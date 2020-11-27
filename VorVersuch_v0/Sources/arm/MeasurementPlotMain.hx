@@ -16,7 +16,7 @@ typedef CCJson = {
     var C1:Array<Int>;
     var C2:Array<Int>;
     var CC12:Array<Int>;
-    var CR12:Array<Int>;
+    //var CR12:Array<Int>;
 }
 
 

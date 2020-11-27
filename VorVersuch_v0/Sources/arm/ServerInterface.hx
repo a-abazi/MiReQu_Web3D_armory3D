@@ -119,11 +119,9 @@ class ServerInterface extends iron.Trait {
         globalObj.properties.set("Subexercise","SubTest");
         globalObj.properties.set("FileName","TestName");
         
-        globalObj.properties.set("xAxis",[0,1,2,3,4,5,6,7,8,9]);
-        globalObj.properties.set("yAxis1",[0,2,2,2,2,5,6,7,8,9]);
-        globalObj.properties.set("yAxis2",[0,1,2,3,4,4,5,6,7,6]);
+        globalObj.properties.set("xAxis",[]);
+        globalObj.properties.set("ArrayYAxis",[[],[]]);
         
-
         time = 0.; 
         timeVals = [0];
         
@@ -166,48 +164,49 @@ class ServerInterface extends iron.Trait {
             }
         }
 
-        var keyboard = Input.getKeyboard();
-        if (keyboard.started("space")){
-            exportData(globalObj.properties.get("xAxis"),[
-                globalObj.properties.get("yAxis1"),globalObj.properties.get("yAxis2")
-            ],"testFileName");
-
-            saveTMP(globalObj.properties.get("xAxis"),[
-                globalObj.properties.get("yAxis1"),globalObj.properties.get("yAxis2")
-            ]);
-        }
+        //var keyboard = Input.getKeyboard();
+        //if (keyboard.started("space")){
+        //    exportData_EXP(globalObj.properties.get("xAxis"),[
+        //        globalObj.properties.get("yAxis1"),globalObj.properties.get("yAxis2")
+        //    ],"testFileName");
+//
+        //    saveTMP_EXP(globalObj.properties.get("xAxis"),[
+        //        globalObj.properties.get("yAxis1"),globalObj.properties.get("yAxis2")
+        //    ]);
+        //}
 		
 	}	
 
 	function onRender2D(g:kha.graphics2.Graphics) {
 		g.end();
 		ui.begin(g);
+        if (virtualInput){
+            if (ui.window(Id.handle(), pos_x, pos_y, width, height, true)) {
 
-		if (ui.window(Id.handle(), pos_x, pos_y, width, height, true)) {
-
-			if (ui.panel(Id.handle({selected: false}), "Virtual Input Angles")) {
-				var angleSlot1:Float = ui.slider(handleSlot1, "Angle Slot 1", 0., 360., true);
-                var angleSlot2:Float = ui.slider(handleSlot2, "Angle Slot 2", 0., 360., true);
-				var angleSlot3:Float = ui.slider(handleSlot3, "Angle Slot 3", 0., 360., true);
-
-				var angleArray =  [angleSlot1,angleSlot2,angleSlot3];
-				iron.Scene.global.properties.set("inputAnglesArray",angleArray);
-				if (handleSlot1.changed) globalObj.properties.set("inputAngle1",angleSlot1);
-				if (handleSlot2.changed) globalObj.properties.set("inputAngle2",angleSlot2);
-				if (handleSlot3.changed) globalObj.properties.set("inputAngle3",angleSlot3);
-			}
-				
-			
-
-			if (ui.panel(Id.handle({selected: false}), "Virtual Input Voltage")) {
-				var voltage1:Float = ui.slider(Id.handle({value: 2.5}), "Voltage Diode 1", 0., 5., true);
-				var voltage2:Float = ui.slider(Id.handle({value: 2.5}), "Voltage Diode 2", 0., 5., true);
+                if (ui.panel(Id.handle({selected: false}), "Virtual Input Angles")) {
+                    var angleSlot1:Float = ui.slider(handleSlot1, "Angle Slot 1", 0., 360., true);
+                    var angleSlot2:Float = ui.slider(handleSlot2, "Angle Slot 2", 0., 360., true);
+                    var angleSlot3:Float = ui.slider(handleSlot3, "Angle Slot 3", 0., 360., true);
+    
+                    var angleArray =  [angleSlot1,angleSlot2,angleSlot3];
+                    iron.Scene.global.properties.set("inputAnglesArray",angleArray);
+                    if (handleSlot1.changed) globalObj.properties.set("inputAngle1",angleSlot1);
+                    if (handleSlot2.changed) globalObj.properties.set("inputAngle2",angleSlot2);
+                    if (handleSlot3.changed) globalObj.properties.set("inputAngle3",angleSlot3);
+                }
+                    
                 
-                globalObj.properties.set("inputVolt1",voltage1);
-                globalObj.properties.set("inputVolt2",voltage2);   
+    
+                if (ui.panel(Id.handle({selected: false}), "Virtual Input Voltage")) {
+                    var voltage1:Float = ui.slider(Id.handle({value: 2.5}), "Voltage Diode 1", 0., 5., true);
+                    var voltage2:Float = ui.slider(Id.handle({value: 2.5}), "Voltage Diode 2", 0., 5., true);
+                    
+                    globalObj.properties.set("inputVolt1",voltage1);
+                    globalObj.properties.set("inputVolt2",voltage2);   
+                }
             }
-		}
-		
+        }
+        
 		ui.end();
 	
 		g.begin(false);
@@ -231,7 +230,7 @@ class ServerInterface extends iron.Trait {
         });
     }
 
-    function exportData( xValues: Array<Dynamic>,arrayYValues: Array<Array<Dynamic>>,filename: String):Void{
+    function exportData_EXP( xValues: Array<Dynamic>,arrayYValues: Array<Array<Dynamic>>,filename: String):Void{
         var expData = new Map();
         expData.set("Exercise", globalObj.properties.get("Exercise"));
         expData.set("Subexercise",globalObj.properties.get("Subexercise"));
@@ -251,7 +250,7 @@ class ServerInterface extends iron.Trait {
         http.request(true);
     }
 
-    function saveTMP(xValues: Array<Dynamic>,arrayYValues: Array<Array<Dynamic>>, filename: String = "None"):Void{
+    function saveTMP_EXP(xValues: Array<Dynamic>,arrayYValues: Array<Array<Dynamic>>, filename: String = "None"):Void{
         var expData = new Map();
         expData.set("Exercise", globalObj.properties.get("Exercise"));
         expData.set("Subexercise",globalObj.properties.get("Subexercise"));
@@ -266,6 +265,47 @@ class ServerInterface extends iron.Trait {
         var expDataString = Json.stringify(expData);
         var http = new haxe.Http("http://"+serverIP +"/dataposttmp");
         //http.addParameter("Content-Type","application/json"); // nicht klar ob das benötigt wird
+        http.setPostData((expDataString));
+        
+        http.request(true);
+    }
+
+    public function exportData():Void{
+        var expData = new Map();
+        expData.set("Exercise", globalObj.properties.get("Exercise"));
+        expData.set("Subexercise",globalObj.properties.get("Subexercise"));
+        expData.set("FileName",globalObj.properties.get("FileName"));
+        expData.set("xAxis", globalObj.properties.get("xAxis"));
+        
+        var arrayYValues: Array<Array<Dynamic>> = globalObj.properties.get("ArrayYAxis");
+        var c = 1;
+        for (yValues in arrayYValues){
+            expData.set("yAxis"+Std.string(c), yValues);
+            c++;
+        }
+
+        var expDataString = Json.stringify(expData);
+        var http = new haxe.Http("http://"+serverIP +"/datapostexport");
+        http.setPostData((expDataString));
+        
+        http.request(true);
+    }
+
+    public function saveTMP():Void{
+        var expData = new Map();
+        expData.set("Exercise", globalObj.properties.get("Exercise"));
+        expData.set("Subexercise",globalObj.properties.get("Subexercise"));
+        expData.set("xAxis", globalObj.properties.get("xAxis"));
+        
+        var arrayYValues: Array<Array<Dynamic>> = globalObj.properties.get("ArrayYAxis");
+        var c = 1;
+        for (yValues in arrayYValues){
+            expData.set("yAxis"+Std.string(c), yValues);
+            c++;
+        }
+        
+        var expDataString = Json.stringify(expData);
+        var http = new haxe.Http("http://"+serverIP +"/dataposttmp");
         http.setPostData((expDataString));
         
         http.request(true);
