@@ -145,7 +145,7 @@ class PolBeamSplitter_v1 extends iron.Trait {
         
 		if (parBeam == null) return null;
         if (parBeam.properties == null) parBeam.properties = new Map();
-        propMap = parBeam.properties;
+        propMap = parBeam.properties.copy();
 		propMap.set("arr_sub_objects",[]);
 
         if (propMap["stokes_I"] == 0){

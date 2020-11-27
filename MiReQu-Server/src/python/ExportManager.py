@@ -17,9 +17,17 @@ class ExportManager():
 
     def saveTmp(self, jsonObj:str):
         import numpy as np
-        js_Dict = json.loads(jsonObj)
+
+        try:
+            js_Dict = json.loads(jsonObj)
+        except:
+            js_Dict = jsonObj
 
         #Check dictionary for correct keys
+        if ("h" in js_Dict): # Workaround for specific case in formatting
+            js_Dict = js_Dict["h"]
+            print(js_Dict)
+
         if (not "Exercise" in js_Dict ) or (not "Subexercise" in js_Dict)\
                 or (not "xAxis" in js_Dict) or (not "yAxis1" in js_Dict):
             print("Keys not correctly specified in Json File")
@@ -27,11 +35,11 @@ class ExportManager():
 
         # setup/check directories
         currpath = os.path.join(self.exportPath,js_Dict["Exercise"])
-        if not os.path.exists(currpath): os.mkdir(currpath)
+        if (not os.path.exists(currpath)): os.mkdir(currpath)
         currpath = os.path.join(currpath, js_Dict["Subexercise"])
-        if not os.path.exists(currpath): os.mkdir(currpath)
+        if (not os.path.exists(currpath)): os.mkdir(currpath)
         currpath = os.path.join(currpath, "tmp")
-        if not os.path.exists(currpath): os.mkdir(currpath)
+        if (not os.path.exists(currpath)): os.mkdir(currpath)
 
 
         # read data from json object and put into list
@@ -59,9 +67,15 @@ class ExportManager():
 
     def export(self, jsonObj:str):
         import numpy as np
-
-        js_Dict = json.loads(jsonObj)
+        try:
+            js_Dict = json.loads(jsonObj)
+        except:
+            js_Dict = jsonObj
         # Check dictionary for correct keys
+        if ("h" in js_Dict): # Workaround for specific case in formatting
+            js_Dict = js_Dict["h"]
+            print(js_Dict)
+
         if (not "Exercise" in js_Dict )or (not "Subexercise" in js_Dict) \
                 or (not "FileName" in js_Dict)\
                 or (not "xAxis" in js_Dict) or (not "yAxis1" in js_Dict):

@@ -57,8 +57,17 @@ class Beam_Control_v8 extends iron.Trait {
 	var mask: Int = 2; // Collections Filtermask for RayCast contact with rigid bodys
 	
 	@prop 
-	var beamdiameter: Float = 0.025;
-	
+	var beamdiameter: Float = 0.25;
+
+	@prop
+	var k_beamdiameter_lin:Float = 1;
+	@prop
+	var k_beamdiameter_quad:Float = 1;
+	@prop
+	var k_beamdiameter_kub:Float = 1;
+	@prop
+	var k_beamdiameter_exp:Float = 0;
+
 	@prop 
 	var arrow_diameter: Float = 0.5; 
 	
@@ -68,6 +77,7 @@ class Beam_Control_v8 extends iron.Trait {
 	@prop 
 	var arrow_dist: Float = 0.75; 
 
+	
 
 
 
@@ -312,6 +322,8 @@ class Beam_Control_v8 extends iron.Trait {
 				//trace("Ray:"+Std.string(i)+" searched for New Beams");
 			}
 		}
+		//TODO: Do ErrorCorrection for Pol arrows
+
 		// overwrite property of all beams that should be detectable, i.e. last beam objects in the array
 		object.properties.set(nameArrayDetectableBeams,arrayDetectableBeams);
 	}
@@ -588,12 +600,26 @@ class Beam_Control_v8 extends iron.Trait {
 				curr_beam.properties[key] = childprops[key];
 			}
 
-			if (curr_beam.properties["stokes_I"]<0.005 ){
-				//curr_beam.remove();
-				curr_beam.visible = false;
-				//break;
-			}
+			//if (curr_beam.properties["stokes_I"]<0.005 ){
+			//	//curr_beam.remove();
+			//	curr_beam.visible = false;
+			//	//break;
+			//}
+
+
+			//ReScale Beam according to Intensity of Beam
+			var sI = curr_beam.properties["stokes_I"];
+			var newBeamDiameter = beamdiameter + ( k_beamdiameter_lin*sI + k_beamdiameter_quad*sI*sI + k_beamdiameter_kub*sI*sI*sI)*Math.exp(-k_beamdiameter_exp*sI) ;
 			
+			scale.y = newBeamDiameter;
+			scale.z = newBeamDiameter;
+			matrix.compose(loc, q, scale);
+			
+			
+			curr_beam.transform.setMatrix(matrix);
+			curr_beam.visible = true;
+			var rigidBody = curr_beam.getTrait(RigidBody);
+			if (rigidBody != null) rigidBody.syncTransform();
 			
 
         }
