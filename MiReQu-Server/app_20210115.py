@@ -13,9 +13,9 @@ import time
 
 # all required TimeTagger dependencies
 from TimeTagger import Coincidences, Counter, Correlation, createTimeTagger, freeTimeTagger
-from multiprocessing import Process, Value
 
-" Start Server from Terminal with >>> flask run --host=192.168.2.100"
+
+" Start Server by running this Script"
 
 """
 Here is an Example for the structure of the JsonFiles for the export:
@@ -32,10 +32,21 @@ tstJsonExport = '{"Exercise":"Hauptversuch", "Subexercise":"Aufgabe1"' \
 app = Flask(__name__)
 CORS(app)
 
-c1 ,c2, cc12 = [],[],[]
-p00,p01,p02 = 0,0,0
-s01,s02 = 0,0
 
+dirname = os.path.dirname(PySide2.__file__)
+plugin_path = os.path.join(dirname, 'plugins', 'platforms')
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
+
+rEncoder = rotEncoderInterface("COM5")
+tagger = createTimeTagger()
+
+ccStream = CoincidencesNoUI(tagger)
+
+group = "BA-A-01"  # GruppenNamen im Praktikum
+type = "Web3D"  # or "MR"
+exportpath = "c:/ExportMiReQu/"
+
+exportManager = ExportManager(group, type, exportpath)
 
 @app.route('/datagettimetagger', methods=['GET', 'POST'])
 def dataGetTimetagger():
@@ -48,9 +59,9 @@ def dataGetTimetagger():
     # GET request
     else:
         message = {
-            'C1': c1,#np.flip(ccStream.counter.getData()[0]* ccStream.getCouterNormalizationFactor()).tolist(),
-            'C2': c2,#np.flip(ccStream.counter.getData()[1]* ccStream.getCouterNormalizationFactor()).tolist(),
-            'CC12': cc12,#np.flip(ccStream.counter.getData()[2] * ccStream.getCouterNormalizationFactor()).tolist(),
+            'C1': np.flip(ccStream.counter.getData()[0]* ccStream.getCouterNormalizationFactor()).tolist(),
+            'C2': np.flip(ccStream.counter.getData()[1]* ccStream.getCouterNormalizationFactor()).tolist(),
+            'CC12': np.flip(ccStream.counter.getData()[2] * ccStream.getCouterNormalizationFactor()).tolist(),
             #'CR12': ccStream.correlation.getData().tolist()
         }
         return jsonify(message)  # serialize and use JSON headers
@@ -67,9 +78,9 @@ def dataGetRot():
     # GET request
     else:
         message = {
-            'p00': p00,#rEncoder.getPos00(),
-            'p01': p01,#rEncoder.getPos01(),
-            'p02': p01,#rEncoder.getPos02(),
+            'p00': rEncoder.getPos00(),
+            'p01': rEncoder.getPos01(),
+            'p02': rEncoder.getPos02(),
         }
         return jsonify(message)  # serialize and use JSON headers
 
@@ -83,9 +94,10 @@ def dataGetSens():
 
     # GET request
     else:
+
         message = {
-            's01': s01,#rEncoder.getSens01(),
-            's02': s02,#rEncoder.getSens02(),
+            's01': rEncoder.getSens01(),
+            's02': rEncoder.getSens02(),
         }
         return jsonify(message)  # serialize and use JSON headers
 
@@ -118,32 +130,7 @@ def dataPostExport():
         return jsonify(message)  # serialize and use JSON headers
 
 
-def update_loop(loop_on):
-    dirname = os.path.dirname(PySide2.__file__)
-    plugin_path = os.path.join(dirname, 'plugins', 'platforms')
-    os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
-
-    rEncoder = rotEncoderInterface("COM5")
-    tagger = createTimeTagger()
-
-    ccStream = CoincidencesNoUI(tagger)
-
-    group = "BA-A-01"  # GruppenNamen im Praktikum
-    type = "Web3D"  # or "MR"
-    exportpath = "c:/ExportMiReQu/"
-
-    exportManager = ExportManager(group, type, exportpath)
-
-    while True:
-      if loop_on.value == True:
-          p00, p01, p02,s01, s02 = rEncoder.getPos00(),rEncoder.getPos01(),rEncoder.getPos02(), rEncoder.getSens01(),rEncoder.getSens02()
-          print(p00, p01, p02,s01, s02)
-      time.sleep(0.05)
-
 
 if __name__ == "__main__":
-   update_on = Value('b', True)
-   p = Process(target=update_loop, args=(update_on,))
-   p.start()
-   app.run(use_reloader=False)
-   p.join()
+   #app.run(use_reloader=False,host="192.168.2.100",threaded = False)
+   app.run( host="192.168.2.100", threaded=False)
