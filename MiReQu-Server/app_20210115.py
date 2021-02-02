@@ -1,20 +1,21 @@
 # docs @ http://flask.pocoo.org/docs/1.0/quickstart/
-#from src.python.timeTaggerData import CoincidencesNoUI
-#from src.python.rotEncoderData import rotEncoderInterface
+from src.python.timeTaggerData import CoincidencesNoUI
+from src.python.rotEncoderData import rotEncoderInterface
 from src.python.ExportManager import ExportManager
 
 
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 import sys, os
-#import PySide2
+import PySide2
 import numpy as np
+import time
 
 # all required TimeTagger dependencies
-#from TimeTagger import Coincidences, Counter, Correlation, createTimeTagger, freeTimeTagger
+from TimeTagger import Coincidences, Counter, Correlation, createTimeTagger, freeTimeTagger
 
 
-" Start Server from Terminal with >>> flask run --host=192.168.2.100"
+" Start Server by running this Script"
 
 """
 Here is an Example for the structure of the JsonFiles for the export:
@@ -31,37 +32,36 @@ tstJsonExport = '{"Exercise":"Hauptversuch", "Subexercise":"Aufgabe1"' \
 app = Flask(__name__)
 CORS(app)
 
-#dirname = os.path.dirname(PySide2.__file__)
-#plugin_path = os.path.join(dirname, 'plugins', 'platforms')
-#os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
 
+dirname = os.path.dirname(PySide2.__file__)
+plugin_path = os.path.join(dirname, 'plugins', 'platforms')
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
 
-#tagger = createTimeTagger()
+rEncoder = rotEncoderInterface("COM5")
+tagger = createTimeTagger()
 
-#ccStream = CoincidencesNoUI(tagger)
-#rEncoder = rotEncoderInterface("COM4")
+ccStream = CoincidencesNoUI(tagger)
 
-
-group = "BA-A-01" # GruppenNamen im Praktikum
+group = "BA-A-01"  # GruppenNamen im Praktikum
 type = "Web3D"  # or "MR"
 exportpath = "c:/ExportMiReQu/"
 
-exportManager = ExportManager(group,type,exportpath)
+exportManager = ExportManager(group, type, exportpath)
 
 @app.route('/datagettimetagger', methods=['GET', 'POST'])
 def dataGetTimetagger():
     # POST request
     if request.method == 'POST':
+        return 'OK', 200
         print('Incoming..')
         print(request.get_json())  # parse as JSON
-        return 'OK', 200
 
     # GET request
     else:
         message = {
-            'C1': [1,1,1,1,1,1,1,1,1,1,1,1,2,1],
-            'C2': [2,2,2,2,2,2,2,2,2,2,2,2,1,2],
-            'CC12': [1,2,1,2,1,2,1,2,1,2,1,2,1,2],
+            'C1': np.flip(ccStream.counter.getData()[0]* ccStream.getCouterNormalizationFactor()).tolist(),
+            'C2': np.flip(ccStream.counter.getData()[1]* ccStream.getCouterNormalizationFactor()).tolist(),
+            'CC12': np.flip(ccStream.counter.getData()[2] * ccStream.getCouterNormalizationFactor()).tolist(),
             #'CR12': ccStream.correlation.getData().tolist()
         }
         return jsonify(message)  # serialize and use JSON headers
@@ -78,9 +78,9 @@ def dataGetRot():
     # GET request
     else:
         message = {
-            'p00': 101,
-            'p01': 111,
-            'p02': 121,
+            'p00': rEncoder.getPos00(),
+            'p01': rEncoder.getPos01(),
+            'p02': rEncoder.getPos02(),
         }
         return jsonify(message)  # serialize and use JSON headers
 
@@ -94,9 +94,10 @@ def dataGetSens():
 
     # GET request
     else:
+
         message = {
-            's01': 11,
-            's02': 22,
+            's01': rEncoder.getSens01(),
+            's02': rEncoder.getSens02(),
         }
         return jsonify(message)  # serialize and use JSON headers
 
@@ -127,3 +128,9 @@ def dataPostExport():
     else:
         message = "this is used to recieve the export"
         return jsonify(message)  # serialize and use JSON headers
+
+
+
+if __name__ == "__main__":
+   #app.run(use_reloader=False,host="192.168.2.100",threaded = False)
+   app.run( host="192.168.2.100", threaded=False)
