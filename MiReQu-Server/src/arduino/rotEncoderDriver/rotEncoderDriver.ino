@@ -28,7 +28,8 @@ Encoder meinEncoder02(ChA02,ChB02);  // An dieser Stelle wird ein neues Encoder 
 
 void setup() {
     Serial.begin(9600);
-    Serial.println("<Arduino is ready>");    
+    Serial.println("<Arduino is ready>");
+    analogReference(EXTERNAL);
 }
 
 void loop() {

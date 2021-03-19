@@ -9,6 +9,7 @@ class rotEncoderInterface():
         self.ser.write("<check>".encode("utf8"))
         print("arduino at USB port " +comPort+" is " + self.posRead())
         time.sleep(.01)
+        self.refVoltage = 1000 #in mV
         self.faktorRot = 1./ 2.224603175
         self.lastValuesRot = [0,0,0]
         self.lastValuesSens = [0, 0, 0]
@@ -56,10 +57,10 @@ class rotEncoderInterface():
 
     def getSens01(self):
         self.ser.write("<agt01>".encode("utf8"))
-        return int(self.posRead())
+        return int(int(self.posRead()) /1023. * self.refVoltage)
     def getSens02(self):
         self.ser.write("<agt02>".encode("utf8"))
-        return int(self.posRead())
+        return int(int(self.posRead())/1023. * self.refVoltage)
 
     def posRead(self):
         b = self.ser.readline()
@@ -73,7 +74,9 @@ class rotEncoderInterface():
 
 if __name__ == '__main__':
     import numpy as np
-    rEncoder = rotEncoderInterface("COM5")
+    #rEncoder = rotEncoderInterface("COM5")
+    rEncoder2 = rotEncoderInterface("COM9")
+    rEncoder = rotEncoderInterface("COM12")
 
     #measurements = 50
     #vs = np.zeros(measurements)
@@ -84,10 +87,12 @@ if __name__ == '__main__':
     #        time.sleep(1/measurements)
     #    print("Voltage [mV]:")
     #    print(np.average(vs)*1000,np.std(vs)*1000)
-
+    startTime = time.time()
     for j in range(10000000):
+        #print(time.time()-startTime, int(rEncoder2.getSens02()/1023*2.56*1000), int(rEncoder.getSens02()/1023*2.56*1000))
+        #print(time.time() - startTime, rEncoder2.getSens02(),rEncoder2.getSens01() )
         print(rEncoder.getPos00(),rEncoder.getPos01(),rEncoder.getPos02(), rEncoder.getSens01(), rEncoder.getSens02())
-        time.sleep(0.005)
+        time.sleep(0.05)
 
 
-    rEncoder.close()
+    rEncoder2.close()

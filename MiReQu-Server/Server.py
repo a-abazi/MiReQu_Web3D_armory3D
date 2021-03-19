@@ -37,13 +37,16 @@ dirname = os.path.dirname(PySide2.__file__)
 plugin_path = os.path.join(dirname, 'plugins', 'platforms')
 os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
 
-rEncoder = rotEncoderInterface("COM5")
+#rEncoder = rotEncoderInterface("COM9") # Port Vorversuch
+rEncoder = rotEncoderInterface("COM12") # Port Hauptversuch
+
 tagger = createTimeTagger()
 
 ccStream = CoincidencesNoUI(tagger)
 
-group = "BA-A-01"  # GruppenNamen im Praktikum
-type = "Web3D"  # or "MR"
+
+group = "PraxisTest"  # GruppenNamen im Praktikum
+type = "MR_test"  # or "MR"
 exportpath = "c:/ExportMiReQu/"
 
 exportManager = ExportManager(group, type, exportpath)
@@ -59,9 +62,9 @@ def dataGetTimetagger():
     # GET request
     else:
         message = {
-            'C1': np.flip(ccStream.counter.getData()[0]* ccStream.getCouterNormalizationFactor()).tolist(),
-            'C2': np.flip(ccStream.counter.getData()[1]* ccStream.getCouterNormalizationFactor()).tolist(),
-            'CC12': np.flip(ccStream.counter.getData()[2] * ccStream.getCouterNormalizationFactor()).tolist(),
+            'C1': np.flip(ccStream.counter.getData()[0]* ccStream.getCouterNormalizationFactor()*1000).tolist(),
+            'C2': np.flip(ccStream.counter.getData()[1]* ccStream.getCouterNormalizationFactor()*1000).tolist(),
+            'CC12': np.flip(ccStream.counter.getData()[2] * ccStream.getCouterNormalizationFactor()*1000).tolist(),
             #'CR12': ccStream.correlation.getData().tolist()
         }
         return jsonify(message)  # serialize and use JSON headers
