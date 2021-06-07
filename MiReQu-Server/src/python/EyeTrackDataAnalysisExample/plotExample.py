@@ -2,21 +2,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from datetime import datetime, timedelta
+from mpl_toolkits import mplot3d
 
-# Das mit den datentypen in numpy ist mir noch nicht gut gelungen
 filename = "tstFile_Real.txt"
-# hier lade ich die daten in strings
 data = np.genfromtxt(filename, delimiter=";",dtype=[int,int,int,int,int,int,int,float,float,float,float,float,float,float,float,float,int,bool,bool,bool,int,int,int], unpack=True)
 #data = np.array(data)
 
 
-# die Richtungen des Eyetrackings müssen nochmal in floats umgewandelt werden. Ich verstehe nicht genau warum er es nicht oben schon macht aber das funktioniert so jedenfalls
 dirX = np.array(data[7][:])
 dirY = np.array(data[8][:])
 dirZ = np.array(data[9][:])
 
-#converting time strings to seconds
-#hier nutze ich das datetime package um aus den Zeitdaten die differenz in sekunden zu erhalten
+indx_hauptversuch = np.where(data[-2] == 1)
+
+
+targetX = np.array(data[12 + 1][indx_hauptversuch])
+targetY = np.array(data[12 + 2][indx_hauptversuch])
+targetZ = np.array(data[12 + 3][indx_hauptversuch])
+
 timeInSeconds = np.empty(dirX.shape)
 initTime = datetime(year= data[0][0],
                     month=data[1][0],
@@ -28,7 +31,6 @@ initTime = datetime(year= data[0][0],
                     )
 
 for i in range(dirX.shape[0]):
-    # hier sucht datetime aus den Strings die passenden daten
     time_i = datetime(year= data[0][i],
                     month=data[1][i],
                     day=data[2][i],
@@ -41,12 +43,17 @@ for i in range(dirX.shape[0]):
 
 
 # hier plotte ich die Beispiel daten
-plt.plot(timeInSeconds, dirX, label="x")
-plt.plot(timeInSeconds, dirY, label="y")
-plt.plot(timeInSeconds, dirZ, label="z")
-plt.xlabel("Zeit in Sekunden")
-plt.ylabel("Richtungswert")
-plt.legend()
+#plt.plot(timeInSeconds, dirX, label="x")
+#plt.plot(timeInSeconds, dirY, label="y")
+#plt.plot(timeInSeconds, dirZ, label="z")
+#plt.xlabel("Zeit in Sekunden")
+#plt.ylabel("Richtungswert")
+#plt.legend()
 #plt.savefig("tstDatenReal.png")
+
+
+
+ax = plt.axes(projection='3d')
+ax.scatter3D(targetX,targetY,targetZ )
 plt.show()
 
