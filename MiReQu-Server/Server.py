@@ -38,14 +38,15 @@ plugin_path = os.path.join(dirname, 'plugins', 'platforms')
 os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
 
 #rEncoder = rotEncoderInterface("COM9") # Port Vorversuch
-rEncoder = rotEncoderInterface("COM12") # Port Hauptversuch
+#rEncoder = rotEncoderInterface("COM12") # Port Hauptversuch
 
-tagger = createTimeTagger()
+#tagger = createTimeTagger()
 
-ccStream = CoincidencesNoUI(tagger)
+#ccStream = CoincidencesNoUI(tagger)
 
 
-group = "PraxisTest"  # GruppenNamen im Praktikum
+group = "Tst_RealData"  # GruppenNamen im Praktikum
+group = "Tst_EditorData"  # GruppenNamen im Praktikum
 type = "MR_test"  # or "MR"
 exportpath = "c:/ExportMiReQu/"
 
@@ -62,9 +63,9 @@ def dataGetTimetagger():
     # GET request
     else:
         message = {
-            'C1': np.flip(ccStream.counter.getData()[0]* ccStream.getCouterNormalizationFactor()*1000).tolist(),
-            'C2': np.flip(ccStream.counter.getData()[1]* ccStream.getCouterNormalizationFactor()*1000).tolist(),
-            'CC12': np.flip(ccStream.counter.getData()[2] * ccStream.getCouterNormalizationFactor()*1000).tolist(),
+            'C1': [1,1],##np.flip(ccStream.counter.getData()[0]* ccStream.getCouterNormalizationFactor()*1000).tolist(),
+            'C2': [1,2],#np.flip(ccStream.counter.getData()[1]* ccStream.getCouterNormalizationFactor()*1000).tolist(),
+            'CC12': [1,3],# np.flip(ccStream.counter.getData()[2] * ccStream.getCouterNormalizationFactor()*1000).tolist(),
             #'CR12': ccStream.correlation.getData().tolist()
         }
         return jsonify(message)  # serialize and use JSON headers
@@ -81,9 +82,9 @@ def dataGetRot():
     # GET request
     else:
         message = {
-            'p00': rEncoder.getPos00(),
-            'p01': rEncoder.getPos01(),
-            'p02': rEncoder.getPos02(),
+            'p00': 3,#rEncoder.getPos00(),
+            'p01': 3,#rEncoder.getPos01(),
+            'p02': 3,#rEncoder.getPos02(),
         }
         return jsonify(message)  # serialize and use JSON headers
 
@@ -99,8 +100,8 @@ def dataGetSens():
     else:
 
         message = {
-            's01': rEncoder.getSens01(),
-            's02': rEncoder.getSens02(),
+            's01': 2,#rEncoder.getSens01(),
+            's02': 2,#rEncoder.getSens02(),
         }
         return jsonify(message)  # serialize and use JSON headers
 
@@ -118,6 +119,7 @@ def dataPostTemp():
         message = "this is used to recieve the temporary data"
         return jsonify(message)  # serialize and use JSON headers
 
+
 @app.route('/datapostexport', methods=['GET', 'POST'])
 def dataPostExport():
     # POST request
@@ -134,6 +136,23 @@ def dataPostExport():
 
 
 
+@app.route('/dataposteyetrack', methods=['GET', 'POST'])
+def dataPostEyeTrack():
+    # POST request
+    if request.method == 'POST':
+        #print('Incoming..')
+        #print(request.get_json(force=True))  # parse as JSON
+        exportManager.logEyeTrack(request.get_json(force=True))
+
+        return 'OK', 200
+
+    # GET request
+    else:
+        message = "this is used to recieve the export"
+        return jsonify(message)  # serialize and use JSON headers
+
+
 if __name__ == "__main__":
-   #app.run(use_reloader=False,host="192.168.2.100",threaded = False)
-   app.run( host="192.168.2.100", threaded=False)
+
+   #app.run( host="192.168.2.100", threaded=False)
+   app.run(host="192.168.137.1", threaded=False)
