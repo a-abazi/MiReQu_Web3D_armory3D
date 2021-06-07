@@ -46,7 +46,7 @@ os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
 
 
 group = "Tst_RealData"  # GruppenNamen im Praktikum
-group = "Tst_EditorData"  # GruppenNamen im Praktikum
+#group = "Tst_EditorData_2"  # GruppenNamen im Praktikum
 type = "MR_test"  # or "MR"
 exportpath = "c:/ExportMiReQu/"
 

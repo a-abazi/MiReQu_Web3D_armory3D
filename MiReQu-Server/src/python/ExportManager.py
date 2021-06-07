@@ -164,8 +164,8 @@ class ExportManager():
 
     def CheckEyeTrackLog(self,):
         isFile = os.path.isfile(self.eyeTrackFilePath + str(self.eyeTrackFileNumber) + self.eyeTrackFileEnding)
-        header = "#Year;Month;Day;Hour;Min;Sec;mSec;dirX;dirY;dirZ;orgX;orgY;orgZ;targX;targY;targZ;target;\
-                dataValid;calibValid;lowContiguity;scene;exercise;subExercise;\n"
+        header = "#Year;Month;Day;Hour;Min;Sec;mSec;dirX;dirY;dirZ;orgX;orgY;orgZ;targX;targY;targZ;targetID;"+\
+                "dataValid;calibValid;lowContiguity;scene;exercise;subExercise;\n"
 
         limitExceded = False
         if (not isFile):
@@ -206,7 +206,7 @@ class ExportManager():
             print(js_Dict)
 
         if (not "dataValid" in js_Dict ) or (not "calibValid" in js_Dict)\
-                or (not "time" in js_Dict) or (not "directionX" in js_Dict):
+                or (not "timeYear" in js_Dict) or (not "directionX" in js_Dict):
             print("Keys not correctly specified in Json File")
             return
         eyeTrackLog = open(self.eyeTrackFilePath + str(self.eyeTrackFileNumber) + self.eyeTrackFileEnding, "a")
@@ -216,7 +216,7 @@ class ExportManager():
                                                     js_Dict["timeSec"], js_Dict["timeMilliSec"])
         dirString = "{:};{:};{:};".format(js_Dict["directionX"],js_Dict["directionY"],js_Dict["directionZ"])
         originString = "{:};{:};{:};".format(js_Dict["originX"],js_Dict["originY"],js_Dict["originZ"])
-        targetString = "{:};{:};{:};".format(js_Dict["targetX"],js_Dict["targetY"],js_Dict["targetZ"])
+        targetString = "{:};{:};{:};{:};".format(js_Dict["targetX"],js_Dict["targetY"],js_Dict["targetZ"],js_Dict["targetID"])
         calibrationString = "{:};{:};".format(js_Dict["dataValid"],js_Dict["calibValid"])
         sceneString = "{:};{:};{:};{:};".format(js_Dict["isLowContiguity"], js_Dict["scene"], js_Dict["exercise"], \
                                                 js_Dict["subExercise"], )
