@@ -45,7 +45,7 @@ os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
 #ccStream = CoincidencesNoUI(tagger)
 
 
-group = "Tst_RealData"  # GruppenNamen im Praktikum
+group = "Tst_RealData20210608"  # GruppenNamen im Praktikum
 #group = "Tst_EditorData_2"  # GruppenNamen im Praktikum
 type = "MR_test"  # or "MR"
 exportpath = "c:/ExportMiReQu/"
@@ -150,6 +150,22 @@ def dataPostEyeTrack():
     else:
         message = "this is used to recieve the export"
         return jsonify(message)  # serialize and use JSON headers
+
+@app.route('/datapostqr', methods=['GET', 'POST'])
+def dataPostQR():
+    # POST request
+    if request.method == 'POST':
+        print('Incoming..')
+        print(request.get_json(force=True))  # parse as JSON
+        exportManager.logQRTrack(request.get_json(force=True))
+
+        return 'OK', 200
+
+    # GET request
+    else:
+        message = "this is used to recieve the export"
+        return jsonify(message)  # serialize and use JSON headers
+
 
 
 if __name__ == "__main__":
