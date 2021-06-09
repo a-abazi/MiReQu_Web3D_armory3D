@@ -6,8 +6,6 @@ from src.python.ExportManager import ExportManager
 
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
-import sys, os
-import PySide2
 import numpy as np
 import time
 
@@ -33,20 +31,17 @@ app = Flask(__name__)
 CORS(app)
 
 
-dirname = os.path.dirname(PySide2.__file__)
-plugin_path = os.path.join(dirname, 'plugins', 'platforms')
-os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
-
-#rEncoder = rotEncoderInterface("COM9") # Port Vorversuch
-rEncoder = rotEncoderInterface("COM12") # Port Hauptversuch
+rEncoder = rotEncoderInterface("COM4") # Port Vorversuch
+#rEncoder = rotEncoderInterface("COM3") # Port Hauptversuch
 
 tagger = createTimeTagger()
-
 ccStream = CoincidencesNoUI(tagger)
 
 
-group = "PraxisTest"  # GruppenNamen im Praktikum
-type = "MR_test"  # or "MR"
+#group = "9di"  # GruppenNamen im Praktikum
+group = "TestEyeTrack20210609"  # GruppenNamen im Praktikum
+#group = "Debug20210409"  # GruppenNamen im Praktikum
+type = "Grundpraktikum"  # or "MR"
 exportpath = "c:/ExportMiReQu/"
 
 exportManager = ExportManager(group, type, exportpath)
@@ -61,11 +56,11 @@ def dataGetTimetagger():
 
     # GET request
     else:
+        data = np.flip(ccStream.counter.getData(), axis=1)
         message = {
-            'C1': np.flip(ccStream.counter.getData()[0]* ccStream.getCouterNormalizationFactor()*1000).tolist(),
-            'C2': np.flip(ccStream.counter.getData()[1]* ccStream.getCouterNormalizationFactor()*1000).tolist(),
-            'CC12': np.flip(ccStream.counter.getData()[2] * ccStream.getCouterNormalizationFactor()*1000).tolist(),
-            #'CR12': ccStream.correlation.getData().tolist()
+            'C1'  : data[0].tolist(),
+            'C2'  : data[1].tolist(),
+            'CC12': data[2].tolist(),
         }
         return jsonify(message)  # serialize and use JSON headers
 
@@ -85,6 +80,7 @@ def dataGetRot():
             'p01': rEncoder.getPos01(),
             'p02': rEncoder.getPos02(),
         }
+        exportManager.setRotEncoderPositions(message)
         return jsonify(message)  # serialize and use JSON headers
 
 @app.route('/datagetsensors', methods=['GET', 'POST'])
@@ -131,6 +127,41 @@ def dataPostExport():
     else:
         message = "this is used to recieve the export"
         return jsonify(message)  # serialize and use JSON headers
+
+
+
+@app.route('/dataposteyetrack', methods=['GET', 'POST'])
+def dataPostEyeTrack():
+    # POST request
+    if request.method == 'POST':
+        #print('Incoming..')
+        #print(request.get_json(force=True))  # parse as JSON
+        exportManager.logEyeTrack(request.get_json(force=True))
+
+        return 'OK', 200
+
+    # GET request
+    else:
+        message = "this is used to recieve the export"
+        return jsonify(message)  # serialize and use JSON headers
+
+
+
+@app.route('/datapostqr', methods=['GET', 'POST'])
+def dataPostQR():
+    # POST request
+    if request.method == 'POST':
+        print('Incoming..')
+        print(request.get_json(force=True))  # parse as JSON
+        exportManager.logQRTrack(request.get_json(force=True))
+
+        return 'OK', 200
+
+    # GET request
+    else:
+        message = "this is used to recieve the export"
+        return jsonify(message)  # serialize and use JSON headers
+
 
 
 

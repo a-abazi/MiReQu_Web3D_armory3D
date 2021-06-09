@@ -15,6 +15,29 @@ class ExportManager():
         self.exportPathTmp = os.path.join(self.exportPath, "tmp")
         if (not os.path.exists(self.exportPathTmp)): os.mkdir(self.exportPathTmp)
 
+        self.eyeTrackFolder = os.path.join(self.exportPath, "eyeTrackLog")
+        if (not os.path.exists(self.eyeTrackFolder)): os.mkdir(self.eyeTrackFolder)
+
+        self.QRTrackFolder = os.path.join(self.exportPath, "QRTrackLog")
+        if (not os.path.exists(self.QRTrackFolder)): os.mkdir(self.QRTrackFolder)
+
+        self.eyeTrackFilePath = self.eyeTrackFolder + "/"+groupName + "_EyeTrackLog_"
+        self.eyeTrackFileNumber = 0
+        self.eyeTrackFileEnding = ".txt"
+
+        self.QRTrackFilePath = self.QRTrackFolder + "/" + groupName + "_QRTrackLog_"
+        self.QRTrackFileNumber = 0
+        self.QRTrackFileEnding = ".txt"
+
+
+        self.fileSizeLimit = 1024 * 1024 * 50 ## last number gives mB
+        self.CheckEyeTrackLog()
+        self.CheckQRTrackLog()
+
+        self.rP00 = 0
+        self.rP01 = 0
+        self.rP02 = 0
+
     #def saveTmp(self, jsonObj:str): ## SAme as save TMP, Quick Hotfix, because in wrong funtion in Unity is called
     def export(self, jsonObj:str):
         import numpy as np
@@ -111,50 +134,141 @@ class ExportManager():
         np.savetxt(currpath +"/"+ tmpStamp+".txt",np.array(data))
 
 
+    def CheckEyeTrackLog(self,):
+        isFile = os.path.isfile(self.eyeTrackFilePath + str(self.eyeTrackFileNumber) + self.eyeTrackFileEnding)
+        header = "#Year;Month;Day;Hour;Min;Sec;mSec;dirX;dirY;dirZ;orgX;orgY;orgZ;targX;targY;targZ;targetID;"+\
+                "dataValid;calibValid;lowContiguity;scene;exercise;subExercise;rP00;rP01;rP02,\n"
+
+        limitExceded = False
+        if (not isFile):
+            eyeTrackLog = open( self.eyeTrackFilePath + str(self.eyeTrackFileNumber) + self.eyeTrackFileEnding, "x")
+            eyeTrackLog.write(header)
+            eyeTrackLog.close()
+        else:
+            eyeTrackLog = open(self.eyeTrackFilePath + str(self.eyeTrackFileNumber) + self.eyeTrackFileEnding, "a")
+            if (eyeTrackLog.tell() > self.fileSizeLimit): limitExceded = True
+            eyeTrackLog.close()
+
+            while (limitExceded): # Recursion of above, only with incrementing file number
+
+                self.eyeTrackFileNumber += 1
+                isFile = os.path.isfile(self.eyeTrackFilePath + str(self.eyeTrackFileNumber) + self.eyeTrackFileEnding)
+                if (not isFile):
+                    eyeTrackLog = open(self.eyeTrackFilePath + str(self.eyeTrackFileNumber) + self.eyeTrackFileEnding, "x")
+                    eyeTrackLog.write(header)
+                    eyeTrackLog.close()
+                    limitExceded = False
+                else:
+                    eyeTrackLog = open(self.eyeTrackFilePath + str(self.eyeTrackFileNumber) + self.eyeTrackFileEnding, "a")
+                    if (eyeTrackLog.tell() <= self.fileSizeLimit): limitExceded = False
+                    eyeTrackLog.close()
+
+    def CheckQRTrackLog(self,):
+        isFile = os.path.isfile(self.QRTrackFilePath + str(self.QRTrackFileNumber) + self.QRTrackFileEnding)
+        header = "#Year;Month;Day;Hour;Min;Sec;P1x;y;z;P2x;y;z;P3x;y;z;\n"
+
+        limitExceded = False
+        if (not isFile):
+            QRTrackLog = open( self.QRTrackFilePath + str(self.QRTrackFileNumber) + self.QRTrackFileEnding, "x")
+            QRTrackLog.write(header)
+            QRTrackLog.close()
+        else:
+            QRTrackLog = open(self.QRTrackFilePath + str(self.QRTrackFileNumber) + self.QRTrackFileEnding, "a")
+            if (QRTrackLog.tell() > self.fileSizeLimit): limitExceded = True
+            QRTrackLog.close()
+
+            while (limitExceded): # Recursion of above, only with incrementing file number
+
+                self.QRTrackFileNumber += 1
+                isFile = os.path.isfile(self.QRTrackFilePath + str(self.QRTrackFileNumber) + self.QRTrackFileEnding)
+                if (not isFile):
+                    QRTrackLog = open(self.QRTrackFilePath + str(self.QRTrackFileNumber) + self.QRTrackFileEnding, "x")
+                    QRTrackLog.write(header)
+                    QRTrackLog.close()
+                    limitExceded = False
+                else:
+                    QRTrackLog = open(self.QRTrackFilePath + str(self.QRTrackFileNumber) + self.QRTrackFileEnding, "a")
+                    if (QRTrackLog.tell() <= self.fileSizeLimit): limitExceded = False
+                    QRTrackLog.close()
 
 
-    def DepRexport(self, jsonObj:str):
-        import numpy as np
+    def logEyeTrack(self, jsonObj:str):
+        self.CheckEyeTrackLog()
         try:
             js_Dict = json.loads(jsonObj)
         except:
             js_Dict = jsonObj
-        # Check dictionary for correct keys
+
+        #Check dictionary for correct keys
         if ("h" in js_Dict): # Workaround for specific case in formatting
             js_Dict = js_Dict["h"]
             print(js_Dict)
 
-        if (not "Exercise" in js_Dict )or (not "Subexercise" in js_Dict) \
-                or (not "FileName" in js_Dict)\
-                or (not "xAxis" in js_Dict) or (not "yAxis1" in js_Dict):
+        if (not "dataValid" in js_Dict ) or (not "calibValid" in js_Dict)\
+                or (not "timeYear" in js_Dict) or (not "directionX" in js_Dict):
             print("Keys not correctly specified in Json File")
             return
+        eyeTrackLog = open(self.eyeTrackFilePath + str(self.eyeTrackFileNumber) + self.eyeTrackFileEnding, "a")
+        timeDayString = "{:};{:};{:};".format(js_Dict["timeYear"], js_Dict["timeMonth"],
+                                              js_Dict["timeDay"])
+        timeClockString = "{:};{:};{:};{:};".format(js_Dict["timeHour"], js_Dict["timeMin"],
+                                                    js_Dict["timeSec"], js_Dict["timeMilliSec"])
+        dirString = "{:};{:};{:};".format(js_Dict["directionX"],js_Dict["directionY"],js_Dict["directionZ"])
+        originString = "{:};{:};{:};".format(js_Dict["originX"],js_Dict["originY"],js_Dict["originZ"])
+        targetString = "{:};{:};{:};{:};".format(js_Dict["targetX"],js_Dict["targetY"],js_Dict["targetZ"],js_Dict["targetID"])
+        calibrationString = "{:};{:};".format(js_Dict["dataValid"],js_Dict["calibValid"])
+        sceneString = "{:};{:};{:};{:};".format(js_Dict["isLowContiguity"], js_Dict["scene"], js_Dict["exercise"], \
+                                                js_Dict["subExercise"], )
+        rEncoderString = "{:};{:};{:};".format(self.rP00,self.rP01,self.rP02)
 
-        # setup/check directories
-        currpath = os.path.join(self.exportPath,js_Dict["Exercise"])
-        if not os.path.exists(currpath): os.mkdir(currpath)
-        currpath = os.path.join(currpath, js_Dict["Subexercise"])
-        if not os.path.exists(currpath): os.mkdir(currpath)
+        writeLine = timeDayString + timeClockString + dirString + originString + targetString + calibrationString + \
+                    sceneString + rEncoderString+ "\n"
+        eyeTrackLog.write(writeLine)
 
-        # read data from json object and put into list
-        data = []
-        data.append(js_Dict["xAxis"])
-        for i in range(10):
-            if "yAxis{:}".format(i) in js_Dict:
-                data.append(js_Dict["yAxis{:}".format(i)])
+        '''
+        eyeTrackLog.write( "{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};{:};".format(js_Dict["time"],\
+                               js_Dict["directionX"],js_Dict["directionY"],js_Dict["directionZ"],\
+                               js_Dict["originX"],js_Dict["originY"],js_Dict["originZ"], \
+                               js_Dict["targetX"],js_Dict["targetY"],js_Dict["targetZ"], \
+                               js_Dict["targetName"],js_Dict["dataValid"],\
+                               js_Dict["calibValid"],js_Dict["isLowContiguity"],\
+                               js_Dict["scene"],js_Dict["exercise"],\
+                               js_Dict["subExercise"],\
+                               ) +"\n")
+        '''
+        eyeTrackLog.close()
 
-        # Check if file already exists, if yes a number is added to the filename limit at 100 files, numpy module is used for saving
-        if not os.path.isfile(os.path.join(currpath, js_Dict["FileName"])+".txt"):
-            np.savetxt(os.path.join(currpath, js_Dict["FileName"])+".txt", np.array(data))
-        else:
-            for i in range(100):
-                if not os.path.isfile(os.path.join(currpath, js_Dict["FileName"])+"_{:02d}.txt".format(i)):
-                    np.savetxt(os.path.join(currpath, js_Dict["FileName"])+"_{:02d}.txt".format(i), np.array(data))
-                    break
+    def logQRTrack(self, jsonObj:str):
+        self.CheckQRTrackLog()
+        try:
+            js_Dict = json.loads(jsonObj)
+        except:
+            js_Dict = jsonObj
 
+        #Check dictionary for correct keys
+        if ("h" in js_Dict): # Workaround for specific case in formatting
+            js_Dict = js_Dict["h"]
+            print(js_Dict)
 
+        if (not "p1X" in js_Dict ) or (not "p2X" in js_Dict)\
+                or (not "p3X" in js_Dict):
+            print("Keys not correctly specified in Json File")
+            return
+        QRTrackLog = open(self.QRTrackFilePath + str(self.QRTrackFileNumber) + self.QRTrackFileEnding, "a")
+        p1String = "{:};{:};{:};".format(js_Dict["p1X"], js_Dict["p1Y"],js_Dict["p1Z"])
+        p2String = "{:};{:};{:};".format(js_Dict["p2X"], js_Dict["p2Y"], js_Dict["p2Z"])
+        p3String = "{:};{:};{:};".format(js_Dict["p3X"], js_Dict["p3Y"], js_Dict["p3Z"])
+        timeDayString = "{:};{:};{:};".format(js_Dict["timeYear"], js_Dict["timeMonth"],js_Dict["timeDay"])
+        timeClockString = "{:};{:};{:};".format(js_Dict["timeHour"], js_Dict["timeMin"],js_Dict["timeSec"])
 
+        writeLine = timeDayString + timeClockString + p1String + p2String + p3String +"\n"
+        QRTrackLog.write(writeLine)
+        QRTrackLog.close()
 
+    def setRotEncoderPositions(self, dictPositions):
+        self.rP00 = dictPositions["p00"]
+        self.rP01 = dictPositions["p01"]
+        self.rP02 = dictPositions["p02"]
 
 
 if __name__ == '__main__':
