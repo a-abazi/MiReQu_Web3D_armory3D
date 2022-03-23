@@ -37,6 +37,24 @@ class ExportManager():
         self.rP00 = 0
         self.rP01 = 0
         self.rP02 = 0
+        self.keyMainExercise  = "Hauptversuch"
+        self.keyPreExercise = "Vorversuch"
+
+        self.header_dic_PreExercise = {
+            "Aufgabe 0": "Winkel1(deg); Winkel2(deg); Winkel3(deg); Mittelwert Spannung1(mV); Mittelwert Spannung2(mV); [Mittelwerte, 20 Werte über 1 sek.]",
+            "Aufgabe 1": "Winkel1(deg); Winkel2(deg); Winkel3(deg); Mittelwert Spannung1(mV); Mittelwert Spannung2(mV); [Mittelwerte, 20 Werte über 1 sek.]",
+            "Aufgabe 2": "Winkel1(deg); Winkel2(deg); Winkel3(deg); Mittelwert Spannung1(mV); Mittelwert Spannung2(mV); [Mittelwerte, 20 Werte über 1 sek.]",
+            "Aufgabe 3": "Winkel1(deg); Winkel2(deg); Winkel3(deg); Mittelwert Spannung1(mV); Mittelwert Spannung2(mV); [Mittelwerte, 20 Werte über 1 sek.]",
+            "Aufgabe 4": "Winkel1(deg); Winkel2(deg); Winkel3(deg); Mittelwert Spannung1(mV); Mittelwert Spannung2(mV); [Mittelwerte, 20 Werte über 1 sek.]",
+        }
+        self.header_dic_MainExercise = {
+            "Aufgabe 0": "",
+            "Aufgabe 1": "WinkelAlice(deg); WinkelBob(deg); Summe Koinzidenzen; Summe Zählereignisse Alice; Summe Zählereignisse Bob; [Summen über 1 sek.]",
+            "Aufgabe 2": "WinkelAlice(deg); WinkelBob(deg); Summe Koinzidenzen; Summe Zählereignisse Alice; Summe Zählereignisse Bob; [Summen über 10 sek.]",
+            "Aufgabe 3": "WinkelAlice(deg); WinkelBob(deg); Summe Koinzidenzen; Summe Zählereignisse Alice; Summe Zählereignisse Bob; [Summen über 1 sek.]",
+            "Aufgabe 4": "",
+        }
+
 
     #def saveTmp(self, jsonObj:str): ## SAme as save TMP, Quick Hotfix, because in wrong funtion in Unity is called
     def export(self, jsonObj:str):
@@ -62,8 +80,6 @@ class ExportManager():
         if (not os.path.exists(currpath)): os.mkdir(currpath)
         currpath = os.path.join(currpath, js_Dict["Subexercise"])
         if (not os.path.exists(currpath)): os.mkdir(currpath)
-        currpath = os.path.join(currpath, "tmp")
-        if (not os.path.exists(currpath)): os.mkdir(currpath)
 
 
         # read data from json object and put into list
@@ -78,13 +94,25 @@ class ExportManager():
         current_time = time.localtime()
         tmpStamp = time.strftime('%Y-%m-%d_%H-%M-%S', current_time)
 
-        # remove oldes file, only 20 files should be in a tmp folder,  numpy module is used for saving
+        # FailSave for data overflow
+        # remove oldes file, only 200 files should be in a tmp folder,  numpy module is used for saving
         files = os.listdir(currpath)
-        if (len(files)>19):
+        if (len(files)>199):
             os.remove(os.path.join(currpath,files[0]))
 
+        # choose correct header, according to dictionaries defined above
+        header =""
+        if (js_Dict["Exercise"] == self.keyMainExercise): header_dic = self.header_dic_MainExercise
+        else: header_dic = self.header_dic_PreExercise
 
-        np.savetxt(currpath +"/"+ tmpStamp+".txt",np.array(data))
+
+        subexercise = js_Dict["Subexercise"]
+        if (subexercise in header_dic): header = header_dic[subexercise]
+        elif "header" in js_Dict: header = js_Dict["header"]
+
+
+        np.savetxt(currpath +"/"+ tmpStamp+".txt",np.array(data).transpose(), header = header, fmt="%i", delimiter=";")
+
 
     def saveTmp(self, jsonObj:str):
         import numpy as np

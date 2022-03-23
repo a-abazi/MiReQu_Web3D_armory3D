@@ -4,11 +4,11 @@ const byte numChars = 32;
 char receivedChars[numChars];
 boolean newData = false;
 
-const int ChA00 = 11;      // Definition der Pins
+const int ChA00 = 5;      // Definition der Pins
 const int ChB00 = 12;
 const int ChA01 = 8;      // Definition der Pins
 const int ChB01 = 9;
-const int ChA02 = 5;      // Definition der Pins
+const int ChA02 = 11;      // Definition der Pins
 const int ChB02 = 6;
 
 
@@ -29,7 +29,7 @@ Encoder meinEncoder02(ChA02,ChB02);  // An dieser Stelle wird ein neues Encoder 
 void setup() {
     Serial.begin(9600);
     Serial.println("<Arduino is ready>");
-    analogReference(EXTERNAL);
+    analogReference(INTERNAL);
 }
 
 void loop() {
@@ -52,8 +52,8 @@ void loop() {
     pos02 = neuePosition02;       
   }
 
-  sensorValue1 = analogRead(A1);
-  sensorValue2 = analogRead(A2);
+  sensorValue1 = analogRead(A2);
+  sensorValue2 = analogRead(A1);
   
   recvWithStartEndMarkers();
   showNewData();
