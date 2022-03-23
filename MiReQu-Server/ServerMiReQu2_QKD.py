@@ -163,23 +163,6 @@ def getRatesAll():
         }
         return jsonify(message)  # serialize and use JSON headers
 
-@app.route('/getlastdetection', methods=['GET', 'POST'])
-def getlastDetection():
-    # POST request
-    if request.method == 'POST':
-        return 'OK', 200
-        print('Incoming..')
-        print(request.get_json())  # parse as JSON
-
-    # GET request
-    else:
-
-        message = {
-            "detection" : random.randint(0,3)
-        }
-
-        return jsonify(message)  # serialize and use JSON headers
-
 
 @app.route('/getratesanddetection', methods=['GET', 'POST'])
 def getRatesAndDetection():
@@ -210,8 +193,8 @@ def getRatesAndDetection():
 
         return jsonify(message)  # serialize and use JSON headers
 
-@app.route("/getdetection", methods=['GET', 'POST'])
-def getDetection():
+@app.route("/getlastdetection", methods=['GET', 'POST'])
+def getlastDetection():
     if request.method == 'POST':
 
         return 'OK', 200
