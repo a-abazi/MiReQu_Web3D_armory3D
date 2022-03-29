@@ -7,15 +7,15 @@ import random
 class CommunicationManager():
     def __init__(self, ):
         self.comData = {
-            'aliceConnect': random.randint(0,1),
-            'bobConnect': random.randint(0,1),
-            'aliceSharedBits': random.randint(0,1),
-            'bobSharedBits': random.randint(0,1),
+            'aliceConnect': False,
+            'bobConnect': False,
+            'aliceSharedBits': False,
+            'bobSharedBits': False,
 
-            'aliceSharedBases': random.randint(0,1),
-            'bobSharedBases': random.randint(0,1),
-            'aliceWaitingForMeasurement': random.randint(0,1),
-            'bobWaitingForMeasurement': random.randint(0,1),
+            'aliceSharedBases': False,
+            'bobSharedBases': False,
+            'aliceWaitingForMeasurement': False,
+            'bobWaitingForMeasurement': False,
         }
         # TODO: write some safet/backup mechanism for restarting the server
         # initialise some random data

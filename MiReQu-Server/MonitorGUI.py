@@ -403,7 +403,7 @@ class MonitorGUI(QMainWindow):
         self.correlationSingles.clear()
         self.correlationCoincidences.clear()
 
-    def saveClicked(self):         ### needs to be checked
+    def saveClicked(self):         ### TODO: Anpassen für neue Version
         '''Handler for the save action button'''
 
 
@@ -419,28 +419,24 @@ class MonitorGUI(QMainWindow):
         # And write all results to disk
         if filename:
             with open(filename, 'w') as f:
-                f.write('Input channel A: %d\n' % self.ui.channelA.value())
-                f.write('Input channel B: %d\n' % self.ui.channelB.value())
-                f.write('Input delay A: %d ps\n' % self.ui.delayA.value())
-                f.write('Input delay B: %d ps\n' % self.ui.delayB.value())
-                f.write('Trigger level A: %.3f V\n' % self.ui.triggerA.value())
-                f.write('Trigger level B: %.3f V\n' % self.ui.triggerB.value())
-                f.write('Test signal A: %d\n' %
-                        self.ui.testsignalA.isChecked())
-                f.write('Test signal B: %d\n' %
-                        self.ui.testsignalB.isChecked())
+                f.write("%"+'Input channel A: %d\n' % self.ui.channelA0.value())
+                f.write("%"+'Input channel A: %d\n' % self.ui.channelA1.value())
+                f.write("%"+'Input channel B: %d\n' % self.ui.channelB0.value())
+                f.write("%"+'Input channel B: %d\n' % self.ui.channelB1.value())
+                f.write("%"+'Input delay A: %d ps\n' % self.ui.delayA0.value())
+                f.write("%"+'Input delay A: %d ps\n' % self.ui.delayA1.value())
+                f.write("%"+'Input delay B: %d ps\n' % self.ui.delayB0.value())
+                f.write("%"+'Input delay B: %d ps\n' % self.ui.delayB1.value())
+                f.write("%"+'Trigger level A: %.3f V\n' % self.ui.triggerA0.value())
+                f.write("%"+'Trigger level A: %.3f V\n' % self.ui.triggerA1.value())
+                f.write("%"+'Trigger level B: %.3f V\n' % self.ui.triggerB0.value())
+                f.write("%"+'Trigger level B: %.3f V\n' % self.ui.triggerB1.value())
+                f.write("%"+'Coincidence window: %d ps\n' % self.ui.coincidenceWindow.value())
+                f.write("%"+'Correlation bin width: %d ps\n' % self.ui.correlationBinwidth.value())
+                f.write("%"+'Correlation bins: %d\n\n' % self.ui.correlationBins.value())
 
-                f.write('Coincidence window: %d ps\n' %
-                        self.ui.coincidenceWindow.value())
-                f.write('Correlation bin width: %d ps\n' %
-                        self.ui.correlationBinwidth.value())
-                f.write('Correlation bins: %d\n\n' %
-                        self.ui.correlationBins.value())
-
-                f.write('Counter data:\n%s\n\n' %
-                        self.counterSingles.getData().__repr__())
-                f.write('Correlation data:\n%s\n\n' %
-                        self.correlation.getData().__repr__())
+                f.write('Counter data:\n%s\n\n' % self.counterSingles.getData().__repr__())
+                f.write('Correlation data:\n%s\n\n' % self.correlationSingles.getData().__repr__())
 
     def resizeEvent(self, event):
         '''Handler for the resize events to update the plots'''

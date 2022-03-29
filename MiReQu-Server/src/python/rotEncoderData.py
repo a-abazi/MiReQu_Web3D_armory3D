@@ -77,7 +77,7 @@ if __name__ == '__main__':
     import numpy as np
     #rEncoder = rotEncoderInterface("COM5")
     #rEncoder2 = rotEncoderInterface("COM3")
-    rEncoder = rotEncoderInterface("COM7")
+    rEncoder = rotEncoderInterface("COM3")
 
     #measurements = 50
     #vs = np.zeros(measurements)

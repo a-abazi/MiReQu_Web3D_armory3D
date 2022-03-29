@@ -177,6 +177,12 @@ def getRatesAndDetection():
         dataSingles = np.flip(ccStream.counterSingles.getData(), axis=1) * countsPerIntervalFactor
         dataCoincidences = np.flip(ccStream.counterCoincidences.getData(), axis=1) * countsPerIntervalFactor
 
+        tagStream.start()
+
+        time.sleep(0.5)
+        buffer = tagStream.getData()
+        channels = buffer.getChannels()
+
         message = {
             'CA0': dataSingles[0].tolist(),
             'CA1': dataSingles[1].tolist(),
@@ -188,8 +194,11 @@ def getRatesAndDetection():
             'CCA0B1': dataCoincidences[2].tolist(),
             'CCA1B1': dataCoincidences[3].tolist(),
 
-            "detection": random.randint(0, 3)
+            "detection": int (channels - 1000),
+
         }
+
+        tagStream.stop()
 
         return jsonify(message)  # serialize and use JSON headers
 
@@ -201,13 +210,19 @@ def getlastDetection():
 
     # GET request
     else:
+        tagStream.start()
+
+        time.sleep(0.5)
         buffer = tagStream.getData()
-
         channels = buffer.getChannels()
-
         message = {
             "detection": int (channels - 1000)
         }
+
+        #print(int (channels - 1000))
+        #print(message)
+        tagStream.stop()
+
 
         return jsonify(message)  # serialize and use JSON headers
 
@@ -228,7 +243,8 @@ def getRotations():
             'p01': rEncoder.getPos01(),
             'p02': rEncoder.getPos02(),
         }
-        exportManager.setRotEncoderPositions(message)
+
+        #exportManager.setRotEncoderPositions(message)
         return jsonify(message)  # serialize and use JSON headers
 
 @app.route('/getsensors', methods=['GET', 'POST'])
